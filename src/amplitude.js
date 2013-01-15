@@ -1,5 +1,9 @@
 /*
  * amplitude.js
+ * Javascript SDK for Amplitude
+ *
+ * Created by Curtis Liu
+ * Copyright (c) 2013 Sonalight, Inc. All rights reserved.
  */
 (function(window, document) {
 
