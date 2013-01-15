@@ -577,7 +577,7 @@
             // phone_brand: null,
             phone_model: BrowserDetect.OS,
             custom_properties: customProperties,
-            global_properties: options.globalUserProperties
+            global_properties: options.globalUserProperties || {}
             // country: null,
             // language: null,
             // phone_carrier: null
