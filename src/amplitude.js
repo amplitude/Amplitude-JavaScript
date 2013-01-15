@@ -1,3 +1,6 @@
+/*
+ * amplitude.js
+ */
 (function(window, document) {
 
     var log = function(s) {
@@ -119,6 +122,7 @@
 
     /*
      * UTF-8 encoder/decoder
+     * http://www.webtoolkit.info/
      */
     var UTF8 = {
         encode: function (s) {
@@ -173,6 +177,7 @@
 
     /*
      * Base64 encoder/decoder
+     * http://www.webtoolkit.info/
      */
     var Base64 = {
         _keyStr: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',
@@ -241,6 +246,7 @@
 
     /*
      * LZW compression
+     * http://rosettacode.org/wiki/LZW_compression#JavaScript
      */
     var LZW = {
         compress: function (uncompressed) {
