@@ -555,6 +555,11 @@
         //log('set globalUserProperties=' + JSON.stringify(globalUserProperties));
     };
 
+    Amplitude.prototype.setVersionName = function(versionName) {
+        options.versionName = versionName;
+        //log('set versionName=' + versionName);
+    };
+
     Amplitude.prototype.logEvent = function(eventType, customProperties) {
         var eventTime = new Date().getTime();
         customProperties = customProperties || {};
@@ -570,7 +575,7 @@
             // },
             client: BrowserDetect.browser,
             version_code: 0,
-            version_name: window.location.host,
+            version_name: options.versionName || null,
             build_version_sdk: 0,
             build_version_release: BrowserDetect.version,
             // phone_manufacturer: null,
