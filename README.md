@@ -7,7 +7,7 @@ Amplitude-Javascript
 
         <script type="text/javascript">
           (function(e,t){var r=e.amplitude||{};var a=t.createElement("script");a.type="text/javascript";
-          a.async=true;a.src="http://cdn.amplitude.com/libs/amplitude-1.0-min.js";
+          a.async=true;a.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-1.0-min.js";
           var n=t.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);
           r._q=[];function i(e){r[e]=function(){r._q.push([e].concat(Array.prototype.slice.call(arguments,0)))}}
           var s=["init","logEvent","setUserId","setGlobalUserProperties","setVersionName"];
