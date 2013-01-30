@@ -96,6 +96,7 @@
                 clear: function() {
                     div.load(attrKey);
                     var i = 0;
+                    var attr;
                     while (attr = div.XMLDocument.documentElement.attributes[i++]) {
                         div.removeAttribute(attr.name);
                     }
@@ -514,7 +515,8 @@
         apiEndpoint: 'api.amplitude.com',
         cookieName: 'amplitude_id',
         cookieExpiration: 365 * 10,
-        unsentKey: 'amplitude_unsent'
+        unsentKey: 'amplitude_unsent',
+        gupKey: 'amplitude_gup'
     };
 
     var eventId = 0;
@@ -539,6 +541,8 @@
             Cookie.set(options.cookieName, options.deviceId, options.cookieExpiration);
         }
         var savedUnsentEventsString = localStorage.getItem(options.unsentKey);
+        var savedGlobalUserPropertiesString = localStorage.getItem(options.gupKey);
+        options.globalUserProperties = JSON.parse(LZW.decompress(Base64.decode(savedGlobalUserPropertiesString)));
         unsentEvents = (savedUnsentEventsString && JSON.parse(LZW.decompress(Base64.decode(savedUnsentEventsString)))) || [];
         if (unsentEvents.length > 0) {
             this.sendEvents();
@@ -552,6 +556,7 @@
 
     Amplitude.prototype.setGlobalUserProperties = function(globalUserProperties) {
         options.globalUserProperties = globalUserProperties;
+        localStorage.setItem(options.gupKey, Base64.encode(LZW.compress(JSON.stringify(globalUserProperties))));
         //log('set globalUserProperties=' + JSON.stringify(globalUserProperties));
     };
 
