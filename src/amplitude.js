@@ -542,7 +542,9 @@
         }
         var savedUnsentEventsString = localStorage.getItem(options.unsentKey);
         var savedGlobalUserPropertiesString = localStorage.getItem(options.gupKey);
-        options.globalUserProperties = JSON.parse(LZW.decompress(Base64.decode(savedGlobalUserPropertiesString)));
+        if (savedGlobalUserPropertiesString) {
+            options.globalUserProperties = JSON.parse(LZW.decompress(Base64.decode(savedGlobalUserPropertiesString)));
+        }
         unsentEvents = (savedUnsentEventsString && JSON.parse(LZW.decompress(Base64.decode(savedUnsentEventsString)))) || [];
         if (unsentEvents.length > 0) {
             this.sendEvents();
@@ -632,6 +634,7 @@
     var instance = new Amplitude();
 
     window.amplitude = instance;
+    window.Base64 = Base64;
 
     // Apply the queued commands
     for (var i = 0; i < q.length; i++) {
