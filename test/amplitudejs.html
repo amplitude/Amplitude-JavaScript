@@ -1,9 +1,9 @@
 <html>
   <script>
-  (function(e,t){var n=e.amplitude||{};var r=t.createElement("script");r.type="text/javascript";r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-1.0-min.js";var a=t.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);n._q=[];function s(e){n[e]=function(){n._q.push([e].concat(Array.prototype.slice.call(arguments,0)))}}var i=["init","logEvent","setUserId","setGlobalUserProperties","setVersionName"];for(var o=0;o<i.length;o++){s(i[o])}e.amplitude=n})(window,document);
+  (function(e,t){var n=e.amplitude||{};var r=t.createElement("script");r.type="text/javascript";r.async=true;r.src="amplitude.js";var a=t.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);n._q=[];function s(e){n[e]=function(){n._q.push([e].concat(Array.prototype.slice.call(arguments,0)))}}var i=["init","logEvent","setUserId","setGlobalUserProperties","setVersionName"];for(var o=0;o<i.length;o++){s(i[o])}e.amplitude=n})(window,document);
   amplitude.init('cf0bd9e2349a13e7562e7e47f8799f4a');
   amplitude.setVersionName('Web');
-  amplitude.logEvent('pageLoad');
+  //amplitude.logEvent('pageLoad');
   </script>
   <body>
     <h3>Amplitude JS Test</h3>
@@ -11,7 +11,6 @@
       <li><a href="javascript:amplitude.setUserId('user01');">Set user ID</a></li>
       <li><a href="javascript:amplitude.logEvent('clicked');">Log event</a></li>
       <li><a href="javascript:amplitude.logEvent('clicked button', {color: 'red;', shape: 'triangle', sides: 3});">Log event with custom properties</a></li>
-      <li><a href="javascript:amplitude.getCampaignInformation();">Get campaign information</a></li>
       <li><a href="javascript:amplitude.setGlobalUserProperties({age: 30, city: 'San Francisco, CA'});">Set global user properties</a></li>
   </body>
 </html>

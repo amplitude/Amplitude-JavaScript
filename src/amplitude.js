@@ -188,6 +188,17 @@
         _keyStr: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',
 
         encode: function (input) {
+            try {
+                if (window.btoa && window.atob) {
+                    return window.btoa(unescape(encodeURIComponent(input)));
+                }
+            } catch (e) {
+                //log(e);
+                return Base64._encode(input);
+            }
+        },
+
+        _encode: function (input) {
             var output = '';
             var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
             var i = 0;
@@ -218,6 +229,17 @@
         },
 
         decode: function (input) {
+            try {
+                if (window.btoa && window.atob) {
+                    return decodeURIComponent(escape(window.atob(input)));
+                }
+            } catch (e) {
+                //log(e);
+                return Base64._decode(input);
+            }
+        },
+
+        _decode: function (input) {
             var output = '';
             var chr1, chr2, chr3;
             var enc1, enc2, enc3, enc4;
@@ -246,76 +268,6 @@
             }
             output = UTF8.decode(output);
             return output;
-        }
-    };
-
-    /*
-     * LZW compression
-     * http://rosettacode.org/wiki/LZW_compression#JavaScript
-     */
-    var LZW = {
-        compress: function (uncompressed) {
-            // Build the dictionary.
-            var i, c, wc;
-            var dictionary = {}, w = '', result = [], dictSize = 256;
-            uncompressed = UTF8.encode(uncompressed);
-            for (i = 0; i < dictSize; i += 1) {
-                dictionary[String.fromCharCode(i)] = i;
-            }
-
-            for (i = 0; i < uncompressed.length; i += 1) {
-                c = uncompressed.charAt(i);
-                wc = w + c;
-                // Do not use dictionary[wc] because javascript arrays
-                // will return values for array['pop'], array['push'] etc
-                // if (dictionary[wc]) {
-                if (dictionary.hasOwnProperty(wc)) {
-                    w = wc;
-                } else {
-                    result.push(String.fromCharCode(dictionary[w]));
-                    // Add wc to the dictionary.
-                    dictionary[wc] = dictSize++;
-                    w = String(c);
-                }
-            }
-
-            // Output the code for w.
-            if (w !== '') {
-                result.push(String.fromCharCode(dictionary[w]));
-            }
-            return result.join('');
-        },
-        decompress: function (compressed) {
-            // Build the dictionary.
-            var i, w, result, k;
-            var dictionary = [], entry = '', dictSize = 256;
-            for (i = 0; i < dictSize; i += 1) {
-                dictionary[i] = String.fromCharCode(i);
-            }
-
-            w = compressed.charAt(0);
-            result = w;
-            for (i = 1; i < compressed.length; i += 1) {
-                k = compressed.charCodeAt(i);
-                if (dictionary[k]) {
-                    entry = dictionary[k];
-                } else {
-                    if (k === dictSize) {
-                        entry = w + w.charAt(0);
-                    } else {
-                        return null;
-                    }
-                }
-
-                result += entry;
-
-                // Add w+entry[0] to the dictionary.
-                dictionary[dictSize++] = w + entry.charAt(0);
-
-                w = entry;
-            }
-            result = UTF8.decode(result);
-            return result;
         }
     };
 
@@ -536,7 +488,7 @@
         var cookieData = null;
         if (cookie) {
             try {
-                cookieData = JSON.parse(LZW.decompress(Base64.decode(cookie)));
+                cookieData = JSON.parse(Base64.decode(cookie));
                 if (cookieData) {
                     if (cookieData.deviceId) {
                         options.deviceId = cookieData.deviceId;
@@ -549,7 +501,7 @@
                     }
                 }
             } catch (e) {
-                // Do nothing
+                //log(e);
             }
         }
 
@@ -562,18 +514,25 @@
         eventId = 0;
 
         var savedUnsentEventsString = localStorage.getItem(options.unsentKey);
-        unsentEvents = (savedUnsentEventsString && JSON.parse(LZW.decompress(Base64.decode(savedUnsentEventsString)))) || [];
+        var unsentEvents = []
+        if (savedUnsentEventsString) {
+            try {
+                unsentEvents = JSON.parse(savedUnsentEventsString);
+            } catch (e) {
+                //log(e);
+            }
+        }
         if (unsentEvents.length > 0) {
             this.sendEvents();
         }
     };
 
     var saveCookieData = function() {
-        Cookie.set(options.cookieName, Base64.encode(LZW.compress(JSON.stringify({
+        Cookie.set(options.cookieName, Base64.encode(JSON.stringify({
                 deviceId: options.deviceId,
                 userId: options.userId,
                 globalUserProperties: options.globalUserProperties
-            }))), options.cookieExpiration);
+            })), options.cookieExpiration);
     };
 
     Amplitude.prototype.setUserId = function(userId) {
@@ -621,7 +580,11 @@
             // phone_carrier: null
         };
         unsentEvents.push(event);
-        localStorage.setItem(options.unsentKey, Base64.encode(LZW.compress(JSON.stringify(unsentEvents))));
+        try {
+            localStorage.setItem(options.unsentKey, JSON.stringify(unsentEvents));
+        } catch (e) {
+            //log(e);
+        }
         //log('logged eventType=' + eventType + ', properties=' + JSON.stringify(customProperties));
         this.sendEvents();
     };
@@ -643,7 +606,11 @@
                     if (status == 200 && JSON.parse(response).added == numEvents) {
                         //log('sucessful upload');
                         unsentEvents.splice(0, numEvents);
-                        localStorage.setItem(options.unsentKey, Base64.encode(LZW.compress(JSON.stringify(unsentEvents))));
+                        try {
+                            localStorage.setItem(options.unsentKey, JSON.stringify(unsentEvents));
+                        } catch (e) {
+                            //log(e);
+                        }
                         if (unsentEvents.length > 0) {
                             scope.sendEvents();
                         }
