@@ -660,9 +660,6 @@
     var instance = new Amplitude();
 
     window.amplitude = instance;
-    window.Base64 = Base64;
-    window.Cookie = Cookie;
-    window.LZW = LZW;
 
     // Apply the queued commands
     for (var i = 0; i < q.length; i++) {
