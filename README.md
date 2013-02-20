@@ -53,6 +53,20 @@ To add properties that are tracked in every event, you can set global properties
     globalProperties.key = "value";
     amplitude.setGlobalUserProperties(globalProperties);
 
+# Configuration Options #
+
+You can configure Amplitude by passing an object as the third argument to the `init`:
+
+    amplitude.init("YOUR_API_KEY_HERE", null, {
+      // optional configuration options
+      saveEvents: true
+    })
+
+| option     | description                                                                      | default   |
+|------------|----------------------------------------------------------------------------------|-----------|
+| saveEvents | If `true`, saves events to localStorage and removes them upon successful upload. | `true`    |
+
+
 # Advanced #
 
 This SDK automatically grabs useful data about the browser, including browser type and operating system version.
