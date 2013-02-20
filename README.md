@@ -64,7 +64,7 @@ You can configure Amplitude by passing an object as the third argument to the `i
 
 | option | description | default |
 |------------|----------------------------------------------------------------------------------|-----------|
-| saveEvents | If `true`, saves events to localStorage and removes them upon successful upload.<br><i>NOTE:</i> Without saving events, events may be lost if the user loses internet connectivity or navigates to another page before events are uploaded. | `true` |
+| saveEvents | If `true`, saves events to localStorage and removes them upon successful upload.<br><i>NOTE:</i> Without saving events, events may be lost if the user navigates to another page before events are uploaded. | `true` |
 
 
 # Advanced #
