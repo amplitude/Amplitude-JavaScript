@@ -467,7 +467,8 @@
         apiEndpoint: 'api.amplitude.com',
         cookieName: 'amplitude_id',
         cookieExpiration: 365 * 10,
-        unsentKey: 'amplitude_unsent'
+        unsentKey: 'amplitude_unsent',
+        saveEvents: true
     };
 
     var eventId = 0;
@@ -479,9 +480,21 @@
         return eventId;
     };
 
-    Amplitude.prototype.init = function(apiKey, opt_userId) {
+    /**
+     * Initializes Amplitude.
+     * apiKey The API Key for your app
+     * opt_userId An identifier for this user
+     * opt_config Configuration options
+     *   - saveEvents (boolean) Whether to save events to local storage. Defaults to true.
+     */
+    Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
         this.options = options;
         options.apiKey = apiKey;
+        if (opt_config) {
+            if (opt_config.saveEvents !== undefined) {
+                options.saveEvents = !!opt_config.saveEvents;
+            }
+        }
 
         // Load cookie data
         var cookie = Cookie.get(options.cookieName);
@@ -513,13 +526,14 @@
         //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
         eventId = 0;
 
-        var savedUnsentEventsString = localStorage.getItem(options.unsentKey);
-        var unsentEvents = []
-        if (savedUnsentEventsString) {
-            try {
-                unsentEvents = JSON.parse(savedUnsentEventsString);
-            } catch (e) {
-                //log(e);
+        if (options.saveEvents) {
+            var savedUnsentEventsString = localStorage.getItem(options.unsentKey);
+            if (savedUnsentEventsString) {
+                try {
+                    unsentEvents = JSON.parse(savedUnsentEventsString);
+                } catch (e) {
+                    //log(e);
+                }
             }
         }
         if (unsentEvents.length > 0) {
@@ -533,6 +547,14 @@
                 userId: options.userId,
                 globalUserProperties: options.globalUserProperties
             })), options.cookieExpiration);
+    };
+
+    var saveEvents = function() {
+        try {
+            localStorage.setItem(options.unsentKey, JSON.stringify(unsentEvents));
+        } catch (e) {
+            //log(e);
+        }
     };
 
     Amplitude.prototype.setUserId = function(userId) {
@@ -580,10 +602,8 @@
             // phone_carrier: null
         };
         unsentEvents.push(event);
-        try {
-            localStorage.setItem(options.unsentKey, JSON.stringify(unsentEvents));
-        } catch (e) {
-            //log(e);
+        if (options.saveEvents) {
+            saveEvents();
         }
         //log('logged eventType=' + eventType + ', properties=' + JSON.stringify(customProperties));
         this.sendEvents();
@@ -606,10 +626,8 @@
                     if (status == 200 && JSON.parse(response).added == numEvents) {
                         //log('sucessful upload');
                         unsentEvents.splice(0, numEvents);
-                        try {
-                            localStorage.setItem(options.unsentKey, JSON.stringify(unsentEvents));
-                        } catch (e) {
-                            //log(e);
+                        if (options.saveEvents) {
+                            saveEvents();
                         }
                         if (unsentEvents.length > 0) {
                             scope.sendEvents();
