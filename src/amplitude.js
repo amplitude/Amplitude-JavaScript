@@ -413,15 +413,27 @@
     };
 
     Request.prototype.send = function(callback) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', this.url, true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-                callback(xhr.status, xhr.responseText);
+        var isIE = window.XDomainRequest ? true : false;
+        if (isIE) {
+            var xdr = new window.XDomainRequest();
+            xdr.open('POST', this.url, true);
+            xdr.onload = function() {
+                callback(xdr.responseText);
+            };
+            xdr.send();
+        } else {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', this.url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        callback(xhr.responseText);
+                    }
+                }
             }
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+            xhr.send(queryString(this.data));
         }
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-        xhr.send(queryString(this.data));
         //log('sent request to ' + this.url + ' with data ' + decodeURIComponent(queryString(this.data)));
     };
 
@@ -620,10 +632,10 @@
             }
             var numEvents = unsentEvents.length;
             var scope = this;
-            new Request(url, data).send(function(status, response) {
+            new Request(url, data).send(function(response) {
                 sending = false;
                 try {
-                    if (status == 200 && JSON.parse(response).added == numEvents) {
+                    if (JSON.parse(response).added == numEvents) {
                         //log('sucessful upload');
                         unsentEvents.splice(0, numEvents);
                         if (options.saveEvents) {
