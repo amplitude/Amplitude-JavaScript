@@ -416,11 +416,11 @@
         var isIE = window.XDomainRequest ? true : false;
         if (isIE) {
             var xdr = new window.XDomainRequest();
-            xdr.open('POST', this.url, true);
-            xdr.onload = function() {
+	    xdr.open('POST', this.url, true);
+	    xdr.onload = function() {
                 callback(xdr.responseText);
             };
-            xdr.send();
+	    xdr.send();
         } else {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', this.url, true);
