@@ -420,7 +420,7 @@
 	    xdr.onload = function() {
                 callback(xdr.responseText);
             };
-	    xdr.send();
+	    xdr.send(queryString(this.data));
         } else {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', this.url, true);
