@@ -194,8 +194,8 @@
                 }
             } catch (e) {
                 //log(e);
-                return Base64._encode(input);
             }
+            return Base64._encode(input);
         },
 
         _encode: function (input) {
@@ -235,8 +235,8 @@
                 }
             } catch (e) {
                 //log(e);
-                return Base64._decode(input);
             }
+            return Base64._decode(input);
         },
 
         _decode: function (input) {
