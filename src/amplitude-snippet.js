@@ -18,7 +18,7 @@
       amplitude._q.push([fn].concat(Array.prototype.slice.call(arguments, 0)));
     };
   }
-  var funcs = ["init", "logEvent", "setUserId", "setGlobalUserProperties", "setVersionName"];
+  var funcs = ["init", "logEvent", "setUserId", "setGlobalUserProperties", "setVersionName", "setDomain"];
   for (var i = 0; i < funcs.length; i++) {
     proxy(funcs[i]);
   };
