@@ -6,12 +6,12 @@ Amplitude-Javascript
 2. On every page that uses analytics, paste the following Javascript code between the `<head>` and `</head>` tags:
 
         <script type="text/javascript">
-          (function(e,t){var r=e.amplitude||{};var a=t.createElement("script");a.type="text/javascript";
-          a.async=true;a.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-1.0-min.js";
-          var n=t.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);
-          r._q=[];function i(e){r[e]=function(){r._q.push([e].concat(Array.prototype.slice.call(arguments,0)))}}
-          var s=["init","logEvent","setUserId","setGlobalUserProperties","setVersionName"];
-          for(var c=0;c<s.length;c++){i(s[c])}e.amplitude=r})(window,document);
+          (function(h,a){var f=h.amplitude||{};var b=a.createElement("script");b.type="text/javascript";
+          b.async=true;b.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-1.1-min.js";
+          var g=a.getElementsByTagName("script")[0];g.parentNode.insertBefore(b,g);
+          f._q=[];function e(i){f[i]=function(){f._q.push([i].concat(Array.prototype.slice.call(arguments,0)))}}
+          var c=["init","logEvent","setUserId","setGlobalUserProperties","setVersionName","setDomain"];
+          for(var d=0;d<c.length;d++){e(c[d])}h.amplitude=f})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
         </script>
