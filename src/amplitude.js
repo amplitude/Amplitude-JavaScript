@@ -787,7 +787,7 @@
             }
             return null;
         },
-        set: function(name, value, days) {
+        set: function(name, value, days, domain) {
             if (days) {
                 var date = new Date();
                 date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -795,10 +795,11 @@
             } else {
                 var expires = '';
             }
-            document.cookie = name + '=' + value + expires + '; path=/';
+            var cookieString = name + '=' + value + expires + '; path=/' + (domain ? (";domain=" + domain) : "");
+            document.cookie = cookieString;
         },
-        remove: function(name) {
-            Cookie.set(name, '', -1);
+        remove: function(name, domain) {
+            Cookie.set(name, '', -1, domain);
         }
     };
 
@@ -812,7 +813,8 @@
         cookieName: 'amplitude_id',
         cookieExpiration: 365 * 10,
         unsentKey: 'amplitude_unsent',
-        saveEvents: true
+        saveEvents: true,
+        domain: ''
     };
 
     var eventId = 0;
@@ -841,27 +843,7 @@
                 }
             }
 
-            // Load cookie data
-            var cookie = Cookie.get(options.cookieName);
-            var cookieData = null;
-            if (cookie) {
-                try {
-                    cookieData = JSON.parse(Base64.decode(cookie));
-                    if (cookieData) {
-                        if (cookieData.deviceId) {
-                            options.deviceId = cookieData.deviceId;
-                        }
-                        if (cookieData.userId) {
-                            options.userId = cookieData.userId;
-                        }
-                        if (cookieData.globalUserProperties) {
-                            options.globalUserProperties = cookieData.globalUserProperties;
-                        }
-                    }
-                } catch (e) {
-                    //log(e);
-                }
-            }
+            loadCookieData();
 
             options.deviceId = options.deviceId || UUID();
             options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || options.userId || null;
@@ -889,12 +871,35 @@
         }
     };
 
+    var loadCookieData = function() {
+        var cookie = Cookie.get(options.cookieName);
+        var cookieData = null;
+        if (cookie) {
+            try {
+                cookieData = JSON.parse(Base64.decode(cookie));
+                if (cookieData) {
+                    if (cookieData.deviceId) {
+                        options.deviceId = cookieData.deviceId;
+                    }
+                    if (cookieData.userId) {
+                        options.userId = cookieData.userId;
+                    }
+                    if (cookieData.globalUserProperties) {
+                        options.globalUserProperties = cookieData.globalUserProperties;
+                    }
+                }
+            } catch (e) {
+                //log(e);
+            }
+        }
+    };
+
     var saveCookieData = function() {
         Cookie.set(options.cookieName, Base64.encode(JSON.stringify({
                 deviceId: options.deviceId,
                 userId: options.userId,
                 globalUserProperties: options.globalUserProperties
-            })), options.cookieExpiration);
+        })), options.cookieExpiration, options.domain);
     };
 
     var saveEvents = function() {
@@ -902,6 +907,18 @@
             localStorage.setItem(options.unsentKey, JSON.stringify(unsentEvents));
         } catch (e) {
             //log(e);
+        }
+    };
+
+    Amplitude.prototype.setDomain = function(domain) {
+        try {        
+            options.domain = (domain !== undefined && domain !== null && ('' + domain)) || null;
+            options.cookieName = "amplitude_id" + (options.domain || '');
+            loadCookieData();
+            saveCookieData();
+            //log('set domain=' + domain);
+        } catch (e) {
+            log(e);
         }
     };
 
