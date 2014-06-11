@@ -9,7 +9,7 @@
   var as = document.createElement('script');
   as.type = 'text/javascript';
   as.async = true;
-  as.src = 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-1.0-min.js';
+  as.src = 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-1.2-min.js';
   var s = document.getElementsByTagName('script')[0];
   s.parentNode.insertBefore(as, s);
   amplitude._q = [];
@@ -18,7 +18,7 @@
       amplitude._q.push([fn].concat(Array.prototype.slice.call(arguments, 0)));
     };
   }
-  var funcs = ["init", "logEvent", "setUserId", "setGlobalUserProperties", "setVersionName", "setDomain"];
+  var funcs = ["init", "logEvent", "setUserId", "setUserProperties", "setVersionName", "setDomain", "setGlobalUserProperties"];
   for (var i = 0; i < funcs.length; i++) {
     proxy(funcs[i]);
   };

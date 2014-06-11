@@ -7,10 +7,10 @@ Amplitude-Javascript
 
         <script type="text/javascript">
           (function(h,a){var f=h.amplitude||{};var b=a.createElement("script");b.type="text/javascript";
-          b.async=true;b.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-1.1-min.js";
+          b.async=true;b.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-1.2-min.js";
           var g=a.getElementsByTagName("script")[0];g.parentNode.insertBefore(b,g);
           f._q=[];function e(i){f[i]=function(){f._q.push([i].concat(Array.prototype.slice.call(arguments,0)))}}
-          var c=["init","logEvent","setUserId","setGlobalUserProperties","setVersionName","setDomain"];
+          var c=["init","logEvent","setUserId","setUserProperties","setVersionName","setDomain","setGlobalUserProperties"];
           for(var d=0;d<c.length;d++){e(c[d])}h.amplitude=f})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
@@ -43,15 +43,15 @@ You can also add the user ID as an argument to the `init` call:
 
 You can attach additional data to any event by passing a Javascript object as the second argument to `logEvent`:
 
-    var customProperties = {};
-    customProperties.key = "value";
-    amplitude.logEvent("EVENT_IDENTIFIER_HERE", customProperties);
+    var eventProperties = {};
+    eventProperties.key = "value";
+    amplitude.logEvent("EVENT_IDENTIFIER_HERE", eventProperties);
 
-To add properties that are tracked in every event, you can set global properties for a user:
+To add properties that are tracked in every event, you can set properties for a user:
 
-    var globalProperties = {};
-    globalProperties.key = "value";
-    amplitude.setGlobalUserProperties(globalProperties);
+    var userProperties = {};
+    userProperties.key = "value";
+    amplitude.setUserProperties(userProperties);
 
 # Configuration Options #
 
