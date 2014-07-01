@@ -51,7 +51,7 @@ To add properties that are tracked in every event, you can set properties for a 
 
     var userProperties = {};
     userProperties.key = "value";
-    amplitude.setUserProperties(userProperties);
+    amplitude.setGlobalUserProperties(userProperties);
 
 # Configuration Options #
 
