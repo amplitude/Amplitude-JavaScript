@@ -1205,7 +1205,7 @@
             new Request(url, data).send(function(response) {
                 sending = false;
                 try {
-                    if (JSON.parse(response).added == numEvents) {
+                    if (response == 'success') {
                         //log('sucessful upload');
                         unsentEvents.splice(0, numEvents);
                         if (options.saveEvents) {
