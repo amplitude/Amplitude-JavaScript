@@ -39,13 +39,15 @@ You can also add the user ID as an argument to the `init` call:
 
     amplitude.init("YOUR_API_KEY_HERE", "USER_ID_HERE");
 
-# Setting Custom Properties #
+# Setting Event Properties #
 
 You can attach additional data to any event by passing a Javascript object as the second argument to `logEvent`:
 
     var eventProperties = {};
     eventProperties.key = "value";
     amplitude.logEvent("EVENT_IDENTIFIER_HERE", eventProperties);
+
+# Setting User Properties #
 
 To add properties that are tracked in every event, you can set properties for a user:
 
