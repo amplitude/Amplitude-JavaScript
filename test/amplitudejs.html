@@ -1,16 +1,41 @@
 <html>
-  <script>
-  (function(h,a){var f=h.amplitude||{};var b=a.createElement("script");b.type="text/javascript";b.async=true;b.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-1.2-min.js";var g=a.getElementsByTagName("script")[0];g.parentNode.insertBefore(b,g);f._q=[];function e(i){f[i]=function(){f._q.push([i].concat(Array.prototype.slice.call(arguments,0)))}}var c=["init","logEvent","setUserId","setUserProperties","setVersionName","setDomain","setGlobalUserProperties"];for(var d=0;d<c.length;d++){e(c[d])}h.amplitude=f})(window,document);
-  amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053');
-  amplitude.setVersionName('Web');
-  //amplitude.logEvent('pageLoad');
-  </script>
-  <body>
-    <h3>Amplitude JS Test</h3>
-    <ul>
-      <li><a href="javascript:amplitude.setUserId('user01');">Set user ID</a></li>
-      <li><a href="javascript:amplitude.logEvent('clicked');">Log event</a></li>
-      <li><a href="javascript:amplitude.logEvent('clicked button', {color: 'red;', shape: 'triangle', sides: 3});">Log event with event properties</a></li>
-      <li><a href="javascript:amplitude.setUserProperties({age: 30, city: 'San Francisco, CA'});">Set user properties</a></li>
-  </body>
+<!--<script src="src/amplitude-snippet.js" type="text/javascript"></script>-->
+<script>
+    (function(window, document) {
+        var amplitude = window.amplitude || {};
+        var as = document.createElement('script');
+        as.type = 'text/javascript';
+        as.async = true;
+        as.src = 'src/amplitude.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(as, s);
+        amplitude._q = [];
+        function proxy(fn) {
+            amplitude[fn] = function() {
+                amplitude._q.push([fn].concat(Array.prototype.slice.call(arguments, 0)));
+            };
+        }
+
+        var funcs = ["init", "logEvent", "setUserId", "setUserProperties", "setVersionName", "setDomain", "setGlobalUserProperties"];
+        for (var i = 0; i < funcs.length; i++) {
+            proxy(funcs[i]);
+        }
+        window.amplitude = amplitude;
+    })(window, document);
+</script>
+<script>
+    amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053');
+    amplitude.setVersionName('Web');
+    //amplitude.logEvent('pageLoad');
+</script>
+<body>
+<h3>Amplitude JS Test</h3>
+<ul>
+    <li><a href="javascript:amplitude.setUserId('user01');">Set user ID</a></li>
+    <li><a href="javascript:amplitude.logEvent('clicked');">Log event</a></li>
+    <li><a href="javascript:amplitude.logEvent('clicked button', {color: 'red;', shape: 'triangle', sides: 3});">Log
+        event with event properties</a></li>
+    <li><a href="javascript:amplitude.setUserProperties({age: 30, city: 'San Francisco, CA'});">Set user properties</a>
+    </li>
+</body>
 </html>

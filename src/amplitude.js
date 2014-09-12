@@ -1001,7 +1001,7 @@
      * Amplitude API
      */
     var Amplitude = function() {};
-    Amplitude.SDK_VERSION = "1.2";
+    Amplitude.SDK_VERSION = "1.3";
     Amplitude.API_VERSION = 2;
 
     var options = {
@@ -1010,12 +1010,19 @@
         cookieExpiration: 365 * 10,
         unsentKey: 'amplitude_unsent',
         saveEvents: true,
-        domain: ''
+        domain: '',
+        sessionTimeout: 30 * 60 * 1000
     };
 
     var eventId = 0;
     var unsentEvents = [];
     var sending = false;
+    var lastEventTime = null;
+    var sessionId = null;
+    var LocalStorageKeys = {
+      LAST_EVENT_TIME: 'amplitude_lastEventTime',
+      SESSION_ID: 'amplitude_sessionId'
+    };
 
     var nextEventId = function() {
         eventId++;
@@ -1041,7 +1048,8 @@
 
             loadCookieData();
 
-            options.deviceId = options.deviceId || UUID();
+            options.deviceId = (opt_config.deviceId !== undefined && opt_config.deviceId !== null && opt_config.deviceId) ||
+                options.deviceId || UUID();
             options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || options.userId || null;
             saveCookieData();
 
@@ -1062,6 +1070,16 @@
             if (unsentEvents.length > 0) {
                 this.sendEvents();
             }
+
+            lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
+            sessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
+            var now = new Date().getTime();
+            if (!sessionId || !lastEventTime || now - lastEventTime > options.sessionTimeout) {
+              sessionId = now;
+              localStorage.setItem(LocalStorageKeys.SESSION_ID, sessionId);
+            }
+            lastEventTime = now;
+            localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, lastEventTime);
         } catch (e) {
             log(e);
         }
@@ -1150,13 +1168,19 @@
     Amplitude.prototype.logEvent = function(eventType, eventProperties) {
         try {
             var eventTime = new Date().getTime();
+            if (!sessionId || !lastEventTime || eventTime - lastEventTime > options.sessionTimeout) {
+              sessionId = eventTime;
+              localStorage.setItem(LocalStorageKeys.SESSION_ID, sessionId);
+            }
+            lastEventTime = eventTime;
+            localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, lastEventTime);
             eventProperties = eventProperties || {};
             var event = {
                 device_id: options.deviceId,
                 user_id: options.userId || options.deviceId,
                 timestamp: eventTime,
                 event_id: nextEventId(),
-                session_id: -1,
+                session_id: sessionId || -1,
                 event_type: eventType,
                 // api_properties: {
                     // location: this.getLocation()
@@ -1226,6 +1250,8 @@
      *  @deprecated
      */
     Amplitude.prototype.setGlobalUserProperties = Amplitude.prototype.setUserProperties;
+
+    Amplitude.prototype.__VERSION__ = '1.3.0';
 
     var old = window.amplitude || {};
     var q = old._q || [];

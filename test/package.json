@@ -1,0 +1,9 @@
+{
+  "name": "amplitude-javascript-test",
+  "description": "Amplitude Javascript SDK Test",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "4.x"
+  }
+}
