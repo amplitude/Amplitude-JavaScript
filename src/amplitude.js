@@ -1048,7 +1048,7 @@
 
             loadCookieData();
 
-            options.deviceId = (opt_config.deviceId !== undefined && opt_config.deviceId !== null && opt_config.deviceId) ||
+            options.deviceId = (opt_config && opt_config.deviceId !== undefined && opt_config.deviceId !== null && opt_config.deviceId) ||
                 options.deviceId || UUID();
             options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || options.userId || null;
             saveCookieData();
