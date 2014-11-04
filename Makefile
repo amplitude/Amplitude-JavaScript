@@ -1,7 +1,13 @@
-SRC = $(wildcard lib/*.js)
+SRC = $(wildcard src/*.js)
 BINS = node_modules/.bin
 DUO = $(BINS)/duo
 MINIFY = $(BINS)/uglifyjs
+
+#
+# Default target.
+#
+
+default: amplitude.js
 
 #
 # Clean.

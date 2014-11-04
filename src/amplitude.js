@@ -1,10 +1,12 @@
 var Base64 = require('./base64');
+var Cookie = require('./cookie');
 var JSON = require('segmentio/json');
+var Request = require('./xhr');
 var UTF8 = require('./utf8');
 var UUID = require('./uuid');
 var md5 = require('./md5');
-var querystring = require('component/querystring');
 var localStorage = require('./localstorage');
+var detect = require('./detect');
 
 /*
  * amplitude.js
@@ -15,207 +17,6 @@ var localStorage = require('./localstorage');
  */
 var log = function(s) {
   console.log('[Amplitude] ' + s);
-};
-
-
-var userAgent = navigator.userAgent;
-var vendor = navigator.vendor;
-var platform = navigator.platform;
-
-/*
- * Browser/OS detection
- */
-var BrowserDetect = {
-  init: function() {
-    this.browser = this.searchString(this.dataBrowser) || null;
-    this.version = this.searchVersion(navigator.userAgent) ||
-        this.searchVersion(navigator.appVersion) || null;
-    this.OS = this.searchString(this.dataOS) || null;
-  },
-  searchString: function(data) {
-    for (var i = 0; i < data.length; i++) {
-      var dataString = data[i].string;
-      var dataProp = data[i].prop;
-      this.versionSearchString = data[i].versionSearch || data[i].identity;
-      if (dataString) {
-        if (dataString.indexOf(data[i].subString) != -1) {
-          return data[i].identity;
-        }
-      }
-      else if (dataProp) {
-        return data[i].identity;
-      }
-    }
-  },
-  searchVersion: function(dataString) {
-    var index = dataString.indexOf(this.versionSearchString);
-    if (index == -1) {
-      return;
-    }
-    return parseFloat(dataString.substring(index + this.versionSearchString.length + 1));
-  },
-  dataBrowser: [
-    {
-      string: userAgent,
-      subString: 'Chrome',
-      identity: 'Chrome'
-    },
-    {  string: userAgent,
-      subString: 'OmniWeb',
-      versionSearch: 'OmniWeb/',
-      identity: 'OmniWeb'
-    },
-    {
-      string: vendor,
-      subString: 'Apple',
-      identity: 'Safari',
-      versionSearch: 'Version'
-    },
-    {
-      prop: window.opera,
-      identity: 'Opera',
-      versionSearch: 'Version'
-    },
-    {
-      string: vendor,
-      subString: 'iCab',
-      identity: 'iCab'
-    },
-    {
-      string: vendor,
-      subString: 'KDE',
-      identity: 'Konqueror'
-    },
-    {
-      string: userAgent,
-      subString: 'Firefox',
-      identity: 'Firefox'
-    },
-    {
-      string: vendor,
-      subString: 'Camino',
-      identity: 'Camino'
-    },
-    {		// for newer Netscapes (6+)
-      string: userAgent,
-      subString: 'Netscape',
-      identity: 'Netscape'
-    },
-    {
-      string: userAgent,
-      subString: 'MSIE',
-      identity: 'Explorer',
-      versionSearch: 'MSIE'
-    },
-    {
-      string: userAgent,
-      subString: 'Gecko',
-      identity: 'Mozilla',
-      versionSearch: 'rv'
-    },
-    { 		// for older Netscapes (4-)
-      string: userAgent,
-      subString: 'Mozilla',
-      identity: 'Netscape',
-      versionSearch: 'Mozilla'
-    }
-  ],
-  dataOS: [
-    {
-      string: platform,
-      subString: 'Win',
-      identity: 'Windows'
-    },
-    {
-      string: platform,
-      subString: 'Mac',
-      identity: 'Mac'
-    },
-    {
-      string: userAgent,
-      subString: 'iPhone',
-      identity: 'iPhone/iPod'
-    },
-    {
-      string: userAgent,
-      subString: 'Android',
-      identity: 'Android'
-    },
-    {
-      string: platform,
-      subString: 'Linux',
-      identity: 'Linux'
-    }
-  ]
-
-};
-BrowserDetect.init();
-
-/*
- * Simple AJAX request object
- */
-var Request = function(url, data) {
-  this.url = url;
-  this.data = data || {};
-};
-
-Request.prototype.send = function(callback) {
-  var isIE = window.XDomainRequest ? true : false;
-  if (isIE) {
-    var xdr = new window.XDomainRequest();
-    xdr.open('POST', this.url, true);
-    xdr.onload = function() {
-      callback(xdr.responseText);
-    };
-    xdr.send(querystring.stringify(this.data));
-  } else {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', this.url, true);
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200) {
-          callback(xhr.responseText);
-        }
-      }
-    }
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-    xhr.send(querystring.stringify(this.data));
-  }
-  //log('sent request to ' + this.url + ' with data ' + decodeURIComponent(queryString(this.data)));
-};
-
-/*
- * Cookie data
- */
-var Cookie = {
-  get: function(name) {
-    var nameEq = name + '=';
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1, c.length);
-      }
-      if (c.indexOf(nameEq) == 0) {
-        return c.substring(nameEq.length, c.length);
-      }
-    }
-    return null;
-  },
-  set: function(name, value, days, domain) {
-    if (days) {
-      var date = new Date();
-      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-      var expires = '; expires=' + date.toGMTString();
-    } else {
-      var expires = '';
-    }
-    var cookieString = name + '=' + value + expires + '; path=/' + (domain ? (";domain=" + domain) : "");
-    document.cookie = cookieString;
-  },
-  remove: function(name, domain) {
-    Cookie.set(name, '', -1, domain);
-  }
 };
 
 /*
@@ -236,6 +37,7 @@ var options = {
   sessionTimeout: 30 * 60 * 1000
 };
 
+var ua = detect.parse(navigator.userAgent);
 var eventId = 0;
 var unsentEvents = [];
 var sending = false;
@@ -408,14 +210,18 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
       event_id: eventId,
       session_id: sessionId || -1,
       event_type: eventType,
-      client: BrowserDetect.browser,
-      version_code: 0,
       version_name: options.versionName || null,
-      build_version_sdk: 0,
-      build_version_release: BrowserDetect.version,
-      phone_model: BrowserDetect.OS,
-      custom_properties: eventProperties,
-      global_properties: options.globalUserProperties || {}
+      platform: 'Web',
+      os_name: ua.browser.family,
+      os_version: ua.browser.version,
+      device_model: ua.os.family,
+      event_properties: eventProperties,
+      user_properties: options.globalUserProperties || {},
+      uuid: UUID(),
+      library: {
+        name: 'amplitude-js',
+        version: this.__VERSION__
+      }
       // country: null,
       // language: null
     };
@@ -471,6 +277,6 @@ Amplitude.prototype.sendEvents = function() {
  */
 Amplitude.prototype.setGlobalUserProperties = Amplitude.prototype.setUserProperties;
 
-Amplitude.prototype.__VERSION__ = '1.3.0';
+Amplitude.prototype.__VERSION__ = '1.4.0';
 
 module.exports = Amplitude;
