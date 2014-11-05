@@ -2,7 +2,7 @@
  * Copyright Amplitude (c) 2014
  */
 
-var querystring = require('component/querystring');
+var querystring = require('querystring');
 
 /*
  * Simple AJAX request object

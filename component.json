@@ -1,0 +1,17 @@
+{
+  "name": "amplitude-js",
+  "main": "src/index.js",
+  "repo": "amplitude/amplitude-javascript",
+  "description": "Javascript library for Amplitude Analytics",
+  "version": "1.4.0",
+  "keywords": [
+    "analytics",
+    "amplitude"
+  ],
+  "dependencies": {
+    "component/object": "0.0.3",
+    "component/querystring": "1.3.0",
+    "segmentio/json": "1.0.0",
+    "segmentio/top-domain": "1.0.0"
+  }
+}

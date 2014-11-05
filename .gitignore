@@ -1,4 +1,4 @@
-test/node_modules
 node_modules
 components
 npm-debug.log
+build
