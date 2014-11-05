@@ -1,7 +1,3 @@
-/**
- * Copyright Amplitude (c) 2014
- */
-
 /*
  * UTF-8 encoder/decoder
  * http://www.webtoolkit.info/

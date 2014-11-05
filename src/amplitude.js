@@ -10,13 +10,6 @@ var detect = require('./detect');
 var version = require('./version');
 var object = require('object');
 
-/*
- * amplitude.js
- * Javascript SDK for Amplitude
- *
- * Created by Curtis Liu
- * Copyright (c) 2014 Sonalight, Inc. All rights reserved.
- */
 var log = function(s) {
   console.log('[Amplitude] ' + s);
 };

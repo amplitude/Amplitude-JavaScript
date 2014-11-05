@@ -1,8 +1,4 @@
 /**
- * Copyright Amplitude (c) 2014
- */
-
-/**
  * Taken straight from jed's gist: https://gist.github.com/982883
  *
  * Returns a random v4 UUID of the form xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx,

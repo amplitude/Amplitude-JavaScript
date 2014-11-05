@@ -1,7 +1,3 @@
-/**
- * Copyright Amplitude (c) 2014
- */
-
 var querystring = require('querystring');
 
 /*

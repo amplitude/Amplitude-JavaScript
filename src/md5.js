@@ -1,6 +1,3 @@
-/**
- * Copyright Amplitude (c) 2014
- */
 var UTF8 = require('./utf8');
 
 /*

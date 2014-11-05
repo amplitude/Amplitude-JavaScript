@@ -1,9 +1,3 @@
-/*
- * amplitude-snippet.js
- *
- * Created by Curtis Liu
- * Copyright (c) 2013 Sonalight, Inc. All rights reserved.
- */
 (function(window, document) {
   var amplitude = window.amplitude || {};
   var as = document.createElement('script');

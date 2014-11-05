@@ -1,7 +1,3 @@
-/**
- * Copyright Amplitude (c) 2014
- */
-
 /*
  * Implement localStorage to support Firefox 2-3 and IE 5-7
  */
