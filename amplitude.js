@@ -238,7 +238,7 @@ var _loadCookieData = function(scope) {
       scope.options.userId = cookieData.userId;
     }
     if (cookieData.globalUserProperties) {
-      scope.options.globalUserProperties = cookieData.globalUserProperties;
+      scope.options.userProperties = cookieData.globalUserProperties;
     }
   }
 };
@@ -247,7 +247,7 @@ var _saveCookieData = function(scope) {
   Cookie.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
-    globalUserProperties: scope.options.globalUserProperties
+    globalUserProperties: scope.options.userProperties
   });
 };
 
@@ -283,9 +283,13 @@ Amplitude.prototype.setUserId = function(userId) {
   }
 };
 
-Amplitude.prototype.setUserProperties = function(userProperties) {
+Amplitude.prototype.setUserProperties = function(userProperties, opt_replace) {
   try {
-    this.options.globalUserProperties = userProperties;
+    if (opt_replace) {
+      this.options.userProperties = userProperties;
+    } else {
+      this.options.userProperties = object.merge(this.options.userProperties || {}, userProperties);
+    }
     _saveCookieData(this);
     //log('set userProperties=' + JSON.stringify(userProperties));
   } catch (e) {
@@ -334,7 +338,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
       os_version: ua.browser.version,
       device_model: ua.os.family,
       event_properties: eventProperties,
-      user_properties: this.options.globalUserProperties || {},
+      user_properties: this.options.userProperties || {},
       uuid: UUID(),
       library: {
         name: 'amplitude-js',

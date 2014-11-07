@@ -51,6 +51,41 @@ describe('Amplitude', function() {
     });
   });
 
+  describe('setUserProperties', function() {
+    beforeEach(function() {
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should set user properties', function() {
+      amplitude.setUserProperties({'prop': true});
+      assert.propertyVal(amplitude.options.userProperties, 'prop', true);
+    });
+
+    it('should merge user properties by default', function() {
+      amplitude.setUserProperties({'prop': true, 'prop2': true});
+      assert.propertyVal(amplitude.options.userProperties, 'prop', true);
+
+      amplitude.setUserProperties({'prop': false, 'prop3': false});
+      assert.propertyVal(amplitude.options.userProperties, 'prop', false);
+      assert.propertyVal(amplitude.options.userProperties, 'prop2', true);
+      assert.propertyVal(amplitude.options.userProperties, 'prop3', false);
+    });
+
+    it('should allow overwriting user properties', function() {
+      amplitude.setUserProperties({'prop': true, 'prop2': true});
+      assert.propertyVal(amplitude.options.userProperties, 'prop', true);
+
+      amplitude.setUserProperties({'prop': false, 'prop3': false}, true);
+      assert.notProperty(amplitude.options.userProperties, 'prop2');
+      assert.propertyVal(amplitude.options.userProperties, 'prop', false);
+      assert.propertyVal(amplitude.options.userProperties, 'prop3', false);
+    });
+  });
+
   describe('logEvent', function() {
 
     beforeEach(function() {
