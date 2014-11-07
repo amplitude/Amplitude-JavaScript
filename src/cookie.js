@@ -20,18 +20,15 @@ var reset = function() {
 
 
 var options = function(opts) {
-  if (!opts) {
+  if (arguments.length === 0) {
     return _options;
   }
+
+  opts = opts || {};
+
   _options.expirationDays = opts.expirationDays;
 
-  var domain;
-  if (opts.domain) {
-    domain = opts.domain;
-  } else {
-    domain = '.' + topDomain(window.location.href);
-  }
-
+  var domain = (opts.domain !== undefined) ? opts.domain : '.' + topDomain(window.location.href);
   var token = Math.random();
   _options.domain = domain;
   set('amplitude_test', token);
@@ -43,10 +40,19 @@ var options = function(opts) {
   _options.domain = domain;
 };
 
+var _domainSpecific = function(name) {
+  // differentiate between cookies on different domains
+  var suffix = '';
+  if (_options.domain) {
+    suffix = _options.domain.charAt(0) == '.' ? _options.domain.substring(1) : _options.domain;
+  }
+  return name + suffix;
+};
+
 
 var get = function(name) {
   try {
-    var nameEq = name + '=';
+    var nameEq = _domainSpecific(name) + '=';
     var ca = document.cookie.split(';');
     var value = null;
     for (var i = 0; i < ca.length; i++) {
@@ -72,7 +78,7 @@ var get = function(name) {
 
 var set = function(name, value) {
   try {
-    _set(name, Base64.encode(JSON.stringify(value)), _options);
+    _set(_domainSpecific(name), Base64.encode(JSON.stringify(value)), _options);
     return true;
   } catch (e) {
     return false;
@@ -101,7 +107,7 @@ var _set = function(name, value, opts) {
 
 var remove = function(name) {
   try {
-    _set(name, null, _options);
+    _set(_domainSpecific(name), null, _options);
     return true;
   } catch (e) {
     return false;

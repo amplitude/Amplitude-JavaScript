@@ -21,8 +21,9 @@ var DEFAULT_OPTIONS = {
   cookieExpiration: 365 * 10,
   unsentKey: 'amplitude_unsent',
   saveEvents: true,
-  domain: '',
-  sessionTimeout: 30 * 60 * 1000
+  domain: undefined,
+  sessionTimeout: 30 * 60 * 1000,
+  platform: 'Web'
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
@@ -36,6 +37,7 @@ var LocalStorageKeys = {
 var Amplitude = function() {
   this._unsentEvents = [];
   this._ua = detect.parse(navigator.userAgent);
+  this.options = object.merge({}, DEFAULT_OPTIONS);
 };
 
 
@@ -53,15 +55,16 @@ Amplitude.prototype._sessionId = null;
  */
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
   try {
-    this.options = object.merge({}, DEFAULT_OPTIONS);
     this.options.apiKey = apiKey;
     if (opt_config) {
       if (opt_config.saveEvents !== undefined) {
         this.options.saveEvents = !!opt_config.saveEvents;
       }
       if (opt_config.domain !== undefined) {
-        this.options.saveEvents = opt_config.domain;
+        this.options.domain = opt_config.domain;
       }
+      this.options.platform = opt_config.platform || this.options.platform;
+      this.options.sessionTimeout = opt_config.sessionTimeout || this.options.sessionTimeout;
     }
 
     Cookie.options({
@@ -216,7 +219,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
       session_id: sessionId || -1,
       event_type: eventType,
       version_name: this.options.versionName || null,
-      platform: 'Web',
+      platform: this.options.platform,
       os_name: ua.browser.family,
       os_version: ua.browser.version,
       device_model: ua.os.family,
