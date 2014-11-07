@@ -178,6 +178,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
     });
+    this.options.domain = Cookie.options().domain;
 
     _loadCookieData(this);
 
@@ -226,7 +227,6 @@ Amplitude.prototype.nextEventId = function() {
 
 var _loadCookieData = function(scope) {
   var cookieData = Cookie.get(scope.options.cookieName);
-  var cookieData = null;
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -628,7 +628,7 @@ var get = function(name) {
 
 var set = function(name, value) {
   try {
-    _set(name, Base64.encode(JSON.stringify(value)));
+    _set(name, Base64.encode(JSON.stringify(value)), _options);
     return true;
   } catch (e) {
     return false;
@@ -636,11 +636,11 @@ var set = function(name, value) {
 };
 
 
-var _set = function(name, value) {
-  var expires = null;
-  if (_options.expirationDays) {
+var _set = function(name, value, opts) {
+  var expires = value != null ? opts.expirationDays : -1 ;
+  if (expires) {
     var date = new Date();
-    date.setTime(date.getTime() + (_options.expirationDays * 24 * 60 * 60 * 1000));
+    date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
     expires = date;
   }
   var str = name + '=' + value;
@@ -648,8 +648,8 @@ var _set = function(name, value) {
     str += '; expires=' + expires.toUTCString();
   }
   str += '; path=/';
-  if (_options.domain) {
-    str += '; domain=' + _options.domain;
+  if (opts.domain) {
+    str += '; domain=' + opts.domain;
   }
   document.cookie = str;
 };
@@ -657,7 +657,7 @@ var _set = function(name, value) {
 
 var remove = function(name) {
   try {
-    _set(name, '');
+    _set(name, null, _options);
     return true;
   } catch (e) {
     return false;
@@ -671,6 +671,7 @@ module.exports = {
   get: get,
   set: set,
   remove: remove
+
 };
 
 }, {"./base64":3,"json":5,"top-domain":14}],
@@ -2343,7 +2344,7 @@ module.exports = localStorage;
 
 }, {}],
 12: [function(require, module, exports) {
-module.exports = '1.4.0';
+module.exports = '2.0.0';
 
 }, {}],
 13: [function(require, module, exports) {

@@ -72,7 +72,7 @@ var get = function(name) {
 
 var set = function(name, value) {
   try {
-    _set(name, Base64.encode(JSON.stringify(value)));
+    _set(name, Base64.encode(JSON.stringify(value)), _options);
     return true;
   } catch (e) {
     return false;
@@ -80,11 +80,11 @@ var set = function(name, value) {
 };
 
 
-var _set = function(name, value) {
-  var expires = null;
-  if (_options.expirationDays) {
+var _set = function(name, value, opts) {
+  var expires = value != null ? opts.expirationDays : -1 ;
+  if (expires) {
     var date = new Date();
-    date.setTime(date.getTime() + (_options.expirationDays * 24 * 60 * 60 * 1000));
+    date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
     expires = date;
   }
   var str = name + '=' + value;
@@ -92,8 +92,8 @@ var _set = function(name, value) {
     str += '; expires=' + expires.toUTCString();
   }
   str += '; path=/';
-  if (_options.domain) {
-    str += '; domain=' + _options.domain;
+  if (opts.domain) {
+    str += '; domain=' + opts.domain;
   }
   document.cookie = str;
 };
@@ -101,7 +101,7 @@ var _set = function(name, value) {
 
 var remove = function(name) {
   try {
-    _set(name, '');
+    _set(name, null, _options);
     return true;
   } catch (e) {
     return false;
@@ -115,4 +115,5 @@ module.exports = {
   get: get,
   set: set,
   remove: remove
+
 };

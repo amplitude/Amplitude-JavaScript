@@ -68,6 +68,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
     });
+    this.options.domain = Cookie.options().domain;
 
     _loadCookieData(this);
 
@@ -116,7 +117,6 @@ Amplitude.prototype.nextEventId = function() {
 
 var _loadCookieData = function(scope) {
   var cookieData = Cookie.get(scope.options.cookieName);
-  var cookieData = null;
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
