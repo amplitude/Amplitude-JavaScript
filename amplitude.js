@@ -120,13 +120,6 @@ var detect = require('./detect');
 var version = require('./version');
 var object = require('object');
 
-/*
- * amplitude.js
- * Javascript SDK for Amplitude
- *
- * Created by Curtis Liu
- * Copyright (c) 2014 Sonalight, Inc. All rights reserved.
- */
 var log = function(s) {
   console.log('[Amplitude] ' + s);
 };
@@ -161,11 +154,6 @@ Amplitude.prototype._sending = false;
 Amplitude.prototype._lastEventTime = null;
 Amplitude.prototype._sessionId = null;
 
-Amplitude.prototype.nextEventId = function() {
-  this._eventId++;
-  return this._eventId;
-};
-
 /**
  * Initializes Amplitude.
  * apiKey The API Key for your app
@@ -181,15 +169,23 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       if (opt_config.saveEvents !== undefined) {
         this.options.saveEvents = !!opt_config.saveEvents;
       }
+      if (opt_config.domain !== undefined) {
+        this.options.saveEvents = opt_config.domain;
+      }
     }
 
-    this.loadCookieData();
+    Cookie.options({
+      expirationDays: this.options.cookieExpiration,
+      domain: this.options.domain
+    });
+
+    _loadCookieData(this);
 
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
         opt_config.deviceId !== null && opt_config.deviceId) ||
         this.options.deviceId || UUID();
     this.options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || this.options.userId || null;
-    this.saveCookieData();
+    _saveCookieData(this);
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
@@ -223,35 +219,33 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
   }
 };
 
-Amplitude.prototype.loadCookieData = function() {
-  var cookie = Cookie.get(this.options.cookieName);
+Amplitude.prototype.nextEventId = function() {
+  this._eventId++;
+  return this._eventId;
+};
+
+var _loadCookieData = function(scope) {
+  var cookieData = Cookie.get(scope.options.cookieName);
   var cookieData = null;
-  if (cookie) {
-    try {
-      cookieData = JSON.parse(Base64.decode(cookie));
-      if (cookieData) {
-        if (cookieData.deviceId) {
-          this.options.deviceId = cookieData.deviceId;
-        }
-        if (cookieData.userId) {
-          this.options.userId = cookieData.userId;
-        }
-        if (cookieData.globalUserProperties) {
-          this.options.globalUserProperties = cookieData.globalUserProperties;
-        }
-      }
-    } catch (e) {
-      //log(e);
+  if (cookieData) {
+    if (cookieData.deviceId) {
+      scope.options.deviceId = cookieData.deviceId;
+    }
+    if (cookieData.userId) {
+      scope.options.userId = cookieData.userId;
+    }
+    if (cookieData.globalUserProperties) {
+      scope.options.globalUserProperties = cookieData.globalUserProperties;
     }
   }
 };
 
-Amplitude.prototype.saveCookieData = function() {
-  Cookie.set(this.options.cookieName, Base64.encode(JSON.stringify({
-    deviceId: this.options.deviceId,
-    userId: this.options.userId,
-    globalUserProperties: this.options.globalUserProperties
-  })), this.options.cookieExpiration, this.options.domain);
+var _saveCookieData = function(scope) {
+  Cookie.set(scope.options.cookieName, {
+    deviceId: scope.options.deviceId,
+    userId: scope.options.userId,
+    globalUserProperties: scope.options.globalUserProperties
+  });
 };
 
 Amplitude.prototype.saveEvents = function() {
@@ -264,10 +258,12 @@ Amplitude.prototype.saveEvents = function() {
 
 Amplitude.prototype.setDomain = function(domain) {
   try {
-    this.options.domain = (domain !== undefined && domain !== null && ('' + domain)) || null;
-    this.options.cookieName = "amplitude_id" + (this.options.domain || '');
-    this.loadCookieData();
-    this.saveCookieData();
+    Cookie.options({
+      domain: domain
+    });
+    this.options.domain = Cookie.options().domain;
+    _loadCookieData(this);
+    _saveCookieData(this);
     //log('set domain=' + domain);
   } catch (e) {
     log(e);
@@ -277,7 +273,7 @@ Amplitude.prototype.setDomain = function(domain) {
 Amplitude.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
-    this.saveCookieData();
+    _saveCookieData(this);
     //log('set userId=' + userId);
   } catch (e) {
     log(e);
@@ -287,7 +283,7 @@ Amplitude.prototype.setUserId = function(userId) {
 Amplitude.prototype.setUserProperties = function(userProperties) {
   try {
     this.options.globalUserProperties = userProperties;
-    this.saveCookieData();
+    _saveCookieData(this);
     //log('set userProperties=' + JSON.stringify(userProperties));
   } catch (e) {
     log(e);
@@ -402,10 +398,6 @@ module.exports = Amplitude;
 
 }, {"./base64":3,"./cookie":4,"json":5,"./xhr":6,"./utf8":7,"./uuid":8,"./md5":9,"./localstorage":10,"./detect":11,"./version":12,"object":13}],
 3: [function(require, module, exports) {
-/**
- * Copyright Amplitude (c) 2014
- */
-
 var UTF8 = require('./utf8');
 
 /*
@@ -503,10 +495,6 @@ module.exports = Base64;
 
 }, {"./utf8":7}],
 7: [function(require, module, exports) {
-/**
- * Copyright Amplitude (c) 2014
- */
-
 /*
  * UTF-8 encoder/decoder
  * http://www.webtoolkit.info/
@@ -566,47 +554,126 @@ module.exports = UTF8;
 
 }, {}],
 4: [function(require, module, exports) {
-/**
- * Copyright Amplitude (c) 2014
- */
-
 /*
  * Cookie data
  */
-var Cookie = {
-  get: function(name) {
+
+var Base64 = require('./base64');
+var JSON = require('json');
+var topDomain = require('top-domain');
+
+
+
+var _options = {
+  expirationDays: undefined,
+  domain: undefined
+};
+
+
+var reset = function() {
+  _options = {};
+};
+
+
+var options = function(opts) {
+  if (!opts) {
+    return _options;
+  }
+  _options.expirationDays = opts.expirationDays;
+
+  var domain;
+  if (opts.domain) {
+    domain = opts.domain;
+  } else {
+    domain = '.' + topDomain(window.location.href);
+  }
+
+  var token = Math.random();
+  _options.domain = domain;
+  set('amplitude_test', token);
+  var stored = get('amplitude_test');
+  if (!stored || stored != token) {
+    domain = null;
+  }
+  remove('amplitude_test');
+  _options.domain = domain;
+};
+
+
+var get = function(name) {
+  try {
     var nameEq = name + '=';
     var ca = document.cookie.split(';');
+    var value = null;
     for (var i = 0; i < ca.length; i++) {
       var c = ca[i];
       while (c.charAt(0) == ' ') {
         c = c.substring(1, c.length);
       }
       if (c.indexOf(nameEq) == 0) {
-        return c.substring(nameEq.length, c.length);
+        value = c.substring(nameEq.length, c.length);
+        break;
       }
     }
-    return null;
-  },
-  set: function(name, value, days, domain) {
-    if (days) {
-      var date = new Date();
-      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-      var expires = '; expires=' + date.toGMTString();
-    } else {
-      var expires = '';
+
+    if (value) {
+      return JSON.parse(Base64.decode(value));
     }
-    var cookieString = name + '=' + value + expires + '; path=/' + (domain ? (";domain=" + domain) : "");
-    document.cookie = cookieString;
-  },
-  remove: function(name, domain) {
-    Cookie.set(name, '', -1, domain);
+    return null;
+  } catch (e) {
+    return null;
   }
 };
 
-module.exports = Cookie;
 
-}, {}],
+var set = function(name, value) {
+  try {
+    _set(name, Base64.encode(JSON.stringify(value)));
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+
+var _set = function(name, value) {
+  var expires = null;
+  if (_options.expirationDays) {
+    var date = new Date();
+    date.setTime(date.getTime() + (_options.expirationDays * 24 * 60 * 60 * 1000));
+    expires = date;
+  }
+  var str = name + '=' + value;
+  if (expires) {
+    str += '; expires=' + expires.toUTCString();
+  }
+  str += '; path=/';
+  if (_options.domain) {
+    str += '; domain=' + _options.domain;
+  }
+  document.cookie = str;
+};
+
+
+var remove = function(name) {
+  try {
+    _set(name, '');
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+
+module.exports = {
+  reset: reset,
+  options: options,
+  get: get,
+  set: set,
+  remove: remove
+};
+
+}, {"./base64":3,"json":5,"top-domain":14}],
 5: [function(require, module, exports) {
 
 var json = window.JSON || {};
@@ -617,8 +684,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":14}],
-14: [function(require, module, exports) {
+}, {"json-fallback":15}],
+15: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1108,11 +1175,141 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-6: [function(require, module, exports) {
+14: [function(require, module, exports) {
+
 /**
- * Copyright Amplitude (c) 2014
+ * Module dependencies.
  */
 
+var parse = require('url').parse;
+
+/**
+ * Expose `domain`
+ */
+
+module.exports = domain;
+
+/**
+ * RegExp
+ */
+
+var regexp = /[a-z0-9][a-z0-9\-]*[a-z0-9]\.[a-z\.]{2,6}$/i;
+
+/**
+ * Get the top domain.
+ * 
+ * Official Grammar: http://tools.ietf.org/html/rfc883#page-56
+ * Look for tlds with up to 2-6 characters.
+ * 
+ * Example:
+ * 
+ *      domain('http://localhost:3000/baz');
+ *      // => ''
+ *      domain('http://dev:3000/baz');
+ *      // => ''
+ *      domain('http://127.0.0.1:3000/baz');
+ *      // => ''
+ *      domain('http://segment.io/baz');
+ *      // => 'segment.io'
+ * 
+ * @param {String} url
+ * @return {String}
+ * @api public
+ */
+
+function domain(url){
+  var host = parse(url).hostname;
+  var match = host.match(regexp);
+  return match ? match[0] : '';
+};
+
+}, {"url":16}],
+16: [function(require, module, exports) {
+
+/**
+ * Parse the given `url`.
+ *
+ * @param {String} str
+ * @return {Object}
+ * @api public
+ */
+
+exports.parse = function(url){
+  var a = document.createElement('a');
+  a.href = url;
+  return {
+    href: a.href,
+    host: a.host || location.host,
+    port: ('0' === a.port || '' === a.port) ? port(a.protocol) : a.port,
+    hash: a.hash,
+    hostname: a.hostname || location.hostname,
+    pathname: a.pathname.charAt(0) != '/' ? '/' + a.pathname : a.pathname,
+    protocol: !a.protocol || ':' == a.protocol ? location.protocol : a.protocol,
+    search: a.search,
+    query: a.search.slice(1)
+  };
+};
+
+/**
+ * Check if `url` is absolute.
+ *
+ * @param {String} url
+ * @return {Boolean}
+ * @api public
+ */
+
+exports.isAbsolute = function(url){
+  return 0 == url.indexOf('//') || !!~url.indexOf('://');
+};
+
+/**
+ * Check if `url` is relative.
+ *
+ * @param {String} url
+ * @return {Boolean}
+ * @api public
+ */
+
+exports.isRelative = function(url){
+  return !exports.isAbsolute(url);
+};
+
+/**
+ * Check if `url` is cross domain.
+ *
+ * @param {String} url
+ * @return {Boolean}
+ * @api public
+ */
+
+exports.isCrossDomain = function(url){
+  url = exports.parse(url);
+  var location = exports.parse(window.location.href);
+  return url.hostname !== location.hostname
+    || url.port !== location.port
+    || url.protocol !== location.protocol;
+};
+
+/**
+ * Return default port for `protocol`.
+ *
+ * @param  {String} protocol
+ * @return {String}
+ * @api private
+ */
+function port (protocol){
+  switch (protocol) {
+    case 'http:':
+      return 80;
+    case 'https:':
+      return 443;
+    default:
+      return location.port;
+  }
+}
+
+}, {}],
+6: [function(require, module, exports) {
 var querystring = require('querystring');
 
 /*
@@ -1150,8 +1347,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":15}],
-15: [function(require, module, exports) {
+}, {"querystring":17}],
+17: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1226,8 +1423,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":16,"type":17}],
-16: [function(require, module, exports) {
+}, {"trim":18,"type":19}],
+18: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -1247,7 +1444,7 @@ exports.right = function(str){
 };
 
 }, {}],
-17: [function(require, module, exports) {
+19: [function(require, module, exports) {
 
 /**
  * toString ref.
@@ -1284,10 +1481,6 @@ module.exports = function(val){
 }, {}],
 8: [function(require, module, exports) {
 /**
- * Copyright Amplitude (c) 2014
- */
-
-/**
  * Taken straight from jed's gist: https://gist.github.com/982883
  *
  * Returns a random v4 UUID of the form xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx,
@@ -1319,9 +1512,6 @@ module.exports = uuid;
 
 }, {}],
 9: [function(require, module, exports) {
-/**
- * Copyright Amplitude (c) 2014
- */
 var UTF8 = require('./utf8');
 
 /*
@@ -1518,10 +1708,6 @@ module.exports = md5;
 
 }, {"./utf8":7}],
 10: [function(require, module, exports) {
-/**
- * Copyright Amplitude (c) 2014
- */
-
 /*
  * Implement localStorage to support Firefox 2-3 and IE 5-7
  */

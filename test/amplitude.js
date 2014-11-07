@@ -23,26 +23,31 @@ describe('Amplitude', function() {
     assert.isObject(amplitude);
   });
 
+  function reset() {
+    localStorage.clear();
+    cookie.remove(amplitude.options.cookieName);
+    cookie.reset();
+  }
+
   describe('init', function() {
     beforeEach(function() {
     });
 
     afterEach(function() {
-      localStorage.clear();
-      cookie.remove(amplitude.options.cookieName, amplitude.options.domain);
-    });
-
-    it('should set cookie', function() {
-      amplitude.init(apiKey, userId);
-      var stored = JSON.parse(Base64.decode(cookie.get(amplitude.options.cookieName)));
-      assert.property(stored, 'deviceId');
-      assert.propertyVal(stored, 'userId', userId);
-      assert.lengthOf(stored.deviceId, 36);
+      reset();
     });
 
     it('should accept userId', function() {
       amplitude.init(apiKey, userId);
       assert.equal(amplitude.options.userId, userId);
+    });
+
+    it('should set cookie', function() {
+      amplitude.init(apiKey, userId);
+      var stored = cookie.get(amplitude.options.cookieName);
+      assert.property(stored, 'deviceId');
+      assert.propertyVal(stored, 'userId', userId);
+      assert.lengthOf(stored.deviceId, 36);
     });
   });
 
@@ -53,8 +58,7 @@ describe('Amplitude', function() {
     });
 
     afterEach(function() {
-      localStorage.clear();
-      cookie.remove(amplitude.options.cookieName, amplitude.options.domain);
+      reset();
     });
 
     it('should send request', function() {

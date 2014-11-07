@@ -4,7 +4,6 @@ BINS = node_modules/.bin
 DUO = $(BINS)/duo
 MINIFY = $(BINS)/uglifyjs
 BUILD_DIR = build
-BUILD = tests.js
 PROJECT = amplitude
 OUT = $(PROJECT).js
 MIN_OUT = $(PROJECT).min.js

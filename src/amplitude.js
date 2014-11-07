@@ -44,11 +44,6 @@ Amplitude.prototype._sending = false;
 Amplitude.prototype._lastEventTime = null;
 Amplitude.prototype._sessionId = null;
 
-Amplitude.prototype.nextEventId = function() {
-  this._eventId++;
-  return this._eventId;
-};
-
 /**
  * Initializes Amplitude.
  * apiKey The API Key for your app
@@ -64,15 +59,23 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       if (opt_config.saveEvents !== undefined) {
         this.options.saveEvents = !!opt_config.saveEvents;
       }
+      if (opt_config.domain !== undefined) {
+        this.options.saveEvents = opt_config.domain;
+      }
     }
 
-    this.loadCookieData();
+    Cookie.options({
+      expirationDays: this.options.cookieExpiration,
+      domain: this.options.domain
+    });
+
+    _loadCookieData(this);
 
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
         opt_config.deviceId !== null && opt_config.deviceId) ||
         this.options.deviceId || UUID();
     this.options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || this.options.userId || null;
-    this.saveCookieData();
+    _saveCookieData(this);
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
@@ -106,35 +109,33 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
   }
 };
 
-Amplitude.prototype.loadCookieData = function() {
-  var cookie = Cookie.get(this.options.cookieName);
+Amplitude.prototype.nextEventId = function() {
+  this._eventId++;
+  return this._eventId;
+};
+
+var _loadCookieData = function(scope) {
+  var cookieData = Cookie.get(scope.options.cookieName);
   var cookieData = null;
-  if (cookie) {
-    try {
-      cookieData = JSON.parse(Base64.decode(cookie));
-      if (cookieData) {
-        if (cookieData.deviceId) {
-          this.options.deviceId = cookieData.deviceId;
-        }
-        if (cookieData.userId) {
-          this.options.userId = cookieData.userId;
-        }
-        if (cookieData.globalUserProperties) {
-          this.options.globalUserProperties = cookieData.globalUserProperties;
-        }
-      }
-    } catch (e) {
-      //log(e);
+  if (cookieData) {
+    if (cookieData.deviceId) {
+      scope.options.deviceId = cookieData.deviceId;
+    }
+    if (cookieData.userId) {
+      scope.options.userId = cookieData.userId;
+    }
+    if (cookieData.globalUserProperties) {
+      scope.options.globalUserProperties = cookieData.globalUserProperties;
     }
   }
 };
 
-Amplitude.prototype.saveCookieData = function() {
-  Cookie.set(this.options.cookieName, Base64.encode(JSON.stringify({
-    deviceId: this.options.deviceId,
-    userId: this.options.userId,
-    globalUserProperties: this.options.globalUserProperties
-  })), this.options.cookieExpiration, this.options.domain);
+var _saveCookieData = function(scope) {
+  Cookie.set(scope.options.cookieName, {
+    deviceId: scope.options.deviceId,
+    userId: scope.options.userId,
+    globalUserProperties: scope.options.globalUserProperties
+  });
 };
 
 Amplitude.prototype.saveEvents = function() {
@@ -147,10 +148,12 @@ Amplitude.prototype.saveEvents = function() {
 
 Amplitude.prototype.setDomain = function(domain) {
   try {
-    this.options.domain = (domain !== undefined && domain !== null && ('' + domain)) || null;
-    this.options.cookieName = "amplitude_id" + (this.options.domain || '');
-    this.loadCookieData();
-    this.saveCookieData();
+    Cookie.options({
+      domain: domain
+    });
+    this.options.domain = Cookie.options().domain;
+    _loadCookieData(this);
+    _saveCookieData(this);
     //log('set domain=' + domain);
   } catch (e) {
     log(e);
@@ -160,7 +163,7 @@ Amplitude.prototype.setDomain = function(domain) {
 Amplitude.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
-    this.saveCookieData();
+    _saveCookieData(this);
     //log('set userId=' + userId);
   } catch (e) {
     log(e);
@@ -170,7 +173,7 @@ Amplitude.prototype.setUserId = function(userId) {
 Amplitude.prototype.setUserProperties = function(userProperties) {
   try {
     this.options.globalUserProperties = userProperties;
-    this.saveCookieData();
+    _saveCookieData(this);
     //log('set userProperties=' + JSON.stringify(userProperties));
   } catch (e) {
     log(e);
