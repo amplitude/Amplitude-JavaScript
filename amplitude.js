@@ -2076,10 +2076,6 @@ module.exports = localStorage;
                 os_replacement: "Mac",
                 manufacturer: "Apple"
             }, {
-                regex: "(CPU OS|iPhone OS) (\\d+)_(\\d+)(?:_(\\d+))?",
-                os_replacement: "iPhone",
-                manufacturer: "Apple"
-            }, {
                 regex: "(iPhone|iPod)",
                 os_replacement: "iPhone",
                 manufacturer: "Apple"
