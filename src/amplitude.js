@@ -173,6 +173,17 @@ Amplitude.prototype.setUserId = function(userId) {
   }
 };
 
+Amplitude.prototype.setDeviceId = function(deviceId) {
+  try {
+    if (deviceId) {
+      this.options.deviceId = ('' + deviceId);
+      _saveCookieData(this);
+    }
+  } catch (e) {
+    log(e);
+  }
+};
+
 Amplitude.prototype.setUserProperties = function(userProperties, opt_replace) {
   try {
     if (opt_replace) {
