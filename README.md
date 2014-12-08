@@ -10,7 +10,8 @@ Amplitude-Javascript
           b.async=true;b.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.0.1-min.js";
           var g=a.getElementsByTagName("script")[0];g.parentNode.insertBefore(b,g);
           f._q=[];function e(i){f[i]=function(){f._q.push([i].concat(Array.prototype.slice.call(arguments,0)))}}
-          var c=["init","logEvent","setUserId","setUserProperties","setVersionName","setDomain","setGlobalUserProperties"];
+          var c=["init","logEvent","setUserId","setUserProperties","setVersionName","setDomain","setDeviceId",
+          "setGlobalUserProperties"];
           for(var d=0;d<c.length;d++){e(c[d])}h.amplitude=f})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
