@@ -2364,7 +2364,7 @@ module.exports = localStorage;
 
 }, {}],
 12: [function(require, module, exports) {
-module.exports = '2.0.0';
+module.exports = '2.0.1';
 
 }, {}],
 13: [function(require, module, exports) {
