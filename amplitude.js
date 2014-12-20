@@ -324,15 +324,13 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
   try {
     var eventTime = new Date().getTime();
     var eventId = this.nextEventId();
-    var sessionId = this._sessionId;
-    var lastEventTime = this._lastEventTime;
     var ua = this._ua;
-    if (!sessionId || !lastEventTime || eventTime - lastEventTime > this.options.sessionTimeout) {
-      sessionId = eventTime;
-      localStorage.setItem(LocalStorageKeys.SESSION_ID, sessionId);
+    if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
+      this._sessionId = eventTime;
+      localStorage.setItem(LocalStorageKeys.SESSION_ID, this._sessionId);
     }
-    lastEventTime = eventTime;
-    localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, lastEventTime);
+    this._lastEventTime = eventTime;
+    localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
 
     eventProperties = eventProperties || {};
@@ -341,7 +339,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
       user_id: this.options.userId || this.options.deviceId,
       timestamp: eventTime,
       event_id: eventId,
-      session_id: sessionId || -1,
+      session_id: this._sessionId || -1,
       event_type: eventType,
       version_name: this.options.versionName || null,
       platform: this.options.platform,

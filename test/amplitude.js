@@ -167,4 +167,31 @@ describe('Amplitude', function() {
       assert.deepEqual(events[0].event_properties, {prop: true});
     });
   });
+
+  describe('sessionId', function() {
+
+    var clock;
+
+    beforeEach(function() {
+      clock = sinon.useFakeTimers();
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+      clock.restore();
+    });
+
+    it('should create new session IDs on timeout', function() {
+      var sessionId = amplitude._sessionId;
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events.length, 1);
+      assert.notEqual(events[0].session_id, sessionId);
+      assert.notEqual(amplitude._sessionId, sessionId);
+      assert.equal(events[0].session_id, amplitude._sessionId);
+    });
+  });
 });
