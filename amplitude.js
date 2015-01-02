@@ -2347,7 +2347,7 @@ module.exports = detect;
 
 }, {}],
 12: [function(require, module, exports) {
-module.exports = '2.0.1';
+module.exports = '2.0.2';
 
 }, {}],
 13: [function(require, module, exports) {
