@@ -1468,7 +1468,6 @@ exports.right = function(str){
 
 }, {}],
 19: [function(require, module, exports) {
-
 /**
  * toString ref.
  */
@@ -1485,18 +1484,21 @@ var toString = Object.prototype.toString;
 
 module.exports = function(val){
   switch (toString.call(val)) {
-    case '[object Function]': return 'function';
     case '[object Date]': return 'date';
     case '[object RegExp]': return 'regexp';
     case '[object Arguments]': return 'arguments';
     case '[object Array]': return 'array';
-    case '[object String]': return 'string';
+    case '[object Error]': return 'error';
   }
 
   if (val === null) return 'null';
   if (val === undefined) return 'undefined';
+  if (val !== val) return 'nan';
   if (val && val.nodeType === 1) return 'element';
-  if (val === Object(val)) return 'object';
+
+  val = val.valueOf
+    ? val.valueOf()
+    : Object.prototype.valueOf.apply(val)
 
   return typeof val;
 };
@@ -1835,7 +1837,7 @@ module.exports = localStorage;
  * console.log(agentInfo.browser.family); // Chrome
  *
  */
-(function(root, undefined) {
+var detect = (function(root, undefined) {
     // Shim Array.prototype.map if necessary
     // Production steps of ECMA-262, Edition 5, 15.4.4.19
     // Reference: http://es5.github.com/#x15.4.4.19
@@ -2338,27 +2340,10 @@ module.exports = localStorage;
         // Return context
         return _this;
     }();
-    // Export the Underscore object for **Node.js** and **"CommonJS"**,
-    // backwards-compatibility for the old `require()` API. If we're not
-    // CommonJS, add `_` to the global object via a string identifier
-    // the Closure Compiler "advanced" mode. Registration as an AMD
-    // via define() happens at the end of this file
-    if (typeof exports !== "undefined") {
-        if (typeof module !== "undefined" && module.exports) {
-            exports = module.exports = detect;
-        }
-        exports.detect = detect;
-    } else {
-        root["detect"] = detect;
-    }
-    // AMD define happens at the end for compatibility with AMD
-    // that don't enforce next-turn semantics on modules
-    if (typeof define === "function" && define.amd) {
-        define(function(require) {
-            return detect;
-        });
-    }
+    return detect;
 })(window);
+
+module.exports = detect;
 
 }, {}],
 12: [function(require, module, exports) {

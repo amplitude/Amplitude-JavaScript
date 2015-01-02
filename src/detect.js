@@ -15,7 +15,7 @@
  * console.log(agentInfo.browser.family); // Chrome
  *
  */
-(function(root, undefined) {
+var detect = (function(root, undefined) {
     // Shim Array.prototype.map if necessary
     // Production steps of ECMA-262, Edition 5, 15.4.4.19
     // Reference: http://es5.github.com/#x15.4.4.19
@@ -518,24 +518,7 @@
         // Return context
         return _this;
     }();
-    // Export the Underscore object for **Node.js** and **"CommonJS"**,
-    // backwards-compatibility for the old `require()` API. If we're not
-    // CommonJS, add `_` to the global object via a string identifier
-    // the Closure Compiler "advanced" mode. Registration as an AMD
-    // via define() happens at the end of this file
-    if (typeof exports !== "undefined") {
-        if (typeof module !== "undefined" && module.exports) {
-            exports = module.exports = detect;
-        }
-        exports.detect = detect;
-    } else {
-        root["detect"] = detect;
-    }
-    // AMD define happens at the end for compatibility with AMD
-    // that don't enforce next-turn semantics on modules
-    if (typeof define === "function" && define.amd) {
-        define(function(require) {
-            return detect;
-        });
-    }
+    return detect;
 })(window);
+
+module.exports = detect;
