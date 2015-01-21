@@ -114,11 +114,12 @@ var JSON = require('json');
 var Request = require('./xhr');
 var UTF8 = require('./utf8');
 var UUID = require('./uuid');
-var md5 = require('./md5');
-var localStorage = require('./localstorage');
 var detect = require('./detect');
-var version = require('./version');
+var language = require('./language');
+var localStorage = require('./localstorage');
+var md5 = require('./md5');
 var object = require('object');
+var version = require('./version');
 
 var log = function(s) {
   console.log('[Amplitude] ' + s);
@@ -133,7 +134,8 @@ var DEFAULT_OPTIONS = {
   saveEvents: true,
   domain: undefined,
   sessionTimeout: 30 * 60 * 1000,
-  platform: 'Web'
+  platform: 'Web',
+  language: language.language
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
@@ -174,6 +176,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
         this.options.domain = opt_config.domain;
       }
       this.options.platform = opt_config.platform || this.options.platform;
+      this.options.language = opt_config.language || this.options.language;
       this.options.sessionTimeout = opt_config.sessionTimeout || this.options.sessionTimeout;
     }
 
@@ -346,6 +349,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
       os_name: ua.browser.family,
       os_version: ua.browser.version,
       device_model: ua.os.family,
+      language: this.options.language,
       event_properties: eventProperties,
       user_properties: this.options.userProperties || {},
       uuid: UUID(),
@@ -353,8 +357,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
         name: 'amplitude-js',
         version: this.__VERSION__
       }
-      // country: null,
-      // language: null
+      // country: null
     };
     this._unsentEvents.push(event);
     if (this.options.saveEvents) {
@@ -412,7 +415,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./base64":3,"./cookie":4,"json":5,"./xhr":6,"./utf8":7,"./uuid":8,"./md5":9,"./localstorage":10,"./detect":11,"./version":12,"object":13}],
+}, {"./base64":3,"./cookie":4,"json":5,"./xhr":6,"./utf8":7,"./uuid":8,"./detect":9,"./language":10,"./localstorage":11,"./md5":12,"object":13,"./version":14}],
 3: [function(require, module, exports) {
 var UTF8 = require('./utf8');
 
@@ -696,7 +699,7 @@ module.exports = {
 
 };
 
-}, {"./base64":3,"json":5,"top-domain":14}],
+}, {"./base64":3,"json":5,"top-domain":15}],
 5: [function(require, module, exports) {
 
 var json = window.JSON || {};
@@ -707,8 +710,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":15}],
-15: [function(require, module, exports) {
+}, {"json-fallback":16}],
+16: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1198,7 +1201,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-14: [function(require, module, exports) {
+15: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1246,8 +1249,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":16}],
-16: [function(require, module, exports) {
+}, {"url":17}],
+17: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -1370,8 +1373,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":17}],
-17: [function(require, module, exports) {
+}, {"querystring":18}],
+18: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1446,8 +1449,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":18,"type":19}],
-18: [function(require, module, exports) {
+}, {"trim":19,"type":20}],
+19: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -1467,7 +1470,7 @@ exports.right = function(str){
 };
 
 }, {}],
-19: [function(require, module, exports) {
+20: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -1537,289 +1540,6 @@ module.exports = uuid;
 
 }, {}],
 9: [function(require, module, exports) {
-var UTF8 = require('./utf8');
-
-/*
- * MD5 Implementation
- * http://www.myersdaily.org/joseph/javascript/md5-text.html
- */
-var md5cycle = function(x, k) {
-  var a = x[0],
-      b = x[1],
-      c = x[2],
-      d = x[3];
-
-  a = ff(a, b, c, d, k[0], 7, -680876936);
-  d = ff(d, a, b, c, k[1], 12, -389564586);
-  c = ff(c, d, a, b, k[2], 17, 606105819);
-  b = ff(b, c, d, a, k[3], 22, -1044525330);
-  a = ff(a, b, c, d, k[4], 7, -176418897);
-  d = ff(d, a, b, c, k[5], 12, 1200080426);
-  c = ff(c, d, a, b, k[6], 17, -1473231341);
-  b = ff(b, c, d, a, k[7], 22, -45705983);
-  a = ff(a, b, c, d, k[8], 7, 1770035416);
-  d = ff(d, a, b, c, k[9], 12, -1958414417);
-  c = ff(c, d, a, b, k[10], 17, -42063);
-  b = ff(b, c, d, a, k[11], 22, -1990404162);
-  a = ff(a, b, c, d, k[12], 7, 1804603682);
-  d = ff(d, a, b, c, k[13], 12, -40341101);
-  c = ff(c, d, a, b, k[14], 17, -1502002290);
-  b = ff(b, c, d, a, k[15], 22, 1236535329);
-
-  a = gg(a, b, c, d, k[1], 5, -165796510);
-  d = gg(d, a, b, c, k[6], 9, -1069501632);
-  c = gg(c, d, a, b, k[11], 14, 643717713);
-  b = gg(b, c, d, a, k[0], 20, -373897302);
-  a = gg(a, b, c, d, k[5], 5, -701558691);
-  d = gg(d, a, b, c, k[10], 9, 38016083);
-  c = gg(c, d, a, b, k[15], 14, -660478335);
-  b = gg(b, c, d, a, k[4], 20, -405537848);
-  a = gg(a, b, c, d, k[9], 5, 568446438);
-  d = gg(d, a, b, c, k[14], 9, -1019803690);
-  c = gg(c, d, a, b, k[3], 14, -187363961);
-  b = gg(b, c, d, a, k[8], 20, 1163531501);
-  a = gg(a, b, c, d, k[13], 5, -1444681467);
-  d = gg(d, a, b, c, k[2], 9, -51403784);
-  c = gg(c, d, a, b, k[7], 14, 1735328473);
-  b = gg(b, c, d, a, k[12], 20, -1926607734);
-
-  a = hh(a, b, c, d, k[5], 4, -378558);
-  d = hh(d, a, b, c, k[8], 11, -2022574463);
-  c = hh(c, d, a, b, k[11], 16, 1839030562);
-  b = hh(b, c, d, a, k[14], 23, -35309556);
-  a = hh(a, b, c, d, k[1], 4, -1530992060);
-  d = hh(d, a, b, c, k[4], 11, 1272893353);
-  c = hh(c, d, a, b, k[7], 16, -155497632);
-  b = hh(b, c, d, a, k[10], 23, -1094730640);
-  a = hh(a, b, c, d, k[13], 4, 681279174);
-  d = hh(d, a, b, c, k[0], 11, -358537222);
-  c = hh(c, d, a, b, k[3], 16, -722521979);
-  b = hh(b, c, d, a, k[6], 23, 76029189);
-  a = hh(a, b, c, d, k[9], 4, -640364487);
-  d = hh(d, a, b, c, k[12], 11, -421815835);
-  c = hh(c, d, a, b, k[15], 16, 530742520);
-  b = hh(b, c, d, a, k[2], 23, -995338651);
-
-  a = ii(a, b, c, d, k[0], 6, -198630844);
-  d = ii(d, a, b, c, k[7], 10, 1126891415);
-  c = ii(c, d, a, b, k[14], 15, -1416354905);
-  b = ii(b, c, d, a, k[5], 21, -57434055);
-  a = ii(a, b, c, d, k[12], 6, 1700485571);
-  d = ii(d, a, b, c, k[3], 10, -1894986606);
-  c = ii(c, d, a, b, k[10], 15, -1051523);
-  b = ii(b, c, d, a, k[1], 21, -2054922799);
-  a = ii(a, b, c, d, k[8], 6, 1873313359);
-  d = ii(d, a, b, c, k[15], 10, -30611744);
-  c = ii(c, d, a, b, k[6], 15, -1560198380);
-  b = ii(b, c, d, a, k[13], 21, 1309151649);
-  a = ii(a, b, c, d, k[4], 6, -145523070);
-  d = ii(d, a, b, c, k[11], 10, -1120210379);
-  c = ii(c, d, a, b, k[2], 15, 718787259);
-  b = ii(b, c, d, a, k[9], 21, -343485551);
-
-  x[0] = add32(a, x[0]);
-  x[1] = add32(b, x[1]);
-  x[2] = add32(c, x[2]);
-  x[3] = add32(d, x[3]);
-};
-
-var cmn = function(q, a, b, x, s, t) {
-  a = add32(add32(a, q), add32(x, t));
-  return add32((a << s) | (a >>> (32 - s)), b);
-};
-
-var ff = function(a, b, c, d, x, s, t) {
-  return cmn((b & c) | ((~b) & d), a, b, x, s, t);
-};
-
-var gg = function(a, b, c, d, x, s, t) {
-  return cmn((b & d) | (c & (~d)), a, b, x, s, t);
-};
-
-var hh = function(a, b, c, d, x, s, t) {
-  return cmn(b ^ c ^ d, a, b, x, s, t);
-};
-
-var ii = function(a, b, c, d, x, s, t) {
-  return cmn(c ^ (b | (~d)), a, b, x, s, t);
-};
-
-var md51 = function(s) {
-  s = UTF8.encode(s);
-  var n = s.length,
-      state = [1732584193, -271733879, -1732584194, 271733878],
-      i;
-  for (i = 64; i <= s.length; i += 64) {
-    md5cycle(state, md5blk(s.substring(i - 64, i)));
-  }
-  s = s.substring(i - 64);
-  var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  for (i = 0; i < s.length; i++)
-    tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
-  tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-  if (i > 55) {
-    md5cycle(state, tail);
-    for (i = 0; i < 16; i++) tail[i] = 0;
-  }
-  tail[14] = n * 8;
-  md5cycle(state, tail);
-  return state;
-};
-
-/* there needs to be support for Unicode here,
- * unless we pretend that we can redefine the MD-5
- * algorithm for multi-byte characters (perhaps
- * by adding every four 16-bit characters and
- * shortening the sum to 32 bits). Otherwise
- * I suggest performing MD-5 as if every character
- * was two bytes--e.g., 0040 0025 = @%--but then
- * how will an ordinary MD-5 sum be matched?
- * There is no way to standardize text to something
- * like UTF-8 before transformation; speed cost is
- * utterly prohibitive. The JavaScript standard
- * itself needs to look at this: it should start
- * providing access to strings as preformed UTF-8
- * 8-bit unsigned value arrays.
- */
-var md5blk = function(s) { /* I figured global was faster.   */
-  var md5blks = [],
-      i;
-  /* Andy King said do it this way. */
-  for (i = 0; i < 64; i += 4) {
-    md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
-  }
-  return md5blks;
-};
-
-var hex_chr = '0123456789abcdef'.split('');
-
-var rhex = function(n) {
-  var s = '',
-      j = 0;
-  for (; j < 4; j++)
-    s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] + hex_chr[(n >> (j * 8)) & 0x0F];
-  return s;
-};
-
-var hex = function(x) {
-  for (var i = 0; i < x.length; i++)
-    x[i] = rhex(x[i]);
-  return x.join('');
-};
-
-var md5 = function(s) {
-  return hex(md51(s));
-};
-
-/* this function is much faster,
- so if possible we use it. Some IEs
- are the only ones I know of that
- need the idiotic second function,
- generated by an if clause.  */
-
-var add32 = function(a, b) {
-  return (a + b) & 0xFFFFFFFF;
-};
-
-if (md5('hello') != '5d41402abc4b2a76b9719d911017c592') {
-  var add32 = function(x, y) {
-    var lsw = (x & 0xFFFF) + (y & 0xFFFF),
-        msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-    return (msw << 16) | (lsw & 0xFFFF);
-  };
-}
-
-module.exports = md5;
-
-}, {"./utf8":7}],
-10: [function(require, module, exports) {
-/*
- * Implement localStorage to support Firefox 2-3 and IE 5-7
- */
-var localStorage;
-
-if (window.localStorage) {
-  localStorage = window.localStorage;
-} else if (window.globalStorage) {
-  // Firefox 2-3 use globalStorage
-  // See https://developer.mozilla.org/en/dom/storage#globalStorage
-  try {
-    localStorage = window.globalStorage[window.location.hostname];
-  } catch (e) {
-    // Something bad happened...
-  }
-} else {
-  // IE 5-7 use userData
-  // See http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx
-  var div = document.createElement('div'),
-      attrKey = 'localStorage';
-  div.style.display = 'none';
-  document.getElementsByTagName('head')[0].appendChild(div);
-  if (div.addBehavior) {
-    div.addBehavior('#default#userdata');
-    localStorage = {
-      length: 0,
-      setItem: function(k, v) {
-        div.load(attrKey);
-        if (!div.getAttribute(k)) {
-          this.length++;
-        }
-        div.setAttribute(k, v);
-        div.save(attrKey);
-      },
-      getItem: function(k) {
-        div.load(attrKey);
-        return div.getAttribute(k);
-      },
-      removeItem: function(k) {
-        div.load(attrKey);
-        if (div.getAttribute(k)) {
-          this.length--;
-        }
-        div.removeAttribute(k);
-        div.save(attrKey);
-      },
-      clear: function() {
-        div.load(attrKey);
-        var i = 0;
-        var attr;
-        while (attr = div.XMLDocument.documentElement.attributes[i++]) {
-          div.removeAttribute(attr.name);
-        }
-        div.save(attrKey);
-        this.length = 0;
-      },
-      key: function(k) {
-        div.load(attrKey);
-        return div.XMLDocument.documentElement.attributes[k];
-      }
-    }
-    div.load(attrKey);
-    localStorage.length = div.XMLDocument.documentElement.attributes.length;
-  } else {
-    /* Nothing we can do ... */
-  }
-}
-if (!localStorage) {
-  localStorage = {
-    length: 0,
-    setItem: function(k, v) {
-    },
-    getItem: function(k) {
-    },
-    removeItem: function(k) {
-    },
-    clear: function() {
-    },
-    key: function(k) {
-    }
-  }
-}
-
-module.exports = localStorage;
-
-}, {}],
-11: [function(require, module, exports) {
 /**
  * Detect.js: User-Agent Parser
  * https://github.com/darcyclarke/Detect.js
@@ -2346,10 +2066,300 @@ var detect = (function(root, undefined) {
 module.exports = detect;
 
 }, {}],
-12: [function(require, module, exports) {
-module.exports = '2.0.2';
+10: [function(require, module, exports) {
+var getLanguage = function() {
+    return navigator && ((navigator.languages && navigator.languages[0]) ||
+        navigator.language || navigator.userLanguage);
+};
+
+module.exports = {
+    language: getLanguage()
+};
 
 }, {}],
+11: [function(require, module, exports) {
+/*
+ * Implement localStorage to support Firefox 2-3 and IE 5-7
+ */
+var localStorage;
+
+if (window.localStorage) {
+  localStorage = window.localStorage;
+} else if (window.globalStorage) {
+  // Firefox 2-3 use globalStorage
+  // See https://developer.mozilla.org/en/dom/storage#globalStorage
+  try {
+    localStorage = window.globalStorage[window.location.hostname];
+  } catch (e) {
+    // Something bad happened...
+  }
+} else {
+  // IE 5-7 use userData
+  // See http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx
+  var div = document.createElement('div'),
+      attrKey = 'localStorage';
+  div.style.display = 'none';
+  document.getElementsByTagName('head')[0].appendChild(div);
+  if (div.addBehavior) {
+    div.addBehavior('#default#userdata');
+    localStorage = {
+      length: 0,
+      setItem: function(k, v) {
+        div.load(attrKey);
+        if (!div.getAttribute(k)) {
+          this.length++;
+        }
+        div.setAttribute(k, v);
+        div.save(attrKey);
+      },
+      getItem: function(k) {
+        div.load(attrKey);
+        return div.getAttribute(k);
+      },
+      removeItem: function(k) {
+        div.load(attrKey);
+        if (div.getAttribute(k)) {
+          this.length--;
+        }
+        div.removeAttribute(k);
+        div.save(attrKey);
+      },
+      clear: function() {
+        div.load(attrKey);
+        var i = 0;
+        var attr;
+        while (attr = div.XMLDocument.documentElement.attributes[i++]) {
+          div.removeAttribute(attr.name);
+        }
+        div.save(attrKey);
+        this.length = 0;
+      },
+      key: function(k) {
+        div.load(attrKey);
+        return div.XMLDocument.documentElement.attributes[k];
+      }
+    }
+    div.load(attrKey);
+    localStorage.length = div.XMLDocument.documentElement.attributes.length;
+  } else {
+    /* Nothing we can do ... */
+  }
+}
+if (!localStorage) {
+  localStorage = {
+    length: 0,
+    setItem: function(k, v) {
+    },
+    getItem: function(k) {
+    },
+    removeItem: function(k) {
+    },
+    clear: function() {
+    },
+    key: function(k) {
+    }
+  }
+}
+
+module.exports = localStorage;
+
+}, {}],
+12: [function(require, module, exports) {
+var UTF8 = require('./utf8');
+
+/*
+ * MD5 Implementation
+ * http://www.myersdaily.org/joseph/javascript/md5-text.html
+ */
+var md5cycle = function(x, k) {
+  var a = x[0],
+      b = x[1],
+      c = x[2],
+      d = x[3];
+
+  a = ff(a, b, c, d, k[0], 7, -680876936);
+  d = ff(d, a, b, c, k[1], 12, -389564586);
+  c = ff(c, d, a, b, k[2], 17, 606105819);
+  b = ff(b, c, d, a, k[3], 22, -1044525330);
+  a = ff(a, b, c, d, k[4], 7, -176418897);
+  d = ff(d, a, b, c, k[5], 12, 1200080426);
+  c = ff(c, d, a, b, k[6], 17, -1473231341);
+  b = ff(b, c, d, a, k[7], 22, -45705983);
+  a = ff(a, b, c, d, k[8], 7, 1770035416);
+  d = ff(d, a, b, c, k[9], 12, -1958414417);
+  c = ff(c, d, a, b, k[10], 17, -42063);
+  b = ff(b, c, d, a, k[11], 22, -1990404162);
+  a = ff(a, b, c, d, k[12], 7, 1804603682);
+  d = ff(d, a, b, c, k[13], 12, -40341101);
+  c = ff(c, d, a, b, k[14], 17, -1502002290);
+  b = ff(b, c, d, a, k[15], 22, 1236535329);
+
+  a = gg(a, b, c, d, k[1], 5, -165796510);
+  d = gg(d, a, b, c, k[6], 9, -1069501632);
+  c = gg(c, d, a, b, k[11], 14, 643717713);
+  b = gg(b, c, d, a, k[0], 20, -373897302);
+  a = gg(a, b, c, d, k[5], 5, -701558691);
+  d = gg(d, a, b, c, k[10], 9, 38016083);
+  c = gg(c, d, a, b, k[15], 14, -660478335);
+  b = gg(b, c, d, a, k[4], 20, -405537848);
+  a = gg(a, b, c, d, k[9], 5, 568446438);
+  d = gg(d, a, b, c, k[14], 9, -1019803690);
+  c = gg(c, d, a, b, k[3], 14, -187363961);
+  b = gg(b, c, d, a, k[8], 20, 1163531501);
+  a = gg(a, b, c, d, k[13], 5, -1444681467);
+  d = gg(d, a, b, c, k[2], 9, -51403784);
+  c = gg(c, d, a, b, k[7], 14, 1735328473);
+  b = gg(b, c, d, a, k[12], 20, -1926607734);
+
+  a = hh(a, b, c, d, k[5], 4, -378558);
+  d = hh(d, a, b, c, k[8], 11, -2022574463);
+  c = hh(c, d, a, b, k[11], 16, 1839030562);
+  b = hh(b, c, d, a, k[14], 23, -35309556);
+  a = hh(a, b, c, d, k[1], 4, -1530992060);
+  d = hh(d, a, b, c, k[4], 11, 1272893353);
+  c = hh(c, d, a, b, k[7], 16, -155497632);
+  b = hh(b, c, d, a, k[10], 23, -1094730640);
+  a = hh(a, b, c, d, k[13], 4, 681279174);
+  d = hh(d, a, b, c, k[0], 11, -358537222);
+  c = hh(c, d, a, b, k[3], 16, -722521979);
+  b = hh(b, c, d, a, k[6], 23, 76029189);
+  a = hh(a, b, c, d, k[9], 4, -640364487);
+  d = hh(d, a, b, c, k[12], 11, -421815835);
+  c = hh(c, d, a, b, k[15], 16, 530742520);
+  b = hh(b, c, d, a, k[2], 23, -995338651);
+
+  a = ii(a, b, c, d, k[0], 6, -198630844);
+  d = ii(d, a, b, c, k[7], 10, 1126891415);
+  c = ii(c, d, a, b, k[14], 15, -1416354905);
+  b = ii(b, c, d, a, k[5], 21, -57434055);
+  a = ii(a, b, c, d, k[12], 6, 1700485571);
+  d = ii(d, a, b, c, k[3], 10, -1894986606);
+  c = ii(c, d, a, b, k[10], 15, -1051523);
+  b = ii(b, c, d, a, k[1], 21, -2054922799);
+  a = ii(a, b, c, d, k[8], 6, 1873313359);
+  d = ii(d, a, b, c, k[15], 10, -30611744);
+  c = ii(c, d, a, b, k[6], 15, -1560198380);
+  b = ii(b, c, d, a, k[13], 21, 1309151649);
+  a = ii(a, b, c, d, k[4], 6, -145523070);
+  d = ii(d, a, b, c, k[11], 10, -1120210379);
+  c = ii(c, d, a, b, k[2], 15, 718787259);
+  b = ii(b, c, d, a, k[9], 21, -343485551);
+
+  x[0] = add32(a, x[0]);
+  x[1] = add32(b, x[1]);
+  x[2] = add32(c, x[2]);
+  x[3] = add32(d, x[3]);
+};
+
+var cmn = function(q, a, b, x, s, t) {
+  a = add32(add32(a, q), add32(x, t));
+  return add32((a << s) | (a >>> (32 - s)), b);
+};
+
+var ff = function(a, b, c, d, x, s, t) {
+  return cmn((b & c) | ((~b) & d), a, b, x, s, t);
+};
+
+var gg = function(a, b, c, d, x, s, t) {
+  return cmn((b & d) | (c & (~d)), a, b, x, s, t);
+};
+
+var hh = function(a, b, c, d, x, s, t) {
+  return cmn(b ^ c ^ d, a, b, x, s, t);
+};
+
+var ii = function(a, b, c, d, x, s, t) {
+  return cmn(c ^ (b | (~d)), a, b, x, s, t);
+};
+
+var md51 = function(s) {
+  s = UTF8.encode(s);
+  var n = s.length,
+      state = [1732584193, -271733879, -1732584194, 271733878],
+      i;
+  for (i = 64; i <= s.length; i += 64) {
+    md5cycle(state, md5blk(s.substring(i - 64, i)));
+  }
+  s = s.substring(i - 64);
+  var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  for (i = 0; i < s.length; i++)
+    tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+  tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+  if (i > 55) {
+    md5cycle(state, tail);
+    for (i = 0; i < 16; i++) tail[i] = 0;
+  }
+  tail[14] = n * 8;
+  md5cycle(state, tail);
+  return state;
+};
+
+/* there needs to be support for Unicode here,
+ * unless we pretend that we can redefine the MD-5
+ * algorithm for multi-byte characters (perhaps
+ * by adding every four 16-bit characters and
+ * shortening the sum to 32 bits). Otherwise
+ * I suggest performing MD-5 as if every character
+ * was two bytes--e.g., 0040 0025 = @%--but then
+ * how will an ordinary MD-5 sum be matched?
+ * There is no way to standardize text to something
+ * like UTF-8 before transformation; speed cost is
+ * utterly prohibitive. The JavaScript standard
+ * itself needs to look at this: it should start
+ * providing access to strings as preformed UTF-8
+ * 8-bit unsigned value arrays.
+ */
+var md5blk = function(s) { /* I figured global was faster.   */
+  var md5blks = [],
+      i;
+  /* Andy King said do it this way. */
+  for (i = 0; i < 64; i += 4) {
+    md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
+  }
+  return md5blks;
+};
+
+var hex_chr = '0123456789abcdef'.split('');
+
+var rhex = function(n) {
+  var s = '',
+      j = 0;
+  for (; j < 4; j++)
+    s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] + hex_chr[(n >> (j * 8)) & 0x0F];
+  return s;
+};
+
+var hex = function(x) {
+  for (var i = 0; i < x.length; i++)
+    x[i] = rhex(x[i]);
+  return x.join('');
+};
+
+var md5 = function(s) {
+  return hex(md51(s));
+};
+
+/* this function is much faster,
+ so if possible we use it. Some IEs
+ are the only ones I know of that
+ need the idiotic second function,
+ generated by an if clause.  */
+
+var add32 = function(a, b) {
+  return (a + b) & 0xFFFFFFFF;
+};
+
+if (md5('hello') != '5d41402abc4b2a76b9719d911017c592') {
+  var add32 = function(x, y) {
+    var lsw = (x & 0xFFFF) + (y & 0xFFFF),
+        msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+    return (msw << 16) | (lsw & 0xFFFF);
+  };
+}
+
+module.exports = md5;
+
+}, {"./utf8":7}],
 13: [function(require, module, exports) {
 
 /**
@@ -2435,5 +2445,9 @@ exports.length = function(obj){
 exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
+}, {}],
+14: [function(require, module, exports) {
+module.exports = '2.0.2';
+
 }, {}]}, {}, {"1":""})
 );

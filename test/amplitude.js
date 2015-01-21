@@ -49,6 +49,17 @@ describe('Amplitude', function() {
       assert.propertyVal(stored, 'userId', userId);
       assert.lengthOf(stored.deviceId, 36);
     });
+
+    it('should set language', function() {
+       amplitude.init(apiKey, userId);
+       assert.property(amplitude.options, 'language');
+       assert.isNotNull(amplitude.options.language);
+    });
+
+    it('should allow language override', function() {
+      amplitude.init(apiKey, userId, {language: 'en-GB'});
+      assert.propertyVal(amplitude.options, 'language', 'en-GB');
+    });
   });
 
   describe('setUserProperties', function() {
@@ -158,6 +169,14 @@ describe('Amplitude', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events.length, 1);
       assert.equal(events[0].event_type, 'Event Type 4');
+    });
+
+    it('should send language', function() {
+      amplitude.logEvent('Event Should Send Language');
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events.length, 1);
+      assert.isNotNull(events[0].language);
     });
 
     it('should accept properties', function() {

@@ -4,11 +4,12 @@ var JSON = require('json');
 var Request = require('./xhr');
 var UTF8 = require('./utf8');
 var UUID = require('./uuid');
-var md5 = require('./md5');
-var localStorage = require('./localstorage');
 var detect = require('./detect');
-var version = require('./version');
+var language = require('./language');
+var localStorage = require('./localstorage');
+var md5 = require('./md5');
 var object = require('object');
+var version = require('./version');
 
 var log = function(s) {
   console.log('[Amplitude] ' + s);
@@ -23,7 +24,8 @@ var DEFAULT_OPTIONS = {
   saveEvents: true,
   domain: undefined,
   sessionTimeout: 30 * 60 * 1000,
-  platform: 'Web'
+  platform: 'Web',
+  language: language.language
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
@@ -64,6 +66,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
         this.options.domain = opt_config.domain;
       }
       this.options.platform = opt_config.platform || this.options.platform;
+      this.options.language = opt_config.language || this.options.language;
       this.options.sessionTimeout = opt_config.sessionTimeout || this.options.sessionTimeout;
     }
 
@@ -236,6 +239,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
       os_name: ua.browser.family,
       os_version: ua.browser.version,
       device_model: ua.os.family,
+      language: this.options.language,
       event_properties: eventProperties,
       user_properties: this.options.userProperties || {},
       uuid: UUID(),
@@ -243,8 +247,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
         name: 'amplitude-js',
         version: this.__VERSION__
       }
-      // country: null,
-      // language: null
+      // country: null
     };
     this._unsentEvents.push(event);
     if (this.options.saveEvents) {
