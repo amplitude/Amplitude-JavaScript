@@ -41,10 +41,16 @@ node_modules: package.json
 	@npm install
 
 #
+# Target for updating version.
+
+version: component.json package.json src/version.js
+	node scripts/version
+
+#
 # Target for `amplitude.js` file.
 #
 
-$(OUT): node_modules $(SRC)
+$(OUT): node_modules $(SRC) version
 	@$(DUO) --standalone amplitude src/index.js > $(OUT)
 	@$(MINIFY) $(OUT) --output $(MIN_OUT)
 
@@ -56,6 +62,14 @@ $(OUT): node_modules $(SRC)
 build: $(TESTS) $(OUT)
 	@-mkdir -p build
 	@$(DUO) --development test/tests.js > build/tests.js
+
+#
+# Target for release.
+#
+
+release: $(OUT)
+	@-mkdir -p dist
+	node scripts/release
 
 .PHONY: clean
 .PHONY: test
