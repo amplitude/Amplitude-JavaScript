@@ -2068,8 +2068,8 @@ module.exports = detect;
 }, {}],
 10: [function(require, module, exports) {
 var getLanguage = function() {
-    return navigator && ((navigator.languages && navigator.languages[0]) ||
-        navigator.language || navigator.userLanguage);
+    return (navigator && ((navigator.languages && navigator.languages[0]) ||
+        navigator.language || navigator.userLanguage)) || undefined;
 };
 
 module.exports = {
