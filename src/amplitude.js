@@ -47,6 +47,7 @@ Amplitude.prototype._eventId = 0;
 Amplitude.prototype._sending = false;
 Amplitude.prototype._lastEventTime = null;
 Amplitude.prototype._sessionId = null;
+Amplitude.prototype._newSession = false;
 
 /**
  * Initializes Amplitude.
@@ -106,6 +107,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
     this._eventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID) || 0;
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
+      this._newSession = true;
       this._sessionId = now;
       localStorage.setItem(LocalStorageKeys.SESSION_ID, this._sessionId);
     }
@@ -114,6 +116,10 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
   } catch (e) {
     log(e);
   }
+};
+
+Amplitude.prototype.isNewSession = function() {
+  return this._newSession;
 };
 
 Amplitude.prototype.nextEventId = function() {
