@@ -185,6 +185,21 @@ describe('Amplitude', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].event_properties, {prop: true});
     });
+
+    it('should send browser and host os properties', function() {
+      var agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 " +
+                  "(KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36";
+      amplitude._ua = detect.parse(agent);
+
+      amplitude.logEvent('Browser Data Event', {prop: true});
+      assert.lengthOf(server.requests, 1);
+
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events[0].browser_name, "Chrome");
+      assert.equal(events[0].browser_version, "40");
+      assert.equal(events[0].host_os_name, "Mac");
+      assert.equal(events[0].host_os_version, "10.10.2");
+    });
   });
 
   describe('sessionId', function() {
