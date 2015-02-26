@@ -55,6 +55,8 @@ Amplitude.prototype._newSession = false;
  * opt_userId An identifier for this user
  * opt_config Configuration options
  *   - saveEvents (boolean) Whether to save events to local storage. Defaults to true.
+ *   - utmParams (string) Optional utm data in query string format.
+ *                        Pulled from location.search otherwise.
  */
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
   try {
@@ -102,6 +104,10 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       this.sendEvents();
     }
 
+    // Parse the utm properties out of cookies and query for adding to user properties.
+    var utmParams = opt_config && opt_config.utmParams || location.search;
+    this._utmProperties = Amplitude._getUtmData(Cookie.get('__utmz'), utmParams);
+
     this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
     this._sessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
     this._eventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID) || 0;
@@ -148,6 +154,31 @@ var _saveCookieData = function(scope) {
     userId: scope.options.userId,
     globalUserProperties: scope.options.userProperties
   });
+};
+
+Amplitude._getUtmParam = function(name, query) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+  var results = regex.exec(query);
+  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
+};
+
+Amplitude._getUtmData = function(rawCookie, query) {
+  // Translate the utmz cookie format into url query string format.
+  var cookie = rawCookie ? '?' + rawCookie.split('.').slice(-1)[0].replace(/\|/g, '&') : '';
+
+  var fetchParam = function (queryName, query, cookieName, cookie) {
+    return Amplitude._getUtmParam(queryName, query) ||
+           Amplitude._getUtmParam(cookieName, cookie);
+  };
+
+  return {
+    utm_source: fetchParam('utm_source', query, 'utmcsr', cookie),
+    utm_medium: fetchParam('utm_medium', query, 'utmcmd', cookie),
+    utm_campaign: fetchParam('utm_campaign', query, 'utmccn', cookie),
+    utm_term: fetchParam('utm_term', query, 'utmctr', cookie),
+    utm_content: fetchParam('utm_content', query, 'utmcct', cookie),
+  };
 };
 
 Amplitude.prototype.saveEvents = function() {
@@ -232,6 +263,11 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
 
+    // Add the utm properties, if any, onto the user properties.
+    var userProperties = {};
+    object.merge(userProperties, this.options.userProperties || {}, this._utmProperties);
+    object.merge(userProperties, this._utmProperties);
+
     eventProperties = eventProperties || {};
     var event = {
       device_id: this.options.deviceId,
@@ -247,7 +283,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
       device_model: ua.os.family,
       language: this.options.language,
       event_properties: eventProperties,
-      user_properties: this.options.userProperties || {},
+      user_properties: userProperties,
       uuid: UUID(),
       library: {
         name: 'amplitude-js',
