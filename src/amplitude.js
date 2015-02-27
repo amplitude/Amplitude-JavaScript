@@ -265,7 +265,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
 
     // Add the utm properties, if any, onto the user properties.
     var userProperties = {};
-    object.merge(userProperties, this.options.userProperties || {}, this._utmProperties);
+    object.merge(userProperties, this.options.userProperties || {});
     object.merge(userProperties, this._utmProperties);
 
     eventProperties = eventProperties || {};
