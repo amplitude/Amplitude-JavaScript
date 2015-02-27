@@ -187,6 +187,81 @@ describe('Amplitude', function() {
     });
   });
 
+  describe('gatherUtm', function() {
+    beforeEach(function() {
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should add utm params to the user properties', function() {
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+
+      reset();
+      amplitude.init(apiKey, undefined, {
+        utmParams: '?utm_source=amplitude&utm_medium=email&utm_term=terms'
+      });
+
+      amplitude.setUserProperties({user_prop: true});
+      amplitude.logEvent('UTM Test Event', {});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
+        user_prop: true,
+        utm_campaign: 'new',
+        utm_content: 'top',
+        utm_medium: 'email',
+        utm_source: 'amplitude',
+        utm_term: 'terms'
+      });
+
+    });
+
+    it('should get utm params from the query string', function() {
+      var query = '?utm_source=amplitude&utm_medium=email&utm_term=terms' +
+                  '&utm_content=top&utm_campaign=new';
+      var utms = Amplitude._getUtmData('', query);
+      assert.deepEqual(utms, {
+        utm_campaign: 'new',
+        utm_content: 'top',
+        utm_medium: 'email',
+        utm_source: 'amplitude',
+        utm_term: 'terms'
+      });
+    });
+
+    it('should get utm params from the cookie string', function() {
+      var cookie = '133232535.1424926227.1.1.utmcsr=google|utmccn=(organic)' +
+                   '|utmcmd=organic|utmctr=(none)|utmcct=link';
+      var utms = Amplitude._getUtmData(cookie, '');
+      assert.deepEqual(utms, {
+        utm_campaign: '(organic)',
+        utm_content: 'link',
+        utm_medium: 'organic',
+        utm_source: 'google',
+        utm_term: '(none)'
+      });
+    });
+
+    it('should prefer utm params from the query string', function() {
+      var query = '?utm_source=amplitude&utm_medium=email&utm_term=terms' +
+                  '&utm_content=top&utm_campaign=new';
+      var cookie = '133232535.1424926227.1.1.utmcsr=google|utmccn=(organic)' +
+                   '|utmcmd=organic|utmctr=(none)|utmcct=link';
+      var utms = Amplitude._getUtmData(cookie, query);
+      assert.deepEqual(utms, {
+        utm_campaign: 'new',
+        utm_content: 'top',
+        utm_medium: 'email',
+        utm_source: 'amplitude',
+        utm_term: 'terms'
+      });
+    });
+  });
+
   describe('sessionId', function() {
 
     var clock;
