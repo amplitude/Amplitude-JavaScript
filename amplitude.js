@@ -135,7 +135,8 @@ var DEFAULT_OPTIONS = {
   domain: undefined,
   sessionTimeout: 30 * 60 * 1000,
   platform: 'Web',
-  language: language.language
+  language: language.language,
+  includeUtm: false
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
@@ -165,8 +166,7 @@ Amplitude.prototype._newSession = false;
  * opt_userId An identifier for this user
  * opt_config Configuration options
  *   - saveEvents (boolean) Whether to save events to local storage. Defaults to true.
- *   - utmParams (string) Optional utm data in query string format.
- *                        Pulled from location.search otherwise.
+ *   - includeUtm (boolean) Whether to send utm parameters with events. Defaults to false.
  */
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
   try {
@@ -177,6 +177,9 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       }
       if (opt_config.domain !== undefined) {
         this.options.domain = opt_config.domain;
+      }
+      if (opt_config.includeUtm !== undefined) {
+        this.options.includeUtm = !!opt_config.includeUtm;
       }
       this.options.platform = opt_config.platform || this.options.platform;
       this.options.language = opt_config.language || this.options.language;
@@ -214,9 +217,9 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       this.sendEvents();
     }
 
-    // Parse the utm properties out of cookies and query for adding to user properties.
-    var utmParams = opt_config && opt_config.utmParams || location.search;
-    this._utmProperties = Amplitude._getUtmData(Cookie.get('__utmz'), utmParams);
+    if (this.options.includeUtm) {
+      this._initUtmData();
+    }
 
     this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
     this._sessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
@@ -289,6 +292,15 @@ Amplitude._getUtmData = function(rawCookie, query) {
     utm_term: fetchParam('utm_term', query, 'utmctr', cookie),
     utm_content: fetchParam('utm_content', query, 'utmcct', cookie),
   };
+};
+
+/**
+ * Parse the utm properties out of cookies and query for adding to user properties.
+ */
+Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
+  queryParams = queryParams || location.search;
+  cookieParams = cookieParams || Cookie.get('__utmz');
+  this._utmProperties = Amplitude._getUtmData(cookieParams, queryParams);
 };
 
 Amplitude.prototype.saveEvents = function() {
@@ -375,7 +387,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
 
     // Add the utm properties, if any, onto the user properties.
     var userProperties = {};
-    object.merge(userProperties, this.options.userProperties || {}, this._utmProperties);
+    object.merge(userProperties, this.options.userProperties || {});
     object.merge(userProperties, this._utmProperties);
 
     eventProperties = eventProperties || {};
@@ -2489,7 +2501,7 @@ exports.isEmpty = function(obj){
 };
 }, {}],
 14: [function(require, module, exports) {
-module.exports = '2.0.3';
+module.exports = '2.0.4';
 
 }, {}]}, {}, {"1":""})
 );
