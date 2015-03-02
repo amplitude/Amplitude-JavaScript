@@ -64,12 +64,14 @@ You can configure Amplitude by passing an object as the third argument to the `i
 
     amplitude.init("YOUR_API_KEY_HERE", null, {
       // optional configuration options
-      saveEvents: true
+      saveEvents: true,
+      includeUtm: true
     })
 
 | option | description | default |
 |------------|----------------------------------------------------------------------------------|-----------|
 | saveEvents | If `true`, saves events to localStorage and removes them upon successful upload.<br><i>NOTE:</i> Without saving events, events may be lost if the user navigates to another page before events are uploaded. | `true` |
+| includeUtm | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
 
 
 # Advanced #
