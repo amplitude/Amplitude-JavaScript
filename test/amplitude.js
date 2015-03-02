@@ -196,13 +196,42 @@ describe('Amplitude', function() {
       reset();
     });
 
+    it('should not send utm data when the includeUtm flag is false', function() {
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      reset();
+      amplitude.init(apiKey, undefined, {});
+
+      amplitude.setUserProperties({user_prop: true});
+      amplitude.logEvent('UTM Test Event', {});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events[0].user_properties.utm_campaign, undefined);
+      assert.equal(events[0].user_properties.utm_content, undefined);
+      assert.equal(events[0].user_properties.utm_medium, undefined);
+      assert.equal(events[0].user_properties.utm_source, undefined);
+      assert.equal(events[0].user_properties.utm_term, undefined);
+    });
+
+    it('should send utm data when the includeUtm flag is true', function() {
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      reset();
+      amplitude.init(apiKey, undefined, {includeUtm: true});
+
+      amplitude.logEvent('UTM Test Event', {});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
+        utm_campaign: 'new',
+        utm_content: 'top'
+      });
+    });
+
     it('should add utm params to the user properties', function() {
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
 
-      reset();
-      amplitude.init(apiKey, undefined, {
-        utmParams: '?utm_source=amplitude&utm_medium=email&utm_term=terms'
-      });
+      var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
+      amplitude._initUtmData(utmParams);
 
       amplitude.setUserProperties({user_prop: true});
       amplitude.logEvent('UTM Test Event', {});
@@ -217,7 +246,6 @@ describe('Amplitude', function() {
         utm_source: 'amplitude',
         utm_term: 'terms'
       });
-
     });
 
     it('should get utm params from the query string', function() {
