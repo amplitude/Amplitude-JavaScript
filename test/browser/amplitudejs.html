@@ -16,7 +16,7 @@
             };
         }
 
-        var funcs = ["init", "logEvent", "setUserId", "setUserProperties", "setVersionName", "setDomain", "setGlobalUserProperties"];
+        var funcs = ["init", "logEvent", "setUserId", "setUserProperties", "setOptOut", "setVersionName", "setDomain", "setGlobalUserProperties"];
         for (var i = 0; i < funcs.length; i++) {
             proxy(funcs[i]);
         }
@@ -32,6 +32,7 @@
 <h3>Amplitude JS Test</h3>
 <ul>
     <li><a href="javascript:amplitude.setUserId('user01');">Set user ID</a></li>
+    <li><a href="javascript:amplitude.setOptOut(!amplitude.options.optOut);">Toggle opt out</a></li>
     <li><a href="javascript:amplitude.logEvent('clicked');">Log event</a></li>
     <li><a href="javascript:amplitude.logEvent('clicked button', {color: 'red;', shape: 'triangle', sides: 3});">Log
         event with event properties</a></li>
