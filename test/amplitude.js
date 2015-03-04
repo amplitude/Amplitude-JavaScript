@@ -187,6 +187,57 @@ describe('Amplitude', function() {
     });
   });
 
+  describe('optOut', function() {
+    beforeEach(function() {
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should not send events while enabled', function() {
+      amplitude.setOptOut(true);
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should not send saved events while enabled', function() {
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+
+      amplitude._sending = false;
+      amplitude.setOptOut(true);
+      amplitude.init(apiKey);
+      assert.lengthOf(server.requests, 1);
+    });
+
+    it('should start sending events again when disabled', function() {
+      amplitude.setOptOut(true);
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.setOptOut(false);
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+    });
+
+    it('should have state be persisted in the cookie', function() {
+      var amplitude = new Amplitude();
+      amplitude.init(apiKey);
+      assert.strictEqual(amplitude.options.optOut, false);
+
+      amplitude.setOptOut(true);
+
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey);
+      assert.strictEqual(amplitude2.options.optOut, true);
+    });
+  });
+
   describe('gatherUtm', function() {
     beforeEach(function() {
       amplitude.init(apiKey);

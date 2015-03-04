@@ -58,6 +58,20 @@ To add properties that are tracked in every event, you can set properties for a 
     userProperties.key = "value";
     amplitude.setUserProperties(userProperties);
 
+
+# Opting User Out of Logging #
+
+You can turn off logging for a given user:
+
+    amplitude.setOptOut(true);
+
+No events will be saved or sent to the server while opt out is enabled. The opt out
+setting will persist across page loads. Calling
+
+    setOptOut(false)
+
+will reenable logging.
+
 # Configuration Options #
 
 You can configure Amplitude by passing an object as the third argument to the `init`:

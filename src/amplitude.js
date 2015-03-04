@@ -26,7 +26,8 @@ var DEFAULT_OPTIONS = {
   sessionTimeout: 30 * 60 * 1000,
   platform: 'Web',
   language: language.language,
-  includeUtm: false
+  includeUtm: false,
+  optOut: false
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
@@ -148,6 +149,9 @@ var _loadCookieData = function(scope) {
     if (cookieData.globalUserProperties) {
       scope.options.userProperties = cookieData.globalUserProperties;
     }
+    if (cookieData.optOut !== undefined) {
+      scope.options.optOut = cookieData.optOut;
+    }
   }
 };
 
@@ -155,7 +159,8 @@ var _saveCookieData = function(scope) {
   Cookie.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
-    globalUserProperties: scope.options.userProperties
+    globalUserProperties: scope.options.userProperties,
+    optOut: scope.options.optOut
   });
 };
 
@@ -225,6 +230,16 @@ Amplitude.prototype.setUserId = function(userId) {
   }
 };
 
+Amplitude.prototype.setOptOut = function(enable) {
+  try {
+    this.options.optOut = enable;
+    _saveCookieData(this);
+    //log('set optOut=' + enable);
+  } catch (e) {
+    log(e);
+  }
+}
+
 Amplitude.prototype.setDeviceId = function(deviceId) {
   try {
     if (deviceId) {
@@ -260,7 +275,7 @@ Amplitude.prototype.setVersionName = function(versionName) {
 };
 
 Amplitude.prototype.logEvent = function(eventType, eventProperties) {
-  if (!eventType) {
+  if (!eventType || this.options.optOut) {
     return;
   }
   try {
@@ -315,7 +330,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
 };
 
 Amplitude.prototype.sendEvents = function() {
-  if (!this._sending) {
+  if (!this._sending && !this.options.optOut) {
     this._sending = true;
     var url = ('https:' == window.location.protocol ? 'https' : 'http') + '://' +
         this.options.apiEndpoint + '/';
