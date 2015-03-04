@@ -12,7 +12,7 @@ Amplitude-Javascript
           b.async=true;b.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.0.4-min.js";
           var g=a.getElementsByTagName("script")[0];g.parentNode.insertBefore(b,g);
           f._q=[];function e(i){f[i]=function(){f._q.push([i].concat(Array.prototype.slice.call(arguments,0)))}}
-          var c=["init","logEvent","setUserId","setUserProperties","setVersionName","setDomain","setDeviceId",
+          var c=["init","logEvent","setUserId",setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId",
           "setGlobalUserProperties"];
           for(var d=0;d<c.length;d++){e(c[d])}h.amplitude=f})(window,document);
 
@@ -57,6 +57,20 @@ To add properties that are tracked in every event, you can set properties for a 
     var userProperties = {};
     userProperties.key = "value";
     amplitude.setUserProperties(userProperties);
+
+
+# Opting User Out of Logging #
+
+You can turn off logging for a given user:
+
+    amplitude.setOptOut(true);
+
+No events will be saved or sent to the server while opt out is enabled. The opt out
+setting will persist across page loads. Calling
+
+    setOptOut(false)
+
+will reenable logging.
 
 # Configuration Options #
 
