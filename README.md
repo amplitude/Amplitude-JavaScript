@@ -8,13 +8,12 @@ Amplitude-Javascript
 2. On every page that uses analytics, paste the following Javascript code between the `<head>` and `</head>` tags:
 
         <script type="text/javascript">
-          (function(h,a){var f=h.amplitude||{};var b=a.createElement("script");b.type="text/javascript";
-          b.async=true;b.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.0.4-min.js";
-          var g=a.getElementsByTagName("script")[0];g.parentNode.insertBefore(b,g);
-          f._q=[];function e(i){f[i]=function(){f._q.push([i].concat(Array.prototype.slice.call(arguments,0)))}}
-          var c=["init","logEvent","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId",
-          "setGlobalUserProperties"];
-          for(var d=0;d<c.length;d++){e(c[d])}h.amplitude=f})(window,document);
+          (function(e,t){var r=e.amplitude||{};var n=t.createElement("script");n.type="text/javascript";
+          n.async=true;n.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.0.4-min.js";
+          var s=t.getElementsByTagName("script")[0];s.parentNode.insertBefore(n,s);r._q=[];
+          function a(e){r[e]=function(){r._q.push([e].concat(Array.prototype.slice.call(arguments,0)))
+          }}var i=["init","logEvent","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties"];
+          for(var o=0;o<i.length;o++){a(i[o])}e.amplitude=r})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
         </script>

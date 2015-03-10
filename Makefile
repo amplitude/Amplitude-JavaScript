@@ -1,11 +1,14 @@
 SRC = $(wildcard src/*.js)
+SNIPPET = src/amplitude-snippet.js
 TESTS = $(wildcard test/*.js)
 BINS = node_modules/.bin
 DUO = $(BINS)/duo
 MINIFY = $(BINS)/uglifyjs
+JSHINT = $(BINS)/jshint
 BUILD_DIR = build
 PROJECT = amplitude
 OUT = $(PROJECT).js
+SNIPPET_OUT = $(PROJECT)-snippet.min.js
 MIN_OUT = $(PROJECT).min.js
 MOCHA = $(BINS)/mocha-phantomjs
 
@@ -47,19 +50,32 @@ version: component.json package.json src/version.js
 	node scripts/version
 
 #
+# Target for updating readme.
+
+README.md: $(SNIPPET_OUT) version
+	node scripts/readme
+
+#
 # Target for `amplitude.js` file.
 #
 
 $(OUT): node_modules $(SRC) version
+	@$(JSHINT) --verbose $(SRC)
 	@$(DUO) --standalone amplitude src/index.js > $(OUT)
 	@$(MINIFY) $(OUT) --output $(MIN_OUT)
 
+#
+# Target for minified `amplitude-snippet.js` file. Update README.
+#
+$(SNIPPET_OUT): $(SRC) $(SNIPPET) version
+	@$(JSHINT) --verbose $(SNIPPET)
+	@$(MINIFY) $(SNIPPET) -m -b max-line-len=80,beautify=false --output $(SNIPPET_OUT)
 
 #
 # Target for `tests-build.js` file.
 #
 
-build: $(TESTS) $(OUT)
+build: $(TESTS) $(OUT) $(SNIPPET_OUT) README.md
 	@-mkdir -p build
 	@$(DUO) --development test/tests.js > build/tests.js
 
