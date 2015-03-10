@@ -1,12 +1,10 @@
-var Base64 = require('./base64');
 var Cookie = require('./cookie');
-var JSON = require('json');
+var JSON = require('json'); // jshint ignore:line
 var Request = require('./xhr');
-var UTF8 = require('./utf8');
 var UUID = require('./uuid');
 var detect = require('./detect');
 var language = require('./language');
-var localStorage = require('./localstorage');
+var localStorage = require('./localstorage');  // jshint ignore:line
 var md5 = require('./md5');
 var object = require('object');
 var version = require('./version');
@@ -238,7 +236,7 @@ Amplitude.prototype.setOptOut = function(enable) {
   } catch (e) {
     log(e);
   }
-}
+};
 
 Amplitude.prototype.setDeviceId = function(deviceId) {
   try {
@@ -332,7 +330,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
 Amplitude.prototype.sendEvents = function() {
   if (!this._sending && !this.options.optOut) {
     this._sending = true;
-    var url = ('https:' == window.location.protocol ? 'https' : 'http') + '://' +
+    var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
         this.options.apiEndpoint + '/';
     var events = JSON.stringify(this._unsentEvents);
     var uploadTime = new Date().getTime();
@@ -348,7 +346,7 @@ Amplitude.prototype.sendEvents = function() {
     new Request(url, data).send(function(response) {
       scope._sending = false;
       try {
-        if (response == 'success') {
+        if (response === 'success') {
           //log('sucessful upload');
           scope._unsentEvents.splice(0, numEvents);
           if (scope.options.saveEvents) {

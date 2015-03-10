@@ -100,7 +100,9 @@ var instance = new Amplitude();
 // Apply the queued commands
 for (var i = 0; i < q.length; i++) {
     var fn = instance[q[i][0]];
-    fn && fn.apply(instance, q[i].slice(1));
+    if (fn) {
+      fn.apply(instance, q[i].slice(1));
+    }
 }
 
 // export the instance
@@ -108,15 +110,13 @@ module.exports = instance;
 
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
-var Base64 = require('./base64');
 var Cookie = require('./cookie');
-var JSON = require('json');
+var JSON = require('json'); // jshint ignore:line
 var Request = require('./xhr');
-var UTF8 = require('./utf8');
 var UUID = require('./uuid');
 var detect = require('./detect');
 var language = require('./language');
-var localStorage = require('./localstorage');
+var localStorage = require('./localstorage');  // jshint ignore:line
 var md5 = require('./md5');
 var object = require('object');
 var version = require('./version');
@@ -348,7 +348,7 @@ Amplitude.prototype.setOptOut = function(enable) {
   } catch (e) {
     log(e);
   }
-}
+};
 
 Amplitude.prototype.setDeviceId = function(deviceId) {
   try {
@@ -442,7 +442,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
 Amplitude.prototype.sendEvents = function() {
   if (!this._sending && !this.options.optOut) {
     this._sending = true;
-    var url = ('https:' == window.location.protocol ? 'https' : 'http') + '://' +
+    var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
         this.options.apiEndpoint + '/';
     var events = JSON.stringify(this._unsentEvents);
     var uploadTime = new Date().getTime();
@@ -458,7 +458,7 @@ Amplitude.prototype.sendEvents = function() {
     new Request(url, data).send(function(response) {
       scope._sending = false;
       try {
-        if (response == 'success') {
+        if (response === 'success') {
           //log('sucessful upload');
           scope._unsentEvents.splice(0, numEvents);
           if (scope.options.saveEvents) {
@@ -484,8 +484,138 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./base64":3,"./cookie":4,"json":5,"./xhr":6,"./utf8":7,"./uuid":8,"./detect":9,"./language":10,"./localstorage":11,"./md5":12,"object":13,"./version":14}],
+}, {"./cookie":3,"json":4,"./xhr":5,"./uuid":6,"./detect":7,"./language":8,"./localstorage":9,"./md5":10,"object":11,"./version":12}],
 3: [function(require, module, exports) {
+/*
+ * Cookie data
+ */
+
+var Base64 = require('./base64');
+var JSON = require('json'); // jshint ignore:line
+var topDomain = require('top-domain');
+
+
+var _options = {
+  expirationDays: undefined,
+  domain: undefined
+};
+
+
+var reset = function() {
+  _options = {};
+};
+
+
+var options = function(opts) {
+  if (arguments.length === 0) {
+    return _options;
+  }
+
+  opts = opts || {};
+
+  _options.expirationDays = opts.expirationDays;
+
+  var domain = (opts.domain !== undefined) ? opts.domain : '.' + topDomain(window.location.href);
+  var token = Math.random();
+  _options.domain = domain;
+  set('amplitude_test', token);
+  var stored = get('amplitude_test');
+  if (!stored || stored !== token) {
+    domain = null;
+  }
+  remove('amplitude_test');
+  _options.domain = domain;
+};
+
+var _domainSpecific = function(name) {
+  // differentiate between cookies on different domains
+  var suffix = '';
+  if (_options.domain) {
+    suffix = _options.domain.charAt(0) === '.' ? _options.domain.substring(1) : _options.domain;
+  }
+  return name + suffix;
+};
+
+
+var get = function(name) {
+  try {
+    var nameEq = _domainSpecific(name) + '=';
+    var ca = document.cookie.split(';');
+    var value = null;
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) === ' ') {
+        c = c.substring(1, c.length);
+      }
+      if (c.indexOf(nameEq) === 0) {
+        value = c.substring(nameEq.length, c.length);
+        break;
+      }
+    }
+
+    if (value) {
+      return JSON.parse(Base64.decode(value));
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+};
+
+
+var set = function(name, value) {
+  try {
+    _set(_domainSpecific(name), Base64.encode(JSON.stringify(value)), _options);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+
+var _set = function(name, value, opts) {
+  var expires = value !== null ? opts.expirationDays : -1 ;
+  if (expires) {
+    var date = new Date();
+    date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
+    expires = date;
+  }
+  var str = name + '=' + value;
+  if (expires) {
+    str += '; expires=' + expires.toUTCString();
+  }
+  str += '; path=/';
+  if (opts.domain) {
+    str += '; domain=' + opts.domain;
+  }
+  document.cookie = str;
+};
+
+
+var remove = function(name) {
+  try {
+    _set(_domainSpecific(name), null, _options);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+
+module.exports = {
+  reset: reset,
+  options: options,
+  get: get,
+  set: set,
+  remove: remove
+
+};
+
+}, {"./base64":13,"json":4,"top-domain":14}],
+13: [function(require, module, exports) {
+/* jshint bitwise: false */
+/* global escape, unescape */
+
 var UTF8 = require('./utf8');
 
 /*
@@ -567,10 +697,10 @@ var Base64 = {
 
             output = output + String.fromCharCode(chr1);
 
-            if (enc3 != 64) {
+            if (enc3 !== 64) {
                 output = output + String.fromCharCode(chr2);
             }
-            if (enc4 != 64) {
+            if (enc4 !== 64) {
                 output = output + String.fromCharCode(chr3);
             }
         }
@@ -581,8 +711,10 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":7}],
-7: [function(require, module, exports) {
+}, {"./utf8":15}],
+15: [function(require, module, exports) {
+/* jshint bitwise: false */
+
 /*
  * UTF-8 encoder/decoder
  * http://www.webtoolkit.info/
@@ -642,134 +774,6 @@ module.exports = UTF8;
 
 }, {}],
 4: [function(require, module, exports) {
-/*
- * Cookie data
- */
-
-var Base64 = require('./base64');
-var JSON = require('json');
-var topDomain = require('top-domain');
-
-
-
-var _options = {
-  expirationDays: undefined,
-  domain: undefined
-};
-
-
-var reset = function() {
-  _options = {};
-};
-
-
-var options = function(opts) {
-  if (arguments.length === 0) {
-    return _options;
-  }
-
-  opts = opts || {};
-
-  _options.expirationDays = opts.expirationDays;
-
-  var domain = (opts.domain !== undefined) ? opts.domain : '.' + topDomain(window.location.href);
-  var token = Math.random();
-  _options.domain = domain;
-  set('amplitude_test', token);
-  var stored = get('amplitude_test');
-  if (!stored || stored != token) {
-    domain = null;
-  }
-  remove('amplitude_test');
-  _options.domain = domain;
-};
-
-var _domainSpecific = function(name) {
-  // differentiate between cookies on different domains
-  var suffix = '';
-  if (_options.domain) {
-    suffix = _options.domain.charAt(0) == '.' ? _options.domain.substring(1) : _options.domain;
-  }
-  return name + suffix;
-};
-
-
-var get = function(name) {
-  try {
-    var nameEq = _domainSpecific(name) + '=';
-    var ca = document.cookie.split(';');
-    var value = null;
-    for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1, c.length);
-      }
-      if (c.indexOf(nameEq) == 0) {
-        value = c.substring(nameEq.length, c.length);
-        break;
-      }
-    }
-
-    if (value) {
-      return JSON.parse(Base64.decode(value));
-    }
-    return null;
-  } catch (e) {
-    return null;
-  }
-};
-
-
-var set = function(name, value) {
-  try {
-    _set(_domainSpecific(name), Base64.encode(JSON.stringify(value)), _options);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
-
-var _set = function(name, value, opts) {
-  var expires = value != null ? opts.expirationDays : -1 ;
-  if (expires) {
-    var date = new Date();
-    date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
-    expires = date;
-  }
-  var str = name + '=' + value;
-  if (expires) {
-    str += '; expires=' + expires.toUTCString();
-  }
-  str += '; path=/';
-  if (opts.domain) {
-    str += '; domain=' + opts.domain;
-  }
-  document.cookie = str;
-};
-
-
-var remove = function(name) {
-  try {
-    _set(_domainSpecific(name), null, _options);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
-
-module.exports = {
-  reset: reset,
-  options: options,
-  get: get,
-  set: set,
-  remove: remove
-
-};
-
-}, {"./base64":3,"json":5,"top-domain":15}],
-5: [function(require, module, exports) {
 
 var json = window.JSON || {};
 var stringify = json.stringify;
@@ -1270,7 +1274,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-15: [function(require, module, exports) {
+14: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1404,7 +1408,7 @@ function port (protocol){
 }
 
 }, {}],
-6: [function(require, module, exports) {
+5: [function(require, module, exports) {
 var querystring = require('querystring');
 
 /*
@@ -1428,12 +1432,12 @@ Request.prototype.send = function(callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', this.url, true);
     xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200) {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
           callback(xhr.responseText);
         }
       }
-    }
+    };
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     xhr.send(querystring.stringify(this.data));
   }
@@ -1576,7 +1580,9 @@ module.exports = function(val){
 };
 
 }, {}],
-8: [function(require, module, exports) {
+6: [function(require, module, exports) {
+/* jshint bitwise: false, laxbreak: true */
+
 /**
  * Taken straight from jed's gist: https://gist.github.com/982883
  *
@@ -1602,13 +1608,16 @@ var uuid = function(a) {
       ).replace(     // replacing
       /[018]/g,    // zeroes, ones, and eights with
       uuid         // random hex digits
-  )
+  );
 };
 
 module.exports = uuid;
 
 }, {}],
-9: [function(require, module, exports) {
+7: [function(require, module, exports) {
+/* jshint eqeqeq: false, eqnull: true, freeze: false, bitwise: false */
+/* jshint curly: false, unused: false, immed: false, forin: false */
+
 /**
  * Detect.js: User-Agent Parser
  * https://github.com/darcyclarke/Detect.js
@@ -1958,6 +1967,8 @@ var detect = (function(root, undefined) {
         }();
         // Utility Variables
         var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype, nativeForEach = ArrayProto.forEach, nativeIndexOf = ArrayProto.indexOf;
+        var push = ArrayProto.push, slice = ArrayProto.slice, hasOwnProperty = ObjProto.hasOwnProperty;
+
         // Find Utility
         var find = function(ua, obj) {
             var ret = {};
@@ -1977,18 +1988,12 @@ var detect = (function(root, undefined) {
                 });
             });
         };
-        // Contains Utility
-        var contains = function(obj, target) {
-            var found = false;
-            if (obj == null) return found;
-            if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-            found = any(obj, function(value) {
-                return value === target;
-            });
-            return found;
+        // Has Utility
+        var has = function(obj, key) {
+            return obj != null && hasOwnProperty.call(obj, key);
         };
         // Each Utility
-        var each = forEach = function(obj, iterator, context) {
+        var each = function(obj, iterator, context) {
             if (obj == null) return;
             if (nativeForEach && obj.forEach === nativeForEach) {
                 obj.forEach(iterator, context);
@@ -1998,7 +2003,7 @@ var detect = (function(root, undefined) {
                 }
             } else {
                 for (var key in obj) {
-                    if (_.has(obj, key)) {
+                    if (has(obj, key)) {
                         iterator.call(context, obj[key], key, obj);
                     }
                 }
@@ -2135,7 +2140,7 @@ var detect = (function(root, undefined) {
 module.exports = detect;
 
 }, {}],
-10: [function(require, module, exports) {
+8: [function(require, module, exports) {
 var getLanguage = function() {
     return (navigator && ((navigator.languages && navigator.languages[0]) ||
         navigator.language || navigator.userLanguage)) || undefined;
@@ -2146,11 +2151,13 @@ module.exports = {
 };
 
 }, {}],
-11: [function(require, module, exports) {
+9: [function(require, module, exports) {
+/* jshint -W020, unused: false, noempty: false, boss: true */
+
 /*
  * Implement localStorage to support Firefox 2-3 and IE 5-7
  */
-var localStorage;
+var localStorage; // jshint ignore:line
 
 if (window.localStorage) {
   localStorage = window.localStorage;
@@ -2207,7 +2214,7 @@ if (window.localStorage) {
         div.load(attrKey);
         return div.XMLDocument.documentElement.attributes[k];
       }
-    }
+    };
     div.load(attrKey);
     localStorage.length = div.XMLDocument.documentElement.attributes.length;
   } else {
@@ -2227,13 +2234,15 @@ if (!localStorage) {
     },
     key: function(k) {
     }
-  }
+  };
 }
 
 module.exports = localStorage;
 
 }, {}],
-12: [function(require, module, exports) {
+10: [function(require, module, exports) {
+/* jshint bitwise: false, curly: false */
+
 var UTF8 = require('./utf8');
 
 /*
@@ -2418,7 +2427,7 @@ var add32 = function(a, b) {
   return (a + b) & 0xFFFFFFFF;
 };
 
-if (md5('hello') != '5d41402abc4b2a76b9719d911017c592') {
+if (md5('hello') !== '5d41402abc4b2a76b9719d911017c592') {
   var add32 = function(x, y) {
     var lsw = (x & 0xFFFF) + (y & 0xFFFF),
         msw = (x >> 16) + (y >> 16) + (lsw >> 16);
@@ -2428,8 +2437,8 @@ if (md5('hello') != '5d41402abc4b2a76b9719d911017c592') {
 
 module.exports = md5;
 
-}, {"./utf8":7}],
-13: [function(require, module, exports) {
+}, {"./utf8":15}],
+11: [function(require, module, exports) {
 
 /**
  * HOP ref.
@@ -2515,7 +2524,7 @@ exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
 }, {}],
-14: [function(require, module, exports) {
+12: [function(require, module, exports) {
 module.exports = '2.0.4';
 
 }, {}]}, {}, {"1":""})
