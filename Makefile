@@ -85,7 +85,7 @@ build: $(TESTS) $(OUT) $(SNIPPET_OUT) README.md
 # Target for release.
 #
 
-release: $(OUT)
+release: $(OUT) $(SNIPPET_OUT) README.md
 	@-mkdir -p dist
 	node scripts/release
 
