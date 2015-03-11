@@ -1,7 +1,9 @@
+/* jshint -W020, unused: false, noempty: false, boss: true */
+
 /*
  * Implement localStorage to support Firefox 2-3 and IE 5-7
  */
-var localStorage;
+var localStorage; // jshint ignore:line
 
 if (window.localStorage) {
   localStorage = window.localStorage;
@@ -58,7 +60,7 @@ if (window.localStorage) {
         div.load(attrKey);
         return div.XMLDocument.documentElement.attributes[k];
       }
-    }
+    };
     div.load(attrKey);
     localStorage.length = div.XMLDocument.documentElement.attributes.length;
   } else {
@@ -78,7 +80,7 @@ if (!localStorage) {
     },
     key: function(k) {
     }
-  }
+  };
 }
 
 module.exports = localStorage;

@@ -21,12 +21,12 @@ Request.prototype.send = function(callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', this.url, true);
     xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200) {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
           callback(xhr.responseText);
         }
       }
-    }
+    };
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     xhr.send(querystring.stringify(this.data));
   }

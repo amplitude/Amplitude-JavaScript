@@ -1,3 +1,5 @@
+/* jshint expr:true */
+
 var Amplitude = require('./amplitude');
 
 var old = window.amplitude || {};

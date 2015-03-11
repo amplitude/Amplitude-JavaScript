@@ -1,3 +1,5 @@
+/* jshint bitwise: false */
+
 /*
  * UTF-8 encoder/decoder
  * http://www.webtoolkit.info/

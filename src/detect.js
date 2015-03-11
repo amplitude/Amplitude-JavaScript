@@ -1,3 +1,6 @@
+/* jshint eqeqeq: false, eqnull: true, freeze: false, bitwise: false */
+/* jshint curly: false, unused: false, immed: false, forin: false */
+
 /**
  * Detect.js: User-Agent Parser
  * https://github.com/darcyclarke/Detect.js
@@ -347,6 +350,8 @@ var detect = (function(root, undefined) {
         }();
         // Utility Variables
         var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype, nativeForEach = ArrayProto.forEach, nativeIndexOf = ArrayProto.indexOf;
+        var push = ArrayProto.push, slice = ArrayProto.slice, hasOwnProperty = ObjProto.hasOwnProperty;
+
         // Find Utility
         var find = function(ua, obj) {
             var ret = {};
@@ -366,18 +371,12 @@ var detect = (function(root, undefined) {
                 });
             });
         };
-        // Contains Utility
-        var contains = function(obj, target) {
-            var found = false;
-            if (obj == null) return found;
-            if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-            found = any(obj, function(value) {
-                return value === target;
-            });
-            return found;
+        // Has Utility
+        var has = function(obj, key) {
+            return obj != null && hasOwnProperty.call(obj, key);
         };
         // Each Utility
-        var each = forEach = function(obj, iterator, context) {
+        var each = function(obj, iterator, context) {
             if (obj == null) return;
             if (nativeForEach && obj.forEach === nativeForEach) {
                 obj.forEach(iterator, context);
@@ -387,7 +386,7 @@ var detect = (function(root, undefined) {
                 }
             } else {
                 for (var key in obj) {
-                    if (_.has(obj, key)) {
+                    if (has(obj, key)) {
                         iterator.call(context, obj[key], key, obj);
                     }
                 }

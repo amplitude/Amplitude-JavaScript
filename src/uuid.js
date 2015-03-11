@@ -1,3 +1,5 @@
+/* jshint bitwise: false, laxbreak: true */
+
 /**
  * Taken straight from jed's gist: https://gist.github.com/982883
  *
@@ -23,7 +25,7 @@ var uuid = function(a) {
       ).replace(     // replacing
       /[018]/g,    // zeroes, ones, and eights with
       uuid         // random hex digits
-  )
+  );
 };
 
 module.exports = uuid;

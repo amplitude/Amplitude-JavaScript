@@ -3,9 +3,8 @@
  */
 
 var Base64 = require('./base64');
-var JSON = require('json');
+var JSON = require('json'); // jshint ignore:line
 var topDomain = require('top-domain');
-
 
 
 var _options = {
@@ -33,7 +32,7 @@ var options = function(opts) {
   _options.domain = domain;
   set('amplitude_test', token);
   var stored = get('amplitude_test');
-  if (!stored || stored != token) {
+  if (!stored || stored !== token) {
     domain = null;
   }
   remove('amplitude_test');
@@ -44,7 +43,7 @@ var _domainSpecific = function(name) {
   // differentiate between cookies on different domains
   var suffix = '';
   if (_options.domain) {
-    suffix = _options.domain.charAt(0) == '.' ? _options.domain.substring(1) : _options.domain;
+    suffix = _options.domain.charAt(0) === '.' ? _options.domain.substring(1) : _options.domain;
   }
   return name + suffix;
 };
@@ -57,10 +56,10 @@ var get = function(name) {
     var value = null;
     for (var i = 0; i < ca.length; i++) {
       var c = ca[i];
-      while (c.charAt(0) == ' ') {
+      while (c.charAt(0) === ' ') {
         c = c.substring(1, c.length);
       }
-      if (c.indexOf(nameEq) == 0) {
+      if (c.indexOf(nameEq) === 0) {
         value = c.substring(nameEq.length, c.length);
         break;
       }
@@ -87,7 +86,7 @@ var set = function(name, value) {
 
 
 var _set = function(name, value, opts) {
-  var expires = value != null ? opts.expirationDays : -1 ;
+  var expires = value !== null ? opts.expirationDays : -1 ;
   if (expires) {
     var date = new Date();
     date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
