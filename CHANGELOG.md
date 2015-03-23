@@ -1,5 +1,9 @@
 ## Unreleased
 
+
+## 2.1.0 (March 23, 2015)
+
+* Add support for logging revenue data.
 * Add opt out setting to disable logging for a user.
 
 ## 2.0.4 (March 2, 2015)
