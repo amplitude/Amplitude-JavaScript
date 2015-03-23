@@ -341,6 +341,65 @@ describe('Amplitude', function() {
     });
   });
 
+  describe('logRevenue', function() {
+    beforeEach(function() {
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    /**
+     * Deep compare an object against the api_properties of the
+     * event queued for sending.
+     */
+    function revenueEqual(api, event) {
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.deepEqual(events[0].api_properties, api || {});
+      assert.deepEqual(events[0].event_properties, event || {});
+    }
+
+    it('should log simple amount', function() {
+      amplitude.logRevenue(10.10);
+      revenueEqual({
+        special: 'revenue_amount',
+        price: 10.10,
+        quantity: 1
+      })
+    });
+
+    it('should log complex amount', function() {
+      amplitude.logRevenue(10.10, 7);
+      revenueEqual({
+        special: 'revenue_amount',
+        price: 10.10,
+        quantity: 7
+      })
+    });
+
+    it('shouldn\'t log invalid price', function() {
+      amplitude.logRevenue('kitten', 7);
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('shouldn\'t log invalid quantity', function() {
+      amplitude.logRevenue(10.00, 'puppy');
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should log complex amount with product id', function() {
+      amplitude.logRevenue(10.10, 7, 'chicken.dinner');
+      revenueEqual({
+        special: 'revenue_amount',
+        price: 10.10,
+        quantity: 7,
+        productId: 'chicken.dinner'
+      });
+    });
+  });
+
   describe('sessionId', function() {
 
     var clock;

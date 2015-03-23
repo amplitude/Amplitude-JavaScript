@@ -384,7 +384,10 @@ Amplitude.prototype.setVersionName = function(versionName) {
   }
 };
 
-Amplitude.prototype.logEvent = function(eventType, eventProperties) {
+/**
+ * Private logEvent method. Keeps apiProperties from being publicly exposed.
+ */
+Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties) {
   if (!eventType || this.options.optOut) {
     return;
   }
@@ -405,6 +408,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
     object.merge(userProperties, this.options.userProperties || {});
     object.merge(userProperties, this._utmProperties);
 
+    apiProperties = apiProperties || {};
     eventProperties = eventProperties || {};
     var event = {
       device_id: this.options.deviceId,
@@ -419,6 +423,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
       os_version: ua.browser.version,
       device_model: ua.os.family,
       language: this.options.language,
+      api_properties: apiProperties,
       event_properties: eventProperties,
       user_properties: userProperties,
       uuid: UUID(),
@@ -437,6 +442,30 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties) {
   } catch (e) {
     log(e);
   }
+};
+
+Amplitude.prototype.logEvent = function(eventType, eventProperties) {
+  this._logEvent(eventType, eventProperties);
+};
+
+// Test that n is a number or a numeric value.
+var _isNumber = function(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+};
+
+Amplitude.prototype.logRevenue = function(price, quantity, product) {
+  // Test that the parameters are of the right type.
+  if (!_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
+    // log('Price and quantity arguments to logRevenue must be numbers');
+    return;
+  }
+
+  this._logEvent('revenue_amount', {}, {
+    productId: product,
+    special: 'revenue_amount',
+    quantity: quantity || 1,
+    price: price
+  });
 };
 
 Amplitude.prototype.sendEvents = function() {

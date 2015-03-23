@@ -12,7 +12,7 @@ Amplitude-Javascript
           n.async=true;n.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.0.4-min.js";
           var s=t.getElementsByTagName("script")[0];s.parentNode.insertBefore(n,s);r._q=[];
           function a(e){r[e]=function(){r._q.push([e].concat(Array.prototype.slice.call(arguments,0)))
-          }}var i=["init","logEvent","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties"];
+          }}var i=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties"];
           for(var o=0;o<i.length;o++){a(i[o])}e.amplitude=r})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
@@ -57,6 +57,15 @@ To add properties that are tracked in every event, you can set properties for a 
     userProperties.key = "value";
     amplitude.setUserProperties(userProperties);
 
+# Tracking Revenue #
+
+To track revenue from a user, call
+
+    amplitude.logRevenue(9.99, 1, "product");
+
+The function takes a unit price, a quantity, and a product identifier. Quantity and product identifier are optional parameters.
+
+This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 7, 30, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
 
 # Opting User Out of Logging #
 
