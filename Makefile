@@ -9,6 +9,7 @@ BUILD_DIR = build
 PROJECT = amplitude
 OUT = $(PROJECT).js
 SNIPPET_OUT = $(PROJECT)-snippet.min.js
+SEGMENT_SNIPPET_OUT = $(PROJECT)-segment-snippet.min.js
 MIN_OUT = $(PROJECT).min.js
 MOCHA = $(BINS)/mocha-phantomjs
 
@@ -66,17 +67,21 @@ $(OUT): node_modules $(SRC) version
 	@$(MINIFY) $(OUT) --output $(MIN_OUT)
 
 #
-# Target for minified `amplitude-snippet.js` file. Update README.
+# Target for minified `amplitude-snippet.js` file.
 #
 $(SNIPPET_OUT): $(SRC) $(SNIPPET) version
 	@$(JSHINT) --verbose $(SNIPPET)
-	@$(MINIFY) $(SNIPPET) -m -b max-line-len=80,beautify=false --output $(SNIPPET_OUT)
+	@$(MINIFY) $(SNIPPET) -m -b max-line-len=80,beautify=false | awk 'NF' > $(SNIPPET_OUT)
+
+$(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET) version
+	@grep -Ev "\ba?s\b" $(SNIPPET) | $(MINIFY) -m -b max-line-len=80,beautify=false - \
+		| awk 'NF' > $(SEGMENT_SNIPPET_OUT)
 
 #
 # Target for `tests-build.js` file.
 #
 
-build: $(TESTS) $(OUT) $(SNIPPET_OUT) README.md
+build: $(TESTS) $(OUT) $(SNIPPET_OUT) $(SEGMENT_SNIPPET_OUT) README.md
 	@-mkdir -p build
 	@$(DUO) --development test/tests.js > build/tests.js
 	@$(DUO) --development test/snippet-tests.js > build/snippet-tests.js
