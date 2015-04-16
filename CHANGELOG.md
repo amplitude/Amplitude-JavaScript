@@ -1,5 +1,6 @@
 ## Unreleased
 
+* Use gzipped version of the library by default. If you still need the uncompressed version, remove ".gz" from the script url in your integration snippet.
 
 ## 2.1.0 (March 23, 2015)
 
