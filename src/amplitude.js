@@ -16,16 +16,17 @@ var log = function(s) {
 var API_VERSION = 2;
 var DEFAULT_OPTIONS = {
   apiEndpoint: 'api.amplitude.com',
-  cookieName: 'amplitude_id',
   cookieExpiration: 365 * 10,
-  unsentKey: 'amplitude_unsent',
-  saveEvents: true,
+  cookieName: 'amplitude_id',
   domain: undefined,
-  sessionTimeout: 30 * 60 * 1000,
-  platform: 'Web',
-  language: language.language,
   includeUtm: false,
-  optOut: false
+  language: language.language,
+  optOut: false,
+  platform: 'Web',
+  savedMaxCount: 1000,
+  saveEvents: true,
+  sessionTimeout: 30 * 60 * 1000,
+  unsentKey: 'amplitude_unsent',
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
@@ -73,6 +74,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       this.options.platform = opt_config.platform || this.options.platform;
       this.options.language = opt_config.language || this.options.language;
       this.options.sessionTimeout = opt_config.sessionTimeout || this.options.sessionTimeout;
+      this.options.savedMaxCount = opt_config.savedMaxCount || this.options.savedMaxCount;
     }
 
     Cookie.options({
@@ -321,19 +323,31 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       }
       // country: null
     };
+
+    //log('logged eventType=' + eventType + ', properties=' + JSON.stringify(eventProperties));
+
     this._unsentEvents.push(event);
+
+    // Remove old events from the beginning of the array if too many
+    // have accumulated. Don't want to kill memory. Default is 1000 events.
+    if (this._unsentEvents.length > this.options.savedMaxCount) {
+      this._unsentEvents.splice(0, this._unsentEvents.length - this.options.savedMaxCount);
+    }
+
     if (this.options.saveEvents) {
       this.saveEvents();
     }
-    //log('logged eventType=' + eventType + ', properties=' + JSON.stringify(eventProperties));
+
     this.sendEvents();
+
+    return eventId;
   } catch (e) {
     log(e);
   }
 };
 
 Amplitude.prototype.logEvent = function(eventType, eventProperties) {
-  this._logEvent(eventType, eventProperties);
+  return this._logEvent(eventType, eventProperties);
 };
 
 // Test that n is a number or a numeric value.
@@ -348,7 +362,7 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
     return;
   }
 
-  this._logEvent('revenue_amount', {}, {
+  return this._logEvent('revenue_amount', {}, {
     productId: product,
     special: 'revenue_amount',
     quantity: quantity || 1,
@@ -356,12 +370,30 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
   });
 };
 
+/**
+ * Remove events in storage with event ids up to and including maxEventId. Does
+ * a true filter in case events get out of order or old events are removed.
+ */
+Amplitude.prototype.removeEvents = function (maxEventId) {
+  var filteredEvents = [];
+  for (var i = 0; i < this._unsentEvents.length; i++) {
+    if (this._unsentEvents[i].event_id > maxEventId) {
+      filteredEvents.push(this._unsentEvents[i]);
+    }
+  }
+  this._unsentEvents = filteredEvents;
+};
+
 Amplitude.prototype.sendEvents = function() {
   if (!this._sending && !this.options.optOut) {
     this._sending = true;
     var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
         this.options.apiEndpoint + '/';
-    var events = JSON.stringify(this._unsentEvents);
+
+    // Determine how many events to send and track the maximum event id sent in this batch.
+    var maxEventId = this._unsentEvents[this._unsentEvents.length - 1].eventId;
+
+    var events = JSON.stringify(this._unsentEvents.slice(0, this._unsentEvents.length));
     var uploadTime = new Date().getTime();
     var data = {
       client: this.options.apiKey,
@@ -370,17 +402,21 @@ Amplitude.prototype.sendEvents = function() {
       upload_time: uploadTime,
       checksum: md5(API_VERSION + this.options.apiKey + events + uploadTime)
     };
-    var numEvents = this._unsentEvents.length;
+
     var scope = this;
     new Request(url, data).send(function(response) {
       scope._sending = false;
       try {
         if (response === 'success') {
           //log('sucessful upload');
-          scope._unsentEvents.splice(0, numEvents);
+          scope.removeEvents(maxEventId);
+
+          // Update the event cache after the removal of sent events.
           if (scope.options.saveEvents) {
             scope.saveEvents();
           }
+
+          // Send more events if any queued during previous send.
           if (scope._unsentEvents.length > 0) {
             scope.sendEvents();
           }

@@ -185,6 +185,80 @@ describe('Amplitude', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].event_properties, {prop: true});
     });
+
+    it('should queue events', function() {
+      amplitude._sending = true;
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
+      amplitude.logEvent('Event', {index: 3});
+      amplitude._sending = false;
+
+      amplitude.logEvent('Event', {index: 100});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 4);
+      assert.deepEqual(events[0].event_properties, {index: 1});
+      assert.deepEqual(events[3].event_properties, {index: 100});
+    });
+
+    it('should limit events queued', function() {
+      amplitude.init(apiKey, null, {savedMaxCount: 10});
+
+      amplitude._sending = true;
+      for (var i = 0; i < 15; i++) {
+        amplitude.logEvent('Event', {index: i});
+      }
+      amplitude._sending = false;
+
+      amplitude.logEvent('Event', {index: 100});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 10);
+      assert.deepEqual(events[0].event_properties, {index: 6});
+      assert.deepEqual(events[9].event_properties, {index: 100});
+    });
+
+    it('should remove only sent events', function() {
+      amplitude._sending = true;
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
+      amplitude._sending = false;
+      amplitude.logEvent('Event', {index: 3});
+
+      server.respondWith('success');
+      server.respond();
+
+      amplitude.logEvent('Event', {index: 4});
+
+      assert.lengthOf(server.requests, 2);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.deepEqual(events[0].event_properties, {index: 4});
+    });
+
+    it('should save events', function() {
+      amplitude.init(apiKey, null, {saveEvents: true});
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
+      amplitude.logEvent('Event', {index: 3});
+
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey);
+      assert.deepEqual(amplitude2._unsentEvents, amplitude._unsentEvents);
+    });
+
+    it('should not save events', function() {
+      amplitude.init(apiKey, null, {saveEvents: false});
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
+      amplitude.logEvent('Event', {index: 3});
+
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey);
+      assert.deepEqual(amplitude2._unsentEvents, []);
+    });
   });
 
   describe('optOut', function() {
