@@ -27,6 +27,7 @@ var DEFAULT_OPTIONS = {
   saveEvents: true,
   sessionTimeout: 30 * 60 * 1000,
   unsentKey: 'amplitude_unsent',
+  uploadBatchSize: 100,
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
@@ -74,6 +75,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       this.options.platform = opt_config.platform || this.options.platform;
       this.options.language = opt_config.language || this.options.language;
       this.options.sessionTimeout = opt_config.sessionTimeout || this.options.sessionTimeout;
+      this.options.uploadBatchSize = opt_config.uploadBatchSize || this.options.uploadBatchSize;
       this.options.savedMaxCount = opt_config.savedMaxCount || this.options.savedMaxCount;
     }
 
@@ -391,9 +393,10 @@ Amplitude.prototype.sendEvents = function() {
         this.options.apiEndpoint + '/';
 
     // Determine how many events to send and track the maximum event id sent in this batch.
-    var maxEventId = this._unsentEvents[this._unsentEvents.length - 1].eventId;
+    var numEvents = Math.min(this._unsentEvents.length, this.options.uploadBatchSize);
+    var maxEventId = this._unsentEvents[numEvents - 1].event_id;
 
-    var events = JSON.stringify(this._unsentEvents.slice(0, this._unsentEvents.length));
+    var events = JSON.stringify(this._unsentEvents.slice(0, numEvents));
     var uploadTime = new Date().getTime();
     var data = {
       client: this.options.apiKey,
@@ -404,10 +407,10 @@ Amplitude.prototype.sendEvents = function() {
     };
 
     var scope = this;
-    new Request(url, data).send(function(response) {
+    new Request(url, data).send(function(status, response) {
       scope._sending = false;
       try {
-        if (response === 'success') {
+        if (status === 200 && response === 'success') {
           //log('sucessful upload');
           scope.removeEvents(maxEventId);
 
@@ -420,6 +423,12 @@ Amplitude.prototype.sendEvents = function() {
           if (scope._unsentEvents.length > 0) {
             scope.sendEvents();
           }
+        } else if (status === 413) {
+          //log('request too large');
+          // The server complained about the length of the request.
+          // Backoff and try again.
+          scope.options.uploadBatchSize = Math.floor(numEvents / 2);
+          scope.sendEvents();
         }
       } catch (e) {
         //log('failed upload');

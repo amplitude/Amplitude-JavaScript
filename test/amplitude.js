@@ -259,6 +259,60 @@ describe('Amplitude', function() {
       amplitude2.init(apiKey);
       assert.deepEqual(amplitude2._unsentEvents, []);
     });
+
+    it('should batch events sent', function() {
+      amplitude.init(apiKey, null, {uploadBatchSize: 10});
+
+      amplitude._sending = true;
+      for (var i = 0; i < 15; i++) {
+        amplitude.logEvent('Event', {index: i});
+      }
+      amplitude._sending = false;
+
+      amplitude.logEvent('Event', {index: 100});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 10);
+      assert.deepEqual(events[0].event_properties, {index: 0});
+      assert.deepEqual(events[9].event_properties, {index: 9});
+
+      server.respondWith('success');
+      server.respond();
+
+      assert.lengthOf(server.requests, 2);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.lengthOf(events, 6);
+      assert.deepEqual(events[0].event_properties, {index: 10});
+      assert.deepEqual(events[5].event_properties, {index: 100});
+    });
+
+    it('should back off on 413 status', function() {
+      amplitude.init(apiKey, null, {uploadBatchSize: 10});
+
+      amplitude._sending = true;
+      for (var i = 0; i < 15; i++) {
+        amplitude.logEvent('Event', {index: i});
+      }
+      amplitude._sending = false;
+
+      amplitude.logEvent('Event', {index: 100});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 10);
+      assert.deepEqual(events[0].event_properties, {index: 0});
+      assert.deepEqual(events[9].event_properties, {index: 9});
+
+      server.respondWith([413, {}, ""]);
+      server.respond();
+
+      assert.lengthOf(server.requests, 2);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.lengthOf(events, 5);
+      assert.deepEqual(events[0].event_properties, {index: 0});
+      assert.deepEqual(events[4].event_properties, {index: 4});
+    });
   });
 
   describe('optOut', function() {
