@@ -313,6 +313,27 @@ describe('Amplitude', function() {
       assert.deepEqual(events[0].event_properties, {index: 0});
       assert.deepEqual(events[4].event_properties, {index: 4});
     });
+
+    it('should back off on 413 status all the way to 1 event with drops', function() {
+      amplitude.init(apiKey, null, {uploadBatchSize: 9});
+
+      amplitude._sending = true;
+      for (var i = 0; i < 10; i++) {
+        amplitude.logEvent('Event', {index: i});
+      }
+      amplitude._sending = false;
+      amplitude.logEvent('Event', {index: 100});
+
+      for (var i = 0; i < 6; i++) {
+        assert.lengthOf(server.requests, i+1);
+        server.respondWith([413, {}, ""]);
+        server.respond();
+      }
+
+      var events = JSON.parse(querystring.parse(server.requests[6].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.deepEqual(events[0].event_properties, {index: 2});
+    });
   });
 
   describe('optOut', function() {

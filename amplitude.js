@@ -537,9 +537,14 @@ Amplitude.prototype.sendEvents = function() {
           }
         } else if (status === 413) {
           //log('request too large');
+          // Can't even get this one massive event through. Drop it.
+          if (scope.options.uploadBatchSize === 1) {
+            scope.removeEvents(maxEventId);
+          }
+
           // The server complained about the length of the request.
           // Backoff and try again.
-          scope.options.uploadBatchSize = Math.floor(numEvents / 2);
+          scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
           scope.sendEvents();
         }
       } catch (e) {
