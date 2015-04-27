@@ -93,6 +93,8 @@ You can configure Amplitude by passing an object as the third argument to the `i
 | option | description | default |
 |------------|----------------------------------------------------------------------------------|-----------|
 | saveEvents | If `true`, saves events to localStorage and removes them upon successful upload.<br><i>NOTE:</i> Without saving events, events may be lost if the user navigates to another page before events are uploaded. | `true` |
+| savedMaxCount | Maximum number of events to save in localStorage. If more events are logged while offline, old events are removed. | 1000 |
+| uploadBatchSize | Maximum number of events to send to the server per request. | 100 |
 | includeUtm | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
 
 
