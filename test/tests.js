@@ -4,4 +4,4 @@
   require('./uuid.js');
   require('./cookie.js');
   require('./amplitude.js');
-  require('./detect.js');
+  require('./ua-parser.js');
