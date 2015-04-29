@@ -320,9 +320,9 @@ var detect = (function(root, undefined) {
                 os_replacement: "Blackberry",
                 manufacturer: "RIM"
             }, {
-                regex: "(Linux)"
-            }, {
                 regex: "(Android)"
+            }, {
+                regex: "(Linux)"
             } ],
             mobile_os_families: [ "Windows Phone", "Windows CE", "Symbian" ],
             device_parsers: [],
