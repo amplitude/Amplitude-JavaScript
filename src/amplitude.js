@@ -1,12 +1,12 @@
 var Cookie = require('./cookie');
 var JSON = require('json'); // jshint ignore:line
-var Request = require('./xhr');
-var UUID = require('./uuid');
-var detect = require('./detect');
 var language = require('./language');
 var localStorage = require('./localstorage');  // jshint ignore:line
 var md5 = require('./md5');
 var object = require('object');
+var Request = require('./xhr');
+var UAParser = require('ua-parser-js');
+var UUID = require('./uuid');
 var version = require('./version');
 
 var log = function(s) {
@@ -40,7 +40,7 @@ var LocalStorageKeys = {
  */
 var Amplitude = function() {
   this._unsentEvents = [];
-  this._ua = detect.parse(navigator.userAgent);
+  this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
 };
 
@@ -311,9 +311,9 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       event_type: eventType,
       version_name: this.options.versionName || null,
       platform: this.options.platform,
-      os_name: ua.browser.family,
-      os_version: ua.browser.version,
-      device_model: ua.os.family,
+      os_name: ua.browser.name || null,
+      os_version: ua.browser.major || null,
+      device_model: ua.os.name || null,
       language: this.options.language,
       api_properties: apiProperties,
       event_properties: eventProperties,
