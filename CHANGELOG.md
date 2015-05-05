@@ -3,6 +3,7 @@
 * Use gzipped version of the library by default. If you still need the uncompressed version, remove ".gz" from the script url in your integration snippet.
 * Upgrade user agent parser for browser detection to keep up-to-date with browser updates.
 * Fix bug where Android browsers were reported as Safari on Linux.
+* Fix bug with line endings in UTF-8 encoder that was causing issues with checksums.
 
 ## 2.1.0 (March 23, 2015)
 

@@ -6,7 +6,6 @@
  */
 var UTF8 = {
     encode: function (s) {
-        s = s.replace(/\r\n/g,'\n');
         var utftext = '';
 
         for (var n = 0; n < s.length; n++) {
