@@ -800,7 +800,6 @@ module.exports = Base64;
  */
 var UTF8 = {
     encode: function (s) {
-        s = s.replace(/\r\n/g,'\n');
         var utftext = '';
 
         for (var n = 0; n < s.length; n++) {
@@ -2959,7 +2958,7 @@ module.exports = uuid;
 
 }, {}],
 12: [function(require, module, exports) {
-module.exports = '2.1.0';
+module.exports = '2.2.0';
 
 }, {}]}, {}, {"1":""})
 );
