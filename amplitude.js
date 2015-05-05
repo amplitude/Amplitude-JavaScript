@@ -138,13 +138,21 @@ var DEFAULT_OPTIONS = {
   savedMaxCount: 1000,
   saveEvents: true,
   sessionTimeout: 30 * 60 * 1000,
-  unsentKey: 'amplitude_unsent',
   uploadBatchSize: 100,
 };
+
 var LocalStorageKeys = {
+  // Always local storage
   LAST_EVENT_ID: 'amplitude_lastEventId',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
-  SESSION_ID: 'amplitude_sessionId'
+  SESSION_ID: 'amplitude_sessionId',
+  UNSENT_EVENTS: 'amplitude_unsent',
+
+  // Previously cookie storage
+  DEVICE_ID: 'amplitude_deviceId',
+  OPT_OUT: 'amplitude_optOut',
+  USER_ID: 'amplitude_userId',
+  USER_PROPERTIES: 'amplitude_userProperties',
 };
 
 /*
@@ -197,27 +205,18 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
     });
     this.options.domain = Cookie.options().domain;
 
-    _loadCookieData(this);
+    this._upgradeStoredData();
+    this._loadStoredData();
 
-    this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
-        opt_config.deviceId !== null && opt_config.deviceId) ||
-        this.options.deviceId || UUID();
-    this.options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || this.options.userId || null;
-    _saveCookieData(this);
+    this.setUserId(opt_userId || this.options.userId || null);
+
+    this.setDeviceId(opt_config && opt_config.deviceId !== undefined &&
+        opt_config.deviceId !== null && opt_config.deviceId ||
+        this.options.deviceId || UUID());
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
 
-    if (this.options.saveEvents) {
-      var savedUnsentEventsString = localStorage.getItem(this.options.unsentKey);
-      if (savedUnsentEventsString) {
-        try {
-          this._unsentEvents = JSON.parse(savedUnsentEventsString);
-        } catch (e) {
-          //log(e);
-        }
-      }
-    }
     if (this._unsentEvents.length > 0) {
       this.sendEvents();
     }
@@ -225,18 +224,6 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
     if (this.options.includeUtm) {
       this._initUtmData();
     }
-
-    this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
-    this._sessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
-    this._eventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID) || 0;
-    var now = new Date().getTime();
-    if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
-      this._newSession = true;
-      this._sessionId = now;
-      localStorage.setItem(LocalStorageKeys.SESSION_ID, this._sessionId);
-    }
-    this._lastEventTime = now;
-    localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
   } catch (e) {
     log(e);
   }
@@ -251,31 +238,115 @@ Amplitude.prototype.nextEventId = function() {
   return this._eventId;
 };
 
-var _loadCookieData = function(scope) {
-  var cookieData = Cookie.get(scope.options.cookieName);
-  if (cookieData) {
-    if (cookieData.deviceId) {
-      scope.options.deviceId = cookieData.deviceId;
+/**
+ * Set an item in local storage. Decorate the item key with the api key
+ * to avoid collisions.
+ *
+ * @property item:  the name of the item to store
+ * @property value: the value to store
+ */
+Amplitude.prototype.setLocalStorage = function (item, value) {
+  var key = LocalStorageKeys[item] + "_" + this.options.apiKey.slice(0, 6);
+  localStorage.setItem(key, value);
+};
+
+/**
+ * Fetch an item from local storage. Decorate the item key with the api key
+ * to avoid collisions.
+ *
+ * @property item:  the name of the item to fetch
+ * @property def:   default value to return if the item doesn't exist
+ */
+Amplitude.prototype.getLocalStorage = function (item, def) {
+  var key = LocalStorageKeys[item] + "_" + this.options.apiKey.slice(0, 6);
+  return localStorage.getItem(key) || def;
+};
+
+/**
+ * 
+ */
+Amplitude.prototype._loadStoredData = function () {
+  if (this.options.saveEvents) {
+    var savedUnsentEventsString = this.getLocalStorage("UNSENT_EVENTS");
+    if (savedUnsentEventsString) {
+      try {
+        this._unsentEvents = JSON.parse(savedUnsentEventsString);
+      } catch (e) {
+        //log(e);
+      }
     }
-    if (cookieData.userId) {
-      scope.options.userId = cookieData.userId;
+  }
+
+  try {
+    this.options.deviceId = this.getLocalStorage("DEVICE_ID", this.options.deviceId);
+    this.options.userId = this.getLocalStorage("USER_ID", this.options.userId);
+    this.options.optOut = (this.getLocalStorage("OPT_OUT", String(this.options.optOut || false)) === "true");
+
+    var userProperties = this.getLocalStorage("USER_PROPERTIES");
+    try {
+      this.options.userProperties = JSON.parse(userProperties);
+    } catch (e) {}
+
+    this._lastEventTime = parseInt(this.getLocalStorage("LAST_EVENT_TIME", null));
+    this._sessionId = parseInt(this.getLocalStorage("SESSION_ID", null));
+    this._eventId = this.getLocalStorage("LAST_EVENT_ID", 0);
+
+    var now = new Date().getTime();
+    if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
+      this._newSession = true;
+      this._sessionId = now;
+      this.setLocalStorage("SESSION_ID", this._sessionId);
     }
-    if (cookieData.globalUserProperties) {
-      scope.options.userProperties = cookieData.globalUserProperties;
-    }
-    if (cookieData.optOut !== undefined) {
-      scope.options.optOut = cookieData.optOut;
-    }
+
+    this._lastEventTime = now;
+    this.setLocalStorage("LAST_EVENT_TIME", this._lastEventTime);
+  } catch (e) {
+    log(e);
   }
 };
 
-var _saveCookieData = function(scope) {
-  Cookie.set(scope.options.cookieName, {
-    deviceId: scope.options.deviceId,
-    userId: scope.options.userId,
-    globalUserProperties: scope.options.userProperties,
-    optOut: scope.options.optOut
-  });
+Amplitude.prototype._upgradeStoredData = function () {
+  var cookieData = Cookie.get(this.options.cookieName);
+
+  if (cookieData) {
+    if (cookieData.deviceId) {
+      this.setLocalStorage("DEVICE_ID", cookieData.deviceId);
+    }
+    if (cookieData.userId) {
+      this.setLocalStorage("USER_ID", cookieData.userId);
+    }
+    if (cookieData.globalUserProperties) {
+      this.setLocalStorage("USER_PROPERTIES", JSON.stringify(cookieData.globalUserProperties));
+    }
+    if (cookieData.optOut !== undefined) {
+      this.setLocalStorage("OPT_OUT", cookieData.optOut);
+    }
+    Cookie.remove(this.options.cookieName);
+  }
+
+  var lastEventTime = localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME);
+  if (lastEventTime) {
+    this.setLocalStorage("LAST_EVENT_TIME", parseInt(lastEventTime));
+  }
+  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
+
+  var sessionId = localStorage.getItem(LocalStorageKeys.SESSION_ID);
+  if (sessionId) {
+    this.setLocalStorage("SESSION_ID", parseInt(sessionId));
+  }
+  localStorage.removeItem(LocalStorageKeys.SESSION_ID);
+
+  var eventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID);
+  if (eventId) {
+    this.setLocalStorage("LAST_EVENT_ID", eventId);
+  }
+  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
+
+  var unsentEvents = localStorage.getItem(LocalStorageKeys.UNSENT_EVENTS);
+  if (unsentEvents) {
+    this.setLocalStorage("UNSENT_EVENTS", unsentEvents);
+  }
+  localStorage.removeItem(LocalStorageKeys.UNSENT_EVENTS);
 };
 
 Amplitude._getUtmParam = function(name, query) {
@@ -314,7 +385,7 @@ Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
 
 Amplitude.prototype.saveEvents = function() {
   try {
-    localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    this.setLocalStorage("UNSENT_EVENTS", JSON.stringify(this._unsentEvents));
   } catch (e) {
     //log(e);
   }
@@ -326,8 +397,10 @@ Amplitude.prototype.setDomain = function(domain) {
       domain: domain
     });
     this.options.domain = Cookie.options().domain;
-    _loadCookieData(this);
-    _saveCookieData(this);
+
+    this._upgradeStoredData();
+    this._loadStoredData();
+
     //log('set domain=' + domain);
   } catch (e) {
     log(e);
@@ -337,7 +410,7 @@ Amplitude.prototype.setDomain = function(domain) {
 Amplitude.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
-    _saveCookieData(this);
+    this.setLocalStorage("USER_ID", this.options.userId);
     //log('set userId=' + userId);
   } catch (e) {
     log(e);
@@ -347,7 +420,7 @@ Amplitude.prototype.setUserId = function(userId) {
 Amplitude.prototype.setOptOut = function(enable) {
   try {
     this.options.optOut = enable;
-    _saveCookieData(this);
+    this.setLocalStorage("OPT_OUT", this.options.optOut);
     //log('set optOut=' + enable);
   } catch (e) {
     log(e);
@@ -358,7 +431,7 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
   try {
     if (deviceId) {
       this.options.deviceId = ('' + deviceId);
-      _saveCookieData(this);
+      this.setLocalStorage("DEVICE_ID", this.options.deviceId);
     }
   } catch (e) {
     log(e);
@@ -372,7 +445,7 @@ Amplitude.prototype.setUserProperties = function(userProperties, opt_replace) {
     } else {
       this.options.userProperties = object.merge(this.options.userProperties || {}, userProperties);
     }
-    _saveCookieData(this);
+    this.setLocalStorage("USER_PROPERTIES", JSON.stringify(this.options.userProperties));
     //log('set userProperties=' + JSON.stringify(userProperties));
   } catch (e) {
     log(e);
@@ -1499,7 +1572,9 @@ module.exports = {
 
 }, {}],
 6: [function(require, module, exports) {
-/* jshint -W020, unused: false, noempty: false, boss: true */
+/* jshint -W020, -W001, unused: false, noempty: false, boss: true */
+/* global escape, unescape */
+
 
 /*
  * Implement localStorage to support Firefox 2-3 and IE 5-7
@@ -1565,7 +1640,7 @@ if (window.localStorage) {
     div.load(attrKey);
     localStorage.length = div.XMLDocument.documentElement.attributes.length;
   } else {
-    /* Nothing we can do ... */
+    localStorage = require('./localstorage-cookie');
   }
 }
 if (!localStorage) {
@@ -1585,6 +1660,50 @@ if (!localStorage) {
 }
 
 module.exports = localStorage;
+
+}, {"./localstorage-cookie":18}],
+18: [function(require, module, exports) {
+/* jshint -W020, -W001, unused: false, noempty: false, boss: true */
+/* global escape, unescape */
+
+// Cookie polyfill from https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Storage
+// Added restriction on data size.
+var cookieStorage = {
+  length: 0,
+  getItem: function (sKey) {
+    if (!sKey || !this.hasOwnProperty(sKey)) { return null; }
+    return unescape(document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1"));
+  },
+  key: function (nKeyId) {
+    return unescape(document.cookie.replace(/\s*\=(?:.(?!;))*$/, "").split(/\s*\=(?:[^;](?!;))*[^;]?;\s*/)[nKeyId]);
+  },
+  setItem: function (sKey, sValue) {
+    if(!sKey) { return; }
+
+    // Restrict total size of storage to 4k.
+    // If we had to fall all the way back to cookie storage, this is very old or
+    // restricted browser and likely doesn't have much cookie storage.
+    // Large values were always stored in local storage and would have
+    // been ephemeral anyway. Also better not to send all that data across the wire.
+    var existing = cookieStorage.getItem(sKey);
+    var itemLength = escape(sKey).length + escape(sValue).length - (existing && escape(existing).length || 0);
+    if (document.cookie.length + itemLength > 4*1024) { return; }
+
+    document.cookie = escape(sKey) + "=" + escape(sValue) + "; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";
+    this.length = document.cookie.match(/\=/g).length;
+  },
+  removeItem: function (sKey) {
+    if (!sKey || !this.hasOwnProperty(sKey)) { return; }
+    document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    this.length--;
+  },
+  hasOwnProperty: function (sKey) {
+    return (new RegExp("(?:^|;\\s*)" + escape(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+  }
+};
+cookieStorage.length = (document.cookie.match(/\=/g) || cookieStorage).length;
+
+module.exports = cookieStorage;
 
 }, {}],
 7: [function(require, module, exports) {
@@ -1907,8 +2026,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":18}],
-18: [function(require, module, exports) {
+}, {"querystring":19}],
+19: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1983,8 +2102,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":19,"type":20}],
-19: [function(require, module, exports) {
+}, {"trim":20,"type":21}],
+20: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2004,7 +2123,7 @@ exports.right = function(str){
 };
 
 }, {}],
-20: [function(require, module, exports) {
+21: [function(require, module, exports) {
 /**
  * toString ref.
  */

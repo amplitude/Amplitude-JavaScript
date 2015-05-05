@@ -1,4 +1,6 @@
-/* jshint -W020, unused: false, noempty: false, boss: true */
+/* jshint -W020, -W001, unused: false, noempty: false, boss: true */
+/* global escape, unescape */
+
 
 /*
  * Implement localStorage to support Firefox 2-3 and IE 5-7
@@ -64,7 +66,7 @@ if (window.localStorage) {
     div.load(attrKey);
     localStorage.length = div.XMLDocument.documentElement.attributes.length;
   } else {
-    /* Nothing we can do ... */
+    localStorage = require('./localstorage-cookie');
   }
 }
 if (!localStorage) {

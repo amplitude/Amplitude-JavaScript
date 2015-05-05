@@ -42,14 +42,6 @@ describe('Amplitude', function() {
       assert.equal(amplitude.options.userId, userId);
     });
 
-    it('should set cookie', function() {
-      amplitude.init(apiKey, userId);
-      var stored = cookie.get(amplitude.options.cookieName);
-      assert.property(stored, 'deviceId');
-      assert.propertyVal(stored, 'userId', userId);
-      assert.lengthOf(stored.deviceId, 36);
-    });
-
     it('should set language', function() {
        amplitude.init(apiKey, userId);
        assert.property(amplitude.options, 'language');
@@ -121,10 +113,10 @@ describe('Amplitude', function() {
       assert.notEqual(amplitude.options.deviceId, null);
     });
 
-    it('should store device id in cookie', function() {
+    it('should store device id in local storage', function() {
+      amplitude.init(apiKey);
       amplitude.setDeviceId('deviceId');
-      var stored = cookie.get(amplitude.options.cookieName);
-      assert.propertyVal(stored, 'deviceId', 'deviceId');
+      assert.equal(amplitude.getLocalStorage("DEVICE_ID"), 'deviceId');
     });
   });
 
