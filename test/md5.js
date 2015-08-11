@@ -1,4 +1,4 @@
-var md5 = require('../src/md5.js');
+var md5 = require('JavaScript-MD5');
 
 describe('MD5', function() {
   var encodeCases = [
@@ -14,5 +14,9 @@ describe('MD5', function() {
 
   it('should hash unicode properly', function() {
     assert.equal('db36e9b42b9fa2863f94280206fb4d74', md5('\u2661'));
+  });
+
+  it('should hash multi-byte unicode properly', function() {
+    assert.equal('8fb34591f1a56cf3ca9837774f4b7bd7', md5('\uD83D\uDE1C'));
   });
 });

@@ -2,7 +2,7 @@ var Cookie = require('./cookie');
 var JSON = require('json'); // jshint ignore:line
 var language = require('./language');
 var localStorage = require('./localstorage');  // jshint ignore:line
-var md5 = require('./md5');
+var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
 var UAParser = require('ua-parser-js');
@@ -27,7 +27,7 @@ var DEFAULT_OPTIONS = {
   saveEvents: true,
   sessionTimeout: 30 * 60 * 1000,
   unsentKey: 'amplitude_unsent',
-  uploadBatchSize: 100,
+  uploadBatchSize: 100
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
