@@ -86,7 +86,8 @@ You can configure Amplitude by passing an object as the third argument to the `i
     amplitude.init("YOUR_API_KEY_HERE", null, {
       // optional configuration options
       saveEvents: true,
-      includeUtm: true
+      includeUtm: true,
+      includeReferrer: true
     })
 
 | option | description | default |
@@ -95,6 +96,7 @@ You can configure Amplitude by passing an object as the third argument to the `i
 | savedMaxCount | Maximum number of events to save in localStorage. If more events are logged while offline, old events are removed. | 1000 |
 | uploadBatchSize | Maximum number of events to send to the server per request. | 100 |
 | includeUtm | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
+| includeReferrer | If `true`, includes `referrer` and `referring_domain` as user propeties on all events uploaded. | `false` |
 
 
 # Advanced #

@@ -1,5 +1,8 @@
 ## Unreleased
 
+* Fix bug where multi-byte unicode characters were hashed improperly.
+* Add option to sent referrer information as user properties
+
 ## 2.2.0 (May 5, 2015)
 
 * Use gzipped version of the library by default. If you still need the uncompressed version, remove ".gz" from the script url in your integration snippet.

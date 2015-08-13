@@ -170,6 +170,7 @@ Amplitude.prototype._newSession = false;
  * opt_config Configuration options
  *   - saveEvents (boolean) Whether to save events to local storage. Defaults to true.
  *   - includeUtm (boolean) Whether to send utm parameters with events. Defaults to false.
+ *   - includeReferrer (boolean) Whether to send referrer info with events. Defaults to false.
  */
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
   try {
@@ -183,6 +184,9 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       }
       if (opt_config.includeUtm !== undefined) {
         this.options.includeUtm = !!opt_config.includeUtm;
+      }
+      if (opt_config.includeReferrer !== undefined) {
+        this.options.includeReferrer = !!opt_config.includeReferrer;
       }
       this.options.platform = opt_config.platform || this.options.platform;
       this.options.language = opt_config.language || this.options.language;
@@ -312,6 +316,18 @@ Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
   this._utmProperties = Amplitude._getUtmData(cookieParams, queryParams);
 };
 
+Amplitude.prototype._getReferrer = function() {
+  return document.referrer;
+};
+
+Amplitude.prototype._getReferringDomain = function() {
+  var parts = this._getReferrer().split("/");
+  if (parts.length >= 3) {
+    return parts[2];
+  }
+  return "";
+};
+
 Amplitude.prototype.saveEvents = function() {
   try {
     localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
@@ -407,10 +423,19 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
 
-    // Add the utm properties, if any, onto the user properties.
     var userProperties = {};
     object.merge(userProperties, this.options.userProperties || {});
+
+    // Add the utm properties, if any, onto the user properties.
     object.merge(userProperties, this._utmProperties);
+
+    // Add referral info onto the user properties
+    if (this.options.includeReferrer && this._getReferrer()) {
+      object.merge(userProperties, {
+        'referrer': this._getReferrer(),
+        'referring_domain': this._getReferringDomain()
+      });
+    }
 
     apiProperties = apiProperties || {};
     eventProperties = eventProperties || {};

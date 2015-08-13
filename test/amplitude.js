@@ -490,6 +490,58 @@ describe('Amplitude', function() {
     });
   });
 
+  describe('gatherReferrer', function() {
+    beforeEach(function() {
+      amplitude.init(apiKey);
+      sinon.stub(amplitude, '_getReferrer').returns('https://amplitude.com/contact');
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should not send referrer data when the includeReferrer flag is false', function() {
+      amplitude.init(apiKey, undefined, {});
+
+      amplitude.setUserProperties({user_prop: true});
+      amplitude.logEvent('Referrer Test Event', {});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events[0].user_properties.referrer, undefined);
+      assert.equal(events[0].user_properties.referring_domain, undefined);
+    });
+
+    it('should send referrer data when the includeReferrer flag is true', function() {
+      reset();
+      amplitude.init(apiKey, undefined, {includeReferrer: true});
+
+      amplitude.logEvent('Referrer Test Event', {});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
+        referrer: 'https://amplitude.com/contact',
+        referring_domain: 'amplitude.com'
+      });
+    });
+
+    it('should add referrer data to the user properties', function() {
+      reset();
+      amplitude.init(apiKey, undefined, {includeReferrer: true});
+
+      amplitude.setUserProperties({user_prop: true});
+      amplitude.logEvent('Referrer Test Event', {});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
+        user_prop: true,
+        referrer: 'https://amplitude.com/contact',
+        referring_domain: 'amplitude.com'
+      });
+    });
+  });
+
   describe('logRevenue', function() {
     beforeEach(function() {
       amplitude.init(apiKey);
