@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 2.2.1 (Aug 13, 2015)
+
 * Fix bug where multi-byte unicode characters were hashed improperly.
 * Add option to sent referrer information as user properties
 
