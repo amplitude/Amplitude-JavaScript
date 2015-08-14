@@ -318,7 +318,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     object.merge(userProperties, this._utmProperties);
 
     // Add referral info onto the user properties
-    if (this.options.includeReferrer && this._getReferrer()) {
+    if (this.options.includeReferrer) {
       object.merge(userProperties, {
         'referrer': this._getReferrer(),
         'referring_domain': this._getReferringDomain()
