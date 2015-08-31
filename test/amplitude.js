@@ -288,17 +288,15 @@ describe('Amplitude', function() {
     });
 
     it('should batch events sent', function() {
-      var threshold = 10;
-      var additional = threshold/2;
-      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: threshold});
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 10});
 
-      for (var i = 0; i < (threshold + additional); i++) {
+      for (var i = 0; i < 15; i++) {
         amplitude.logEvent('Event', {index: i});
       }
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      assert.lengthOf(events, threshold);
+      assert.lengthOf(events, 10);
       assert.deepEqual(events[0].event_properties, {index: 0});
       assert.deepEqual(events[9].event_properties, {index: 9});
 
@@ -307,8 +305,8 @@ describe('Amplitude', function() {
 
       assert.lengthOf(server.requests, 1);
       var unsentEvents = amplitude._unsentEvents;
-      assert.lengthOf(unsentEvents, additional);
-      assert.deepEqual(unsentEvents[additional - 1].event_properties, {index: threshold + additional - 1});
+      assert.lengthOf(unsentEvents, 5);
+      assert.deepEqual(unsentEvents[4].event_properties, {index: 14});
     });
 
     it('should back off on 413 status', function() {

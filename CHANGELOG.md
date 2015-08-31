@@ -1,6 +1,6 @@
 ## Unreleased
 
-* Add setting to batch events to send to in a single request.
+* Add option to batch events into a single request.
 
 ## 2.2.1 (Aug 13, 2015)
 
