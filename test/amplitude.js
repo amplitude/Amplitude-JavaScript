@@ -260,7 +260,7 @@ describe('Amplitude', function() {
       assert.deepEqual(amplitude2._unsentEvents, []);
     });
 
-    it('should batch events sent', function() {
+    it('should limit events sent', function() {
       amplitude.init(apiKey, null, {uploadBatchSize: 10});
 
       amplitude._sending = true;
@@ -285,6 +285,30 @@ describe('Amplitude', function() {
       assert.lengthOf(events, 6);
       assert.deepEqual(events[0].event_properties, {index: 10});
       assert.deepEqual(events[5].event_properties, {index: 100});
+    });
+
+    it('should batch events sent', function() {
+      var threshold = 10;
+      var additional = threshold/2;
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: threshold});
+
+      for (var i = 0; i < (threshold + additional); i++) {
+        amplitude.logEvent('Event', {index: i});
+      }
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, threshold);
+      assert.deepEqual(events[0].event_properties, {index: 0});
+      assert.deepEqual(events[9].event_properties, {index: 9});
+
+      server.respondWith('success');
+      server.respond();
+
+      assert.lengthOf(server.requests, 1);
+      var unsentEvents = amplitude._unsentEvents;
+      assert.lengthOf(unsentEvents, additional);
+      assert.deepEqual(unsentEvents[additional - 1].event_properties, {index: threshold + additional - 1});
     });
 
     it('should back off on 413 status', function() {

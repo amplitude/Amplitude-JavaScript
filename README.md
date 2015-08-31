@@ -97,6 +97,8 @@ You can configure Amplitude by passing an object as the third argument to the `i
 | uploadBatchSize | Maximum number of events to send to the server per request. | 100 |
 | includeUtm | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
 | includeReferrer | If `true`, includes `referrer` and `referring_domain` as user propeties on all events uploaded. | `false` |
+| batchEvents | If `true`, events are uploaded only when the number of unsent events is greater than `eventUploadThreshold`. | `false` |
+| eventUploadThreshold | Minimum number of events to send to the server per request if `batchEvents` is `true`. | 30 |
 
 
 # Advanced #
