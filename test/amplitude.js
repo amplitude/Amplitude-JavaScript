@@ -130,12 +130,16 @@ describe('Amplitude', function() {
 
   describe('logEvent', function() {
 
+    var clock;
+
     beforeEach(function() {
+      clock = sinon.useFakeTimers();
       amplitude.init(apiKey);
     });
 
     afterEach(function() {
       reset();
+      clock.restore();
     });
 
     it('should send request', function() {
@@ -260,7 +264,7 @@ describe('Amplitude', function() {
       assert.deepEqual(amplitude2._unsentEvents, []);
     });
 
-    it('should batch events sent', function() {
+    it('should limit events sent', function() {
       amplitude.init(apiKey, null, {uploadBatchSize: 10});
 
       amplitude._sending = true;
@@ -286,6 +290,91 @@ describe('Amplitude', function() {
       assert.deepEqual(events[0].event_properties, {index: 10});
       assert.deepEqual(events[5].event_properties, {index: 100});
     });
+
+    it('should batch events sent', function() {
+      var eventUploadPeriodMillis = 10*1000;
+      amplitude.init(apiKey, null, {
+        batchEvents: true,
+        eventUploadThreshold: 10,
+        eventUploadPeriodMillis: eventUploadPeriodMillis
+      });
+
+      for (var i = 0; i < 15; i++) {
+        amplitude.logEvent('Event', {index: i});
+      }
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 10);
+      assert.deepEqual(events[0].event_properties, {index: 0});
+      assert.deepEqual(events[9].event_properties, {index: 9});
+
+      server.respondWith('success');
+      server.respond();
+
+      assert.lengthOf(server.requests, 1);
+      var unsentEvents = amplitude._unsentEvents;
+      assert.lengthOf(unsentEvents, 5);
+      assert.deepEqual(unsentEvents[4].event_properties, {index: 14});
+
+      // remaining 5 events should be sent by the delayed sendEvent call
+      clock.tick(eventUploadPeriodMillis);
+      assert.lengthOf(server.requests, 2);
+      server.respondWith('success');
+      server.respond();
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.lengthOf(events, 5);
+      assert.deepEqual(events[4].event_properties, {index: 14});
+    });
+
+    it('should send events after a delay', function() {
+      var eventUploadPeriodMillis = 10*1000;
+      amplitude.init(apiKey, null, {
+        batchEvents: true,
+        eventUploadThreshold: 2,
+        eventUploadPeriodMillis: eventUploadPeriodMillis
+      });
+      amplitude.logEvent('Event');
+
+      // saveEvent should not have been called yet
+      assert.lengthOf(amplitude._unsentEvents, 1);
+      assert.lengthOf(server.requests, 0);
+
+      // saveEvent should be called after delay
+      clock.tick(eventUploadPeriodMillis);
+      assert.lengthOf(server.requests, 1);
+      server.respondWith('success');
+      server.respond();
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.deepEqual(events[0].event_type, 'Event');
+    });
+
+    it('should not send events after a delay if no events to send', function() {
+      var eventUploadPeriodMillis = 10*1000;
+      amplitude.init(apiKey, null, {
+        batchEvents: true,
+        eventUploadThreshold: 2,
+        eventUploadPeriodMillis: eventUploadPeriodMillis
+      });
+      amplitude.logEvent('Event1');
+      amplitude.logEvent('Event2');
+
+      // saveEvent triggered by 2 event batch threshold
+      assert.lengthOf(amplitude._unsentEvents, 2);
+      assert.lengthOf(server.requests, 1);
+      server.respondWith('success');
+      server.respond();
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+      assert.deepEqual(events[1].event_type, 'Event2');
+
+      // saveEvent should be called after delay, but no request made
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      clock.tick(eventUploadPeriodMillis);
+      assert.lengthOf(server.requests, 1);
+    })
 
     it('should back off on 413 status', function() {
       amplitude.init(apiKey, null, {uploadBatchSize: 10});

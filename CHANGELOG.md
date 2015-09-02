@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add option to batch events into a single request.
+
 ## 2.2.1 (Aug 13, 2015)
 
 * Fix bug where multi-byte unicode characters were hashed improperly.
