@@ -29,7 +29,8 @@ var DEFAULT_OPTIONS = {
   unsentKey: 'amplitude_unsent',
   uploadBatchSize: 100,
   batchEvents: false,
-  eventUploadThreshold: 30
+  eventUploadThreshold: 30,
+  eventUploadPeriodMillis: 30 * 1000 // 30s
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
@@ -87,6 +88,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
       this.options.uploadBatchSize = opt_config.uploadBatchSize || this.options.uploadBatchSize;
       this.options.eventUploadThreshold = opt_config.eventUploadThreshold || this.options.eventUploadThreshold;
       this.options.savedMaxCount = opt_config.savedMaxCount || this.options.savedMaxCount;
+      this.options.eventUploadPeriodMillis = opt_config.eventUploadPeriodMillis || this.options.eventUploadPeriodMillis;
     }
 
     Cookie.options({
@@ -116,9 +118,8 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
         }
       }
     }
-    if (this.shouldSendEvents()) {
-      this.sendEvents();
-    }
+
+    this._sendEventsIfReady();
 
     if (this.options.includeUtm) {
       this._initUtmData();
@@ -149,11 +150,21 @@ Amplitude.prototype.nextEventId = function() {
   return this._eventId;
 };
 
-Amplitude.prototype.shouldSendEvents = function() {
-  var batchEvents = this.options.batchEvents;
-  var numEvents = this._unsentEvents.length;
-  var threshold = this.options.eventUploadThreshold;
-  return (!batchEvents && numEvents > 0) || (batchEvents && numEvents >= threshold);
+Amplitude.prototype._sendEventsIfReady = function() {
+  if (this._unsentEvents.length === 0) {
+    return;
+  }
+
+  if (!this.options.batchEvents) {
+    this.sendEvents();
+    return;
+  }
+
+  if (this._unsentEvents.length >= this.options.eventUploadThreshold) {
+    this.sendEvents();
+  } else {
+    setTimeout(this.sendEvents.bind(this), this.options.eventUploadPeriodMillis);
+  }
 };
 
 var _loadCookieData = function(scope) {
@@ -378,9 +389,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       this.saveEvents();
     }
 
-    if (this.shouldSendEvents()){
-      this.sendEvents();
-    }
+    this._sendEventsIfReady();
 
     return eventId;
   } catch (e) {
@@ -427,7 +436,7 @@ Amplitude.prototype.removeEvents = function (maxEventId) {
 };
 
 Amplitude.prototype.sendEvents = function() {
-  if (!this._sending && !this.options.optOut) {
+  if (!this._sending && !this.options.optOut && this._unsentEvents.length > 0) {
     this._sending = true;
     var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
         this.options.apiEndpoint + '/';
@@ -460,9 +469,8 @@ Amplitude.prototype.sendEvents = function() {
           }
 
           // Send more events if any queued during previous send.
-          if (scope.shouldSendEvents()) {
-            scope.sendEvents();
-          }
+          scope._sendEventsIfReady();
+
         } else if (status === 413) {
           //log('request too large');
           // Can't even get this one massive event through. Drop it.

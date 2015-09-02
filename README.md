@@ -87,7 +87,9 @@ You can configure Amplitude by passing an object as the third argument to the `i
       // optional configuration options
       saveEvents: true,
       includeUtm: true,
-      includeReferrer: true
+      includeReferrer: true,
+      batchEvents: true,
+      eventUploadThreshold: 50
     })
 
 | option | description | default |
@@ -97,8 +99,9 @@ You can configure Amplitude by passing an object as the third argument to the `i
 | uploadBatchSize | Maximum number of events to send to the server per request. | 100 |
 | includeUtm | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
 | includeReferrer | If `true`, includes `referrer` and `referring_domain` as user propeties on all events uploaded. | `false` |
-| batchEvents | If `true`, events are uploaded only when the number of unsent events is greater than `eventUploadThreshold`. | `false` |
-| eventUploadThreshold | Minimum number of events to send to the server per request if `batchEvents` is `true`. | 30 |
+| batchEvents | If `true`, events are batched together and uploaded only when the number of unsent events is greater than or equal to `eventUploadThreshold` or after `eventUploadPeriodMillis` milliseconds have passed since the first unsent event was logged. | `false` |
+| eventUploadThreshold | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
+| eventUploadPeriodMillis | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30*1000 |
 
 
 # Advanced #
