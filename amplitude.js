@@ -3096,7 +3096,7 @@ module.exports = uuid;
 
 }, {}],
 12: [function(require, module, exports) {
-module.exports = '2.2.1';
+module.exports = '2.3.0';
 
 }, {}]}, {}, {"1":""})
 );
