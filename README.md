@@ -102,7 +102,7 @@ You can configure Amplitude by passing an object as the third argument to the `i
 | batchEvents | If `true`, events are batched together and uploaded only when the number of unsent events is greater than or equal to `eventUploadThreshold` or after `eventUploadPeriodMillis` milliseconds have passed since the first unsent event was logged. | `false` |
 | eventUploadThreshold | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
 | eventUploadPeriodMillis | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30*1000 |
-| deviceId | Custom device ID to set | "" |
+| deviceId | Custom device ID to set | Randomly generated UUID |
 
 
 # Advanced #
