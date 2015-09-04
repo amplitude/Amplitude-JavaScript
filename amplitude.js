@@ -262,7 +262,7 @@ Amplitude.prototype.nextEventId = function() {
   return this._eventId;
 };
 
-// returns true if sendEvents called
+// returns true if sendEvents called immediately
 Amplitude.prototype._sendEventsIfReady = function(callback) {
   if (this._unsentEvents.length === 0) {
     return false;

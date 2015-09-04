@@ -426,9 +426,17 @@ describe('Amplitude', function() {
 
     it ('should run callback if no eventType', function () {
       var counter = 0;
-      var callback = function (status, response) { counter++; }
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
       amplitude.logEvent(null, null, callback);
       assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
     });
 
     it ('should run callback if optout', function () {
