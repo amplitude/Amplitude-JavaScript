@@ -71,29 +71,24 @@ describe('Amplitude', function() {
       reset();
     });
 
-    it('should set user properties', function() {
-      amplitude.setUserProperties({'prop': true});
-      assert.propertyVal(amplitude.options.userProperties, 'prop', true);
-    });
+    it('should log identify call from set user properties', function() {
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      amplitude.setUserProperties({'prop': true, 'key': 'value'});
 
-    it('should merge user properties by default', function() {
-      amplitude.setUserProperties({'prop': true, 'prop2': true});
-      assert.propertyVal(amplitude.options.userProperties, 'prop', true);
+      assert.lengthOf(amplitude._unsentEvents, 1);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].event_properties, {});
 
-      amplitude.setUserProperties({'prop': false, 'prop3': false});
-      assert.propertyVal(amplitude.options.userProperties, 'prop', false);
-      assert.propertyVal(amplitude.options.userProperties, 'prop2', true);
-      assert.propertyVal(amplitude.options.userProperties, 'prop3', false);
-    });
-
-    it('should allow overwriting user properties', function() {
-      amplitude.setUserProperties({'prop': true, 'prop2': true});
-      assert.propertyVal(amplitude.options.userProperties, 'prop', true);
-
-      amplitude.setUserProperties({'prop': false, 'prop3': false}, true);
-      assert.notProperty(amplitude.options.userProperties, 'prop2');
-      assert.propertyVal(amplitude.options.userProperties, 'prop', false);
-      assert.propertyVal(amplitude.options.userProperties, 'prop3', false);
+      var expected = {
+        '$set': {
+          'prop': true,
+          'key': 'value'
+        }
+      };
+      assert.deepEqual(events[0].user_properties, expected);
     });
   });
 
@@ -690,7 +685,6 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, undefined, {});
 
       amplitude.setUserProperties({user_prop: true});
-      amplitude.logEvent('UTM Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events[0].user_properties.utm_campaign, undefined);
@@ -722,12 +716,25 @@ describe('Amplitude', function() {
       amplitude._initUtmData(utmParams);
 
       amplitude.setUserProperties({user_prop: true});
-      amplitude.logEvent('UTM Test Event', {});
-
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
-        user_prop: true,
+        '$set': {
+          'user_prop': true
+        },
+        utm_campaign: 'new',
+        utm_content: 'top',
+        utm_medium: 'email',
+        utm_source: 'amplitude',
+        utm_term: 'terms'
+      });
+      server.respondWith('success');
+      server.respond();
+
+      amplitude.logEvent('UTM Test Event', {});
+      assert.lengthOf(server.requests, 2);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
         utm_campaign: 'new',
         utm_content: 'top',
         utm_medium: 'email',
@@ -792,7 +799,6 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, undefined, {});
 
       amplitude.setUserProperties({user_prop: true});
-      amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events[0].user_properties.referrer, undefined);
@@ -804,7 +810,6 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, undefined, {includeReferrer: true});
 
       amplitude.logEvent('Referrer Test Event', {});
-
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
@@ -818,12 +823,12 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, undefined, {includeReferrer: true});
 
       amplitude.setUserProperties({user_prop: true});
-      amplitude.logEvent('Referrer Test Event', {});
-
-      assert.lengthOf(server.requests, 1);
+       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
-        user_prop: true,
+        $set: {
+          'user_prop': true
+        },
         referrer: 'https://amplitude.com/contact',
         referring_domain: 'amplitude.com'
       });

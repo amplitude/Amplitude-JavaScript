@@ -157,5 +157,4 @@ describe('Identify', function() {
     assert.deepEqual(expected, identify.userPropertiesOperations);
     assert.deepEqual([property], identify.properties);
   });
-
 });

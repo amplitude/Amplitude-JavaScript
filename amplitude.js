@@ -126,6 +126,7 @@ var log = function(s) {
   console.log('[Amplitude] ' + s);
 };
 
+var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
 var DEFAULT_OPTIONS = {
   apiEndpoint: 'api.amplitude.com',
@@ -159,8 +160,6 @@ var Amplitude = function() {
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
 };
-
-Amplitude.prototype._test = new Identify();
 
 Amplitude.prototype._eventId = 0;
 Amplitude.prototype._sending = false;
@@ -410,17 +409,23 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
   }
 };
 
-Amplitude.prototype.setUserProperties = function(userProperties, opt_replace) {
-  try {
-    if (opt_replace) {
-      this.options.userProperties = userProperties;
-    } else {
-      this.options.userProperties = object.merge(this.options.userProperties || {}, userProperties);
+Amplitude.prototype.setUserProperties = function(userProperties) {
+
+  // convert userProperties into an identify call
+  var identify = new Identify();
+  for (var property in userProperties) {
+    if (userProperties.hasOwnProperty(property)) {
+      identify.set(property, userProperties[property]);
     }
-    _saveCookieData(this);
-    //log('set userProperties=' + JSON.stringify(userProperties));
-  } catch (e) {
-    log(e);
+  }
+
+  // _saveCookieData(this); ??
+  this.identify(identify);
+};
+
+Amplitude.prototype.identify = function(identify) {
+  if (identify instanceof Identify) {
+    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
   }
 };
 
@@ -436,7 +441,7 @@ Amplitude.prototype.setVersionName = function(versionName) {
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
-Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, callback) {
+Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
   if (typeof callback !== 'function') {
     callback = null;
   }
@@ -459,10 +464,8 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
 
-    var userProperties = {};
-    object.merge(userProperties, this.options.userProperties || {});
-
     // Add the utm properties, if any, onto the user properties.
+    userProperties = userProperties || {};
     object.merge(userProperties, this._utmProperties);
 
     // Add referral info onto the user properties
@@ -524,7 +527,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 };
 
 Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
-  return this._logEvent(eventType, eventProperties, null, callback);
+  return this._logEvent(eventType, eventProperties, null, null, callback);
 };
 
 // Test that n is a number or a numeric value.
@@ -3121,8 +3124,6 @@ module.exports = '2.4.0';
 
 }, {}],
 13: [function(require, module, exports) {
-// var querystring = require('querystring');
-
 /*
  * Wrapper for a user properties JSON object that supports operations
  */

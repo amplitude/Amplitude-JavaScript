@@ -1,5 +1,3 @@
-// var querystring = require('querystring');
-
 /*
  * Wrapper for a user properties JSON object that supports operations
  */
