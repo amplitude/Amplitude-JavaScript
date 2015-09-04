@@ -29,6 +29,7 @@ var DEFAULT_OPTIONS = {
   saveEvents: true,
   sessionTimeout: 30 * 60 * 1000,
   unsentKey: 'amplitude_unsent',
+  unsentIdentifyKey: 'amplitude_unsent_identify',
   uploadBatchSize: 100,
   batchEvents: false,
   eventUploadThreshold: 30,
@@ -45,6 +46,7 @@ var LocalStorageKeys = {
  */
 var Amplitude = function() {
   this._unsentEvents = [];
+  this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
 };
@@ -111,9 +113,11 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
 
     if (this.options.saveEvents) {
       var savedUnsentEventsString = localStorage.getItem(this.options.unsentKey);
+      var savedUnsentIdentifysString = localStorage.getItem(this.options.unsentIdentifyKey);
       if (savedUnsentEventsString) {
         try {
           this._unsentEvents = JSON.parse(savedUnsentEventsString);
+          this._unsentIdentifys = JSON.parse(savedUnsentIdentifysString);
         } catch (e) {
           //log(e);
         }
@@ -151,9 +155,14 @@ Amplitude.prototype.nextEventId = function() {
   return this._eventId;
 };
 
+// returns the number of unsent events and identifys
+Amplitude.prototype._unsentCount = function() {
+  return this._unsentEvents.length + this._unsentIdentifys.length;
+};
+
 // returns true if sendEvents called immediately
 Amplitude.prototype._sendEventsIfReady = function(callback) {
-  if (this._unsentEvents.length === 0) {
+  if (this._unsentCount() === 0) {
     return false;
   }
 
@@ -162,7 +171,7 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
     return true;
   }
 
-  if (this._unsentEvents.length >= this.options.eventUploadThreshold) {
+  if (this._unsentCount() >= this.options.eventUploadThreshold) {
     this.sendEvents(callback);
     return true;
   }
@@ -180,9 +189,6 @@ var _loadCookieData = function(scope) {
     if (cookieData.userId) {
       scope.options.userId = cookieData.userId;
     }
-    if (cookieData.globalUserProperties) {
-      scope.options.userProperties = cookieData.globalUserProperties;
-    }
     if (cookieData.optOut !== undefined) {
       scope.options.optOut = cookieData.optOut;
     }
@@ -193,7 +199,6 @@ var _saveCookieData = function(scope) {
   Cookie.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
-    globalUserProperties: scope.options.userProperties,
     optOut: scope.options.optOut
   });
 };
@@ -247,6 +252,7 @@ Amplitude.prototype._getReferringDomain = function() {
 Amplitude.prototype.saveEvents = function() {
   try {
     localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    localStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
     //log(e);
   }
@@ -453,7 +459,7 @@ Amplitude.prototype.removeEvents = function (maxEventId) {
 };
 
 Amplitude.prototype.sendEvents = function(callback) {
-  if (!this._sending && !this.options.optOut && this._unsentEvents.length > 0) {
+  if (!this._sending && !this.options.optOut && this._unsentCount() > 0) {
     this._sending = true;
     var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
         this.options.apiEndpoint + '/';
