@@ -604,7 +604,7 @@ describe('Amplitude', function() {
       assert.equal(message, 'success');
     });
 
-    it ('should fire callback if server returns something other than 200 and 413', function () {
+    it ('should run callback if server returns something other than 200 and 413', function () {
       var counter = 0;
       var value = -1;
       var message = '';

@@ -521,10 +521,6 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
   }
 };
 
-Amplitude.prototype.logEvent = function(eventType, eventProperties) {
-  return this._logEvent(eventType, eventProperties);
-};
-
 Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
   return this._logEvent(eventType, eventProperties, null, callback);
 };
