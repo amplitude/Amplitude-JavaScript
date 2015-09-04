@@ -3,7 +3,7 @@
   var as = document.createElement('script');
   as.type = 'text/javascript';
   as.async = true;
-  as.src = 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.3.0-min.gz.js';
+  as.src = 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.4.0-min.gz.js';
   var s = document.getElementsByTagName('script')[0];
   s.parentNode.insertBefore(as, s);
   amplitude._q = [];
