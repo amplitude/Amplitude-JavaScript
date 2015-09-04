@@ -5,3 +5,4 @@
   require('./cookie.js');
   require('./amplitude.js');
   require('./ua-parser.js');
+  require('./identify.js');

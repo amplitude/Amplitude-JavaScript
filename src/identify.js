@@ -15,9 +15,14 @@ var Identify = function() {
   this.properties = []; // keep track of keys that have been added
 };
 
+var isNumeric = function(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+};
+
 Identify.prototype.add = function(property, value) {
-  // validate value is number??
-  this._addOperation(AMP_OP_ADD, property, value);
+  if (isNumeric(value) || typeof(value) === 'string' || value instanceof String) {
+    this._addOperation(AMP_OP_ADD, property, value);
+  }
   return this;
 };
 
@@ -27,7 +32,7 @@ Identify.prototype.set = function(property, value) {
 };
 
 Identify.prototype.setOnce = function(property, value) {
-  this._addOperation(AMP_OP_SET_ONCE, value);
+  this._addOperation(AMP_OP_SET_ONCE, property, value);
   return this;
 };
 
@@ -49,11 +54,4 @@ Identify.prototype._addOperation = function(operation, property, value) {
   this.properties.push(property);
 };
 
-
-module.exports = {
-  Identify: Identify,
-  AMP_OP_ADD: AMP_OP_ADD,
-  AMP_OP_SET: AMP_OP_SET,
-  AMP_OP_SET_ONCE: AMP_OP_SET_ONCE,
-  AMP_OP_UNSET: AMP_OP_UNSET
-};
+module.exports = Identify;

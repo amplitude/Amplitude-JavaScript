@@ -8,6 +8,7 @@ var Request = require('./xhr');
 var UAParser = require('ua-parser-js');
 var UUID = require('./uuid');
 var version = require('./version');
+var Identify = require('./identify');
 
 var log = function(s) {
   console.log('[Amplitude] ' + s);
@@ -47,6 +48,7 @@ var Amplitude = function() {
   this.options = object.merge({}, DEFAULT_OPTIONS);
 };
 
+Amplitude.prototype._test = new Identify();
 
 Amplitude.prototype._eventId = 0;
 Amplitude.prototype._sending = false;

@@ -120,6 +120,7 @@ var Request = require('./xhr');
 var UAParser = require('ua-parser-js');
 var UUID = require('./uuid');
 var version = require('./version');
+var Identify = require('./identify');
 
 var log = function(s) {
   console.log('[Amplitude] ' + s);
@@ -159,6 +160,7 @@ var Amplitude = function() {
   this.options = object.merge({}, DEFAULT_OPTIONS);
 };
 
+Amplitude.prototype._test = new Identify();
 
 Amplitude.prototype._eventId = 0;
 Amplitude.prototype._sending = false;
@@ -630,7 +632,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12}],
+}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13}],
 3: [function(require, module, exports) {
 /*
  * Cookie data
@@ -757,8 +759,8 @@ module.exports = {
 
 };
 
-}, {"./base64":13,"json":4,"top-domain":14}],
-13: [function(require, module, exports) {
+}, {"./base64":14,"json":4,"top-domain":15}],
+14: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -857,8 +859,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":15}],
-15: [function(require, module, exports) {
+}, {"./utf8":16}],
+16: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -928,8 +930,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":16}],
-16: [function(require, module, exports) {
+}, {"json-fallback":17}],
+17: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1419,7 +1421,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-14: [function(require, module, exports) {
+15: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1467,8 +1469,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":17}],
-17: [function(require, module, exports) {
+}, {"url":18}],
+18: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -2063,8 +2065,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":18}],
-18: [function(require, module, exports) {
+}, {"querystring":19}],
+19: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2139,8 +2141,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":19,"type":20}],
-19: [function(require, module, exports) {
+}, {"trim":20,"type":21}],
+20: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2160,7 +2162,7 @@ exports.right = function(str){
 };
 
 }, {}],
-20: [function(require, module, exports) {
+21: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -3116,6 +3118,66 @@ module.exports = uuid;
 }, {}],
 12: [function(require, module, exports) {
 module.exports = '2.3.0';
+
+}, {}],
+13: [function(require, module, exports) {
+// var querystring = require('querystring');
+
+/*
+ * Wrapper for a user properties JSON object that supports operations
+ */
+
+var AMP_OP_ADD = '$add';
+var AMP_OP_SET = '$set';
+var AMP_OP_SET_ONCE = '$setOnce';
+var AMP_OP_UNSET = '$unset';
+
+
+var Identify = function() {
+  this.userPropertiesOperations = {};
+  this.properties = []; // keep track of keys that have been added
+};
+
+var isNumeric = function(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+};
+
+Identify.prototype.add = function(property, value) {
+  if (isNumeric(value) || typeof(value) === 'string' || value instanceof String) {
+    this._addOperation(AMP_OP_ADD, property, value);
+  }
+  return this;
+};
+
+Identify.prototype.set = function(property, value) {
+  this._addOperation(AMP_OP_SET, property, value);
+  return this;
+};
+
+Identify.prototype.setOnce = function(property, value) {
+  this._addOperation(AMP_OP_SET_ONCE, property, value);
+  return this;
+};
+
+Identify.prototype.unset = function(property) {
+  this._addOperation(AMP_OP_UNSET, property, '-');
+  return this;
+};
+
+Identify.prototype._addOperation = function(operation, property, value) {
+  // check that property wasn't already used in this Identify
+  if (this.properties.indexOf(property) !== -1) {
+    return;
+  }
+
+  if (!(operation in this.userPropertiesOperations)){
+    this.userPropertiesOperations[operation] = {};
+  }
+  this.userPropertiesOperations[operation][property] = value;
+  this.properties.push(property);
+};
+
+module.exports = Identify;
 
 }, {}]}, {}, {"1":""})
 );
