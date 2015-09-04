@@ -5,6 +5,7 @@ describe('Amplitude', function() {
   var cookie = require('../src/cookie.js');
   var querystring = require('querystring');
   var JSON = require('json');
+  var Identify = require('../src/identify.js');
   var apiKey = '000000';
   var userId = 'user';
   var amplitude;
@@ -121,6 +122,64 @@ describe('Amplitude', function() {
       var stored = cookie.get(amplitude.options.cookieName);
       assert.propertyVal(stored, 'deviceId', 'deviceId');
     });
+  });
+
+  describe('identify', function() {
+
+    beforeEach(function() {
+      clock = sinon.useFakeTimers();
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+      clock.restore();
+    });
+
+    it('should ignore inputs that are not identify objects', function() {
+      amplitude.identify('This is a test');
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.identify(150);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.identify(['test']);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.identify({'user_prop': true});
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should generate an event from the identify object', function() {
+      var identify = new Identify().set('prop1', 'value1').unset('prop2').add('prop3', 3).setOnce('prop4', true);
+      amplitude.identify(identify);
+
+      assert.lengthOf(amplitude._unsentEvents, 1);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].event_properties, {});
+      assert.deepEqual(events[0].user_properties, {
+        '$set': {
+          'prop1': 'value1'
+        },
+        '$unset': {
+          'prop2': '-'
+        },
+        '$add': {
+          'prop3': 3
+        },
+        '$setOnce': {
+          'prop4': true
+        }
+      });
+    });
+
   });
 
   describe('logEvent', function() {
