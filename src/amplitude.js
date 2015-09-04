@@ -150,21 +150,24 @@ Amplitude.prototype.nextEventId = function() {
   return this._eventId;
 };
 
-Amplitude.prototype._sendEventsIfReady = function() {
+// returns true if sendEvents called immediately
+Amplitude.prototype._sendEventsIfReady = function(callback) {
   if (this._unsentEvents.length === 0) {
-    return;
+    return false;
   }
 
   if (!this.options.batchEvents) {
-    this.sendEvents();
-    return;
+    this.sendEvents(callback);
+    return true;
   }
 
   if (this._unsentEvents.length >= this.options.eventUploadThreshold) {
-    this.sendEvents();
-  } else {
-    setTimeout(this.sendEvents.bind(this), this.options.eventUploadPeriodMillis);
+    this.sendEvents(callback);
+    return true;
   }
+
+  setTimeout(this.sendEvents.bind(this), this.options.eventUploadPeriodMillis);
+  return false;
 };
 
 var _loadCookieData = function(scope) {
@@ -319,8 +322,15 @@ Amplitude.prototype.setVersionName = function(versionName) {
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
-Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties) {
+Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, callback) {
+  if (typeof callback !== 'function') {
+    callback = null;
+  }
+
   if (!eventType || this.options.optOut) {
+    if (callback) {
+      callback(0, 'No request sent');
+    }
     return;
   }
   try {
@@ -389,7 +399,9 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       this.saveEvents();
     }
 
-    this._sendEventsIfReady();
+    if (!this._sendEventsIfReady(callback) && callback) {
+      callback(0, 'No request sent');
+    }
 
     return eventId;
   } catch (e) {
@@ -397,8 +409,8 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
   }
 };
 
-Amplitude.prototype.logEvent = function(eventType, eventProperties) {
-  return this._logEvent(eventType, eventProperties);
+Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
+  return this._logEvent(eventType, eventProperties, null, callback);
 };
 
 // Test that n is a number or a numeric value.
@@ -435,7 +447,7 @@ Amplitude.prototype.removeEvents = function (maxEventId) {
   this._unsentEvents = filteredEvents;
 };
 
-Amplitude.prototype.sendEvents = function() {
+Amplitude.prototype.sendEvents = function(callback) {
   if (!this._sending && !this.options.optOut && this._unsentEvents.length > 0) {
     this._sending = true;
     var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
@@ -469,7 +481,9 @@ Amplitude.prototype.sendEvents = function() {
           }
 
           // Send more events if any queued during previous send.
-          scope._sendEventsIfReady();
+          if (!scope._sendEventsIfReady(callback) && callback) {
+            callback(status, response);
+          }
 
         } else if (status === 413) {
           //log('request too large');
@@ -481,12 +495,17 @@ Amplitude.prototype.sendEvents = function() {
           // The server complained about the length of the request.
           // Backoff and try again.
           scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
-          scope.sendEvents();
+          scope.sendEvents(callback);
+
+        } else if (callback) { // If server turns something like a 400
+          callback(status, response);
         }
       } catch (e) {
         //log('failed upload');
       }
     });
+  } else if (callback) {
+    callback(0, 'No request sent');
   }
 };
 

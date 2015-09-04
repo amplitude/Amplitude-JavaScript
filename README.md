@@ -118,3 +118,20 @@ User IDs are automatically generated and stored in cookies if not specified.
 Device IDs are generated randomly, although you can define a custom device ID setting it as a configuration option or by calling:
 
     amplitude.setDeviceId("CUSTOM_DEVICE_ID");
+
+You can pass a callback function to logEvent, which will get called after receiving a response from the server:
+
+    amplitude.logEvent("EVENT_IDENTIFIER_HERE", null, callback_function);
+
+The status and response from the server are passed to the callback function, which you might find useful. An example of a callback function which redirects the browser to another site after a response:
+
+```javascript
+  var callback_function = function(status, response) {
+    if (status === 200 && response === 'success') {
+      // do something here
+    }
+    window.location.replace('URL_OF_OTHER_SITE');
+  };
+```
+
+In the case that `optOut` is true, then no event will be logged, but the callback will be called. In the case that `batchEvents` is true, if the batch requirements `eventUploadThreshold` and `eventUploadPeriodMillis` are not met when `logEvent` is called, then no request is sent, but the callback is still called. In these cases, the callback will be called with an input status of 0 and response 'No request sent'.
