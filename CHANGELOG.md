@@ -1,5 +1,9 @@
 ## Unreleased
 
+* Add support for passing callback functions to logEvent
+
+## 2.3.0 (September 2, 2015)
+
 * Add option to batch events into a single request.
 
 ## 2.2.1 (Aug 13, 2015)

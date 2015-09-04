@@ -423,6 +423,197 @@ describe('Amplitude', function() {
       assert.lengthOf(events, 1);
       assert.deepEqual(events[0].event_properties, {index: 2});
     });
+
+    it ('should run callback if no eventType', function () {
+      var counter = 0;
+      var callback = function (status, response) { counter++; }
+      amplitude.logEvent(null, null, callback);
+      assert.equal(counter, 1);
+    });
+
+    it ('should run callback if optout', function () {
+      amplitude.setOptOut(true);
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      };
+      amplitude.logEvent('test', null, callback);
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+    });
+
+    it ('should not run callback if invalid callback and no eventType', function () {
+      amplitude.logEvent(null, null, 'invalid callback');
+    });
+
+    it ('should run callback after logging event', function () {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      };
+      amplitude.logEvent('test', null, callback);
+
+      // before server responds, callback should not fire
+      assert.lengthOf(server.requests, 1);
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      // after server response, fire callback
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
+    it ('should run callback if batchEvents but under threshold', function () {
+      var eventUploadPeriodMillis = 5*1000;
+      amplitude.init(apiKey, null, {
+        batchEvents: true,
+        eventUploadThreshold: 2,
+        eventUploadPeriodMillis: eventUploadPeriodMillis
+      });
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      };
+      amplitude.logEvent('test', null, callback);
+      assert.lengthOf(server.requests, 0);
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+
+      // check that request is made after delay, but callback is not run a second time
+      clock.tick(eventUploadPeriodMillis);
+      assert.lengthOf(server.requests, 1);
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+    });
+
+    it ('should run callback once and only after all events are uploaded', function () {
+      amplitude.init(apiKey, null, {uploadBatchSize: 10});
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      };
+
+      // queue up 15 events, since batchsize 10, need to send in 2 batches
+      amplitude._sending = true;
+      for (var i = 0; i < 15; i++) {
+        amplitude.logEvent('Event', {index: i});
+      }
+      amplitude._sending = false;
+
+      amplitude.logEvent('Event', {index: 100}, callback);
+
+      assert.lengthOf(server.requests, 1);
+      server.respondWith('success');
+      server.respond();
+
+      // after first response received, callback should not have fired
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      assert.lengthOf(server.requests, 2);
+      server.respondWith('success');
+      server.respond();
+
+      // after last response received, callback should fire
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
+    it ('should run callback once and only after 413 resolved', function () {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      };
+
+      // queue up 15 events
+      amplitude._sending = true;
+      for (var i = 0; i < 15; i++) {
+        amplitude.logEvent('Event', {index: i});
+      }
+      amplitude._sending = false;
+
+      // 16th event with 413 will backoff to batches of 8
+      amplitude.logEvent('Event', {index: 100}, callback);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 16);
+
+      // after 413 response received, callback should not have fired
+      server.respondWith([413, {}, ""]);
+      server.respond();
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      // after sending first backoff batch, callback still should not have fired
+      assert.lengthOf(server.requests, 2);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.lengthOf(events, 8);
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      // after sending second backoff batch, callback should fire
+      assert.lengthOf(server.requests, 3);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.lengthOf(events, 8);
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
+    it ('should fire callback if server returns something other than 200 and 413', function () {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      };
+
+      amplitude.logEvent('test', null, callback);
+      server.respondWith([404, {}, 'Not found']);
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 404);
+      assert.equal(message, 'Not found');
+    });
+
   });
 
   describe('optOut', function() {
