@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 2.4.0 (September 4, 2015)
+
 * Add support for passing callback functions to logEvent
 
 ## 2.3.0 (September 2, 2015)
