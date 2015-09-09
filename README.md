@@ -93,10 +93,10 @@ The SDK supports the operations set, setOnce, unset, and add on individual user 
 
 Note: if a user property is used in multiple operations on the same `Identify` object, only the first operation will be saved, and the rest will be ignored. In this example, only the set operation will be saved, and the add and unset will be ignored:
 
-    ```javascript
-    var identify = new amplitude.Identify().set('karma', 10).add('karma', 1).unset('karma');
-    amplitude.identify(identify);
-    ```
+```javascript
+var identify = new amplitude.Identify().set('karma', 10).add('karma', 1).unset('karma');
+amplitude.identify(identify);
+```
 
 # Tracking Revenue #
 
