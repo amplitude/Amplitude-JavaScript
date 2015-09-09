@@ -433,7 +433,6 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
 };
 
 Amplitude.prototype.setUserProperties = function(userProperties) {
-
   // convert userProperties into an identify call
   var identify = new Identify();
   for (var property in userProperties) {
@@ -441,8 +440,6 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
       identify.set(property, userProperties[property]);
     }
   }
-
-  // _saveCookieData(this); ??
   this.identify(identify);
 };
 
