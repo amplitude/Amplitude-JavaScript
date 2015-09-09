@@ -16,6 +16,7 @@ var log = function(s) {
 
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
+var MAX_STRING_LENGTH = 1024;
 var DEFAULT_OPTIONS = {
   apiEndpoint: 'api.amplitude.com',
   cookieExpiration: 365 * 10,
@@ -37,6 +38,7 @@ var DEFAULT_OPTIONS = {
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
+  LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
   SESSION_ID: 'amplitude_sessionId'
 };
@@ -52,10 +54,13 @@ var Amplitude = function() {
 };
 
 Amplitude.prototype._eventId = 0;
+Amplitude.prototype._identifyId = 0;
 Amplitude.prototype._sending = false;
 Amplitude.prototype._lastEventTime = null;
 Amplitude.prototype._sessionId = null;
 Amplitude.prototype._newSession = false;
+
+Amplitude.prototype.Identify = Identify;
 
 /**
  * Initializes Amplitude.
@@ -113,10 +118,16 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
 
     if (this.options.saveEvents) {
       var savedUnsentEventsString = localStorage.getItem(this.options.unsentKey);
-      var savedUnsentIdentifysString = localStorage.getItem(this.options.unsentIdentifyKey);
       if (savedUnsentEventsString) {
         try {
           this._unsentEvents = JSON.parse(savedUnsentEventsString);
+        } catch (e) {
+          //log(e);
+        }
+      }
+      var savedUnsentIdentifysString = localStorage.getItem(this.options.unsentIdentifyKey);
+      if (savedUnsentIdentifysString) {
+        try {
           this._unsentIdentifys = JSON.parse(savedUnsentIdentifysString);
         } catch (e) {
           //log(e);
@@ -133,6 +144,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
     this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
     this._sessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
     this._eventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID) || 0;
+    this._identifyId = localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID) || 0;
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
@@ -153,6 +165,11 @@ Amplitude.prototype.isNewSession = function() {
 Amplitude.prototype.nextEventId = function() {
   this._eventId++;
   return this._eventId;
+};
+
+Amplitude.prototype.nextIdentifyId = function() {
+  this._identifyId++;
+  return this._identifyId;
 };
 
 // returns the number of unsent events and identifys
@@ -332,6 +349,34 @@ Amplitude.prototype.setVersionName = function(versionName) {
   }
 };
 
+// truncate string values in event and user properties so that request size does not get too large
+Amplitude.prototype._truncate = function(value) {
+  if (typeof(value) === 'object') {
+    if (Array.isArray(value)) {
+      for (var i = 0; i < value.length; i++) {
+        value[i] = this._truncate(value[i]);
+      }
+    } else {
+      for (var key in value) {
+        if (value.hasOwnProperty(key)) {
+          value[key] = this._truncate(value[key]);
+        }
+      }
+    }
+
+    return value;
+  }
+
+  return _truncateValue(value);
+};
+
+var _truncateValue = function(value) {
+  if (typeof(value) === 'string') {
+    return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
+  }
+  return value;
+};
+
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
@@ -347,8 +392,15 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     return;
   }
   try {
+    var eventId;
+    if (eventType === IDENTIFY_EVENT) {
+      eventId = this.nextIdentifyId();
+      localStorage.setItem(LocalStorageKeys.LAST_IDENTIFY_ID, eventId);
+    } else {
+      eventId = this.nextEventId();
+      localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
+    }
     var eventTime = new Date().getTime();
-    var eventId = this.nextEventId();
     var ua = this._ua;
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
@@ -356,7 +408,6 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     }
     this._lastEventTime = eventTime;
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
-    localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
 
     // Add the utm properties, if any, onto the user properties.
     userProperties = userProperties || {};
@@ -386,8 +437,8 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       device_model: ua.os.name || null,
       language: this.options.language,
       api_properties: apiProperties,
-      event_properties: eventProperties,
-      user_properties: userProperties,
+      event_properties: this._truncate(eventProperties),
+      user_properties: this._truncate(userProperties),
       uuid: UUID(),
       library: {
         name: 'amplitude-js',
@@ -396,14 +447,19 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       // country: null
     };
 
-    //log('logged eventType=' + eventType + ', properties=' + JSON.stringify(eventProperties));
+    if (eventType === IDENTIFY_EVENT) {
+      this._unsentIdentifys.push(event);
+      if (this._unsentIdentifys.length > this.options.savedMaxCount) {
+        this._unsentIdentifys.splice(0, this._unsentIdentifys.length - this.options.savedMaxCount);
+      }
+    } else {
+      this._unsentEvents.push(event);
 
-    this._unsentEvents.push(event);
-
-    // Remove old events from the beginning of the array if too many
-    // have accumulated. Don't want to kill memory. Default is 1000 events.
-    if (this._unsentEvents.length > this.options.savedMaxCount) {
-      this._unsentEvents.splice(0, this._unsentEvents.length - this.options.savedMaxCount);
+      // Remove old events from the beginning of the array if too many
+      // have accumulated. Don't want to kill memory. Default is 1000 events.
+      if (this._unsentEvents.length > this.options.savedMaxCount) {
+        this._unsentEvents.splice(0, this._unsentEvents.length - this.options.savedMaxCount);
+      }
     }
 
     if (this.options.saveEvents) {
@@ -448,14 +504,26 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
  * Remove events in storage with event ids up to and including maxEventId. Does
  * a true filter in case events get out of order or old events are removed.
  */
-Amplitude.prototype.removeEvents = function (maxEventId) {
-  var filteredEvents = [];
-  for (var i = 0; i < this._unsentEvents.length; i++) {
-    if (this._unsentEvents[i].event_id > maxEventId) {
-      filteredEvents.push(this._unsentEvents[i]);
+Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
+  if (maxEventId) {
+    var filteredEvents = [];
+    for (var i = 0; i < this._unsentEvents.length; i++) {
+      if (this._unsentEvents[i].event_id > maxEventId) {
+        filteredEvents.push(this._unsentEvents[i]);
+      }
     }
+    this._unsentEvents = filteredEvents;
   }
-  this._unsentEvents = filteredEvents;
+
+  if (maxIdentifyId) {
+    var filteredIdentifys = [];
+    for (var j = 0; j < this._unsentIdentifys.length; j++) {
+      if (this._unsentIdentifys[j].event_id > maxIdentifyId) {
+        filteredIdentifys.push(this._unsentIdentifys[j]);
+      }
+    }
+    this._unsentIdentifys = filteredIdentifys;
+  }
 };
 
 Amplitude.prototype.sendEvents = function(callback) {
@@ -465,10 +533,42 @@ Amplitude.prototype.sendEvents = function(callback) {
         this.options.apiEndpoint + '/';
 
     // Determine how many events to send and track the maximum event id sent in this batch.
-    var numEvents = Math.min(this._unsentEvents.length, this.options.uploadBatchSize);
-    var maxEventId = this._unsentEvents[numEvents - 1].event_id;
+    var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
 
-    var events = JSON.stringify(this._unsentEvents.slice(0, numEvents));
+    // coalesce events from both queues
+    var eventsToSend = [];
+    var eventIndex = 0;
+    var identifyIndex = 0;
+
+    while (eventsToSend.length < numEvents) {
+      var event;
+
+      // case 1: no identifys - grab from events
+      if (identifyIndex >= this._unsentIdentifys.length) {
+        event = this._unsentEvents[eventIndex++];
+
+      // case 2: no events - grab from identifys
+      } else if (eventIndex >= this._unsentEvents.length) {
+        event = this._unsentIdentifys[identifyIndex++];
+
+      // case 3: need to compare timestamps
+      } else {
+        if (this._unsentIdentifys[identifyIndex].timestamp <= this._unsentEvents[eventIndex].timestamp) {
+          event = this._unsentIdentifys[identifyIndex++];
+        } else {
+          event = this._unsentEvents[eventIndex++];
+        }
+      }
+
+      eventsToSend.push(event);
+    }
+
+    var maxEventId = eventIndex > 0 && this._unsentEvents.length > 0 ?
+      this._unsentEvents[eventIndex - 1].event_id : null;
+    var maxIdentifyId = identifyIndex > 0 && this._unsentIdentifys.length > 0 ?
+      this._unsentIdentifys[identifyIndex - 1].event_id : null;
+    var events = JSON.stringify(eventsToSend);
+
     var uploadTime = new Date().getTime();
     var data = {
       client: this.options.apiKey,
@@ -484,7 +584,7 @@ Amplitude.prototype.sendEvents = function(callback) {
       try {
         if (status === 200 && response === 'success') {
           //log('sucessful upload');
-          scope.removeEvents(maxEventId);
+          scope.removeEvents(maxEventId, maxIdentifyId);
 
           // Update the event cache after the removal of sent events.
           if (scope.options.saveEvents) {
@@ -500,7 +600,8 @@ Amplitude.prototype.sendEvents = function(callback) {
           //log('request too large');
           // Can't even get this one massive event through. Drop it.
           if (scope.options.uploadBatchSize === 1) {
-            scope.removeEvents(maxEventId);
+            // if massive event is identify, still need to drop it
+            scope.removeEvents(maxEventId, maxIdentifyId);
           }
 
           // The server complained about the length of the request.
