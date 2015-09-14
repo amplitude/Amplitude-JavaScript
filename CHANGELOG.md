@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add support for passing callback function to init.
+
 ## 2.4.0 (September 4, 2015)
 
 * Add support for passing callback functions to logEvent

@@ -175,7 +175,7 @@ Amplitude.prototype._newSession = false;
  *   - includeUtm (boolean) Whether to send utm parameters with events. Defaults to false.
  *   - includeReferrer (boolean) Whether to send referrer info with events. Defaults to false.
  */
-Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
+Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   try {
     this.options.apiKey = apiKey;
     if (opt_config) {
@@ -250,6 +250,10 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
   } catch (e) {
     log(e);
+  }
+
+  if (callback && typeof(callback) === 'function') {
+    callback();
   }
 };
 
