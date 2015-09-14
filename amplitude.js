@@ -229,22 +229,8 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
 
     if (this.options.saveEvents) {
-      var savedUnsentEventsString = localStorage.getItem(this.options.unsentKey);
-      if (savedUnsentEventsString) {
-        try {
-          this._unsentEvents = JSON.parse(savedUnsentEventsString);
-        } catch (e) {
-          //log(e);
-        }
-      }
-      var savedUnsentIdentifysString = localStorage.getItem(this.options.unsentIdentifyKey);
-      if (savedUnsentIdentifysString) {
-        try {
-          this._unsentIdentifys = JSON.parse(savedUnsentIdentifysString);
-        } catch (e) {
-          //log(e);
-        }
-      }
+      this._loadSavedUnsentEvents(this.options.unsentKey, '_unsentEvents');
+      this._loadSavedUnsentEvents(this.options.unsentIdentifyKey, '_unsentIdentifys');
     }
 
     this._sendEventsIfReady();
@@ -267,6 +253,17 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config) {
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
   } catch (e) {
     log(e);
+  }
+};
+
+Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey, queue) {
+  var savedUnsentEventsString = localStorage.getItem(unsentKey);
+  if (savedUnsentEventsString) {
+    try {
+      this[queue] = JSON.parse(savedUnsentEventsString);
+    } catch (e) {
+      //log(e);
+    }
   }
 };
 
@@ -558,17 +555,10 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 
     if (eventType === IDENTIFY_EVENT) {
       this._unsentIdentifys.push(event);
-      if (this._unsentIdentifys.length > this.options.savedMaxCount) {
-        this._unsentIdentifys.splice(0, this._unsentIdentifys.length - this.options.savedMaxCount);
-      }
+      this._limitEventsQueued(this._unsentIdentifys);
     } else {
       this._unsentEvents.push(event);
-
-      // Remove old events from the beginning of the array if too many
-      // have accumulated. Don't want to kill memory. Default is 1000 events.
-      if (this._unsentEvents.length > this.options.savedMaxCount) {
-        this._unsentEvents.splice(0, this._unsentEvents.length - this.options.savedMaxCount);
-      }
+      this._limitEventsQueued(this._unsentEvents);
     }
 
     if (this.options.saveEvents) {
@@ -582,6 +572,14 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     return eventId;
   } catch (e) {
     log(e);
+  }
+};
+
+// Remove old events from the beginning of the array if too many
+// have accumulated. Don't want to kill memory. Default is 1000 events.
+Amplitude.prototype._limitEventsQueued = function(queue) {
+  if (queue.length > this.options.savedMaxCount) {
+    queue.splice(0, queue.length - this.options.savedMaxCount);
   }
 };
 

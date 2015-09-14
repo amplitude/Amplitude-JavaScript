@@ -954,6 +954,23 @@ describe('Amplitude', function() {
       amplitude2.init(apiKey);
       assert.strictEqual(amplitude2.options.optOut, true);
     });
+
+    it('should limit identify events queued', function() {
+      amplitude.init(apiKey, null, {savedMaxCount: 10});
+
+      amplitude._sending = true;
+      for (var i = 0; i < 15; i++) {
+        amplitude.identify(new Identify().add('test', i));
+      }
+      amplitude._sending = false;
+
+      amplitude.identify(new Identify().add('test', 100));
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 10);
+      assert.deepEqual(events[0].user_properties, {$add: {'test': 6}});
+      assert.deepEqual(events[9].user_properties, {$add: {'test': 100}});
+    });
   });
 
   describe('gatherUtm', function() {
@@ -1256,7 +1273,7 @@ describe('Amplitude', function() {
       assert.lengthOf(eventProperties[1][1], 4);
     });
 
-    it('should handle arrays nested inside dictionaryes', function() {
+    it('should handle arrays nested inside dictionaries', function() {
       var test = [longString, 'test'];
       var eventProperties = amplitude._truncate({'name': test});
       assert.lengthOf(Object.keys(eventProperties), 1);

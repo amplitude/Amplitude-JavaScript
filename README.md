@@ -63,24 +63,24 @@ The SDK supports the operations set, setOnce, unset, and add on individual user 
 1. `set`: this sets the value of a user property.
 
     ```javascript
-    var identify = new amplitude.Identify().set('city', 'Boston, MA').set('country', 'United States');
+    var identify = new amplitude.Identify().set('gender', 'female').set('age', 20);
     amplitude.identify(identify);
     ```
 
-2. `setOnce`: this sets the value of a user property only once. Subsequent `setOnce` operations on that user property will be ignored. In the following example, the city will be set once to `Boston, MA`, and the following setOnce to `San Francisco, CA` will be ignored:
+2. `setOnce`: this sets the value of a user property only once. Subsequent `setOnce` operations on that user property will be ignored. In the following example, `sign_up_date` will be set once to `08/24/2015`, and the following setOnce to `09/14/2015` will be ignored:
 
     ```javascript
-    var identify = new amplitude.Identify().setOnce('city', 'Boston, MA');
+    var identify = new amplitude.Identify().setOnce('sign_up_date', '08/24/2015');
     amplitude.identify(identify);
 
-    var identify = new amplitude.Identify().setOnce('city', 'San Francisco, CA');
+    var identify = new amplitude.Identify().setOnce('sign_up_date', '09/14/2015');
     amplitude.identify(identify);
     ```
 
 3. `unset`: this will unset and remove a user property.
 
     ```javascript
-    var identify = new amplitude.Identify().unset('city').unset('country');
+    var identify = new amplitude.Identify().unset('gender').unset('age');
     amplitude.identify(identify);
     ```
 
