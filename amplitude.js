@@ -1572,7 +1572,22 @@ module.exports = {
  */
 var localStorage; // jshint ignore:line
 
-if (window.localStorage) {
+// test that Window.localStorage is available and works
+function windowLocalStorageAvailable() {
+  var uid = new Date();
+  var result;
+  try {
+    window.localStorage.setItem(uid, uid);
+    result = window.localStorage.getItem(uid) === String(uid);
+    window.localStorage.removeItem(uid);
+    return result;
+  } catch (e) {
+    // localStorage not available
+  }
+  return false;
+}
+
+if (windowLocalStorageAvailable()) {
   localStorage = window.localStorage;
 } else if (window.globalStorage) {
   // Firefox 2-3 use globalStorage

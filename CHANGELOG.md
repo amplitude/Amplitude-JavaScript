@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Fix bug to check that Window localStorage is available for use.
+
 ## 2.4.0 (September 4, 2015)
 
 * Add support for passing callback functions to logEvent
