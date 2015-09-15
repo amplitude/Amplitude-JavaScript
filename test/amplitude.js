@@ -60,6 +60,19 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, userId, {language: 'en-GB'});
       assert.propertyVal(amplitude.options, 'language', 'en-GB');
     });
+
+    it ('should not run callback if invalid callback', function() {
+      amplitude.init(apiKey, userId, null, 'invalid callback');
+    });
+
+    it ('should run valid callbacks', function() {
+      var counter = 0;
+      var callback = function() {
+        counter++;
+      };
+      amplitude.init(apiKey, userId, null, callback);
+      assert.equal(counter, 1);
+    });
   });
 
   describe('setUserProperties', function() {

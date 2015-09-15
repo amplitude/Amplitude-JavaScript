@@ -134,4 +134,8 @@ The status and response from the server are passed to the callback function, whi
   };
 ```
 
+You can also pass a callback function to init, which will get called after the SDK finishes its asynchronous loading. Note: no values are passed to the init callback function:
+
+    amplitude.init("YOUR_API_KEY_HERE", "USER_ID_HERE", null, callback_function);
+
 In the case that `optOut` is true, then no event will be logged, but the callback will be called. In the case that `batchEvents` is true, if the batch requirements `eventUploadThreshold` and `eventUploadPeriodMillis` are not met when `logEvent` is called, then no request is sent, but the callback is still called. In these cases, the callback will be called with an input status of 0 and response 'No request sent'.
