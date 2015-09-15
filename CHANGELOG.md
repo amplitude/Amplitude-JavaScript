@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Add support for passing callback function to init.
+* Fix bug to check that Window localStorage is available for use.
 
 ## 2.4.0 (September 4, 2015)
 
