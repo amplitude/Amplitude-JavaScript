@@ -121,6 +121,7 @@ var UAParser = require('ua-parser-js');
 var UUID = require('./uuid');
 var version = require('./version');
 var Identify = require('./identify');
+var type = require('./type');
 
 var log = function(s) {
   console.log('[Amplitude] ' + s);
@@ -457,27 +458,25 @@ Amplitude.prototype.setVersionName = function(versionName) {
 
 // truncate string values in event and user properties so that request size does not get too large
 Amplitude.prototype._truncate = function(value) {
-  if (typeof(value) === 'object') {
-    if (Array.isArray(value)) {
-      for (var i = 0; i < value.length; i++) {
-        value[i] = this._truncate(value[i]);
-      }
-    } else {
-      for (var key in value) {
-        if (value.hasOwnProperty(key)) {
-          value[key] = this._truncate(value[key]);
-        }
+  if (type(value) === 'array') {
+    for (var i = 0; i < value.length; i++) {
+      value[i] = this._truncate(value[i]);
+    }
+  } else if (type(value) === 'object') {
+    for (var key in value) {
+      if (value.hasOwnProperty(key)) {
+        value[key] = this._truncate(value[key]);
       }
     }
-
-    return value;
+  } else {
+    value = _truncateValue(value);
   }
 
-  return _truncateValue(value);
+  return value;
 };
 
 var _truncateValue = function(value) {
-  if (typeof(value) === 'string') {
+  if (type(value) === 'string') {
     return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
   }
   return value;
@@ -612,7 +611,7 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
  * a true filter in case events get out of order or old events are removed.
  */
 Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
-  if (maxEventId) {
+  if (maxEventId >= 0) {
     var filteredEvents = [];
     for (var i = 0; i < this._unsentEvents.length; i++) {
       if (this._unsentEvents[i].event_id > maxEventId) {
@@ -622,7 +621,7 @@ Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
     this._unsentEvents = filteredEvents;
   }
 
-  if (maxIdentifyId) {
+  if (maxIdentifyId >= 0) {
     var filteredIdentifys = [];
     for (var j = 0; j < this._unsentIdentifys.length; j++) {
       if (this._unsentIdentifys[j].event_id > maxIdentifyId) {
@@ -639,42 +638,12 @@ Amplitude.prototype.sendEvents = function(callback) {
     var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
         this.options.apiEndpoint + '/';
 
-    // Determine how many events to send and track the maximum event id sent in this batch.
+    // fetch events to send
     var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
-
-    // coalesce events from both queues
-    var eventsToSend = [];
-    var eventIndex = 0;
-    var identifyIndex = 0;
-
-    while (eventsToSend.length < numEvents) {
-      var event;
-
-      // case 1: no identifys - grab from events
-      if (identifyIndex >= this._unsentIdentifys.length) {
-        event = this._unsentEvents[eventIndex++];
-
-      // case 2: no events - grab from identifys
-      } else if (eventIndex >= this._unsentEvents.length) {
-        event = this._unsentIdentifys[identifyIndex++];
-
-      // case 3: need to compare timestamps
-      } else {
-        if (this._unsentIdentifys[identifyIndex].timestamp <= this._unsentEvents[eventIndex].timestamp) {
-          event = this._unsentIdentifys[identifyIndex++];
-        } else {
-          event = this._unsentEvents[eventIndex++];
-        }
-      }
-
-      eventsToSend.push(event);
-    }
-
-    var maxEventId = eventIndex > 0 && this._unsentEvents.length > 0 ?
-      this._unsentEvents[eventIndex - 1].event_id : null;
-    var maxIdentifyId = identifyIndex > 0 && this._unsentIdentifys.length > 0 ?
-      this._unsentIdentifys[identifyIndex - 1].event_id : null;
-    var events = JSON.stringify(eventsToSend);
+    var mergedEvents = this._mergeEventsAndIdentifys(numEvents);
+    var maxEventId = mergedEvents.maxEventId;
+    var maxIdentifyId = mergedEvents.maxIdentifyId;
+    var events = JSON.stringify(mergedEvents.eventsToSend);
 
     var uploadTime = new Date().getTime();
     var data = {
@@ -728,6 +697,48 @@ Amplitude.prototype.sendEvents = function(callback) {
   }
 };
 
+Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
+  // coalesce events from both queues
+  var eventsToSend = [];
+  var eventIndex = 0;
+  var maxEventId = -1;
+  var identifyIndex = 0;
+  var maxIdentifyId = -1;
+
+  while (eventsToSend.length < numEvents) {
+    var event;
+
+    // case 1: no identifys - grab from events
+    if (identifyIndex >= this._unsentIdentifys.length) {
+      event = this._unsentEvents[eventIndex++];
+      maxEventId = event.event_id;
+
+    // case 2: no events - grab from identifys
+    } else if (eventIndex >= this._unsentEvents.length) {
+      event = this._unsentIdentifys[identifyIndex++];
+      maxIdentifyId = event.event_id;
+
+    // case 3: need to compare timestamps
+    } else {
+      if (this._unsentIdentifys[identifyIndex].timestamp <= this._unsentEvents[eventIndex].timestamp) {
+        event = this._unsentIdentifys[identifyIndex++];
+        maxIdentifyId = event.event_id;
+      } else {
+        event = this._unsentEvents[eventIndex++];
+        maxEventId = event.event_id;
+      }
+    }
+
+    eventsToSend.push(event);
+  }
+
+  return {
+    eventsToSend: eventsToSend,
+    maxEventId: maxEventId,
+    maxIdentifyId: maxIdentifyId
+  };
+};
+
 /**
  *  @deprecated
  */
@@ -737,7 +748,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13}],
+}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
 3: [function(require, module, exports) {
 /*
  * Cookie data
@@ -864,8 +875,8 @@ module.exports = {
 
 };
 
-}, {"./base64":14,"json":4,"top-domain":15}],
-14: [function(require, module, exports) {
+}, {"./base64":15,"json":4,"top-domain":16}],
+15: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -964,8 +975,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":16}],
-16: [function(require, module, exports) {
+}, {"./utf8":17}],
+17: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1035,8 +1046,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":17}],
-17: [function(require, module, exports) {
+}, {"json-fallback":18}],
+18: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1526,7 +1537,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-15: [function(require, module, exports) {
+16: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1574,8 +1585,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":18}],
-18: [function(require, module, exports) {
+}, {"url":19}],
+19: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -2170,8 +2181,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":19}],
-19: [function(require, module, exports) {
+}, {"querystring":20}],
+20: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2246,8 +2257,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":20,"type":21}],
-20: [function(require, module, exports) {
+}, {"trim":21,"type":22}],
+21: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2267,7 +2278,7 @@ exports.right = function(str){
 };
 
 }, {}],
-21: [function(require, module, exports) {
+22: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -3226,8 +3237,12 @@ module.exports = '2.4.0';
 
 }, {}],
 13: [function(require, module, exports) {
+var type = require('./type');
+
 /*
- * Wrapper for a user properties JSON object that supports operations
+ * Wrapper for a user properties JSON object that supports operations.
+ * Note: if a user property is used in multiple operations on the same Identify object,
+ * only the first operation will be saved, and the rest will be ignored.
  */
 
 var AMP_OP_ADD = '$add';
@@ -3235,19 +3250,21 @@ var AMP_OP_SET = '$set';
 var AMP_OP_SET_ONCE = '$setOnce';
 var AMP_OP_UNSET = '$unset';
 
+var log = function(s) {
+  console.log('[Amplitude] ' + s);
+};
+
 
 var Identify = function() {
   this.userPropertiesOperations = {};
   this.properties = []; // keep track of keys that have been added
 };
 
-var isNumeric = function(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
-};
-
 Identify.prototype.add = function(property, value) {
-  if (isNumeric(value) || typeof(value) === 'string' || value instanceof String) {
+  if (type(value) === 'number' || type(value) === 'string') {
     this._addOperation(AMP_OP_ADD, property, value);
+  } else {
+    log('Unsupported type for value: ' + type(value) + ', expecting number or string');
   }
   return this;
 };
@@ -3281,6 +3298,54 @@ Identify.prototype._addOperation = function(operation, property, value) {
 };
 
 module.exports = Identify;
+
+}, {"./type":14}],
+14: [function(require, module, exports) {
+/* Taken from: https://github.com/component/type */
+
+/**
+ * toString ref.
+ */
+
+var toString = Object.prototype.toString;
+
+/**
+ * Return the type of `val`.
+ *
+ * @param {Mixed} val
+ * @return {String}
+ * @api public
+ */
+
+module.exports = function(val){
+  switch (toString.call(val)) {
+    case '[object Date]': return 'date';
+    case '[object RegExp]': return 'regexp';
+    case '[object Arguments]': return 'arguments';
+    case '[object Array]': return 'array';
+    case '[object Error]': return 'error';
+  }
+
+  if (val === null) {
+    return 'null';
+  }
+  if (val === undefined) {
+    return 'undefined';
+  }
+  if (val !== val) {
+    return 'nan';
+  }
+  if (val && val.nodeType === 1) {
+    return 'element';
+  }
+
+  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(val)) {
+    return 'buffer';
+  }
+
+  val = val.valueOf ? val.valueOf() : Object.prototype.valueOf.apply(val);
+  return typeof val;
+};
 
 }, {}]}, {}, {"1":""})
 );

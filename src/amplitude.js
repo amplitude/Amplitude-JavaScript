@@ -9,6 +9,7 @@ var UAParser = require('ua-parser-js');
 var UUID = require('./uuid');
 var version = require('./version');
 var Identify = require('./identify');
+var type = require('./type');
 
 var log = function(s) {
   console.log('[Amplitude] ' + s);
@@ -345,27 +346,25 @@ Amplitude.prototype.setVersionName = function(versionName) {
 
 // truncate string values in event and user properties so that request size does not get too large
 Amplitude.prototype._truncate = function(value) {
-  if (typeof(value) === 'object') {
-    if (Array.isArray(value)) {
-      for (var i = 0; i < value.length; i++) {
-        value[i] = this._truncate(value[i]);
-      }
-    } else {
-      for (var key in value) {
-        if (value.hasOwnProperty(key)) {
-          value[key] = this._truncate(value[key]);
-        }
+  if (type(value) === 'array') {
+    for (var i = 0; i < value.length; i++) {
+      value[i] = this._truncate(value[i]);
+    }
+  } else if (type(value) === 'object') {
+    for (var key in value) {
+      if (value.hasOwnProperty(key)) {
+        value[key] = this._truncate(value[key]);
       }
     }
-
-    return value;
+  } else {
+    value = _truncateValue(value);
   }
 
-  return _truncateValue(value);
+  return value;
 };
 
 var _truncateValue = function(value) {
-  if (typeof(value) === 'string') {
+  if (type(value) === 'string') {
     return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
   }
   return value;
@@ -500,7 +499,7 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
  * a true filter in case events get out of order or old events are removed.
  */
 Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
-  if (maxEventId) {
+  if (maxEventId >= 0) {
     var filteredEvents = [];
     for (var i = 0; i < this._unsentEvents.length; i++) {
       if (this._unsentEvents[i].event_id > maxEventId) {
@@ -510,7 +509,7 @@ Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
     this._unsentEvents = filteredEvents;
   }
 
-  if (maxIdentifyId) {
+  if (maxIdentifyId >= 0) {
     var filteredIdentifys = [];
     for (var j = 0; j < this._unsentIdentifys.length; j++) {
       if (this._unsentIdentifys[j].event_id > maxIdentifyId) {
@@ -527,42 +526,12 @@ Amplitude.prototype.sendEvents = function(callback) {
     var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
         this.options.apiEndpoint + '/';
 
-    // Determine how many events to send and track the maximum event id sent in this batch.
+    // fetch events to send
     var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
-
-    // coalesce events from both queues
-    var eventsToSend = [];
-    var eventIndex = 0;
-    var identifyIndex = 0;
-
-    while (eventsToSend.length < numEvents) {
-      var event;
-
-      // case 1: no identifys - grab from events
-      if (identifyIndex >= this._unsentIdentifys.length) {
-        event = this._unsentEvents[eventIndex++];
-
-      // case 2: no events - grab from identifys
-      } else if (eventIndex >= this._unsentEvents.length) {
-        event = this._unsentIdentifys[identifyIndex++];
-
-      // case 3: need to compare timestamps
-      } else {
-        if (this._unsentIdentifys[identifyIndex].timestamp <= this._unsentEvents[eventIndex].timestamp) {
-          event = this._unsentIdentifys[identifyIndex++];
-        } else {
-          event = this._unsentEvents[eventIndex++];
-        }
-      }
-
-      eventsToSend.push(event);
-    }
-
-    var maxEventId = eventIndex > 0 && this._unsentEvents.length > 0 ?
-      this._unsentEvents[eventIndex - 1].event_id : null;
-    var maxIdentifyId = identifyIndex > 0 && this._unsentIdentifys.length > 0 ?
-      this._unsentIdentifys[identifyIndex - 1].event_id : null;
-    var events = JSON.stringify(eventsToSend);
+    var mergedEvents = this._mergeEventsAndIdentifys(numEvents);
+    var maxEventId = mergedEvents.maxEventId;
+    var maxIdentifyId = mergedEvents.maxIdentifyId;
+    var events = JSON.stringify(mergedEvents.eventsToSend);
 
     var uploadTime = new Date().getTime();
     var data = {
@@ -614,6 +583,48 @@ Amplitude.prototype.sendEvents = function(callback) {
   } else if (callback) {
     callback(0, 'No request sent');
   }
+};
+
+Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
+  // coalesce events from both queues
+  var eventsToSend = [];
+  var eventIndex = 0;
+  var maxEventId = -1;
+  var identifyIndex = 0;
+  var maxIdentifyId = -1;
+
+  while (eventsToSend.length < numEvents) {
+    var event;
+
+    // case 1: no identifys - grab from events
+    if (identifyIndex >= this._unsentIdentifys.length) {
+      event = this._unsentEvents[eventIndex++];
+      maxEventId = event.event_id;
+
+    // case 2: no events - grab from identifys
+    } else if (eventIndex >= this._unsentEvents.length) {
+      event = this._unsentIdentifys[identifyIndex++];
+      maxIdentifyId = event.event_id;
+
+    // case 3: need to compare timestamps
+    } else {
+      if (this._unsentIdentifys[identifyIndex].timestamp <= this._unsentEvents[eventIndex].timestamp) {
+        event = this._unsentIdentifys[identifyIndex++];
+        maxIdentifyId = event.event_id;
+      } else {
+        event = this._unsentEvents[eventIndex++];
+        maxEventId = event.event_id;
+      }
+    }
+
+    eventsToSend.push(event);
+  }
+
+  return {
+    eventsToSend: eventsToSend,
+    maxEventId: maxEventId,
+    maxIdentifyId: maxIdentifyId
+  };
 };
 
 /**
