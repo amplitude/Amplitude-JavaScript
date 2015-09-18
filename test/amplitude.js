@@ -387,7 +387,41 @@ describe('Amplitude', function() {
       assert.lengthOf(amplitude._unsentEvents, 0);
       clock.tick(eventUploadPeriodMillis);
       assert.lengthOf(server.requests, 1);
-    })
+    });
+
+    it('should not schedule more than one upload', function() {
+      var eventUploadPeriodMillis = 5*1000; // 5s
+      amplitude.init(apiKey, null, {
+        batchEvents: true,
+        eventUploadThreshold: 30,
+        eventUploadPeriodMillis: eventUploadPeriodMillis
+      });
+
+      // log 2 events, 1 millisecond apart, second event should not schedule upload
+      amplitude.logEvent('Event1');
+      clock.tick(1);
+      amplitude.logEvent('Event2');
+      assert.lengthOf(amplitude._unsentEvents, 2);
+      assert.lengthOf(server.requests, 0);
+
+      // advance to upload period millis, and should have 1 server request
+      // from the first scheduled upload
+      clock.tick(eventUploadPeriodMillis-1);
+      assert.lengthOf(server.requests, 1);
+      server.respondWith('success');
+      server.respond();
+
+      // log 3rd event, advance 1 more millisecond, verify no 2nd server request
+      amplitude.logEvent('Event3');
+      clock.tick(1);
+      assert.lengthOf(server.requests, 1);
+
+      // the 3rd event, however, should have scheduled another upload after 5s
+      clock.tick(eventUploadPeriodMillis-2);
+      assert.lengthOf(server.requests, 1);
+      clock.tick(1);
+      assert.lengthOf(server.requests, 2);
+    });
 
     it('should back off on 413 status', function() {
       amplitude.init(apiKey, null, {uploadBatchSize: 10});
