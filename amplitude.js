@@ -174,6 +174,7 @@ Amplitude.prototype._sending = false;
 Amplitude.prototype._lastEventTime = null;
 Amplitude.prototype._sessionId = null;
 Amplitude.prototype._newSession = false;
+Amplitude.prototype._updateScheduled = false;
 
 Amplitude.prototype.Identify = Identify;
 
@@ -315,7 +316,16 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
     return true;
   }
 
-  setTimeout(this.sendEvents.bind(this), this.options.eventUploadPeriodMillis);
+  if (!this._updateScheduled) {
+    this._updateScheduled = true;
+    setTimeout(
+      function() {
+        this._updateScheduled = false;
+        this.sendEvents();
+      }.bind(this), this.options.eventUploadPeriodMillis
+    );
+  }
+
   return false;
 };
 
@@ -3264,7 +3274,7 @@ module.exports = uuid;
 
 }, {}],
 12: [function(require, module, exports) {
-module.exports = '2.4.0';
+module.exports = '2.4.1';
 
 }, {}],
 13: [function(require, module, exports) {
