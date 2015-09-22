@@ -3328,6 +3328,7 @@ Identify.prototype.unset = function(property) {
 Identify.prototype._addOperation = function(operation, property, value) {
   // check that property wasn't already used in this Identify
   if (this.properties.indexOf(property) !== -1) {
+    log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
     return;
   }
 
