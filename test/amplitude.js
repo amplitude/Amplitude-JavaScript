@@ -1126,15 +1126,11 @@ describe('Amplitude', function() {
       amplitude.setUserProperties({user_prop: true});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      // identify event should not have utm properties
       assert.deepEqual(events[0].user_properties, {
         '$set': {
           'user_prop': true
-        },
-        utm_campaign: 'new',
-        utm_content: 'top',
-        utm_medium: 'email',
-        utm_source: 'amplitude',
-        utm_term: 'terms'
+        }
       });
       server.respondWith('success');
       server.respond();
@@ -1226,17 +1222,25 @@ describe('Amplitude', function() {
       });
     });
 
-    it('should add referrer data to the user properties', function() {
+    it('should add referrer data to the user properties on events only', function() {
       reset();
       amplitude.init(apiKey, undefined, {includeReferrer: true});
 
       amplitude.setUserProperties({user_prop: true});
-       assert.lengthOf(server.requests, 1);
+      assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
         $set: {
           'user_prop': true
-        },
+        }
+      });
+      server.respondWith('success');
+      server.respond();
+
+      amplitude.logEvent('Referrer test event');
+      assert.lengthOf(server.requests, 2);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
         referrer: 'https://amplitude.com/contact',
         referring_domain: 'amplitude.com'
       });

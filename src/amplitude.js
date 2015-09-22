@@ -148,7 +148,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     log(e);
   }
 
-  if (callback && typeof(callback) === 'function') {
+  if (callback && type(callback) === 'function') {
     callback();
   }
 };
@@ -396,7 +396,7 @@ var _truncateValue = function(value) {
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
 Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
-  if (typeof callback !== 'function') {
+  if (type(callback) !== 'function') {
     callback = null;
   }
 
@@ -424,16 +424,18 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     this._lastEventTime = eventTime;
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
 
-    // Add the utm properties, if any, onto the user properties.
     userProperties = userProperties || {};
-    object.merge(userProperties, this._utmProperties);
+    // Only add utm properties to user properties for events
+    if (eventType !== IDENTIFY_EVENT) {
+      object.merge(userProperties, this._utmProperties);
 
-    // Add referral info onto the user properties
-    if (this.options.includeReferrer) {
-      object.merge(userProperties, {
-        'referrer': this._getReferrer(),
-        'referring_domain': this._getReferringDomain()
-      });
+      // Add referral info onto the user properties
+      if (this.options.includeReferrer) {
+        object.merge(userProperties, {
+          'referrer': this._getReferrer(),
+          'referring_domain': this._getReferringDomain()
+        });
+      }
     }
 
     apiProperties = apiProperties || {};
