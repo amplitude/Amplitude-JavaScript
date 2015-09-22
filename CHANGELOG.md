@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 2.4.1 (September 21, 2015)
+
 * Add support for passing callback function to init.
 * Fix bug to check that Window localStorage is available for use.
 * Fix bug to prevent scheduling multiple event uploads.
