@@ -22,6 +22,23 @@
         }
         window.amplitude = amplitude;
     })(window, document);
+
+    var setUserId = function() {
+        var userId = prompt('Input userId', 'user01');
+        amplitude.setUserId(userId);
+    };
+    var setEventUploadThreshold = function() {
+        var eventUploadThreshold = parseInt(prompt('Input eventUploadThreshold', 5));
+        amplitude.options.eventUploadThreshold = eventUploadThreshold;
+    }
+    var logEvent = function() {
+        var event = prompt('Input event type', 'clicked');
+        amplitude.logEvent(event);
+    }
+    var setCity = function() {
+        var city = prompt('Input city', 'San Francisco, CA');
+        amplitude.setUserProperties({city: city});
+    }
 </script>
 <script>
     amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053');
@@ -31,12 +48,17 @@
 <body>
 <h3>Amplitude JS Test</h3>
 <ul>
-    <li><a href="javascript:amplitude.setUserId('user01');">Set user ID</a></li>
+    <li><a href="javascript:setUserId();">Set user ID</a></li>
     <li><a href="javascript:amplitude.setOptOut(!amplitude.options.optOut);">Toggle opt out</a></li>
-    <li><a href="javascript:amplitude.logEvent('clicked');">Log event</a></li>
+    <li><a href="javascript:logEvent();">Log event</a></li>
     <li><a href="javascript:amplitude.logEvent('clicked button', {color: 'red;', shape: 'triangle', sides: 3});">Log
         event with event properties</a></li>
     <li><a href="javascript:amplitude.setUserProperties({age: 30, city: 'San Francisco, CA'});">Set user properties</a>
     </li>
+    <li><a href="javascript:amplitude.options.batchEvents = !amplitude.options.batchEvents;">Toggle batch events</a></li>
+    <li><a href="javascript:setEventUploadThreshold();">Set event upload threshold</a></li>
+    <li><a href="javascript:amplitude.identify(new amplitude.Identify().add('photoCount', 1));">Increment photo count</a></li>
+    <li><a href="javascript:setCity();">Set city via setUserProperties</a></li>
+    <li><a href="javascript:amplitude.identify(new amplitude.Identify().unset('photoCount'));">Unset photo count</a></li>
 </body>
 </html>

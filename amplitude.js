@@ -120,12 +120,16 @@ var Request = require('./xhr');
 var UAParser = require('ua-parser-js');
 var UUID = require('./uuid');
 var version = require('./version');
+var Identify = require('./identify');
+var type = require('./type');
 
 var log = function(s) {
   console.log('[Amplitude] ' + s);
 };
 
+var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
+var MAX_STRING_LENGTH = 1024;
 var DEFAULT_OPTIONS = {
   apiEndpoint: 'api.amplitude.com',
   cookieExpiration: 365 * 10,
@@ -139,6 +143,7 @@ var DEFAULT_OPTIONS = {
   saveEvents: true,
   sessionTimeout: 30 * 60 * 1000,
   unsentKey: 'amplitude_unsent',
+  unsentIdentifyKey: 'amplitude_unsent_identify',
   uploadBatchSize: 100,
   batchEvents: false,
   eventUploadThreshold: 30,
@@ -146,6 +151,8 @@ var DEFAULT_OPTIONS = {
 };
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
+  LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
+  LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
   SESSION_ID: 'amplitude_sessionId'
 };
@@ -155,17 +162,21 @@ var LocalStorageKeys = {
  */
 var Amplitude = function() {
   this._unsentEvents = [];
+  this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
 };
 
-
 Amplitude.prototype._eventId = 0;
+Amplitude.prototype._identifyId = 0;
+Amplitude.prototype._sequenceNumber = 0;
 Amplitude.prototype._sending = false;
 Amplitude.prototype._lastEventTime = null;
 Amplitude.prototype._sessionId = null;
 Amplitude.prototype._newSession = false;
 Amplitude.prototype._updateScheduled = false;
+
+Amplitude.prototype.Identify = Identify;
 
 /**
  * Initializes Amplitude.
@@ -222,14 +233,8 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
 
     if (this.options.saveEvents) {
-      var savedUnsentEventsString = localStorage.getItem(this.options.unsentKey);
-      if (savedUnsentEventsString) {
-        try {
-          this._unsentEvents = JSON.parse(savedUnsentEventsString);
-        } catch (e) {
-          //log(e);
-        }
-      }
+      this._loadSavedUnsentEvents(this.options.unsentKey, '_unsentEvents');
+      this._loadSavedUnsentEvents(this.options.unsentIdentifyKey, '_unsentIdentifys');
     }
 
     this._sendEventsIfReady();
@@ -241,6 +246,8 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
     this._sessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
     this._eventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID) || 0;
+    this._identifyId = localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID) || 0;
+    this._sequenceNumber = localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER) || 0;
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
@@ -253,8 +260,19 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     log(e);
   }
 
-  if (callback && typeof(callback) === 'function') {
+  if (callback && type(callback) === 'function') {
     callback();
+  }
+};
+
+Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey, queue) {
+  var savedUnsentEventsString = localStorage.getItem(unsentKey);
+  if (savedUnsentEventsString) {
+    try {
+      this[queue] = JSON.parse(savedUnsentEventsString);
+    } catch (e) {
+      //log(e);
+    }
   }
 };
 
@@ -267,9 +285,24 @@ Amplitude.prototype.nextEventId = function() {
   return this._eventId;
 };
 
+Amplitude.prototype.nextIdentifyId = function() {
+  this._identifyId++;
+  return this._identifyId;
+};
+
+Amplitude.prototype.nextSequenceNumber = function() {
+  this._sequenceNumber++;
+  return this._sequenceNumber;
+};
+
+// returns the number of unsent events and identifys
+Amplitude.prototype._unsentCount = function() {
+  return this._unsentEvents.length + this._unsentIdentifys.length;
+};
+
 // returns true if sendEvents called immediately
 Amplitude.prototype._sendEventsIfReady = function(callback) {
-  if (this._unsentEvents.length === 0) {
+  if (this._unsentCount() === 0) {
     return false;
   }
 
@@ -278,7 +311,7 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
     return true;
   }
 
-  if (this._unsentEvents.length >= this.options.eventUploadThreshold) {
+  if (this._unsentCount() >= this.options.eventUploadThreshold) {
     this.sendEvents(callback);
     return true;
   }
@@ -305,9 +338,6 @@ var _loadCookieData = function(scope) {
     if (cookieData.userId) {
       scope.options.userId = cookieData.userId;
     }
-    if (cookieData.globalUserProperties) {
-      scope.options.userProperties = cookieData.globalUserProperties;
-    }
     if (cookieData.optOut !== undefined) {
       scope.options.optOut = cookieData.optOut;
     }
@@ -318,7 +348,6 @@ var _saveCookieData = function(scope) {
   Cookie.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
-    globalUserProperties: scope.options.userProperties,
     optOut: scope.options.optOut
   });
 };
@@ -372,6 +401,7 @@ Amplitude.prototype._getReferringDomain = function() {
 Amplitude.prototype.saveEvents = function() {
   try {
     localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    localStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
     //log(e);
   }
@@ -422,17 +452,20 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
   }
 };
 
-Amplitude.prototype.setUserProperties = function(userProperties, opt_replace) {
-  try {
-    if (opt_replace) {
-      this.options.userProperties = userProperties;
-    } else {
-      this.options.userProperties = object.merge(this.options.userProperties || {}, userProperties);
+Amplitude.prototype.setUserProperties = function(userProperties) {
+  // convert userProperties into an identify call
+  var identify = new Identify();
+  for (var property in userProperties) {
+    if (userProperties.hasOwnProperty(property)) {
+      identify.set(property, userProperties[property]);
     }
-    _saveCookieData(this);
-    //log('set userProperties=' + JSON.stringify(userProperties));
-  } catch (e) {
-    log(e);
+  }
+  this.identify(identify);
+};
+
+Amplitude.prototype.identify = function(identify) {
+  if (identify instanceof Identify) {
+    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
   }
 };
 
@@ -445,11 +478,37 @@ Amplitude.prototype.setVersionName = function(versionName) {
   }
 };
 
+// truncate string values in event and user properties so that request size does not get too large
+Amplitude.prototype._truncate = function(value) {
+  if (type(value) === 'array') {
+    for (var i = 0; i < value.length; i++) {
+      value[i] = this._truncate(value[i]);
+    }
+  } else if (type(value) === 'object') {
+    for (var key in value) {
+      if (value.hasOwnProperty(key)) {
+        value[key] = this._truncate(value[key]);
+      }
+    }
+  } else {
+    value = _truncateValue(value);
+  }
+
+  return value;
+};
+
+var _truncateValue = function(value) {
+  if (type(value) === 'string') {
+    return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
+  }
+  return value;
+};
+
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
-Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, callback) {
-  if (typeof callback !== 'function') {
+Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
+  if (type(callback) !== 'function') {
     callback = null;
   }
 
@@ -460,8 +519,15 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     return;
   }
   try {
+    var eventId;
+    if (eventType === IDENTIFY_EVENT) {
+      eventId = this.nextIdentifyId();
+      localStorage.setItem(LocalStorageKeys.LAST_IDENTIFY_ID, eventId);
+    } else {
+      eventId = this.nextEventId();
+      localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
+    }
     var eventTime = new Date().getTime();
-    var eventId = this.nextEventId();
     var ua = this._ua;
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
@@ -469,20 +535,19 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     }
     this._lastEventTime = eventTime;
     localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
-    localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
 
-    var userProperties = {};
-    object.merge(userProperties, this.options.userProperties || {});
+    userProperties = userProperties || {};
+    // Only add utm properties to user properties for events
+    if (eventType !== IDENTIFY_EVENT) {
+      object.merge(userProperties, this._utmProperties);
 
-    // Add the utm properties, if any, onto the user properties.
-    object.merge(userProperties, this._utmProperties);
-
-    // Add referral info onto the user properties
-    if (this.options.includeReferrer) {
-      object.merge(userProperties, {
-        'referrer': this._getReferrer(),
-        'referring_domain': this._getReferringDomain()
-      });
+      // Add referral info onto the user properties
+      if (this.options.includeReferrer) {
+        object.merge(userProperties, {
+          'referrer': this._getReferrer(),
+          'referring_domain': this._getReferringDomain()
+        });
+      }
     }
 
     apiProperties = apiProperties || {};
@@ -501,24 +566,23 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       device_model: ua.os.name || null,
       language: this.options.language,
       api_properties: apiProperties,
-      event_properties: eventProperties,
-      user_properties: userProperties,
+      event_properties: this._truncate(eventProperties),
+      user_properties: this._truncate(userProperties),
       uuid: UUID(),
       library: {
         name: 'amplitude-js',
         version: this.__VERSION__
-      }
+      },
+      sequence_number: this.nextSequenceNumber() // for ordering events and identifys
       // country: null
     };
 
-    //log('logged eventType=' + eventType + ', properties=' + JSON.stringify(eventProperties));
-
-    this._unsentEvents.push(event);
-
-    // Remove old events from the beginning of the array if too many
-    // have accumulated. Don't want to kill memory. Default is 1000 events.
-    if (this._unsentEvents.length > this.options.savedMaxCount) {
-      this._unsentEvents.splice(0, this._unsentEvents.length - this.options.savedMaxCount);
+    if (eventType === IDENTIFY_EVENT) {
+      this._unsentIdentifys.push(event);
+      this._limitEventsQueued(this._unsentIdentifys);
+    } else {
+      this._unsentEvents.push(event);
+      this._limitEventsQueued(this._unsentEvents);
     }
 
     if (this.options.saveEvents) {
@@ -535,8 +599,16 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
   }
 };
 
+// Remove old events from the beginning of the array if too many
+// have accumulated. Don't want to kill memory. Default is 1000 events.
+Amplitude.prototype._limitEventsQueued = function(queue) {
+  if (queue.length > this.options.savedMaxCount) {
+    queue.splice(0, queue.length - this.options.savedMaxCount);
+  }
+};
+
 Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
-  return this._logEvent(eventType, eventProperties, null, callback);
+  return this._logEvent(eventType, eventProperties, null, null, callback);
 };
 
 // Test that n is a number or a numeric value.
@@ -563,27 +635,41 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
  * Remove events in storage with event ids up to and including maxEventId. Does
  * a true filter in case events get out of order or old events are removed.
  */
-Amplitude.prototype.removeEvents = function (maxEventId) {
-  var filteredEvents = [];
-  for (var i = 0; i < this._unsentEvents.length; i++) {
-    if (this._unsentEvents[i].event_id > maxEventId) {
-      filteredEvents.push(this._unsentEvents[i]);
+Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
+  if (maxEventId >= 0) {
+    var filteredEvents = [];
+    for (var i = 0; i < this._unsentEvents.length; i++) {
+      if (this._unsentEvents[i].event_id > maxEventId) {
+        filteredEvents.push(this._unsentEvents[i]);
+      }
     }
+    this._unsentEvents = filteredEvents;
   }
-  this._unsentEvents = filteredEvents;
+
+  if (maxIdentifyId >= 0) {
+    var filteredIdentifys = [];
+    for (var j = 0; j < this._unsentIdentifys.length; j++) {
+      if (this._unsentIdentifys[j].event_id > maxIdentifyId) {
+        filteredIdentifys.push(this._unsentIdentifys[j]);
+      }
+    }
+    this._unsentIdentifys = filteredIdentifys;
+  }
 };
 
 Amplitude.prototype.sendEvents = function(callback) {
-  if (!this._sending && !this.options.optOut && this._unsentEvents.length > 0) {
+  if (!this._sending && !this.options.optOut && this._unsentCount() > 0) {
     this._sending = true;
     var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
         this.options.apiEndpoint + '/';
 
-    // Determine how many events to send and track the maximum event id sent in this batch.
-    var numEvents = Math.min(this._unsentEvents.length, this.options.uploadBatchSize);
-    var maxEventId = this._unsentEvents[numEvents - 1].event_id;
+    // fetch events to send
+    var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
+    var mergedEvents = this._mergeEventsAndIdentifys(numEvents);
+    var maxEventId = mergedEvents.maxEventId;
+    var maxIdentifyId = mergedEvents.maxIdentifyId;
+    var events = JSON.stringify(mergedEvents.eventsToSend);
 
-    var events = JSON.stringify(this._unsentEvents.slice(0, numEvents));
     var uploadTime = new Date().getTime();
     var data = {
       client: this.options.apiKey,
@@ -599,7 +685,7 @@ Amplitude.prototype.sendEvents = function(callback) {
       try {
         if (status === 200 && response === 'success') {
           //log('sucessful upload');
-          scope.removeEvents(maxEventId);
+          scope.removeEvents(maxEventId, maxIdentifyId);
 
           // Update the event cache after the removal of sent events.
           if (scope.options.saveEvents) {
@@ -615,7 +701,8 @@ Amplitude.prototype.sendEvents = function(callback) {
           //log('request too large');
           // Can't even get this one massive event through. Drop it.
           if (scope.options.uploadBatchSize === 1) {
-            scope.removeEvents(maxEventId);
+            // if massive event is identify, still need to drop it
+            scope.removeEvents(maxEventId, maxIdentifyId);
           }
 
           // The server complained about the length of the request.
@@ -635,6 +722,51 @@ Amplitude.prototype.sendEvents = function(callback) {
   }
 };
 
+Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
+  // coalesce events from both queues
+  var eventsToSend = [];
+  var eventIndex = 0;
+  var maxEventId = -1;
+  var identifyIndex = 0;
+  var maxIdentifyId = -1;
+
+  while (eventsToSend.length < numEvents) {
+    var event;
+
+    // case 1: no identifys - grab from events
+    if (identifyIndex >= this._unsentIdentifys.length) {
+      event = this._unsentEvents[eventIndex++];
+      maxEventId = event.event_id;
+
+    // case 2: no events - grab from identifys
+    } else if (eventIndex >= this._unsentEvents.length) {
+      event = this._unsentIdentifys[identifyIndex++];
+      maxIdentifyId = event.event_id;
+
+    // case 3: need to compare sequence numbers
+    } else {
+      // events logged before v2.5.0 won't have a sequence number, put those first
+      if (!('sequence_number' in this._unsentEvents[eventIndex]) ||
+          this._unsentEvents[eventIndex].sequence_number <
+          this._unsentIdentifys[identifyIndex].sequence_number) {
+        event = this._unsentEvents[eventIndex++];
+        maxEventId = event.event_id;
+      } else {
+        event = this._unsentIdentifys[identifyIndex++];
+        maxIdentifyId = event.event_id;
+      }
+    }
+
+    eventsToSend.push(event);
+  }
+
+  return {
+    eventsToSend: eventsToSend,
+    maxEventId: maxEventId,
+    maxIdentifyId: maxIdentifyId
+  };
+};
+
 /**
  *  @deprecated
  */
@@ -644,7 +776,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12}],
+}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
 3: [function(require, module, exports) {
 /*
  * Cookie data
@@ -771,8 +903,8 @@ module.exports = {
 
 };
 
-}, {"./base64":13,"json":4,"top-domain":14}],
-13: [function(require, module, exports) {
+}, {"./base64":15,"json":4,"top-domain":16}],
+15: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -871,8 +1003,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":15}],
-15: [function(require, module, exports) {
+}, {"./utf8":17}],
+17: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -942,8 +1074,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":16}],
-16: [function(require, module, exports) {
+}, {"json-fallback":18}],
+18: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1433,7 +1565,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-14: [function(require, module, exports) {
+16: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1481,8 +1613,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":17}],
-17: [function(require, module, exports) {
+}, {"url":19}],
+19: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -2092,8 +2224,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":18}],
-18: [function(require, module, exports) {
+}, {"querystring":20}],
+20: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2168,8 +2300,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":19,"type":20}],
-19: [function(require, module, exports) {
+}, {"trim":21,"type":22}],
+21: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2189,7 +2321,7 @@ exports.right = function(str){
 };
 
 }, {}],
-20: [function(require, module, exports) {
+22: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -3145,6 +3277,119 @@ module.exports = uuid;
 }, {}],
 12: [function(require, module, exports) {
 module.exports = '2.4.1';
+
+}, {}],
+13: [function(require, module, exports) {
+var type = require('./type');
+
+/*
+ * Wrapper for a user properties JSON object that supports operations.
+ * Note: if a user property is used in multiple operations on the same Identify object,
+ * only the first operation will be saved, and the rest will be ignored.
+ */
+
+var AMP_OP_ADD = '$add';
+var AMP_OP_SET = '$set';
+var AMP_OP_SET_ONCE = '$setOnce';
+var AMP_OP_UNSET = '$unset';
+
+var log = function(s) {
+  console.log('[Amplitude] ' + s);
+};
+
+
+var Identify = function() {
+  this.userPropertiesOperations = {};
+  this.properties = []; // keep track of keys that have been added
+};
+
+Identify.prototype.add = function(property, value) {
+  if (type(value) === 'number' || type(value) === 'string') {
+    this._addOperation(AMP_OP_ADD, property, value);
+  } else {
+    log('Unsupported type for value: ' + type(value) + ', expecting number or string');
+  }
+  return this;
+};
+
+Identify.prototype.set = function(property, value) {
+  this._addOperation(AMP_OP_SET, property, value);
+  return this;
+};
+
+Identify.prototype.setOnce = function(property, value) {
+  this._addOperation(AMP_OP_SET_ONCE, property, value);
+  return this;
+};
+
+Identify.prototype.unset = function(property) {
+  this._addOperation(AMP_OP_UNSET, property, '-');
+  return this;
+};
+
+Identify.prototype._addOperation = function(operation, property, value) {
+  // check that property wasn't already used in this Identify
+  if (this.properties.indexOf(property) !== -1) {
+    log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
+    return;
+  }
+
+  if (!(operation in this.userPropertiesOperations)){
+    this.userPropertiesOperations[operation] = {};
+  }
+  this.userPropertiesOperations[operation][property] = value;
+  this.properties.push(property);
+};
+
+module.exports = Identify;
+
+}, {"./type":14}],
+14: [function(require, module, exports) {
+/* Taken from: https://github.com/component/type */
+
+/**
+ * toString ref.
+ */
+
+var toString = Object.prototype.toString;
+
+/**
+ * Return the type of `val`.
+ *
+ * @param {Mixed} val
+ * @return {String}
+ * @api public
+ */
+
+module.exports = function(val){
+  switch (toString.call(val)) {
+    case '[object Date]': return 'date';
+    case '[object RegExp]': return 'regexp';
+    case '[object Arguments]': return 'arguments';
+    case '[object Array]': return 'array';
+    case '[object Error]': return 'error';
+  }
+
+  if (val === null) {
+    return 'null';
+  }
+  if (val === undefined) {
+    return 'undefined';
+  }
+  if (val !== val) {
+    return 'nan';
+  }
+  if (val && val.nodeType === 1) {
+    return 'element';
+  }
+
+  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(val)) {
+    return 'buffer';
+  }
+
+  val = val.valueOf ? val.valueOf() : Object.prototype.valueOf.apply(val);
+  return typeof val;
+};
 
 }, {}]}, {}, {"1":""})
 );

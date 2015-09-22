@@ -56,6 +56,48 @@ To add properties that are tracked in every event, you can set properties for a 
     userProperties.key = "value";
     amplitude.setUserProperties(userProperties);
 
+# User Property Operations #
+
+The SDK supports the operations set, setOnce, unset, and add on individual user properties. The operations are declared via a provided `Identify` interface. Multiple operations can be chained together in a single `Identify` object. The `Identify` object is then passed to the Amplitude client to send to the server. The results of the operations will be visible immediately in the dashboard, and take effect for events logged after.
+
+1. `set`: this sets the value of a user property.
+
+    ```javascript
+    var identify = new amplitude.Identify().set('gender', 'female').set('age', 20);
+    amplitude.identify(identify);
+    ```
+
+2. `setOnce`: this sets the value of a user property only once. Subsequent `setOnce` operations on that user property will be ignored. In the following example, `sign_up_date` will be set once to `08/24/2015`, and the following setOnce to `09/14/2015` will be ignored:
+
+    ```javascript
+    var identify = new amplitude.Identify().setOnce('sign_up_date', '08/24/2015');
+    amplitude.identify(identify);
+
+    var identify = new amplitude.Identify().setOnce('sign_up_date', '09/14/2015');
+    amplitude.identify(identify);
+    ```
+
+3. `unset`: this will unset and remove a user property.
+
+    ```javascript
+    var identify = new amplitude.Identify().unset('gender').unset('age');
+    amplitude.identify(identify);
+    ```
+
+4. `add`: this will increment a user property by some numerical value. If the user property does not have a value set yet, it will be initialized to 0 before being incremented.
+
+    ```javascript
+    var identify = new amplitude.Identify().add('karma', 1).add('friends', 1);
+    amplitude.identify(identify);
+    ```
+
+Note: if a user property is used in multiple operations on the same `Identify` object, only the first operation will be saved, and the rest will be ignored. In this example, only the set operation will be saved, and the add and unset will be ignored:
+
+```javascript
+var identify = new amplitude.Identify().set('karma', 10).add('karma', 1).unset('karma');
+amplitude.identify(identify);
+```
+
 # Tracking Revenue #
 
 To track revenue from a user, call

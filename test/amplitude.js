@@ -5,6 +5,7 @@ describe('Amplitude', function() {
   var cookie = require('../src/cookie.js');
   var querystring = require('querystring');
   var JSON = require('json');
+  var Identify = require('../src/identify.js');
   var apiKey = '000000';
   var userId = 'user';
   var amplitude;
@@ -84,29 +85,26 @@ describe('Amplitude', function() {
       reset();
     });
 
-    it('should set user properties', function() {
-      amplitude.setUserProperties({'prop': true});
-      assert.propertyVal(amplitude.options.userProperties, 'prop', true);
-    });
+    it('should log identify call from set user properties', function() {
+      assert.equal(amplitude._unsentCount(), 0);
+      amplitude.setUserProperties({'prop': true, 'key': 'value'});
 
-    it('should merge user properties by default', function() {
-      amplitude.setUserProperties({'prop': true, 'prop2': true});
-      assert.propertyVal(amplitude.options.userProperties, 'prop', true);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 1);
+      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].event_properties, {});
 
-      amplitude.setUserProperties({'prop': false, 'prop3': false});
-      assert.propertyVal(amplitude.options.userProperties, 'prop', false);
-      assert.propertyVal(amplitude.options.userProperties, 'prop2', true);
-      assert.propertyVal(amplitude.options.userProperties, 'prop3', false);
-    });
-
-    it('should allow overwriting user properties', function() {
-      amplitude.setUserProperties({'prop': true, 'prop2': true});
-      assert.propertyVal(amplitude.options.userProperties, 'prop', true);
-
-      amplitude.setUserProperties({'prop': false, 'prop3': false}, true);
-      assert.notProperty(amplitude.options.userProperties, 'prop2');
-      assert.propertyVal(amplitude.options.userProperties, 'prop', false);
-      assert.propertyVal(amplitude.options.userProperties, 'prop3', false);
+      var expected = {
+        '$set': {
+          'prop': true,
+          'key': 'value'
+        }
+      };
+      assert.deepEqual(events[0].user_properties, expected);
     });
   });
 
@@ -139,6 +137,66 @@ describe('Amplitude', function() {
       var stored = cookie.get(amplitude.options.cookieName);
       assert.propertyVal(stored, 'deviceId', 'deviceId');
     });
+  });
+
+  describe('identify', function() {
+
+    beforeEach(function() {
+      clock = sinon.useFakeTimers();
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+      clock.restore();
+    });
+
+    it('should ignore inputs that are not identify objects', function() {
+      amplitude.identify('This is a test');
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.identify(150);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.identify(['test']);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.identify({'user_prop': true});
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should generate an event from the identify object', function() {
+      var identify = new Identify().set('prop1', 'value1').unset('prop2').add('prop3', 3).setOnce('prop4', true);
+      amplitude.identify(identify);
+
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 1);
+      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].event_properties, {});
+      assert.deepEqual(events[0].user_properties, {
+        '$set': {
+          'prop1': 'value1'
+        },
+        '$unset': {
+          'prop2': '-'
+        },
+        '$add': {
+          'prop3': 3
+        },
+        '$setOnce': {
+          'prop4': true
+        }
+      });
+    });
+
   });
 
   describe('logEvent', function() {
@@ -440,7 +498,7 @@ describe('Amplitude', function() {
       assert.deepEqual(events[0].event_properties, {index: 0});
       assert.deepEqual(events[9].event_properties, {index: 9});
 
-      server.respondWith([413, {}, ""]);
+      server.respondWith([413, {}, '']);
       server.respond();
 
       assert.lengthOf(server.requests, 2);
@@ -462,7 +520,7 @@ describe('Amplitude', function() {
 
       for (var i = 0; i < 6; i++) {
         assert.lengthOf(server.requests, i+1);
-        server.respondWith([413, {}, ""]);
+        server.respondWith([413, {}, '']);
         server.respond();
       }
 
@@ -624,7 +682,7 @@ describe('Amplitude', function() {
       assert.lengthOf(events, 16);
 
       // after 413 response received, callback should not have fired
-      server.respondWith([413, {}, ""]);
+      server.respondWith([413, {}, '']);
       server.respond();
       assert.equal(counter, 0);
       assert.equal(value, -1);
@@ -669,6 +727,287 @@ describe('Amplitude', function() {
       assert.equal(message, 'Not found');
     });
 
+    it('should send 3 identify events', function() {
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
+      assert.equal(amplitude._unsentCount(), 0);
+
+      amplitude.identify(new Identify().add('photoCount', 1));
+      amplitude.identify(new Identify().add('photoCount', 1).set('country', 'USA'));
+      amplitude.identify(new Identify().add('photoCount', 1));
+
+      // verify some internal counters
+      assert.equal(amplitude._eventId, 0);
+      assert.equal(amplitude._identifyId, 3);
+      assert.equal(amplitude._unsentCount(), 3);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 3);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 3);
+      for (var i = 0; i < 3; i++) {
+        assert.equal(events[i].event_type, '$identify');
+        assert.isTrue('$add' in events[i].user_properties);
+        assert.deepEqual(events[i].user_properties['$add'], {'photoCount': 1});
+        assert.equal(events[i].event_id, i+1);
+        assert.equal(events[i].sequence_number, i+1);
+      }
+
+      // send response and check that remove events works properly
+      server.respondWith('success');
+      server.respond();
+      assert.equal(amplitude._unsentCount(), 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+    });
+
+    it('should send 3 events', function() {
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
+      assert.equal(amplitude._unsentCount(), 0);
+
+      amplitude.logEvent('test');
+      amplitude.logEvent('test');
+      amplitude.logEvent('test');
+
+      // verify some internal counters
+      assert.equal(amplitude._eventId, 3);
+      assert.equal(amplitude._identifyId, 0);
+      assert.equal(amplitude._unsentCount(), 3);
+      assert.lengthOf(amplitude._unsentEvents, 3);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 3);
+      for (var i = 0; i < 3; i++) {
+        assert.equal(events[i].event_type, 'test');
+        assert.equal(events[i].event_id, i+1);
+        assert.equal(events[i].sequence_number, i+1);
+      }
+
+      // send response and check that remove events works properly
+      server.respondWith('success');
+      server.respond();
+      assert.equal(amplitude._unsentCount(), 0);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+    });
+
+    it('should send 1 event and 1 identify event', function() {
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+      assert.equal(amplitude._unsentCount(), 0);
+
+      amplitude.logEvent('test');
+      amplitude.identify(new Identify().add('photoCount', 1));
+
+      // verify some internal counters
+      assert.equal(amplitude._eventId, 1);
+      assert.equal(amplitude._identifyId, 1);
+      assert.equal(amplitude._unsentCount(), 2);
+      assert.lengthOf(amplitude._unsentEvents, 1);
+      assert.lengthOf(amplitude._unsentIdentifys, 1);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+
+      // event should come before identify - maintain order using sequence number
+      assert.equal(events[0].event_type, 'test');
+      assert.equal(events[0].event_id, 1);
+      assert.deepEqual(events[0].user_properties, {});
+      assert.equal(events[0].sequence_number, 1);
+      assert.equal(events[1].event_type, '$identify');
+      assert.equal(events[1].event_id, 1);
+      assert.isTrue('$add' in events[1].user_properties);
+      assert.deepEqual(events[1].user_properties['$add'], {'photoCount': 1});
+      assert.equal(events[1].sequence_number, 2);
+
+      // send response and check that remove events works properly
+      server.respondWith('success');
+      server.respond();
+      assert.equal(amplitude._unsentCount(), 0);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+    });
+
+    it('should properly coalesce events and identify events into a request', function() {
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 6});
+      assert.equal(amplitude._unsentCount(), 0);
+
+      amplitude.logEvent('test1');
+      clock.tick(1);
+      amplitude.identify(new Identify().add('photoCount', 1));
+      clock.tick(1);
+      amplitude.logEvent('test2');
+      clock.tick(1);
+      amplitude.logEvent('test3');
+      clock.tick(1);
+      amplitude.logEvent('test4');
+      amplitude.identify(new Identify().add('photoCount', 2));
+
+      // verify some internal counters
+      assert.equal(amplitude._eventId, 4);
+      assert.equal(amplitude._identifyId, 2);
+      assert.equal(amplitude._unsentCount(), 6);
+      assert.lengthOf(amplitude._unsentEvents, 4);
+      assert.lengthOf(amplitude._unsentIdentifys, 2);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 6);
+
+      // verify the correct coalescing
+      assert.equal(events[0].event_type, 'test1');
+      assert.deepEqual(events[0].user_properties, {});
+      assert.equal(events[0].sequence_number, 1);
+      assert.equal(events[1].event_type, '$identify');
+      assert.isTrue('$add' in events[1].user_properties);
+      assert.deepEqual(events[1].user_properties['$add'], {'photoCount': 1});
+      assert.equal(events[1].sequence_number, 2);
+      assert.equal(events[2].event_type, 'test2');
+      assert.deepEqual(events[2].user_properties, {});
+      assert.equal(events[2].sequence_number, 3);
+      assert.equal(events[3].event_type, 'test3');
+      assert.deepEqual(events[3].user_properties, {});
+      assert.equal(events[3].sequence_number, 4);
+      assert.equal(events[4].event_type, 'test4');
+      assert.deepEqual(events[4].user_properties, {});
+      assert.equal(events[4].sequence_number, 5);
+      assert.equal(events[5].event_type, '$identify');
+      assert.isTrue('$add' in events[5].user_properties);
+      assert.deepEqual(events[5].user_properties['$add'], {'photoCount': 2});
+      assert.equal(events[5].sequence_number, 6);
+
+      // send response and check that remove events works properly
+      server.respondWith('success');
+      server.respond();
+      assert.equal(amplitude._unsentCount(), 0);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+    });
+
+    it('should merged events supporting backwards compatability', function() {
+      // events logged before v2.5.0 won't have sequence number, should get priority
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
+      assert.equal(amplitude._unsentCount(), 0);
+
+      amplitude.identify(new Identify().add('photoCount', 1));
+      amplitude.logEvent('test');
+      delete amplitude._unsentEvents[0].sequence_number; // delete sequence number to simulate old event
+      amplitude._sequenceNumber = 1; // reset sequence number
+      amplitude.identify(new Identify().add('photoCount', 2));
+
+      // verify some internal counters
+      assert.equal(amplitude._eventId, 1);
+      assert.equal(amplitude._identifyId, 2);
+      assert.equal(amplitude._unsentCount(), 3);
+      assert.lengthOf(amplitude._unsentEvents, 1);
+      assert.lengthOf(amplitude._unsentIdentifys, 2);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 3);
+
+      // event should come before identify - prioritize events with no sequence number
+      assert.equal(events[0].event_type, 'test');
+      assert.equal(events[0].event_id, 1);
+      assert.deepEqual(events[0].user_properties, {});
+      assert.isFalse('sequence_number' in events[0]);
+
+      assert.equal(events[1].event_type, '$identify');
+      assert.equal(events[1].event_id, 1);
+      assert.isTrue('$add' in events[1].user_properties);
+      assert.deepEqual(events[1].user_properties['$add'], {'photoCount': 1});
+      assert.equal(events[1].sequence_number, 1);
+
+      assert.equal(events[2].event_type, '$identify');
+      assert.equal(events[2].event_id, 2);
+      assert.isTrue('$add' in events[2].user_properties);
+      assert.deepEqual(events[2].user_properties['$add'], {'photoCount': 2});
+      assert.equal(events[2].sequence_number, 2);
+
+      // send response and check that remove events works properly
+      server.respondWith('success');
+      server.respond();
+      assert.equal(amplitude._unsentCount(), 0);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+    });
+
+    it('should drop event and keep identify on 413 response', function() {
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+      amplitude.logEvent('test');
+      clock.tick(1);
+      amplitude.identify(new Identify().add('photoCount', 1));
+
+      assert.equal(amplitude._unsentCount(), 2);
+      assert.lengthOf(server.requests, 1);
+      server.respondWith([413, {}, '']);
+      server.respond();
+
+      // backoff and retry
+      assert.equal(amplitude.options.uploadBatchSize, 1);
+      assert.equal(amplitude._unsentCount(), 2);
+      assert.lengthOf(server.requests, 2);
+      server.respondWith([413, {}, '']);
+      server.respond();
+
+      // after dropping massive event, only 1 event left
+      assert.equal(amplitude.options.uploadBatchSize, 1);
+      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(server.requests, 3);
+
+      var events = JSON.parse(querystring.parse(server.requests[2].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$identify');
+      assert.isTrue('$add' in events[0].user_properties);
+      assert.deepEqual(events[0].user_properties['$add'], {'photoCount': 1});
+    });
+
+    it('should drop identify if 413 and uploadBatchSize is 1', function() {
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+      amplitude.identify(new Identify().add('photoCount', 1));
+      clock.tick(1);
+      amplitude.logEvent('test');
+
+      assert.equal(amplitude._unsentCount(), 2);
+      assert.lengthOf(server.requests, 1);
+      server.respondWith([413, {}, '']);
+      server.respond();
+
+      // backoff and retry
+      assert.equal(amplitude.options.uploadBatchSize, 1);
+      assert.equal(amplitude._unsentCount(), 2);
+      assert.lengthOf(server.requests, 2);
+      server.respondWith([413, {}, '']);
+      server.respond();
+
+      // after dropping massive event, only 1 event left
+      assert.equal(amplitude.options.uploadBatchSize, 1);
+      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(server.requests, 3);
+
+      var events = JSON.parse(querystring.parse(server.requests[2].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, 'test');
+      assert.deepEqual(events[0].user_properties, {});
+    });
+
+    it('should truncate long event property strings', function() {
+      var longString = new Array(2000).join('a');
+      amplitude.logEvent('test', {'key': longString});
+      var event = JSON.parse(querystring.parse(server.requests[0].requestBody).e)[0];
+
+      assert.isTrue('key' in event.event_properties);
+      assert.lengthOf(event.event_properties['key'], 1024);
+    });
+
+    it('should  truncate long user property strings', function() {
+      var longString = new Array(2000).join('a');
+      amplitude.identify(new Identify().set('key', longString));
+      var event = JSON.parse(querystring.parse(server.requests[0].requestBody).e)[0];
+
+      assert.isTrue('$set' in event.user_properties);
+      assert.lengthOf(event.user_properties['$set']['key'], 1024);
+    });
   });
 
   describe('optOut', function() {
@@ -720,6 +1059,23 @@ describe('Amplitude', function() {
       amplitude2.init(apiKey);
       assert.strictEqual(amplitude2.options.optOut, true);
     });
+
+    it('should limit identify events queued', function() {
+      amplitude.init(apiKey, null, {savedMaxCount: 10});
+
+      amplitude._sending = true;
+      for (var i = 0; i < 15; i++) {
+        amplitude.identify(new Identify().add('test', i));
+      }
+      amplitude._sending = false;
+
+      amplitude.identify(new Identify().add('test', 100));
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 10);
+      assert.deepEqual(events[0].user_properties, {$add: {'test': 6}});
+      assert.deepEqual(events[9].user_properties, {$add: {'test': 100}});
+    });
   });
 
   describe('gatherUtm', function() {
@@ -737,7 +1093,6 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, undefined, {});
 
       amplitude.setUserProperties({user_prop: true});
-      amplitude.logEvent('UTM Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events[0].user_properties.utm_campaign, undefined);
@@ -769,12 +1124,21 @@ describe('Amplitude', function() {
       amplitude._initUtmData(utmParams);
 
       amplitude.setUserProperties({user_prop: true});
-      amplitude.logEvent('UTM Test Event', {});
-
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      // identify event should not have utm properties
       assert.deepEqual(events[0].user_properties, {
-        user_prop: true,
+        '$set': {
+          'user_prop': true
+        }
+      });
+      server.respondWith('success');
+      server.respond();
+
+      amplitude.logEvent('UTM Test Event', {});
+      assert.lengthOf(server.requests, 2);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
         utm_campaign: 'new',
         utm_content: 'top',
         utm_medium: 'email',
@@ -839,7 +1203,6 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, undefined, {});
 
       amplitude.setUserProperties({user_prop: true});
-      amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events[0].user_properties.referrer, undefined);
@@ -851,7 +1214,6 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, undefined, {includeReferrer: true});
 
       amplitude.logEvent('Referrer Test Event', {});
-
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
@@ -860,17 +1222,25 @@ describe('Amplitude', function() {
       });
     });
 
-    it('should add referrer data to the user properties', function() {
+    it('should add referrer data to the user properties on events only', function() {
       reset();
       amplitude.init(apiKey, undefined, {includeReferrer: true});
 
       amplitude.setUserProperties({user_prop: true});
-      amplitude.logEvent('Referrer Test Event', {});
-
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
-        user_prop: true,
+        $set: {
+          'user_prop': true
+        }
+      });
+      server.respondWith('success');
+      server.respond();
+
+      amplitude.logEvent('Referrer test event');
+      assert.lengthOf(server.requests, 2);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
         referrer: 'https://amplitude.com/contact',
         referring_domain: 'amplitude.com'
       });
@@ -960,6 +1330,65 @@ describe('Amplitude', function() {
       assert.notEqual(events[0].session_id, sessionId);
       assert.notEqual(amplitude._sessionId, sessionId);
       assert.equal(events[0].session_id, amplitude._sessionId);
+    });
+  });
+
+  describe('truncate', function() {
+    var longString = new Array(2000).join('a');
+
+    it('should truncate long strings', function() {
+      eventProperties = amplitude._truncate({'test': longString});
+      assert.lengthOf(eventProperties['test'], 1024);
+    });
+
+    it('should ignore keys', function() {
+      var eventProperties = {};
+      eventProperties[longString] = 'test';
+      eventProperties = amplitude._truncate(eventProperties);
+      assert.isTrue(longString in eventProperties);
+    });
+
+    it('should handle arrays', function() {
+      var eventProperties = [longString, longString];
+      eventProperties = amplitude._truncate(eventProperties);
+      assert.lengthOf(eventProperties, 2);
+      assert.lengthOf(eventProperties[0], 1024);
+      assert.lengthOf(eventProperties[1], 1024);
+    });
+
+    it('should handle nested dictionaries', function() {
+      var name = {'first': 'John', 'last': longString};
+      var eventProperties = amplitude._truncate({'name': name});
+      assert.lengthOf(Object.keys(eventProperties), 1);
+      assert.lengthOf(Object.keys(eventProperties['name']), 2);
+      assert.lengthOf(eventProperties['name']['first'], 4);
+      assert.lengthOf(eventProperties['name']['last'], 1024);
+    });
+
+    it('should ignore boolean and number values', function() {
+      var test = {'key1': 24, 'key2': false};
+      assert.deepEqual(test, amplitude._truncate(test));
+    });
+
+    it('should handle nested arrays', function() {
+      var test = [longString, 'test'];
+      var eventProperties = amplitude._truncate([test, test]);
+      assert.lengthOf(eventProperties, 2);
+      assert.lengthOf(eventProperties[0], 2);
+      assert.lengthOf(eventProperties[1], 2);
+      assert.lengthOf(eventProperties[0][0], 1024);
+      assert.lengthOf(eventProperties[0][1], 4);
+      assert.lengthOf(eventProperties[1][0], 1024);
+      assert.lengthOf(eventProperties[1][1], 4);
+    });
+
+    it('should handle arrays nested inside dictionaries', function() {
+      var test = [longString, 'test'];
+      var eventProperties = amplitude._truncate({'name': test});
+      assert.lengthOf(Object.keys(eventProperties), 1);
+      assert.lengthOf(eventProperties['name'], 2);
+      assert.lengthOf(eventProperties['name'][0], 1024);
+      assert.lengthOf(eventProperties['name'][1], 4);
     });
   });
 });

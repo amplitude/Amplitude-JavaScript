@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add support for user properties operations (set, setOnce, add, unset).
+
 ## 2.4.1 (September 21, 2015)
 
 * Add support for passing callback function to init.
@@ -8,7 +10,7 @@
 
 ## 2.4.0 (September 4, 2015)
 
-* Add support for passing callback functions to logEvent
+* Add support for passing callback functions to logEvent.
 
 ## 2.3.0 (September 2, 2015)
 
@@ -17,7 +19,7 @@
 ## 2.2.1 (Aug 13, 2015)
 
 * Fix bug where multi-byte unicode characters were hashed improperly.
-* Add option to sent referrer information as user properties
+* Add option to send referrer information as user properties.
 
 ## 2.2.0 (May 5, 2015)
 
