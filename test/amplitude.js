@@ -716,6 +716,7 @@ describe('Amplitude', function() {
         assert.isTrue('$add' in events[i].user_properties);
         assert.deepEqual(events[i].user_properties['$add'], {'photoCount': 1});
         assert.equal(events[i].event_id, i+1);
+        assert.equal(events[i].sequence_number, i+1);
       }
 
       // send response and check that remove events works properly
@@ -746,6 +747,7 @@ describe('Amplitude', function() {
       for (var i = 0; i < 3; i++) {
         assert.equal(events[i].event_type, 'test');
         assert.equal(events[i].event_id, i+1);
+        assert.equal(events[i].sequence_number, i+1);
       }
 
       // send response and check that remove events works properly
@@ -773,14 +775,16 @@ describe('Amplitude', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 2);
 
-      // if identify and event have same timestamp, identify comes first
-      assert.equal(events[0].event_type, '$identify');
+      // event should come before identify - maintain order using sequence number
+      assert.equal(events[0].event_type, 'test');
       assert.equal(events[0].event_id, 1);
-      assert.isTrue('$add' in events[0].user_properties);
-      assert.deepEqual(events[0].user_properties['$add'], {'photoCount': 1});
-      assert.equal(events[1].event_type, 'test');
+      assert.deepEqual(events[0].user_properties, {});
+      assert.equal(events[0].sequence_number, 1);
+      assert.equal(events[1].event_type, '$identify');
       assert.equal(events[1].event_id, 1);
-      assert.deepEqual(events[1].user_properties, {});
+      assert.isTrue('$add' in events[1].user_properties);
+      assert.deepEqual(events[1].user_properties['$add'], {'photoCount': 1});
+      assert.equal(events[1].sequence_number, 2);
 
       // send response and check that remove events works properly
       server.respondWith('success');
@@ -819,18 +823,72 @@ describe('Amplitude', function() {
       // verify the correct coalescing
       assert.equal(events[0].event_type, 'test1');
       assert.deepEqual(events[0].user_properties, {});
+      assert.equal(events[0].sequence_number, 1);
       assert.equal(events[1].event_type, '$identify');
       assert.isTrue('$add' in events[1].user_properties);
       assert.deepEqual(events[1].user_properties['$add'], {'photoCount': 1});
+      assert.equal(events[1].sequence_number, 2);
       assert.equal(events[2].event_type, 'test2');
       assert.deepEqual(events[2].user_properties, {});
+      assert.equal(events[2].sequence_number, 3);
       assert.equal(events[3].event_type, 'test3');
       assert.deepEqual(events[3].user_properties, {});
-      assert.equal(events[4].event_type, '$identify');
-      assert.isTrue('$add' in events[4].user_properties);
-      assert.deepEqual(events[4].user_properties['$add'], {'photoCount': 2});
-      assert.equal(events[5].event_type, 'test4');
-      assert.deepEqual(events[5].user_properties, {});
+      assert.equal(events[3].sequence_number, 4);
+      assert.equal(events[4].event_type, 'test4');
+      assert.deepEqual(events[4].user_properties, {});
+      assert.equal(events[4].sequence_number, 5);
+      assert.equal(events[5].event_type, '$identify');
+      assert.isTrue('$add' in events[5].user_properties);
+      assert.deepEqual(events[5].user_properties['$add'], {'photoCount': 2});
+      assert.equal(events[5].sequence_number, 6);
+
+      // send response and check that remove events works properly
+      server.respondWith('success');
+      server.respond();
+      assert.equal(amplitude._unsentCount(), 0);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+    });
+
+    it('should merged events supporting backwards compatability', function() {
+      // events logged before v2.5.0 won't have sequence number, should get priority
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
+      assert.equal(amplitude._unsentCount(), 0);
+
+      amplitude.identify(new Identify().add('photoCount', 1));
+      amplitude.logEvent('test');
+      delete amplitude._unsentEvents[0].sequence_number; // delete sequence number to simulate old event
+      amplitude._sequenceNumber = 1; // reset sequence number
+      amplitude.identify(new Identify().add('photoCount', 2));
+
+      // verify some internal counters
+      assert.equal(amplitude._eventId, 1);
+      assert.equal(amplitude._identifyId, 2);
+      assert.equal(amplitude._unsentCount(), 3);
+      assert.lengthOf(amplitude._unsentEvents, 1);
+      assert.lengthOf(amplitude._unsentIdentifys, 2);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 3);
+
+      // event should come before identify - prioritize events with no sequence number
+      assert.equal(events[0].event_type, 'test');
+      assert.equal(events[0].event_id, 1);
+      assert.deepEqual(events[0].user_properties, {});
+      assert.isFalse('sequence_number' in events[0]);
+
+      assert.equal(events[1].event_type, '$identify');
+      assert.equal(events[1].event_id, 1);
+      assert.isTrue('$add' in events[1].user_properties);
+      assert.deepEqual(events[1].user_properties['$add'], {'photoCount': 1});
+      assert.equal(events[1].sequence_number, 1);
+
+      assert.equal(events[2].event_type, '$identify');
+      assert.equal(events[2].event_id, 2);
+      assert.isTrue('$add' in events[2].user_properties);
+      assert.deepEqual(events[2].user_properties['$add'], {'photoCount': 2});
+      assert.equal(events[2].sequence_number, 2);
 
       // send response and check that remove events works properly
       server.respondWith('success');

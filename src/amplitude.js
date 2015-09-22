@@ -40,6 +40,7 @@ var DEFAULT_OPTIONS = {
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
+  LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
   SESSION_ID: 'amplitude_sessionId'
 };
@@ -56,6 +57,7 @@ var Amplitude = function() {
 
 Amplitude.prototype._eventId = 0;
 Amplitude.prototype._identifyId = 0;
+Amplitude.prototype._sequenceNumber = 0;
 Amplitude.prototype._sending = false;
 Amplitude.prototype._lastEventTime = null;
 Amplitude.prototype._sessionId = null;
@@ -132,6 +134,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     this._sessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
     this._eventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID) || 0;
     this._identifyId = localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID) || 0;
+    this._sequenceNumber = localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER) || 0;
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
@@ -172,6 +175,11 @@ Amplitude.prototype.nextEventId = function() {
 Amplitude.prototype.nextIdentifyId = function() {
   this._identifyId++;
   return this._identifyId;
+};
+
+Amplitude.prototype.nextSequenceNumber = function() {
+  this._sequenceNumber++;
+  return this._sequenceNumber;
 };
 
 // returns the number of unsent events and identifys
@@ -440,7 +448,8 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       library: {
         name: 'amplitude-js',
         version: this.__VERSION__
-      }
+      },
+      sequence_number: this.nextSequenceNumber() // for ordering events and identifys
       // country: null
     };
 
@@ -610,14 +619,17 @@ Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
       event = this._unsentIdentifys[identifyIndex++];
       maxIdentifyId = event.event_id;
 
-    // case 3: need to compare timestamps
+    // case 3: need to compare sequence numbers
     } else {
-      if (this._unsentIdentifys[identifyIndex].timestamp <= this._unsentEvents[eventIndex].timestamp) {
-        event = this._unsentIdentifys[identifyIndex++];
-        maxIdentifyId = event.event_id;
-      } else {
+      // events logged before v2.5.0 won't have a sequence number, put those first
+      if (!('sequence_number' in this._unsentEvents[eventIndex]) ||
+          this._unsentEvents[eventIndex].sequence_number <
+          this._unsentIdentifys[identifyIndex].sequence_number) {
         event = this._unsentEvents[eventIndex++];
         maxEventId = event.event_id;
+      } else {
+        event = this._unsentIdentifys[identifyIndex++];
+        maxIdentifyId = event.event_id;
       }
     }
 
