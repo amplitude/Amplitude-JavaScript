@@ -164,6 +164,10 @@ describe('Identify', function() {
     var emptyIdentify = new Identify().fromProxyObject(emptyProxyObject);
     assert.deepEqual(emptyIdentify.userPropertiesOperations, {});
 
+    // proxy object without p dict should result in empty identify object:
+    var emptyIdentify2 = new Identify().fromProxyObject({});
+    assert.deepEqual(emptyIdentify2.userPropertiesOperations, {});
+
     var proxyObject = {'p':{
       'a':{'key1': 'value1'},
       'u':{'key1': 'value2'},

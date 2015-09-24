@@ -3311,18 +3311,22 @@ var Identify = function() {
 };
 
 Identify.prototype.fromProxyObject = function(proxyObject) {
-  this._addOperationsFromProxyObjectDictionary(AMP_OP_SET_ONCE, proxyObject, 'so');
-  this._addOperationsFromProxyObjectDictionary(AMP_OP_UNSET, proxyObject, 'u');
-  this._addOperationsFromProxyObjectDictionary(AMP_OP_SET, proxyObject, 's');
-  this._addOperationsFromProxyObjectDictionary(AMP_OP_ADD, proxyObject, 'a');
+  if (!('p' in proxyObject)) {
+    return this;
+  }
+
+  this._addOperationsFromProxyObjectDictionary(AMP_OP_SET_ONCE, proxyObject.p, 'so');
+  this._addOperationsFromProxyObjectDictionary(AMP_OP_UNSET, proxyObject.p, 'u');
+  this._addOperationsFromProxyObjectDictionary(AMP_OP_SET, proxyObject.p, 's');
+  this._addOperationsFromProxyObjectDictionary(AMP_OP_ADD, proxyObject.p, 'a');
   return this;
 };
 
-Identify.prototype._addOperationsFromProxyObjectDictionary = function(operation, proxyObject, dictionary) {
-  if (dictionary in proxyObject.p) {
-    for (var key in proxyObject.p[dictionary]) {
-      if (proxyObject.p[dictionary].hasOwnProperty(key)) {
-        this._addOperation(operation, key, proxyObject.p[dictionary][key]);
+Identify.prototype._addOperationsFromProxyObjectDictionary = function(operation, userPropertyOperations, dictionary) {
+  if (dictionary in userPropertyOperations) {
+    for (var key in userPropertyOperations[dictionary]) {
+      if (userPropertyOperations[dictionary].hasOwnProperty(key)) {
+        this._addOperation(operation, key, userPropertyOperations[dictionary][key]);
       }
     }
   }
