@@ -9,6 +9,11 @@
         as.src = '/amplitude.js';
         var s = document.getElementsByTagName('script')[0];
         s.parentNode.insertBefore(as, s);
+        amplitude.Identify = function(){this.p={'a':{},'s':{},'us':{},'so':{}};};
+        amplitude.Identify.prototype.add = function(k,v){this.p.a[k]=v;return this;};
+        amplitude.Identify.prototype.set = function(k,v){this.p.s[k]=v;return this;};
+        amplitude.Identify.prototype.setOnce = function(k,v){this.p.so[k]=v;return this;};
+        amplitude.Identify.prototype.unset = function(k){this.p.us[k]='-';return this;};
         amplitude._q = [];
         function proxy(fn) {
             amplitude[fn] = function() {
@@ -16,7 +21,7 @@
             };
         }
 
-        var funcs = ["init", "logEvent", "logRevenue", "setUserId", "setUserProperties", "setOptOut", "setVersionName", "setDomain", "setGlobalUserProperties"];
+        var funcs = ["init", "logEvent", "logRevenue", "setUserId", "setUserProperties", "setOptOut", "setVersionName", "setDomain", "setGlobalUserProperties", "identify"];
         for (var i = 0; i < funcs.length; i++) {
             proxy(funcs[i]);
         }
@@ -43,7 +48,8 @@
 <script>
     amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053');
     amplitude.setVersionName('Web');
-    //amplitude.logEvent('pageLoad');
+    amplitude.identify(new amplitude.Identify().add('photoCount', 1).set('gender', 'male'));
+    amplitude.logEvent('pageLoad');
 </script>
 <body>
 <h3>Amplitude JS Test</h3>

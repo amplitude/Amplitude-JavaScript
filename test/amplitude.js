@@ -153,19 +153,19 @@ describe('Amplitude', function() {
 
     it('should ignore inputs that are not identify objects', function() {
       amplitude.identify('This is a test');
-      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
       amplitude.identify(150);
-      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
       amplitude.identify(['test']);
-      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
       amplitude.identify({'user_prop': true});
-      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
     });
 
@@ -197,6 +197,45 @@ describe('Amplitude', function() {
       });
     });
 
+    it('should ignore empty identify objects', function() {
+      amplitude.identify(new Identify());
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should ignore empty proxy identify objects', function() {
+      amplitude.identify({'p': {}});
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.identify({});
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should generate an event from a proxy identify object', function() {
+      var proxyObject = {'p':{
+        'a':{'key1': 'value1'},
+        'u':{'key1': 'value2'},
+        's':{'key2': 'value3', 'key4': 'value5'},
+        'so':{'key2': 'value4'}
+      }};
+      amplitude.identify(proxyObject);
+
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 1);
+      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].event_properties, {});
+      assert.deepEqual(events[0].user_properties, {
+        '$setOnce': {'key2': 'value4'},
+        '$unset': {'key1': 'value2'},
+        '$set': {'key4': 'value5'}
+      });
+    });
   });
 
   describe('logEvent', function() {

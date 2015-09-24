@@ -352,8 +352,13 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
 };
 
 Amplitude.prototype.identify = function(identify) {
-  if (identify instanceof Identify) {
+  if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
     this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
+  } else if (type(identify) === 'object' && 'p' in identify) {
+    var identifyObject = new Identify().fromProxyObject(identify);
+    if (Object.keys(identifyObject.userPropertiesOperations).length > 0) {
+      this._logEvent(IDENTIFY_EVENT, null, null, identifyObject.userPropertiesOperations);
+    }
   }
 };
 

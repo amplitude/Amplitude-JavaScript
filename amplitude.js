@@ -464,8 +464,13 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
 };
 
 Amplitude.prototype.identify = function(identify) {
-  if (identify instanceof Identify) {
+  if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
     this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
+  } else if (type(identify) === 'object' && 'p' in identify) {
+    var identifyObject = new Identify().fromProxyObject(identify);
+    if (Object.keys(identifyObject.userPropertiesOperations).length > 0) {
+      this._logEvent(IDENTIFY_EVENT, null, null, identifyObject.userPropertiesOperations);
+    }
   }
 };
 
@@ -2350,6 +2355,8 @@ module.exports = function(val){
   if (val !== val) return 'nan';
   if (val && val.nodeType === 1) return 'element';
 
+  if (typeof Buffer != 'undefined' && Buffer.isBuffer(val)) return 'buffer';
+
   val = val.valueOf
     ? val.valueOf()
     : Object.prototype.valueOf.apply(val)
@@ -3301,6 +3308,24 @@ var log = function(s) {
 var Identify = function() {
   this.userPropertiesOperations = {};
   this.properties = []; // keep track of keys that have been added
+};
+
+Identify.prototype.fromProxyObject = function(proxyObject) {
+  this._addOperationsFromProxyObjectDictionary(AMP_OP_SET_ONCE, proxyObject, 'so');
+  this._addOperationsFromProxyObjectDictionary(AMP_OP_UNSET, proxyObject, 'u');
+  this._addOperationsFromProxyObjectDictionary(AMP_OP_SET, proxyObject, 's');
+  this._addOperationsFromProxyObjectDictionary(AMP_OP_ADD, proxyObject, 'a');
+  return this;
+};
+
+Identify.prototype._addOperationsFromProxyObjectDictionary = function(operation, proxyObject, dictionary) {
+  if (dictionary in proxyObject.p) {
+    for (var key in proxyObject.p[dictionary]) {
+      if (proxyObject.p[dictionary].hasOwnProperty(key)) {
+        this._addOperation(operation, key, proxyObject.p[dictionary][key]);
+      }
+    }
+  }
 };
 
 Identify.prototype.add = function(property, value) {
