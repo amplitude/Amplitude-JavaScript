@@ -179,6 +179,19 @@ The status and response from the server are passed to the callback function, whi
   };
 ```
 
+You can also use this to track outbound links on your website. For example you would have a link like this:
+
+    <a href="javascript:trackClickLinkA();">Link A</a>
+
+And then you would define a function that is called when the link is clicked like this:
+
+```javascript
+var trackClickLinkA = function() {
+  amplitude.logEvent('Clicked Link A', null, function() {
+    window.location="LINK_A_URL";
+  });
+}
+```
 You can also pass a callback function to init, which will get called after the SDK finishes its asynchronous loading. Note: no values are passed to the init callback function:
 
     amplitude.init("YOUR_API_KEY_HERE", "USER_ID_HERE", null, callback_function);
