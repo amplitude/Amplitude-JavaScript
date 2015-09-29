@@ -2,26 +2,39 @@
 <!--<script src="src/amplitude-snippet.js" type="text/javascript"></script>-->
 <script>
     (function(window, document) {
-        var amplitude = window.amplitude || {};
-        var as = document.createElement('script');
-        as.type = 'text/javascript';
-        as.async = true;
-        as.src = '/amplitude.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(as, s);
-        amplitude._q = [];
-        function proxy(fn) {
-            amplitude[fn] = function() {
-                amplitude._q.push([fn].concat(Array.prototype.slice.call(arguments, 0)));
-            };
-        }
-
-        var funcs = ["init", "logEvent", "logRevenue", "setUserId", "setUserProperties", "setOptOut", "setVersionName", "setDomain", "setGlobalUserProperties"];
-        for (var i = 0; i < funcs.length; i++) {
-            proxy(funcs[i]);
-        }
-        window.amplitude = amplitude;
+      var amplitude = window.amplitude || {};
+      var as = document.createElement('script');
+      as.type = 'text/javascript';
+      as.async = true;
+      as.src = '/amplitude.js';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(as, s);
+      var Identify = function() { this._q = []; return this; };
+      function proxyIdentify(fn) {
+        Identify.prototype[fn] = function() {
+          this._q.push([fn].concat(Array.prototype.slice.call(arguments, 0))); return this;
+        };
+      }
+      var identifyFuncs = ['add', 'set', 'setOnce', 'unset'];
+      for (var i = 0; i < identifyFuncs.length; i++) {
+        proxyIdentify(identifyFuncs[i]);
+      }
+      amplitude.Identify = Identify;
+      amplitude._q = [];
+      function proxy(fn) {
+        amplitude[fn] = function() {
+          amplitude._q.push([fn].concat(Array.prototype.slice.call(arguments, 0)));
+        };
+      }
+      var funcs = ['init', 'logEvent', 'logRevenue', 'setUserId', 'setUserProperties',
+                   'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId',
+                   'setGlobalUserProperties', 'identify'];
+      for (var j = 0; j < funcs.length; j++) {
+        proxy(funcs[j]);
+      }
+      window.amplitude = amplitude;
     })(window, document);
+
 
     var setUserId = function() {
         var userId = prompt('Input userId', 'user01');
@@ -30,20 +43,25 @@
     var setEventUploadThreshold = function() {
         var eventUploadThreshold = parseInt(prompt('Input eventUploadThreshold', 5));
         amplitude.options.eventUploadThreshold = eventUploadThreshold;
-    }
+    };
     var logEvent = function() {
         var event = prompt('Input event type', 'clicked');
         amplitude.logEvent(event);
-    }
+    };
     var setCity = function() {
         var city = prompt('Input city', 'San Francisco, CA');
         amplitude.setUserProperties({city: city});
-    }
+    };
+    var clickOnLinkA = function() {
+        amplitude.logEvent('Clicked on link A', null, function() { window.location='https://www.google.com'; });
+    };
 </script>
 <script>
     amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053');
     amplitude.setVersionName('Web');
-    //amplitude.logEvent('pageLoad');
+    amplitude.identify(new amplitude.Identify().add('photoCount', 1));
+    //amplitude.identify(new amplitude.Identify().add('photoCount', 1).set('gender', 'male').unset('karma'););
+    amplitude.logEvent('pageLoad');
 </script>
 <body>
 <h3>Amplitude JS Test</h3>
@@ -60,5 +78,6 @@
     <li><a href="javascript:amplitude.identify(new amplitude.Identify().add('photoCount', 1));">Increment photo count</a></li>
     <li><a href="javascript:setCity();">Set city via setUserProperties</a></li>
     <li><a href="javascript:amplitude.identify(new amplitude.Identify().unset('photoCount'));">Unset photo count</a></li>
+    <li><a href="javascript:clickOnLinkA();">Click on link A</a></li>
 </body>
 </html>

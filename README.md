@@ -8,11 +8,14 @@ Amplitude-Javascript
 2. On every page that uses analytics, paste the following Javascript code between the `<head>` and `</head>` tags:
 
         <script type="text/javascript">
-          (function(e,t){var r=e.amplitude||{};var n=t.createElement("script");n.type="text/javascript";
-          n.async=true;n.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.4.1-min.gz.js";
-          var s=t.getElementsByTagName("script")[0];s.parentNode.insertBefore(n,s);r._q=[];function a(e){
-          r[e]=function(){r._q.push([e].concat(Array.prototype.slice.call(arguments,0)))}}var i=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties"];
-          for(var o=0;o<i.length;o++){a(i[o])}e.amplitude=r})(window,document);
+          (function(t,e){var n=t.amplitude||{};var r=e.createElement("script");r.type="text/javascript";
+          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.4.1-min.gz.js";
+          var s=e.getElementsByTagName("script")[0];s.parentNode.insertBefore(r,s);var i=function(){
+          this._q=[];return this};function a(t){i.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+          return this}}var o=["add","set","setOnce","unset"];for(var c=0;c<o.length;c++){a(o[c]);
+          }n.Identify=i;n._q=[];function u(t){n[t]=function(){n._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+          }}var p=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify"];
+          for(var l=0;l<p.length;l++){u(p[l])}t.amplitude=n})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
         </script>

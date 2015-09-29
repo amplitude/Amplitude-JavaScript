@@ -464,7 +464,20 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
 };
 
 Amplitude.prototype.identify = function(identify) {
-  if (identify instanceof Identify) {
+
+  if (type(identify) === 'object' && '_q' in identify) {
+    var instance = new Identify();
+    // Apply the queued commands
+    for (var i = 0; i < identify._q.length; i++) {
+        var fn = instance[identify._q[i][0]];
+        if (fn && type(fn) === 'function') {
+          fn.apply(instance, identify._q[i].slice(1));
+        }
+    }
+    identify = instance;
+  }
+
+  if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
     this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
   }
 };
@@ -2350,6 +2363,8 @@ module.exports = function(val){
   if (val !== val) return 'nan';
   if (val && val.nodeType === 1) return 'element';
 
+  if (typeof Buffer != 'undefined' && Buffer.isBuffer(val)) return 'buffer';
+
   val = val.valueOf
     ? val.valueOf()
     : Object.prototype.valueOf.apply(val)
@@ -3296,7 +3311,6 @@ var AMP_OP_UNSET = '$unset';
 var log = function(s) {
   console.log('[Amplitude] ' + s);
 };
-
 
 var Identify = function() {
   this.userPropertiesOperations = {};

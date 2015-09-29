@@ -15,7 +15,6 @@ var log = function(s) {
   console.log('[Amplitude] ' + s);
 };
 
-
 var Identify = function() {
   this.userPropertiesOperations = {};
   this.properties = []; // keep track of keys that have been added
