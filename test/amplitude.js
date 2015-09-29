@@ -204,7 +204,7 @@ describe('Amplitude', function() {
     });
 
     it('should ignore empty proxy identify objects', function() {
-      amplitude.identify({'p': {}});
+      amplitude.identify({'_q': {}});
       assert.lengthOf(amplitude._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
@@ -214,12 +214,13 @@ describe('Amplitude', function() {
     });
 
     it('should generate an event from a proxy identify object', function() {
-      var proxyObject = {'p':{
-        'a':{'key1': 'value1'},
-        'u':{'key1': 'value2'},
-        's':{'key2': 'value3', 'key4': 'value5'},
-        'so':{'key2': 'value4'}
-      }};
+      var proxyObject = {'_q':[
+        ['setOnce', 'key2', 'value4'],
+        ['unset', 'key1'],
+        ['add', 'key1', 'value1'],
+        ['set', 'key2', 'value3'],
+        ['set', 'key4', 'value5'],
+      ]};
       amplitude.identify(proxyObject);
 
       assert.lengthOf(amplitude._unsentEvents, 0);
@@ -232,7 +233,7 @@ describe('Amplitude', function() {
       assert.deepEqual(events[0].event_properties, {});
       assert.deepEqual(events[0].user_properties, {
         '$setOnce': {'key2': 'value4'},
-        '$unset': {'key1': 'value2'},
+        '$unset': {'key1': '-'},
         '$set': {'key4': 'value5'}
       });
     });

@@ -15,28 +15,13 @@ describe('Snippet', function() {
   });
 
   it('amplitude object should proxy Identify object and calls', function() {
-    amplitude._q = [];
+    var identify = new amplitude.Identify().set('key1', 'value1').unset('key2');
+    identify.add('key3', 2).setOnce('key4', 'value2');
 
-    var emptyProxyObject = new amplitude.Identify();
-    assert.deepEqual(
-      emptyProxyObject.p,
-      {'a':{},'s':{},'u':{},'so':{}}
-    );
-
-    var proxyObject = new amplitude.Identify().add('key1', 'value1').unset('key1');
-    proxyObject.set('key2', 'value3').set('key4', 'value5').setOnce('key2', 'value4');
-    assert.deepEqual(
-      proxyObject.p,
-      {
-        'a':{'key1': 'value1'},
-        'u':{'key1': '-'},
-        's':{'key2': 'value3', 'key4': 'value5'},
-        'so':{'key2': 'value4'}
-      }
-    );
-    amplitude.identify(proxyObject);
-    assert.lengthOf(amplitude._q, 1);
-    assert.deepEqual(amplitude._q[0], ['identify', proxyObject]);
+    assert.lengthOf(identify._q, 4);
+    assert.deepEqual(identify._q[0], ['set', 'key1', 'value1']);
+    assert.deepEqual(identify._q[1], ['unset', 'key2']);
+    assert.deepEqual(identify._q[2], ['add', 'key3', 2]);
+    assert.deepEqual(identify._q[3], ['setOnce', 'key4', 'value2']);
   });
-
 });

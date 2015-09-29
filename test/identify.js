@@ -157,32 +157,4 @@ describe('Identify', function() {
     assert.deepEqual(expected, identify.userPropertiesOperations);
     assert.deepEqual([property], identify.properties);
   });
-
-  it ('should load from proxy object', function() {
-    // empty proxy object should result in empty identify object:
-    var emptyProxyObject = {'p':{'a':{}, 'u':{}, 's':{}, 'so':{}}};
-    var emptyIdentify = new Identify().fromProxyObject(emptyProxyObject);
-    assert.deepEqual(emptyIdentify.userPropertiesOperations, {});
-
-    // proxy object without p dict should result in empty identify object:
-    var emptyIdentify2 = new Identify().fromProxyObject({});
-    assert.deepEqual(emptyIdentify2.userPropertiesOperations, {});
-
-    var proxyObject = {'p':{
-      'a':{'key1': 'value1'},
-      'u':{'key1': 'value2'},
-      's':{'key2': 'value3', 'key4': 'value5'},
-      'so':{'key2': 'value4'}
-    }};
-    var identify = new Identify().fromProxyObject(proxyObject);
-    assert.deepEqual(
-      identify.userPropertiesOperations,
-      {
-        '$setOnce': {'key2': 'value4'},
-        '$unset': {'key1': 'value2'},
-        '$set': {'key4': 'value5'}
-        // no add since filtered out as duplicate
-      }
-    );
-  });
 });

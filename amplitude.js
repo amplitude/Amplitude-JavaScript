@@ -464,13 +464,21 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
 };
 
 Amplitude.prototype.identify = function(identify) {
+
+  if (type(identify) === 'object' && '_q' in identify) {
+    var instance = new Identify();
+    // Apply the queued commands
+    for (var i = 0; i < identify._q.length; i++) {
+        var fn = instance[identify._q[i][0]];
+        if (fn && type(fn) === 'function') {
+          fn.apply(instance, identify._q[i].slice(1));
+        }
+    }
+    identify = instance;
+  }
+
   if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
     this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
-  } else if (type(identify) === 'object' && 'p' in identify) {
-    var identifyObject = new Identify().fromProxyObject(identify);
-    if (Object.keys(identifyObject.userPropertiesOperations).length > 0) {
-      this._logEvent(IDENTIFY_EVENT, null, null, identifyObject.userPropertiesOperations);
-    }
   }
 };
 
@@ -3295,14 +3303,10 @@ var type = require('./type');
  * only the first operation will be saved, and the rest will be ignored.
  */
 
-// maps operation to identify string and proxy key
-// order listed also defines order of processing
-var OPERATIONS = {
-  'AMP_OP_SET_ONCE': {'opString': '$setOnce', 'proxyKey': 'so'},
-  'AMP_OP_UNSET': {'opString': '$unset', 'proxyKey': 'u'},
-  'AMP_OP_SET': {'opString': '$set', 'proxyKey': 's'},
-  'AMP_OP_ADD': {'opString': '$add', 'proxyKey': 'a'}
-};
+var AMP_OP_ADD = '$add';
+var AMP_OP_SET = '$set';
+var AMP_OP_SET_ONCE = '$setOnce';
+var AMP_OP_UNSET = '$unset';
 
 var log = function(s) {
   console.log('[Amplitude] ' + s);
@@ -3313,30 +3317,9 @@ var Identify = function() {
   this.properties = []; // keep track of keys that have been added
 };
 
-Identify.prototype.fromProxyObject = function(proxyObject) {
-  if (!('p' in proxyObject)) {
-    return this;
-  }
-  Object.keys(OPERATIONS).forEach(function(operation) {
-    this._addOperationsFromProxyObjectDictionary(operation, proxyObject.p);
-  }.bind(this));
-  return this;
-};
-
-Identify.prototype._addOperationsFromProxyObjectDictionary = function(operation, proxyObjectDict) {
-  var proxyKey = OPERATIONS[operation].proxyKey;
-  if (!(proxyKey in proxyObjectDict)) {
-    return;
-  }
-  var userPropertiesOperations = proxyObjectDict[proxyKey];
-  Object.keys(userPropertiesOperations).forEach(function(key) {
-    this._addOperation(operation, key, userPropertiesOperations[key]);
-  }.bind(this));
-};
-
 Identify.prototype.add = function(property, value) {
   if (type(value) === 'number' || type(value) === 'string') {
-    this._addOperation('AMP_OP_ADD', property, value);
+    this._addOperation(AMP_OP_ADD, property, value);
   } else {
     log('Unsupported type for value: ' + type(value) + ', expecting number or string');
   }
@@ -3344,32 +3327,31 @@ Identify.prototype.add = function(property, value) {
 };
 
 Identify.prototype.set = function(property, value) {
-  this._addOperation('AMP_OP_SET', property, value);
+  this._addOperation(AMP_OP_SET, property, value);
   return this;
 };
 
 Identify.prototype.setOnce = function(property, value) {
-  this._addOperation('AMP_OP_SET_ONCE', property, value);
+  this._addOperation(AMP_OP_SET_ONCE, property, value);
   return this;
 };
 
 Identify.prototype.unset = function(property) {
-  this._addOperation('AMP_OP_UNSET', property, '-');
+  this._addOperation(AMP_OP_UNSET, property, '-');
   return this;
 };
 
 Identify.prototype._addOperation = function(operation, property, value) {
-  var opString = OPERATIONS[operation].opString;
   // check that property wasn't already used in this Identify
   if (this.properties.indexOf(property) !== -1) {
-    log('User property "' + property + '" already used in this identify, skipping operation ' + opString);
+    log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
     return;
   }
 
-  if (!(opString in this.userPropertiesOperations)){
-    this.userPropertiesOperations[opString] = {};
+  if (!(operation in this.userPropertiesOperations)){
+    this.userPropertiesOperations[operation] = {};
   }
-  this.userPropertiesOperations[opString][property] = value;
+  this.userPropertiesOperations[operation][property] = value;
   this.properties.push(property);
 };
 
