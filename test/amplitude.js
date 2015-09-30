@@ -76,6 +76,39 @@ describe('Amplitude', function() {
     });
   });
 
+  describe('runQueuedFunctions', function() {
+    beforeEach(function() {
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should run queued functions', function() {
+      assert.equal(amplitude._unsentCount(), 0);
+      assert.lengthOf(server.requests, 0);
+      var userId = 'testUserId'
+      var eventType = 'test_event'
+      var functions = [
+        ['setUserId', userId],
+        ['logEvent', eventType]
+      ];
+      amplitude._q = functions;
+      assert.lengthOf(amplitude._q, 2);
+      amplitude.runQueuedFunctions();
+
+      assert.equal(amplitude.options.userId, userId);
+      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, eventType);
+
+      assert.lengthOf(amplitude._q, 0);
+    });
+  });
+
   describe('setUserProperties', function() {
     beforeEach(function() {
       amplitude.init(apiKey);

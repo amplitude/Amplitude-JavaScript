@@ -96,14 +96,8 @@
 var Amplitude = require('./amplitude');
 
 var old = window.amplitude || {};
-var q = old._q || [];
 var instance = new Amplitude();
-
-// Apply the queued commands
-for (var i = 0; i < q.length; i++) {
-    var fn = instance[q[i][0]];
-    fn && fn.apply(instance, q[i].slice(1));
-}
+instance._q = old._q || [];
 
 // export the instance
 module.exports = instance;
@@ -165,6 +159,7 @@ var Amplitude = function() {
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
+  this._q = []; // queue for proxied functions before script load
 };
 
 Amplitude.prototype._eventId = 0;
@@ -263,6 +258,16 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   if (callback && type(callback) === 'function') {
     callback();
   }
+};
+
+Amplitude.prototype.runQueuedFunctions = function () {
+  for (var i = 0; i < this._q.length; i++) {
+    var fn = this[this._q[i][0]];
+    if (fn && type(fn) === 'function') {
+      fn.apply(this, this._q[i].slice(1));
+    }
+  }
+  this._q = []; // clear function queue after running
 };
 
 Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey, queue) {
