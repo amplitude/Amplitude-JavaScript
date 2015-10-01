@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Add support for user properties operations (set, setOnce, add, unset).
+* Fix bug to run queued functions after script element is loaded and set to window.
 
 ## 2.4.1 (September 21, 2015)
 

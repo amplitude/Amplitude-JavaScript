@@ -7,6 +7,7 @@
       as.type = 'text/javascript';
       as.async = true;
       as.src = '/amplitude.js';
+      as.onload = function() { window.amplitude.runQueuedFunctions(); };
       var s = document.getElementsByTagName('script')[0];
       s.parentNode.insertBefore(as, s);
       var Identify = function() { this._q = []; return this; };
@@ -69,7 +70,9 @@
     }
 </script>
 <script>
-    amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053');
+    amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053', null, null, function() {
+        alert(amplitude.options.deviceId);
+    });
     amplitude.setVersionName('Web');
     amplitude.identify(new amplitude.Identify().add('photoCount', 1));
     amplitude.identify(new amplitude.Identify().add('photoCount', 1).set('gender', 'male').unset('karma'));
