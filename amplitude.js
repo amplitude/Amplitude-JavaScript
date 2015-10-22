@@ -222,8 +222,6 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     });
     this.options.domain = Cookie.options().domain;
 
-    debugger;
-
     this._upgradeStoredData();
     this._loadStoredData();
 
@@ -293,50 +291,50 @@ Amplitude.prototype._upgradeStoredData = function() {
     if (cookieData.optOut !== undefined) {
       this.setLocalStorage('OPT_OUT', cookieData.optOut);
     }
-    // Cookie.remove(this.options.cookieName);
+    Cookie.remove(this.options.cookieName);
   }
 
   // update local storage keys to prevent conflicts
   var lastEventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID);
   if (lastEventId) {
     this.setLocalStorage('LAST_EVENT_ID', lastEventId);
-    // localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
+    localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
   }
 
   var lastIdentifyId = localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID);
   if (lastIdentifyId) {
     this.setLocalStorage('LAST_IDENTIFY_ID', lastIdentifyId);
-    // localStorage.removeItem(LocalStorageKeys.LAST_IDENTIFY_ID);
+    localStorage.removeItem(LocalStorageKeys.LAST_IDENTIFY_ID);
   }
 
   var lastSequenceNumber = localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
   if (lastSequenceNumber) {
     this.setLocalStorage('LAST_SEQUENCE_NUMBER', lastSequenceNumber);
-    // localStorage.removeItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
+    localStorage.removeItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
   }
 
   var lastEventTime  = localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME);
   if (lastEventTime) {
     this.setLocalStorage('LAST_EVENT_TIME', lastEventTime);
-    // localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
+    localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
   }
 
   var sessionId = localStorage.getItem(LocalStorageKeys.SESSION_ID);
   if (sessionId) {
     this.setLocalStorage('SESSION_ID', sessionId);
-    // localStorage.removeItem(LocalStorageKeys.SESSION_ID);
+    localStorage.removeItem(LocalStorageKeys.SESSION_ID);
   }
 
   var unsentEventsString = localStorage.getItem(LocalStorageKeys.UNSENT_EVENTS);
   if (unsentEventsString) {
     this.setLocalStorage('UNSENT_EVENTS', unsentEventsString);
-    // localStorage.removeItem(LocalStorageKeys.UNSENT_EVENTS);
+    localStorage.removeItem(LocalStorageKeys.UNSENT_EVENTS);
   }
 
   var unsentIdentifysString = localStorage.getItem(LocalStorageKeys.UNSENT_IDENTIFYS);
   if (unsentIdentifysString) {
     this.setLocalStorage('UNSENT_IDENTIFYS', unsentIdentifysString);
-    // localStorage.removeItem(LocalStorageKeys.UNSENT_IDENTIFYS);
+    localStorage.removeItem(LocalStorageKeys.UNSENT_IDENTIFYS);
   }
 };
 
