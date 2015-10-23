@@ -221,7 +221,6 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
       domain: this.options.domain
     });
     this.options.domain = Cookie.options().domain;
-
     this._upgradeStoredData();
     this._loadStoredData();
 

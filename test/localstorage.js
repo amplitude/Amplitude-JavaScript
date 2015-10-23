@@ -91,6 +91,14 @@ describe('Localstorage', function() {
       assert.equal(cookieStorage.getItem('key-a'), longString);
       assert.isNull(cookieStorage.getItem('key-b'));
     });
+
+    it('should fetch the nth key', function() {
+      cookieStorage.setItem('key-a', 'value-a');
+      cookieStorage.setItem('key-b', 'value-b');
+
+      assert.isNull(cookieStorage.key(5));
+      assert.equal(cookieStorage.key(1), 'key-b');
+    });
   });
 
   describe('upgrade', function() {
