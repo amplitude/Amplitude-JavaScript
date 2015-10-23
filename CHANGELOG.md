@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Migrate cookie data to local storage to address issue where having cookies disabled causes SDK to generate a new deviceId for returning users.
+
 ## 2.5.0 (September 30, 2015)
 
 * Add support for user properties operations (set, setOnce, add, unset).

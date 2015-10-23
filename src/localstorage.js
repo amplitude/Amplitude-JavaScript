@@ -79,7 +79,7 @@ if (windowLocalStorageAvailable()) {
     div.load(attrKey);
     localStorage.length = div.XMLDocument.documentElement.attributes.length;
   } else {
-    /* Nothing we can do ... */
+    localStorage = require('./localstorage-cookie.js');
   }
 }
 if (!localStorage) {

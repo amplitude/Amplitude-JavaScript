@@ -1,7 +1,7 @@
 describe('Localstorage', function() {
   var Amplitude = require('../src/amplitude.js');
   var localStorage = require('../src/localstorage.js');
-  // var cookieStorage = require('../src/localstorage-cookie.js');
+  var cookieStorage = require('../src/localstorage-cookie.js');
   var Cookie = require('../src/cookie.js');
 
   var apiKey = '000000';
@@ -36,6 +36,61 @@ describe('Localstorage', function() {
   });
 
   afterEach(function() {
+  });
+
+  describe('cookie storage', function() {
+
+    beforeEach(function() {
+      cookieStorage.clear();
+      assert.lengthOf(cookieStorage, 0);
+    });
+
+    it('should store values', function() {
+      cookieStorage.setItem('key-a', 'value-a');
+      assert.equal(cookieStorage.getItem('key-a'), 'value-a');
+      assert.lengthOf(cookieStorage, 1);
+    });
+
+    it('should return null for unstored keys', function() {
+      assert.isNull(cookieStorage.getItem('bogus_key'));
+      cookieStorage.setItem('key-a', 'value-a');
+      assert.isNull(cookieStorage.getItem('bogus_key'));
+    });
+
+    it('should remove values', function() {
+      cookieStorage.setItem('key-a', 'value-a');
+      assert.equal(cookieStorage.getItem('key-a'), 'value-a');
+      assert.lengthOf(cookieStorage, 1);
+      cookieStorage.removeItem('bogus_key');
+      assert.lengthOf(cookieStorage, 1);
+      cookieStorage.removeItem('key-a');
+      assert.isNull(cookieStorage.getItem('key-a'));
+      assert.lengthOf(cookieStorage, 0);
+    });
+
+    it('should replace values', function() {
+      cookieStorage.setItem('key-a', 'value-a');
+      assert.equal(cookieStorage.getItem('key-a'), 'value-a');
+      assert.lengthOf(cookieStorage, 1);
+      cookieStorage.setItem('key-a', 'value-b');
+      assert.equal(cookieStorage.getItem('key-a'), 'value-b');
+      assert.lengthOf(cookieStorage, 1);
+    });
+
+    it('should store values with entities', function() {
+      cookieStorage.setItem('key-a', 'this&that;with=an?<>');
+      assert.equal(cookieStorage.getItem('key-a'), 'this&that;with=an?<>');
+    });
+
+    it('should not store more than 4k', function() {
+      var longString = new Array(3*1024).join('a');
+
+      cookieStorage.setItem('key-a', longString);
+      cookieStorage.setItem('key-b', longString);
+
+      assert.equal(cookieStorage.getItem('key-a'), longString);
+      assert.isNull(cookieStorage.getItem('key-b'));
+    });
   });
 
   describe('upgrade', function() {
