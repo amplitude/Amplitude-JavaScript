@@ -1,7 +1,7 @@
 describe('Localstorage', function() {
   var Amplitude = require('../src/amplitude.js');
   var Storage = require('../src/storage.js');
-  var cookieStorage = require('../src/localstorage-cookie.js');
+  var cookieStorage = require('../src/cookie-storage.js');
   var Cookie = require('../src/cookie.js');
 
   var apiKey = '000000';
@@ -155,9 +155,9 @@ describe('Localstorage', function() {
 
       amplitude._upgradeStoredData();
 
-      assert.equal(amplitude.getLocalStorage('amplitude_deviceId'), deviceId);
-      assert.equal(amplitude.getLocalStorage('amplitude_userId'), userId);
-      assert.equal(amplitude.getLocalStorage('amplitude_optOut'), 'true');
+      assert.equal(amplitude.getFromStorage('amplitude_deviceId'), deviceId);
+      assert.equal(amplitude.getFromStorage('amplitude_userId'), userId);
+      assert.equal(amplitude.getFromStorage('amplitude_optOut'), 'true');
     });
 
     it('should update local storage keys and append with apiKey', function() {
@@ -179,13 +179,13 @@ describe('Localstorage', function() {
 
       amplitude._upgradeStoredData();
 
-      assert.equal(amplitude.getLocalStorage(lastEventId), '1000');
-      assert.equal(amplitude.getLocalStorage(lastIdentifyId), '2000');
-      assert.equal(amplitude.getLocalStorage(lastSequenceNumber), '3000');
-      assert.equal(amplitude.getLocalStorage(lastEventTime), '4000');
-      assert.equal(amplitude.getLocalStorage(sessionId), '4000');
-      assert.equal(amplitude.getLocalStorage(unsentEvents), 'unsent_events_string');
-      assert.equal(amplitude.getLocalStorage(unsentIdentifys), 'unsent_identifys_string');
+      assert.equal(amplitude.getFromStorage(lastEventId), '1000');
+      assert.equal(amplitude.getFromStorage(lastIdentifyId), '2000');
+      assert.equal(amplitude.getFromStorage(lastSequenceNumber), '3000');
+      assert.equal(amplitude.getFromStorage(lastEventTime), '4000');
+      assert.equal(amplitude.getFromStorage(sessionId), '4000');
+      assert.equal(amplitude.getFromStorage(unsentEvents), 'unsent_events_string');
+      assert.equal(amplitude.getFromStorage(unsentIdentifys), 'unsent_identifys_string');
 
       // assert new keys
       assert.equal(localStorage.getItem(lastEventId + '_' + apiKey), '1000');

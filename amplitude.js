@@ -107,8 +107,7 @@ module.exports = instance;
 var Cookie = require('./cookie');
 var JSON = require('json'); // jshint ignore:line
 var language = require('./language');
-var localStorage = require('./localstorage');  // jshint ignore:line
-var storage = require('./storage');
+var Storage = require('./storage'); // jshint ignore:line
 var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
@@ -143,7 +142,7 @@ var DEFAULT_OPTIONS = {
   eventUploadPeriodMillis: 30 * 1000 // 30s
 };
 
-var LocalStorageKeys = {
+var StorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
@@ -166,7 +165,7 @@ var Amplitude = function() {
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
-  this.storage = new storage().getStorage();
+  this.storage = new Storage().getStorage();
   this._q = []; // queue for proxied functions before script load
 };
 
@@ -260,10 +259,9 @@ Amplitude.prototype.runQueuedFunctions = function () {
  * @property item: name of the item to store
  * @property value: the value to store
  */
-Amplitude.prototype.setLocalStorage = function(item, value) {
+Amplitude.prototype.setInStorage = function(item, value) {
   var key = item + '_' + this.options.apiKey.slice(0, 6);
   this.storage.setItem(key, value);
-  //localStorage.setItem(key, value);
 };
 
 /**
@@ -273,10 +271,9 @@ Amplitude.prototype.setLocalStorage = function(item, value) {
  * @property item: name of the item to fetch
  * @property defaultValue: default value to return if the item does not exist
  */
-Amplitude.prototype.getLocalStorage = function(item, defaultValue) {
+Amplitude.prototype.getFromStorage = function(item, defaultValue) {
   var key = item + '_' + this.options.apiKey.slice(0, 6);
   return this.storage.getItem(key) || defaultValue;
-  // return localStorage.getItem(key) || defaultValue;
 };
 
 Amplitude.prototype._upgradeStoredData = function() {
@@ -284,93 +281,93 @@ Amplitude.prototype._upgradeStoredData = function() {
   var cookieData = Cookie.get(this.options.cookieName);
   if (cookieData) {
     if (cookieData.deviceId) {
-      this.setLocalStorage(LocalStorageKeys.DEVICE_ID, cookieData.deviceId);
+      this.setInStorage(StorageKeys.DEVICE_ID, cookieData.deviceId);
     }
     if (cookieData.userId) {
-      this.setLocalStorage(LocalStorageKeys.USER_ID, cookieData.userId);
+      this.setInStorage(StorageKeys.USER_ID, cookieData.userId);
     }
     if (cookieData.optOut !== undefined) {
-      this.setLocalStorage(LocalStorageKeys.OPT_OUT, cookieData.optOut);
+      this.setInStorage(StorageKeys.OPT_OUT, cookieData.optOut);
     }
     Cookie.remove(this.options.cookieName);
   }
 
   // update local storage keys to prevent conflicts
-  var lastEventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID);
+  var lastEventId = localStorage.getItem(StorageKeys.LAST_EVENT_ID);
   if (lastEventId) {
-    this.setLocalStorage(LocalStorageKeys.LAST_EVENT_ID, lastEventId);
-    localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
+    this.setInStorage(StorageKeys.LAST_EVENT_ID, lastEventId);
+    localStorage.removeItem(StorageKeys.LAST_EVENT_ID);
   }
 
-  var lastIdentifyId = localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID);
+  var lastIdentifyId = localStorage.getItem(StorageKeys.LAST_IDENTIFY_ID);
   if (lastIdentifyId) {
-    this.setLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID, lastIdentifyId);
-    localStorage.removeItem(LocalStorageKeys.LAST_IDENTIFY_ID);
+    this.setInStorage(StorageKeys.LAST_IDENTIFY_ID, lastIdentifyId);
+    localStorage.removeItem(StorageKeys.LAST_IDENTIFY_ID);
   }
 
-  var lastSequenceNumber = localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
+  var lastSequenceNumber = localStorage.getItem(StorageKeys.LAST_SEQUENCE_NUMBER);
   if (lastSequenceNumber) {
-    this.setLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER, lastSequenceNumber);
-    localStorage.removeItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
+    this.setInStorage(StorageKeys.LAST_SEQUENCE_NUMBER, lastSequenceNumber);
+    localStorage.removeItem(StorageKeys.LAST_SEQUENCE_NUMBER);
   }
 
-  var lastEventTime  = localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME);
+  var lastEventTime  = localStorage.getItem(StorageKeys.LAST_EVENT_TIME);
   if (lastEventTime) {
-    this.setLocalStorage(LocalStorageKeys.LAST_EVENT_TIME, lastEventTime);
-    localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
+    this.setInStorage(StorageKeys.LAST_EVENT_TIME, lastEventTime);
+    localStorage.removeItem(StorageKeys.LAST_EVENT_TIME);
   }
 
-  var sessionId = localStorage.getItem(LocalStorageKeys.SESSION_ID);
+  var sessionId = localStorage.getItem(StorageKeys.SESSION_ID);
   if (sessionId) {
-    this.setLocalStorage(LocalStorageKeys.SESSION_ID, sessionId);
-    localStorage.removeItem(LocalStorageKeys.SESSION_ID);
+    this.setInStorage(StorageKeys.SESSION_ID, sessionId);
+    localStorage.removeItem(StorageKeys.SESSION_ID);
   }
 
-  var unsentEventsString = localStorage.getItem(LocalStorageKeys.UNSENT_EVENTS);
+  var unsentEventsString = localStorage.getItem(StorageKeys.UNSENT_EVENTS);
   if (unsentEventsString) {
-    this.setLocalStorage(LocalStorageKeys.UNSENT_EVENTS, unsentEventsString);
-    localStorage.removeItem(LocalStorageKeys.UNSENT_EVENTS);
+    this.setInStorage(StorageKeys.UNSENT_EVENTS, unsentEventsString);
+    localStorage.removeItem(StorageKeys.UNSENT_EVENTS);
   }
 
-  var unsentIdentifysString = localStorage.getItem(LocalStorageKeys.UNSENT_IDENTIFYS);
+  var unsentIdentifysString = localStorage.getItem(StorageKeys.UNSENT_IDENTIFYS);
   if (unsentIdentifysString) {
-    this.setLocalStorage(LocalStorageKeys.UNSENT_IDENTIFYS, unsentIdentifysString);
-    localStorage.removeItem(LocalStorageKeys.UNSENT_IDENTIFYS);
+    this.setInStorage(StorageKeys.UNSENT_IDENTIFYS, unsentIdentifysString);
+    localStorage.removeItem(StorageKeys.UNSENT_IDENTIFYS);
   }
 };
 
 Amplitude.prototype._loadStoredData = function() {
   if (this.options.saveEvents) {
-    this._unsentEvents = this._loadSavedUnsentEvents(LocalStorageKeys.UNSENT_EVENTS);
-    this._unsentIdentifys = this._loadSavedUnsentEvents(LocalStorageKeys.UNSENT_IDENTIFYS);
+    this._unsentEvents = this._loadSavedUnsentEvents(StorageKeys.UNSENT_EVENTS);
+    this._unsentIdentifys = this._loadSavedUnsentEvents(StorageKeys.UNSENT_IDENTIFYS);
   }
 
   try {
-    this.options.deviceId = this.getLocalStorage(LocalStorageKeys.DEVICE_ID, this.options.deviceId);
-    this.options.userId = this.getLocalStorage(LocalStorageKeys.USER_ID, this.options.userId);
-    this.options.optOut = (this.getLocalStorage(LocalStorageKeys.OPT_OUT, String(this.options.optOut || false)) === 'true');
+    this.options.deviceId = this.getFromStorage(StorageKeys.DEVICE_ID, this.options.deviceId);
+    this.options.userId = this.getFromStorage(StorageKeys.USER_ID, this.options.userId);
+    this.options.optOut = (this.getFromStorage(StorageKeys.OPT_OUT, String(this.options.optOut || false)) === 'true');
 
-    this._lastEventTime = parseInt(this.getLocalStorage(LocalStorageKeys.LAST_EVENT_TIME));
-    this._sessionId = parseInt(this.getLocalStorage(LocalStorageKeys.SESSION_ID));
-    this._eventId = parseInt(this.getLocalStorage(LocalStorageKeys.LAST_EVENT_ID, 0));
-    this._identifyId = parseInt(this.getLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID, 0));
-    this._sequenceNumber = parseInt(this.getLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER, 0));
+    this._lastEventTime = parseInt(this.getFromStorage(StorageKeys.LAST_EVENT_TIME));
+    this._sessionId = parseInt(this.getFromStorage(StorageKeys.SESSION_ID));
+    this._eventId = parseInt(this.getFromStorage(StorageKeys.LAST_EVENT_ID, 0));
+    this._identifyId = parseInt(this.getFromStorage(StorageKeys.LAST_IDENTIFY_ID, 0));
+    this._sequenceNumber = parseInt(this.getFromStorage(StorageKeys.LAST_SEQUENCE_NUMBER, 0));
 
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
       this._sessionId = now;
-      this.setLocalStorage(LocalStorageKeys.SESSION_ID, this._sessionId);
+      this.setInStorage(StorageKeys.SESSION_ID, this._sessionId);
     }
     this._lastEventTime = now;
-    this.setLocalStorage(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
+    this.setInStorage(StorageKeys.LAST_EVENT_TIME, this._lastEventTime);
   } catch (e) {
     log(e);
   }
 };
 
 Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey) {
-  var savedUnsentEventsString = this.getLocalStorage(unsentKey);
+  var savedUnsentEventsString = this.getFromStorage(unsentKey);
   if (savedUnsentEventsString) {
     try {
       return JSON.parse(savedUnsentEventsString);
@@ -482,8 +479,8 @@ Amplitude.prototype._getReferringDomain = function() {
 
 Amplitude.prototype.saveEvents = function() {
   try {
-    this.setLocalStorage(LocalStorageKeys.UNSENT_EVENTS, JSON.stringify(this._unsentEvents));
-    this.setLocalStorage(LocalStorageKeys.UNSENT_IDENTIFYS, JSON.stringify(this._unsentIdentifys));
+    this.setInStorage(StorageKeys.UNSENT_EVENTS, JSON.stringify(this._unsentEvents));
+    this.setInStorage(StorageKeys.UNSENT_IDENTIFYS, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
     //log(e);
   }
@@ -508,7 +505,7 @@ Amplitude.prototype.setDomain = function(domain) {
 Amplitude.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
-    this.setLocalStorage(LocalStorageKeys.USER_ID, this.options.userId);
+    this.setInStorage(StorageKeys.USER_ID, this.options.userId);
     //log('set userId=' + userId);
   } catch (e) {
     log(e);
@@ -518,7 +515,7 @@ Amplitude.prototype.setUserId = function(userId) {
 Amplitude.prototype.setOptOut = function(enable) {
   try {
     this.options.optOut = enable;
-    this.setLocalStorage(LocalStorageKeys.OPT_OUT, this.options.optOut);
+    this.setInStorage(StorageKeys.OPT_OUT, this.options.optOut);
     //log('set optOut=' + enable);
   } catch (e) {
     log(e);
@@ -529,7 +526,7 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
   try {
     if (deviceId) {
       this.options.deviceId = ('' + deviceId);
-      this.setLocalStorage(LocalStorageKeys.DEVICE_ID, this.options.deviceId);
+      this.setInStorage(StorageKeys.DEVICE_ID, this.options.deviceId);
     }
   } catch (e) {
     log(e);
@@ -619,19 +616,19 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     var eventId;
     if (eventType === IDENTIFY_EVENT) {
       eventId = this.nextIdentifyId();
-      this.setLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID, eventId);
+      this.setInStorage(StorageKeys.LAST_IDENTIFY_ID, eventId);
     } else {
       eventId = this.nextEventId();
-      this.setLocalStorage(LocalStorageKeys.LAST_EVENT_ID, eventId);
+      this.setInStorage(StorageKeys.LAST_EVENT_ID, eventId);
     }
     var eventTime = new Date().getTime();
     var ua = this._ua;
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
-      this.setLocalStorage(LocalStorageKeys.SESSION_ID, this._sessionId);
+      this.setInStorage(StorageKeys.SESSION_ID, this._sessionId);
     }
     this._lastEventTime = eventTime;
-    this.setLocalStorage(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
+    this.setInStorage(StorageKeys.LAST_EVENT_TIME, this._lastEventTime);
 
     userProperties = userProperties || {};
     // Only add utm properties to user properties for events
@@ -873,7 +870,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"./storage":7,"JavaScript-MD5":8,"object":9,"./xhr":10,"ua-parser-js":11,"./uuid":12,"./version":13,"./identify":14,"./type":15}],
+}, {"./cookie":3,"json":4,"./language":5,"./storage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
 3: [function(require, module, exports) {
 /*
  * Cookie data
@@ -1000,8 +997,8 @@ module.exports = {
 
 };
 
-}, {"./base64":16,"json":4,"top-domain":17}],
-16: [function(require, module, exports) {
+}, {"./base64":15,"json":4,"top-domain":16}],
+15: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -1100,8 +1097,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":18}],
-18: [function(require, module, exports) {
+}, {"./utf8":17}],
+17: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1171,8 +1168,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":19}],
-19: [function(require, module, exports) {
+}, {"json-fallback":18}],
+18: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1662,7 +1659,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-17: [function(require, module, exports) {
+16: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1710,8 +1707,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":20}],
-20: [function(require, module, exports) {
+}, {"url":19}],
+19: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -1811,164 +1808,6 @@ module.exports = {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
- * Implement localStorage to support Firefox 2-3 and IE 5-7
- */
-var localStorage; // jshint ignore:line
-
-// test that Window.localStorage is available and works
-function windowLocalStorageAvailable() {
-  var uid = new Date();
-  var result;
-  try {
-    window.localStorage.setItem(uid, uid);
-    result = window.localStorage.getItem(uid) === String(uid);
-    window.localStorage.removeItem(uid);
-    return result;
-  } catch (e) {
-    // localStorage not available
-  }
-  return false;
-}
-
-if (windowLocalStorageAvailable()) {
-  localStorage = window.localStorage;
-} else if (window.globalStorage) {
-  // Firefox 2-3 use globalStorage
-  // See https://developer.mozilla.org/en/dom/storage#globalStorage
-  try {
-    localStorage = window.globalStorage[window.location.hostname];
-  } catch (e) {
-    // Something bad happened...
-  }
-} else {
-  // IE 5-7 use userData
-  // See http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx
-  var div = document.createElement('div'),
-      attrKey = 'localStorage';
-  div.style.display = 'none';
-  document.getElementsByTagName('head')[0].appendChild(div);
-  if (div.addBehavior) {
-    div.addBehavior('#default#userdata');
-    localStorage = {
-      length: 0,
-      setItem: function(k, v) {
-        div.load(attrKey);
-        if (!div.getAttribute(k)) {
-          this.length++;
-        }
-        div.setAttribute(k, v);
-        div.save(attrKey);
-      },
-      getItem: function(k) {
-        div.load(attrKey);
-        return div.getAttribute(k);
-      },
-      removeItem: function(k) {
-        div.load(attrKey);
-        if (div.getAttribute(k)) {
-          this.length--;
-        }
-        div.removeAttribute(k);
-        div.save(attrKey);
-      },
-      clear: function() {
-        div.load(attrKey);
-        var i = 0;
-        var attr;
-        while (attr = div.XMLDocument.documentElement.attributes[i++]) {
-          div.removeAttribute(attr.name);
-        }
-        div.save(attrKey);
-        this.length = 0;
-      },
-      key: function(k) {
-        div.load(attrKey);
-        return div.XMLDocument.documentElement.attributes[k];
-      }
-    };
-    div.load(attrKey);
-    localStorage.length = div.XMLDocument.documentElement.attributes.length;
-  } else {
-    localStorage = require('./localstorage-cookie.js');
-  }
-}
-if (!localStorage) {
-  localStorage = {
-    length: 0,
-    setItem: function(k, v) {
-    },
-    getItem: function(k) {
-    },
-    removeItem: function(k) {
-    },
-    clear: function() {
-    },
-    key: function(k) {
-    }
-  };
-}
-
-module.exports = localStorage;
-
-}, {"./localstorage-cookie.js":21}],
-21: [function(require, module, exports) {
-/* jshint -W020, unused: false, noempty: false, boss: true */
-/* global escape, unescape */
-
-var Cookie = require('./cookie.js');
-
-var COOKIE_STORAGE_KEY = 'amplitude_storage';
-
-var cookieStorage = {
-  length: 0,
-
-  setItem: function(sKey, sValue) {
-    var store = Cookie.get(COOKIE_STORAGE_KEY) || {};
-
-    // don't add if cookie size exceeds 4k
-    var existingValue = '';
-    if (store.hasOwnProperty(sKey)) { existingValue = store[sKey]; }
-    var itemLength = escape(sKey).length + escape(sValue).length - escape(existingValue).length;
-    if (document.cookie.length + itemLength > 4*1024) { return; }
-
-    if (!store.hasOwnProperty(sKey)) { this.length++; }
-    store[sKey] = sValue;
-    Cookie.set(COOKIE_STORAGE_KEY, store);
-  },
-
-  getItem: function(sKey) {
-    var store = Cookie.get(COOKIE_STORAGE_KEY);
-    return store && store.hasOwnProperty(sKey) && store[sKey] || null;
-  },
-
-  removeItem: function(sKey) {
-    var store = Cookie.get(COOKIE_STORAGE_KEY);
-    if (!store || !store.hasOwnProperty(sKey)) { return; }
-    delete store[sKey];
-    Cookie.set(COOKIE_STORAGE_KEY, store);
-    this.length--;
-  },
-
-  clear: function() {
-    Cookie.set(COOKIE_STORAGE_KEY, {});
-    this.length = 0;
-  },
-
-  key: function(n) {
-    var store = Cookie.get(COOKIE_STORAGE_KEY);
-    if (!store) { return null; }
-    var keys = Object.keys(store);
-    return n < keys.length && keys[n] || null;
-  }
-};
-
-module.exports = cookieStorage;
-
-}, {"./cookie.js":3}],
-7: [function(require, module, exports) {
-/* jshint -W020, unused: false, noempty: false, boss: true */
-
-/*
  * Wrapper to determine best storage to use. In most cases
  * localStorage is good, although if it is unavailable, then
  * fall back to using global storage, html div, or cookies.
@@ -2057,7 +1896,7 @@ storage.prototype.getStorage = function() {
       div.load(attrKey);
       this.storage.length = div.XMLDocument.documentElement.attributes.length;
     } else {
-      this.storage = require('./localstorage-cookie.js');
+      this.storage = require('./cookie-storage.js');
     }
   }
   if (!this.storage) {
@@ -2080,8 +1919,62 @@ storage.prototype.getStorage = function() {
 
 module.exports = storage;
 
-}, {"./localstorage-cookie.js":21}],
-8: [function(require, module, exports) {
+}, {"./cookie-storage.js":20}],
+20: [function(require, module, exports) {
+/* jshint -W020, unused: false, noempty: false, boss: true */
+/* global escape, unescape */
+
+var Cookie = require('./cookie.js');
+
+var COOKIE_STORAGE_KEY = 'amplitude_storage';
+
+var cookieStorage = {
+  length: 0,
+
+  setItem: function(sKey, sValue) {
+    var store = Cookie.get(COOKIE_STORAGE_KEY) || {};
+
+    // don't add if cookie size exceeds 4k
+    var existingValue = '';
+    if (store.hasOwnProperty(sKey)) { existingValue = store[sKey]; }
+    var itemLength = escape(sKey).length + escape(sValue).length - escape(existingValue).length;
+    if (document.cookie.length + itemLength > 4*1024) { return; }
+
+    if (!store.hasOwnProperty(sKey)) { this.length++; }
+    store[sKey] = sValue;
+    Cookie.set(COOKIE_STORAGE_KEY, store);
+  },
+
+  getItem: function(sKey) {
+    var store = Cookie.get(COOKIE_STORAGE_KEY);
+    return store && store.hasOwnProperty(sKey) && store[sKey] || null;
+  },
+
+  removeItem: function(sKey) {
+    var store = Cookie.get(COOKIE_STORAGE_KEY);
+    if (!store || !store.hasOwnProperty(sKey)) { return; }
+    delete store[sKey];
+    Cookie.set(COOKIE_STORAGE_KEY, store);
+    this.length--;
+  },
+
+  clear: function() {
+    Cookie.set(COOKIE_STORAGE_KEY, {});
+    this.length = 0;
+  },
+
+  key: function(n) {
+    var store = Cookie.get(COOKIE_STORAGE_KEY);
+    if (!store) { return null; }
+    var keys = Object.keys(store);
+    return n < keys.length && keys[n] || null;
+  }
+};
+
+module.exports = cookieStorage;
+
+}, {"./cookie.js":3}],
+7: [function(require, module, exports) {
 /*
  * JavaScript MD5 1.0.1
  * https://github.com/blueimp/JavaScript-MD5
@@ -2369,7 +2262,7 @@ module.exports = storage;
 }(this));
 
 }, {}],
-9: [function(require, module, exports) {
+8: [function(require, module, exports) {
 
 /**
  * HOP ref.
@@ -2455,7 +2348,7 @@ exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
 }, {}],
-10: [function(require, module, exports) {
+9: [function(require, module, exports) {
 var querystring = require('querystring');
 
 /*
@@ -2491,8 +2384,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":22}],
-22: [function(require, module, exports) {
+}, {"querystring":21}],
+21: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2567,8 +2460,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":23,"type":24}],
-23: [function(require, module, exports) {
+}, {"trim":22,"type":23}],
+22: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2588,7 +2481,7 @@ exports.right = function(str){
 };
 
 }, {}],
-24: [function(require, module, exports) {
+23: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -2627,7 +2520,7 @@ module.exports = function(val){
 };
 
 }, {}],
-11: [function(require, module, exports) {
+10: [function(require, module, exports) {
 /* jshint eqeqeq: false, forin: false */
 /* global define */
 
@@ -3510,7 +3403,7 @@ module.exports = function(val){
 })(this);
 
 }, {}],
-12: [function(require, module, exports) {
+11: [function(require, module, exports) {
 /* jshint bitwise: false, laxbreak: true */
 
 /**
@@ -3544,11 +3437,11 @@ var uuid = function(a) {
 module.exports = uuid;
 
 }, {}],
-13: [function(require, module, exports) {
+12: [function(require, module, exports) {
 module.exports = '2.5.0';
 
 }, {}],
-14: [function(require, module, exports) {
+13: [function(require, module, exports) {
 var type = require('./type');
 
 /*
@@ -3611,8 +3504,8 @@ Identify.prototype._addOperation = function(operation, property, value) {
 
 module.exports = Identify;
 
-}, {"./type":15}],
-15: [function(require, module, exports) {
+}, {"./type":14}],
+14: [function(require, module, exports) {
 /* Taken from: https://github.com/component/type */
 
 /**

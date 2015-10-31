@@ -1,6 +1,5 @@
 describe('Amplitude', function() {
   var Amplitude = require('../src/amplitude.js');
-  var localStorage = require('../src/localstorage.js');
   var Base64 = require('../src/base64.js');
   var cookie = require('../src/cookie.js');
   var querystring = require('querystring');
@@ -168,7 +167,7 @@ describe('Amplitude', function() {
       amplitude.setDeviceId('deviceId');
       var stored = cookie.get(amplitude.options.cookieName);
       assert.isNull(stored);
-      assert.equal(amplitude.getLocalStorage('amplitude_deviceId'), 'deviceId');
+      assert.equal(amplitude.getFromStorage('amplitude_deviceId'), 'deviceId');
     });
   });
 

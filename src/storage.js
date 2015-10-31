@@ -89,7 +89,7 @@ storage.prototype.getStorage = function() {
       div.load(attrKey);
       this.storage.length = div.XMLDocument.documentElement.attributes.length;
     } else {
-      this.storage = require('./localstorage-cookie.js');
+      this.storage = require('./cookie-storage.js');
     }
   }
   if (!this.storage) {
