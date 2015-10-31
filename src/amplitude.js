@@ -2,6 +2,7 @@ var Cookie = require('./cookie');
 var JSON = require('json'); // jshint ignore:line
 var language = require('./language');
 var localStorage = require('./localstorage');  // jshint ignore:line
+var storage = require('./storage');
 var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
@@ -59,6 +60,7 @@ var Amplitude = function() {
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.storage = new storage().getStorage();
   this._q = []; // queue for proxied functions before script load
 };
 
@@ -154,7 +156,8 @@ Amplitude.prototype.runQueuedFunctions = function () {
  */
 Amplitude.prototype.setLocalStorage = function(item, value) {
   var key = item + '_' + this.options.apiKey.slice(0, 6);
-  localStorage.setItem(key, value);
+  this.storage.setItem(key, value);
+  //localStorage.setItem(key, value);
 };
 
 /**
@@ -166,7 +169,8 @@ Amplitude.prototype.setLocalStorage = function(item, value) {
  */
 Amplitude.prototype.getLocalStorage = function(item, defaultValue) {
   var key = item + '_' + this.options.apiKey.slice(0, 6);
-  return localStorage.getItem(key) || defaultValue;
+  return this.storage.getItem(key) || defaultValue;
+  // return localStorage.getItem(key) || defaultValue;
 };
 
 Amplitude.prototype._upgradeStoredData = function() {

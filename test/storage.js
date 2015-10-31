@@ -1,6 +1,6 @@
 describe('Localstorage', function() {
   var Amplitude = require('../src/amplitude.js');
-  var localStorage = require('../src/localstorage.js');
+  var Storage = require('../src/storage.js');
   var cookieStorage = require('../src/localstorage-cookie.js');
   var Cookie = require('../src/cookie.js');
 
@@ -9,6 +9,7 @@ describe('Localstorage', function() {
   var userId = 'test_user_id';
   var deviceId = 'test_device_id';
   var amplitude;
+  var storage;
 
   var localStorageKeys = [
     'amplitude_lastEventId',
@@ -26,12 +27,13 @@ describe('Localstorage', function() {
   beforeEach(function() {
     amplitude = new Amplitude();
     amplitude.options.apiKey = apiKey;
+    storage = new Storage().getStorage();
 
     for (var i = 0; i < localStorageKeys.length; i++) {
       var key = localStorageKeys[i];
-      if (localStorage.getItem(key)) localStorage.removeItem(key);
+      if (storage.getItem(key)) storage.removeItem(key);
       key = key + '_' + apiKey;
-      if (localStorage.getItem(key)) localStorage.removeItem(key);
+      if (storage.getItem(key)) storage.removeItem(key);
     }
   });
 
@@ -101,7 +103,48 @@ describe('Localstorage', function() {
     });
   });
 
+  describe('storage fallback to cookie', function() {
+    var globalStorageOld;
+    var testStorage;
+
+    beforeEach(function() {
+      window.localStorage.clear();
+      cookieStorage.clear();
+      assert.lengthOf(cookieStorage, 0);
+
+      // disable localStorage and global storage
+      sinon.stub(window.localStorage, 'getItem').returns(null);
+      globalStorageOld = window.globalStorage;
+      window.globalStorage = null;
+
+      testStorage = new Storage().getStorage();
+    });
+
+    afterEach(function() {
+      window.localStorage.getItem.restore();
+      window.globalStorage = globalStorageOld;
+    });
+
+    it('should use cookie storage if all other storages unavailable', function() {
+      var uid = String(new Date());
+
+      assert.lengthOf(storage, 0);
+      assert.isNull(testStorage.getItem())
+      assert.isNull(cookieStorage.getItem(uid));
+
+      testStorage.setItem(uid, uid);
+      assert.lengthOf(testStorage, 1);
+      assert.equal(testStorage.getItem(uid), uid);
+      assert.lengthOf(cookieStorage, 1);
+      assert.equal(cookieStorage.getItem(uid), uid);
+    });
+  });
+
   describe('upgrade', function() {
+
+    beforeEach(function() {
+      localStorage.clear();
+    });
 
     it('should migrate cookie values to localstorage', function() {
       Cookie.set(cookieKey, {
