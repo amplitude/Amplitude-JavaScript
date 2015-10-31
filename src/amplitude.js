@@ -119,9 +119,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     this._loadStoredData();
 
     this.setUserId(opt_userId || this.options.userId || null);
-    this.setDeviceId(opt_config && opt_config.deviceId !== undefined &&
-      opt_config.deviceId !== null && opt_config.deviceId ||
-      this.options.deviceId || UUID());
+    this.setDeviceId((opt_config && opt_config.deviceId) || this.options.deviceId || UUID());
 
     this._sendEventsIfReady();
 
@@ -155,7 +153,7 @@ Amplitude.prototype.runQueuedFunctions = function () {
  * @property value: the value to store
  */
 Amplitude.prototype.setLocalStorage = function(item, value) {
-  var key = LocalStorageKeys[item] + '_' + this.options.apiKey.slice(0, 6);
+  var key = item + '_' + this.options.apiKey.slice(0, 6);
   localStorage.setItem(key, value);
 };
 
@@ -164,11 +162,11 @@ Amplitude.prototype.setLocalStorage = function(item, value) {
  * to avoid collisions.
  *
  * @property item: name of the item to fetch
- * @property def: default value to return if the item does not exist
+ * @property defaultValue: default value to return if the item does not exist
  */
-Amplitude.prototype.getLocalStorage = function(item, def) {
-  var key = LocalStorageKeys[item] + '_' + this.options.apiKey.slice(0, 6);
-  return localStorage.getItem(key) || def;
+Amplitude.prototype.getLocalStorage = function(item, defaultValue) {
+  var key = item + '_' + this.options.apiKey.slice(0, 6);
+  return localStorage.getItem(key) || defaultValue;
 };
 
 Amplitude.prototype._upgradeStoredData = function() {
@@ -176,13 +174,13 @@ Amplitude.prototype._upgradeStoredData = function() {
   var cookieData = Cookie.get(this.options.cookieName);
   if (cookieData) {
     if (cookieData.deviceId) {
-      this.setLocalStorage('DEVICE_ID', cookieData.deviceId);
+      this.setLocalStorage(LocalStorageKeys.DEVICE_ID, cookieData.deviceId);
     }
     if (cookieData.userId) {
-      this.setLocalStorage('USER_ID', cookieData.userId);
+      this.setLocalStorage(LocalStorageKeys.USER_ID, cookieData.userId);
     }
     if (cookieData.optOut !== undefined) {
-      this.setLocalStorage('OPT_OUT', cookieData.optOut);
+      this.setLocalStorage(LocalStorageKeys.OPT_OUT, cookieData.optOut);
     }
     Cookie.remove(this.options.cookieName);
   }
@@ -190,72 +188,72 @@ Amplitude.prototype._upgradeStoredData = function() {
   // update local storage keys to prevent conflicts
   var lastEventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID);
   if (lastEventId) {
-    this.setLocalStorage('LAST_EVENT_ID', lastEventId);
+    this.setLocalStorage(LocalStorageKeys.LAST_EVENT_ID, lastEventId);
     localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
   }
 
   var lastIdentifyId = localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID);
   if (lastIdentifyId) {
-    this.setLocalStorage('LAST_IDENTIFY_ID', lastIdentifyId);
+    this.setLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID, lastIdentifyId);
     localStorage.removeItem(LocalStorageKeys.LAST_IDENTIFY_ID);
   }
 
   var lastSequenceNumber = localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
   if (lastSequenceNumber) {
-    this.setLocalStorage('LAST_SEQUENCE_NUMBER', lastSequenceNumber);
+    this.setLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER, lastSequenceNumber);
     localStorage.removeItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
   }
 
   var lastEventTime  = localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME);
   if (lastEventTime) {
-    this.setLocalStorage('LAST_EVENT_TIME', lastEventTime);
+    this.setLocalStorage(LocalStorageKeys.LAST_EVENT_TIME, lastEventTime);
     localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
   }
 
   var sessionId = localStorage.getItem(LocalStorageKeys.SESSION_ID);
   if (sessionId) {
-    this.setLocalStorage('SESSION_ID', sessionId);
+    this.setLocalStorage(LocalStorageKeys.SESSION_ID, sessionId);
     localStorage.removeItem(LocalStorageKeys.SESSION_ID);
   }
 
   var unsentEventsString = localStorage.getItem(LocalStorageKeys.UNSENT_EVENTS);
   if (unsentEventsString) {
-    this.setLocalStorage('UNSENT_EVENTS', unsentEventsString);
+    this.setLocalStorage(LocalStorageKeys.UNSENT_EVENTS, unsentEventsString);
     localStorage.removeItem(LocalStorageKeys.UNSENT_EVENTS);
   }
 
   var unsentIdentifysString = localStorage.getItem(LocalStorageKeys.UNSENT_IDENTIFYS);
   if (unsentIdentifysString) {
-    this.setLocalStorage('UNSENT_IDENTIFYS', unsentIdentifysString);
+    this.setLocalStorage(LocalStorageKeys.UNSENT_IDENTIFYS, unsentIdentifysString);
     localStorage.removeItem(LocalStorageKeys.UNSENT_IDENTIFYS);
   }
 };
 
 Amplitude.prototype._loadStoredData = function() {
   if (this.options.saveEvents) {
-    this._unsentEvents = this._loadSavedUnsentEvents('UNSENT_EVENTS');
-    this._unsentIdentifys = this._loadSavedUnsentEvents('UNSENT_IDENTIFYS');
+    this._unsentEvents = this._loadSavedUnsentEvents(LocalStorageKeys.UNSENT_EVENTS);
+    this._unsentIdentifys = this._loadSavedUnsentEvents(LocalStorageKeys.UNSENT_IDENTIFYS);
   }
 
   try {
-    this.options.deviceId = this.getLocalStorage('DEVICE_ID', this.options.deviceId);
-    this.options.userId = this.getLocalStorage('USER_ID', this.options.userId);
-    this.options.optOut = (this.getLocalStorage('OPT_OUT', String(this.options.optOut || false)) === 'true');
+    this.options.deviceId = this.getLocalStorage(LocalStorageKeys.DEVICE_ID, this.options.deviceId);
+    this.options.userId = this.getLocalStorage(LocalStorageKeys.USER_ID, this.options.userId);
+    this.options.optOut = (this.getLocalStorage(LocalStorageKeys.OPT_OUT, String(this.options.optOut || false)) === 'true');
 
-    this._lastEventTime = parseInt(this.getLocalStorage('LAST_EVENT_TIME'));
-    this._sessionId = parseInt(this.getLocalStorage('SESSION_ID'));
-    this._eventId = parseInt(this.getLocalStorage('LAST_EVENT_ID', 0));
-    this._identifyId = parseInt(this.getLocalStorage('LAST_IDENTIFY_ID', 0));
-    this._sequenceNumber = parseInt(this.getLocalStorage('LAST_SEQUENCE_NUMBER', 0));
+    this._lastEventTime = parseInt(this.getLocalStorage(LocalStorageKeys.LAST_EVENT_TIME));
+    this._sessionId = parseInt(this.getLocalStorage(LocalStorageKeys.SESSION_ID));
+    this._eventId = parseInt(this.getLocalStorage(LocalStorageKeys.LAST_EVENT_ID, 0));
+    this._identifyId = parseInt(this.getLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID, 0));
+    this._sequenceNumber = parseInt(this.getLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER, 0));
 
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
       this._sessionId = now;
-      this.setLocalStorage('SESSION_ID', this._sessionId);
+      this.setLocalStorage(LocalStorageKeys.SESSION_ID, this._sessionId);
     }
     this._lastEventTime = now;
-    this.setLocalStorage('LAST_EVENT_TIME', this._lastEventTime);
+    this.setLocalStorage(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
   } catch (e) {
     log(e);
   }
@@ -374,8 +372,8 @@ Amplitude.prototype._getReferringDomain = function() {
 
 Amplitude.prototype.saveEvents = function() {
   try {
-    this.setLocalStorage('UNSENT_EVENTS', JSON.stringify(this._unsentEvents));
-    this.setLocalStorage('UNSENT_IDENTIFYS', JSON.stringify(this._unsentIdentifys));
+    this.setLocalStorage(LocalStorageKeys.UNSENT_EVENTS, JSON.stringify(this._unsentEvents));
+    this.setLocalStorage(LocalStorageKeys.UNSENT_IDENTIFYS, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
     //log(e);
   }
@@ -400,7 +398,7 @@ Amplitude.prototype.setDomain = function(domain) {
 Amplitude.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
-    this.setLocalStorage('USER_ID', this.options.userId);
+    this.setLocalStorage(LocalStorageKeys.USER_ID, this.options.userId);
     //log('set userId=' + userId);
   } catch (e) {
     log(e);
@@ -410,7 +408,7 @@ Amplitude.prototype.setUserId = function(userId) {
 Amplitude.prototype.setOptOut = function(enable) {
   try {
     this.options.optOut = enable;
-    this.setLocalStorage('OPT_OUT', this.options.optOut);
+    this.setLocalStorage(LocalStorageKeys.OPT_OUT, this.options.optOut);
     //log('set optOut=' + enable);
   } catch (e) {
     log(e);
@@ -421,7 +419,7 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
   try {
     if (deviceId) {
       this.options.deviceId = ('' + deviceId);
-      this.setLocalStorage('DEVICE_ID', this.options.deviceId);
+      this.setLocalStorage(LocalStorageKeys.DEVICE_ID, this.options.deviceId);
     }
   } catch (e) {
     log(e);
@@ -511,19 +509,19 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     var eventId;
     if (eventType === IDENTIFY_EVENT) {
       eventId = this.nextIdentifyId();
-      this.setLocalStorage('LAST_IDENTIFY_ID', eventId);
+      this.setLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID, eventId);
     } else {
       eventId = this.nextEventId();
-      this.setLocalStorage('LAST_EVENT_ID', eventId);
+      this.setLocalStorage(LocalStorageKeys.LAST_EVENT_ID, eventId);
     }
     var eventTime = new Date().getTime();
     var ua = this._ua;
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
-      this.setLocalStorage('SESSION_ID', this._sessionId);
+      this.setLocalStorage(LocalStorageKeys.SESSION_ID, this._sessionId);
     }
     this._lastEventTime = eventTime;
-    this.setLocalStorage('LAST_EVENT_TIME', this._lastEventTime);
+    this.setLocalStorage(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
 
     userProperties = userProperties || {};
     // Only add utm properties to user properties for events

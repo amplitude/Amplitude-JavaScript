@@ -112,9 +112,9 @@ describe('Localstorage', function() {
 
       amplitude._upgradeStoredData();
 
-      assert.equal(amplitude.getLocalStorage('DEVICE_ID'), deviceId);
-      assert.equal(amplitude.getLocalStorage('USER_ID'), userId);
-      assert.equal(amplitude.getLocalStorage('OPT_OUT'), 'true');
+      assert.equal(amplitude.getLocalStorage('amplitude_deviceId'), deviceId);
+      assert.equal(amplitude.getLocalStorage('amplitude_userId'), userId);
+      assert.equal(amplitude.getLocalStorage('amplitude_optOut'), 'true');
     });
 
     it('should update local storage keys and append with apiKey', function() {
@@ -136,13 +136,13 @@ describe('Localstorage', function() {
 
       amplitude._upgradeStoredData();
 
-      assert.equal(amplitude.getLocalStorage('LAST_EVENT_ID'), '1000');
-      assert.equal(amplitude.getLocalStorage('LAST_IDENTIFY_ID'), '2000');
-      assert.equal(amplitude.getLocalStorage('LAST_SEQUENCE_NUMBER'), '3000');
-      assert.equal(amplitude.getLocalStorage('LAST_EVENT_TIME'), '4000');
-      assert.equal(amplitude.getLocalStorage('SESSION_ID'), '4000');
-      assert.equal(amplitude.getLocalStorage('UNSENT_EVENTS'), 'unsent_events_string');
-      assert.equal(amplitude.getLocalStorage('UNSENT_IDENTIFYS'), 'unsent_identifys_string');
+      assert.equal(amplitude.getLocalStorage(lastEventId), '1000');
+      assert.equal(amplitude.getLocalStorage(lastIdentifyId), '2000');
+      assert.equal(amplitude.getLocalStorage(lastSequenceNumber), '3000');
+      assert.equal(amplitude.getLocalStorage(lastEventTime), '4000');
+      assert.equal(amplitude.getLocalStorage(sessionId), '4000');
+      assert.equal(amplitude.getLocalStorage(unsentEvents), 'unsent_events_string');
+      assert.equal(amplitude.getLocalStorage(unsentIdentifys), 'unsent_identifys_string');
 
       // assert new keys
       assert.equal(localStorage.getItem(lastEventId + '_' + apiKey), '1000');

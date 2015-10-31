@@ -168,7 +168,7 @@ describe('Amplitude', function() {
       amplitude.setDeviceId('deviceId');
       var stored = cookie.get(amplitude.options.cookieName);
       assert.isNull(stored);
-      assert.equal(amplitude.getLocalStorage('DEVICE_ID'), 'deviceId');
+      assert.equal(amplitude.getLocalStorage('amplitude_deviceId'), 'deviceId');
     });
   });
 
