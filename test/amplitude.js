@@ -42,6 +42,18 @@ describe('Amplitude', function() {
       assert.equal(amplitude.options.userId, userId);
     });
 
+    it('should allow null userId', function() {
+      var userIdKey = 'amplitude_userId_' + apiKey;
+      amplitude.init(apiKey, userId);
+      assert.equal(amplitude.options.userId, userId);
+      assert.equal(window.localStorage.getItem(userIdKey), userId);
+      assert.equal(amplitude.getFromStorage('amplitude_userId'), userId);
+      amplitude.setUserId(null);
+      assert.isNull(amplitude.options.userId);
+      assert.isNull(window.localStorage.getItem(userIdKey));
+      assert.isUndefined(amplitude.getFromStorage('amplitude_userId'));
+    });
+
     it('should not set cookie', function() {
       amplitude.init(apiKey, userId);
       var stored = cookie.get(amplitude.options.cookieName);
@@ -145,6 +157,7 @@ describe('Amplitude', function() {
     });
 
     it('should change device id', function() {
+      amplitude.options.apiKey = apiKey;
       amplitude.setDeviceId('deviceId');
       amplitude.init(apiKey);
       assert.equal(amplitude.options.deviceId, 'deviceId');

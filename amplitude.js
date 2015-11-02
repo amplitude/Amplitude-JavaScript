@@ -261,7 +261,12 @@ Amplitude.prototype.runQueuedFunctions = function () {
  */
 Amplitude.prototype.setInStorage = function(item, value) {
   var key = item + '_' + this.options.apiKey.slice(0, 6);
-  this.storage.setItem(key, value);
+  if (value) {
+    this.storage.setItem(key, value);
+    return;
+  }
+  // if value is null, then remove from storage
+  this.storage.removeItem(key);
 };
 
 /**
