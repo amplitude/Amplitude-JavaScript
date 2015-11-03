@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 2.6.0 (November 2, 2015)
+
 * Migrate cookie data to local storage to address issue where having cookies disabled causes SDK to generate a new deviceId for returning users.
 
 ## 2.5.0 (September 30, 2015)
