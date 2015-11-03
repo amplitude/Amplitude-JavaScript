@@ -1,6 +1,5 @@
 describe('Amplitude', function() {
   var Amplitude = require('../src/amplitude.js');
-  var localStorage = require('../src/localstorage.js');
   var Base64 = require('../src/base64.js');
   var cookie = require('../src/cookie.js');
   var querystring = require('querystring');
@@ -43,12 +42,22 @@ describe('Amplitude', function() {
       assert.equal(amplitude.options.userId, userId);
     });
 
-    it('should set cookie', function() {
+    it('should allow null userId', function() {
+      var userIdKey = 'amplitude_userId_' + apiKey;
+      amplitude.init(apiKey, userId);
+      assert.equal(amplitude.options.userId, userId);
+      assert.equal(window.localStorage.getItem(userIdKey), userId);
+      assert.equal(amplitude.getFromStorage('amplitude_userId'), userId);
+      amplitude.setUserId(null);
+      assert.isNull(amplitude.options.userId);
+      assert.isNull(window.localStorage.getItem(userIdKey));
+      assert.isUndefined(amplitude.getFromStorage('amplitude_userId'));
+    });
+
+    it('should not set cookie', function() {
       amplitude.init(apiKey, userId);
       var stored = cookie.get(amplitude.options.cookieName);
-      assert.property(stored, 'deviceId');
-      assert.propertyVal(stored, 'userId', userId);
-      assert.lengthOf(stored.deviceId, 36);
+      assert.isNull(stored);
     });
 
     it('should set language', function() {
@@ -148,6 +157,7 @@ describe('Amplitude', function() {
     });
 
     it('should change device id', function() {
+      amplitude.options.apiKey = apiKey;
       amplitude.setDeviceId('deviceId');
       amplitude.init(apiKey);
       assert.equal(amplitude.options.deviceId, 'deviceId');
@@ -165,10 +175,12 @@ describe('Amplitude', function() {
       assert.notEqual(amplitude.options.deviceId, null);
     });
 
-    it('should store device id in cookie', function() {
+    it('should store device id in localstorage and not cookie', function() {
+      amplitude.init(apiKey);
       amplitude.setDeviceId('deviceId');
       var stored = cookie.get(amplitude.options.cookieName);
-      assert.propertyVal(stored, 'deviceId', 'deviceId');
+      assert.isNull(stored);
+      assert.equal(amplitude.getFromStorage('amplitude_deviceId'), 'deviceId');
     });
   });
 

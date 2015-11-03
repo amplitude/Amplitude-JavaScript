@@ -107,7 +107,7 @@ module.exports = instance;
 var Cookie = require('./cookie');
 var JSON = require('json'); // jshint ignore:line
 var language = require('./language');
-var localStorage = require('./localstorage');  // jshint ignore:line
+var Storage = require('./storage'); // jshint ignore:line
 var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
@@ -136,19 +136,25 @@ var DEFAULT_OPTIONS = {
   savedMaxCount: 1000,
   saveEvents: true,
   sessionTimeout: 30 * 60 * 1000,
-  unsentKey: 'amplitude_unsent',
-  unsentIdentifyKey: 'amplitude_unsent_identify',
   uploadBatchSize: 100,
   batchEvents: false,
   eventUploadThreshold: 30,
   eventUploadPeriodMillis: 30 * 1000 // 30s
 };
-var LocalStorageKeys = {
+
+var StorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
-  SESSION_ID: 'amplitude_sessionId'
+  SESSION_ID: 'amplitude_sessionId',
+  UNSENT_EVENTS: 'amplitude_unsent',
+  UNSENT_IDENTIFYS: 'amplitude_unsent_identify',
+
+  // Previously stored in cookie
+  DEVICE_ID: 'amplitude_deviceId',
+  USER_ID: 'amplitude_userId',
+  OPT_OUT: 'amplitude_optOut'
 };
 
 /*
@@ -159,6 +165,7 @@ var Amplitude = function() {
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.storage = new Storage().getStorage();
   this._q = []; // queue for proxied functions before script load
 };
 
@@ -215,42 +222,17 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
       domain: this.options.domain
     });
     this.options.domain = Cookie.options().domain;
+    this._upgradeStoredData();
+    this._loadStoredData();
 
-    _loadCookieData(this);
-
-    this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
-        opt_config.deviceId !== null && opt_config.deviceId) ||
-        this.options.deviceId || UUID();
-    this.options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || this.options.userId || null;
-    _saveCookieData(this);
-
-    //log('initialized with apiKey=' + apiKey);
-    //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
-
-    if (this.options.saveEvents) {
-      this._loadSavedUnsentEvents(this.options.unsentKey, '_unsentEvents');
-      this._loadSavedUnsentEvents(this.options.unsentIdentifyKey, '_unsentIdentifys');
-    }
+    this.setUserId(opt_userId || this.options.userId || null);
+    this.setDeviceId((opt_config && opt_config.deviceId) || this.options.deviceId || UUID());
 
     this._sendEventsIfReady();
 
     if (this.options.includeUtm) {
       this._initUtmData();
     }
-
-    this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
-    this._sessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
-    this._eventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID) || 0;
-    this._identifyId = localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID) || 0;
-    this._sequenceNumber = localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER) || 0;
-    var now = new Date().getTime();
-    if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
-      this._newSession = true;
-      this._sessionId = now;
-      localStorage.setItem(LocalStorageKeys.SESSION_ID, this._sessionId);
-    }
-    this._lastEventTime = now;
-    localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
   } catch (e) {
     log(e);
   }
@@ -270,15 +252,135 @@ Amplitude.prototype.runQueuedFunctions = function () {
   this._q = []; // clear function queue after running
 };
 
-Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey, queue) {
-  var savedUnsentEventsString = localStorage.getItem(unsentKey);
+/**
+ * Set an item in local storage. Decorate item key with the api key
+ * to avoid collisions.
+ *
+ * @property item: name of the item to store
+ * @property value: the value to store
+ */
+Amplitude.prototype.setInStorage = function(item, value) {
+  var key = item + '_' + this.options.apiKey.slice(0, 6);
+  if (value) {
+    this.storage.setItem(key, value);
+    return;
+  }
+  // if value is null, then remove from storage
+  this.storage.removeItem(key);
+};
+
+/**
+ * Fetch an item from local storage. Decorate item key with api key
+ * to avoid collisions.
+ *
+ * @property item: name of the item to fetch
+ * @property defaultValue: default value to return if the item does not exist
+ */
+Amplitude.prototype.getFromStorage = function(item, defaultValue) {
+  var key = item + '_' + this.options.apiKey.slice(0, 6);
+  return this.storage.getItem(key) || defaultValue;
+};
+
+Amplitude.prototype._upgradeStoredData = function() {
+  // migrate data from cookie to local storage
+  var cookieData = Cookie.get(this.options.cookieName);
+  if (cookieData) {
+    if (cookieData.deviceId) {
+      this.setInStorage(StorageKeys.DEVICE_ID, cookieData.deviceId);
+    }
+    if (cookieData.userId) {
+      this.setInStorage(StorageKeys.USER_ID, cookieData.userId);
+    }
+    if (cookieData.optOut !== undefined) {
+      this.setInStorage(StorageKeys.OPT_OUT, cookieData.optOut);
+    }
+    Cookie.remove(this.options.cookieName);
+  }
+
+  // update local storage keys to prevent conflicts
+  var lastEventId = localStorage.getItem(StorageKeys.LAST_EVENT_ID);
+  if (lastEventId) {
+    this.setInStorage(StorageKeys.LAST_EVENT_ID, lastEventId);
+    localStorage.removeItem(StorageKeys.LAST_EVENT_ID);
+  }
+
+  var lastIdentifyId = localStorage.getItem(StorageKeys.LAST_IDENTIFY_ID);
+  if (lastIdentifyId) {
+    this.setInStorage(StorageKeys.LAST_IDENTIFY_ID, lastIdentifyId);
+    localStorage.removeItem(StorageKeys.LAST_IDENTIFY_ID);
+  }
+
+  var lastSequenceNumber = localStorage.getItem(StorageKeys.LAST_SEQUENCE_NUMBER);
+  if (lastSequenceNumber) {
+    this.setInStorage(StorageKeys.LAST_SEQUENCE_NUMBER, lastSequenceNumber);
+    localStorage.removeItem(StorageKeys.LAST_SEQUENCE_NUMBER);
+  }
+
+  var lastEventTime  = localStorage.getItem(StorageKeys.LAST_EVENT_TIME);
+  if (lastEventTime) {
+    this.setInStorage(StorageKeys.LAST_EVENT_TIME, lastEventTime);
+    localStorage.removeItem(StorageKeys.LAST_EVENT_TIME);
+  }
+
+  var sessionId = localStorage.getItem(StorageKeys.SESSION_ID);
+  if (sessionId) {
+    this.setInStorage(StorageKeys.SESSION_ID, sessionId);
+    localStorage.removeItem(StorageKeys.SESSION_ID);
+  }
+
+  var unsentEventsString = localStorage.getItem(StorageKeys.UNSENT_EVENTS);
+  if (unsentEventsString) {
+    this.setInStorage(StorageKeys.UNSENT_EVENTS, unsentEventsString);
+    localStorage.removeItem(StorageKeys.UNSENT_EVENTS);
+  }
+
+  var unsentIdentifysString = localStorage.getItem(StorageKeys.UNSENT_IDENTIFYS);
+  if (unsentIdentifysString) {
+    this.setInStorage(StorageKeys.UNSENT_IDENTIFYS, unsentIdentifysString);
+    localStorage.removeItem(StorageKeys.UNSENT_IDENTIFYS);
+  }
+};
+
+Amplitude.prototype._loadStoredData = function() {
+  if (this.options.saveEvents) {
+    this._unsentEvents = this._loadSavedUnsentEvents(StorageKeys.UNSENT_EVENTS);
+    this._unsentIdentifys = this._loadSavedUnsentEvents(StorageKeys.UNSENT_IDENTIFYS);
+  }
+
+  try {
+    this.options.deviceId = this.getFromStorage(StorageKeys.DEVICE_ID, this.options.deviceId);
+    this.options.userId = this.getFromStorage(StorageKeys.USER_ID, this.options.userId);
+    this.options.optOut = (this.getFromStorage(StorageKeys.OPT_OUT, String(this.options.optOut || false)) === 'true');
+
+    this._lastEventTime = parseInt(this.getFromStorage(StorageKeys.LAST_EVENT_TIME));
+    this._sessionId = parseInt(this.getFromStorage(StorageKeys.SESSION_ID));
+    this._eventId = parseInt(this.getFromStorage(StorageKeys.LAST_EVENT_ID, 0));
+    this._identifyId = parseInt(this.getFromStorage(StorageKeys.LAST_IDENTIFY_ID, 0));
+    this._sequenceNumber = parseInt(this.getFromStorage(StorageKeys.LAST_SEQUENCE_NUMBER, 0));
+
+    var now = new Date().getTime();
+    if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
+      this._newSession = true;
+      this._sessionId = now;
+      this.setInStorage(StorageKeys.SESSION_ID, this._sessionId);
+    }
+    this._lastEventTime = now;
+    this.setInStorage(StorageKeys.LAST_EVENT_TIME, this._lastEventTime);
+  } catch (e) {
+    log(e);
+  }
+};
+
+Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey) {
+  var savedUnsentEventsString = this.getFromStorage(unsentKey);
   if (savedUnsentEventsString) {
     try {
-      this[queue] = JSON.parse(savedUnsentEventsString);
+      return JSON.parse(savedUnsentEventsString);
     } catch (e) {
       //log(e);
     }
   }
+  return [];
 };
 
 Amplitude.prototype.isNewSession = function() {
@@ -334,29 +436,6 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
-var _loadCookieData = function(scope) {
-  var cookieData = Cookie.get(scope.options.cookieName);
-  if (cookieData) {
-    if (cookieData.deviceId) {
-      scope.options.deviceId = cookieData.deviceId;
-    }
-    if (cookieData.userId) {
-      scope.options.userId = cookieData.userId;
-    }
-    if (cookieData.optOut !== undefined) {
-      scope.options.optOut = cookieData.optOut;
-    }
-  }
-};
-
-var _saveCookieData = function(scope) {
-  Cookie.set(scope.options.cookieName, {
-    deviceId: scope.options.deviceId,
-    userId: scope.options.userId,
-    optOut: scope.options.optOut
-  });
-};
-
 Amplitude._getUtmParam = function(name, query) {
   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
   var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
@@ -405,8 +484,8 @@ Amplitude.prototype._getReferringDomain = function() {
 
 Amplitude.prototype.saveEvents = function() {
   try {
-    localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
-    localStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+    this.setInStorage(StorageKeys.UNSENT_EVENTS, JSON.stringify(this._unsentEvents));
+    this.setInStorage(StorageKeys.UNSENT_IDENTIFYS, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
     //log(e);
   }
@@ -418,8 +497,10 @@ Amplitude.prototype.setDomain = function(domain) {
       domain: domain
     });
     this.options.domain = Cookie.options().domain;
-    _loadCookieData(this);
-    _saveCookieData(this);
+
+    this._upgradeStoredData();
+    this._loadStoredData();
+
     //log('set domain=' + domain);
   } catch (e) {
     log(e);
@@ -429,7 +510,7 @@ Amplitude.prototype.setDomain = function(domain) {
 Amplitude.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
-    _saveCookieData(this);
+    this.setInStorage(StorageKeys.USER_ID, this.options.userId);
     //log('set userId=' + userId);
   } catch (e) {
     log(e);
@@ -439,7 +520,7 @@ Amplitude.prototype.setUserId = function(userId) {
 Amplitude.prototype.setOptOut = function(enable) {
   try {
     this.options.optOut = enable;
-    _saveCookieData(this);
+    this.setInStorage(StorageKeys.OPT_OUT, this.options.optOut);
     //log('set optOut=' + enable);
   } catch (e) {
     log(e);
@@ -450,7 +531,7 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
   try {
     if (deviceId) {
       this.options.deviceId = ('' + deviceId);
-      _saveCookieData(this);
+      this.setInStorage(StorageKeys.DEVICE_ID, this.options.deviceId);
     }
   } catch (e) {
     log(e);
@@ -540,19 +621,19 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     var eventId;
     if (eventType === IDENTIFY_EVENT) {
       eventId = this.nextIdentifyId();
-      localStorage.setItem(LocalStorageKeys.LAST_IDENTIFY_ID, eventId);
+      this.setInStorage(StorageKeys.LAST_IDENTIFY_ID, eventId);
     } else {
       eventId = this.nextEventId();
-      localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
+      this.setInStorage(StorageKeys.LAST_EVENT_ID, eventId);
     }
     var eventTime = new Date().getTime();
     var ua = this._ua;
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
-      localStorage.setItem(LocalStorageKeys.SESSION_ID, this._sessionId);
+      this.setInStorage(StorageKeys.SESSION_ID, this._sessionId);
     }
     this._lastEventTime = eventTime;
-    localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
+    this.setInStorage(StorageKeys.LAST_EVENT_TIME, this._lastEventTime);
 
     userProperties = userProperties || {};
     // Only add utm properties to user properties for events
@@ -794,7 +875,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
+}, {"./cookie":3,"json":4,"./language":5,"./storage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
 3: [function(require, module, exports) {
 /*
  * Cookie data
@@ -1732,12 +1813,17 @@ module.exports = {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
- * Implement localStorage to support Firefox 2-3 and IE 5-7
+ * Wrapper to determine best storage to use. In most cases
+ * localStorage is good, although if it is unavailable, then
+ * fall back to using global storage, html div, or cookies.
+ * Implement localStorage to support Firefox 2-3 and IE 5-7.
  */
-var localStorage; // jshint ignore:line
+var storage = function() {
+  this.storage = null;
+};
 
 // test that Window.localStorage is available and works
-function windowLocalStorageAvailable() {
+storage.prototype._windowLocalStorageAvailable = function() {
   var uid = new Date();
   var result;
   try {
@@ -1749,89 +1835,150 @@ function windowLocalStorageAvailable() {
     // localStorage not available
   }
   return false;
-}
+};
 
-if (windowLocalStorageAvailable()) {
-  localStorage = window.localStorage;
-} else if (window.globalStorage) {
-  // Firefox 2-3 use globalStorage
-  // See https://developer.mozilla.org/en/dom/storage#globalStorage
-  try {
-    localStorage = window.globalStorage[window.location.hostname];
-  } catch (e) {
-    // Something bad happened...
+storage.prototype.getStorage = function() {
+  if (this.storage !== null) {
+    return this.storage;
   }
-} else {
-  // IE 5-7 use userData
-  // See http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx
-  var div = document.createElement('div'),
-      attrKey = 'localStorage';
-  div.style.display = 'none';
-  document.getElementsByTagName('head')[0].appendChild(div);
-  if (div.addBehavior) {
-    div.addBehavior('#default#userdata');
-    localStorage = {
+
+  if (this._windowLocalStorageAvailable()) {
+    this.storage = window.localStorage;
+  } else if (window.globalStorage) {
+    // Firefox 2-3 use globalStorage
+    // See https://developer.mozilla.org/en/dom/storage#globalStorage
+    try {
+      this.storage = window.globalStorage[window.location.hostname];
+    } catch (e) {
+      // Something bad happened...
+    }
+  } else {
+    // IE 5-7 use userData
+    // See http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx
+    var div = document.createElement('div'),
+        attrKey = 'localStorage';
+    div.style.display = 'none';
+    document.getElementsByTagName('head')[0].appendChild(div);
+    if (div.addBehavior) {
+      div.addBehavior('#default#userdata');
+      this.storage = {
+        length: 0,
+        setItem: function(k, v) {
+          div.load(attrKey);
+          if (!div.getAttribute(k)) {
+            this.length++;
+          }
+          div.setAttribute(k, v);
+          div.save(attrKey);
+        },
+        getItem: function(k) {
+          div.load(attrKey);
+          return div.getAttribute(k);
+        },
+        removeItem: function(k) {
+          div.load(attrKey);
+          if (div.getAttribute(k)) {
+            this.length--;
+          }
+          div.removeAttribute(k);
+          div.save(attrKey);
+        },
+        clear: function() {
+          div.load(attrKey);
+          var i = 0;
+          var attr;
+          while (attr = div.XMLDocument.documentElement.attributes[i++]) {
+            div.removeAttribute(attr.name);
+          }
+          div.save(attrKey);
+          this.length = 0;
+        },
+        key: function(k) {
+          div.load(attrKey);
+          return div.XMLDocument.documentElement.attributes[k];
+        }
+      };
+      div.load(attrKey);
+      this.storage.length = div.XMLDocument.documentElement.attributes.length;
+    } else {
+      this.storage = require('./cookie-storage.js');
+    }
+  }
+  if (!this.storage) {
+    this.storage = {
       length: 0,
       setItem: function(k, v) {
-        div.load(attrKey);
-        if (!div.getAttribute(k)) {
-          this.length++;
-        }
-        div.setAttribute(k, v);
-        div.save(attrKey);
       },
       getItem: function(k) {
-        div.load(attrKey);
-        return div.getAttribute(k);
       },
       removeItem: function(k) {
-        div.load(attrKey);
-        if (div.getAttribute(k)) {
-          this.length--;
-        }
-        div.removeAttribute(k);
-        div.save(attrKey);
       },
       clear: function() {
-        div.load(attrKey);
-        var i = 0;
-        var attr;
-        while (attr = div.XMLDocument.documentElement.attributes[i++]) {
-          div.removeAttribute(attr.name);
-        }
-        div.save(attrKey);
-        this.length = 0;
       },
       key: function(k) {
-        div.load(attrKey);
-        return div.XMLDocument.documentElement.attributes[k];
       }
     };
-    div.load(attrKey);
-    localStorage.length = div.XMLDocument.documentElement.attributes.length;
-  } else {
-    /* Nothing we can do ... */
   }
-}
-if (!localStorage) {
-  localStorage = {
-    length: 0,
-    setItem: function(k, v) {
-    },
-    getItem: function(k) {
-    },
-    removeItem: function(k) {
-    },
-    clear: function() {
-    },
-    key: function(k) {
-    }
-  };
-}
+  return this.storage;
+};
 
-module.exports = localStorage;
+module.exports = storage;
 
-}, {}],
+}, {"./cookie-storage.js":20}],
+20: [function(require, module, exports) {
+/* jshint -W020, unused: false, noempty: false, boss: true */
+/* global escape, unescape */
+
+var Cookie = require('./cookie.js');
+
+var COOKIE_STORAGE_KEY = 'amplitude_storage';
+
+var cookieStorage = {
+  length: 0,
+
+  setItem: function(sKey, sValue) {
+    var store = Cookie.get(COOKIE_STORAGE_KEY) || {};
+
+    // don't add if cookie size exceeds 4k
+    var existingValue = '';
+    if (store.hasOwnProperty(sKey)) { existingValue = store[sKey]; }
+    var itemLength = escape(sKey).length + escape(sValue).length - escape(existingValue).length;
+    if (document.cookie.length + itemLength > 4*1024) { return; }
+
+    if (!store.hasOwnProperty(sKey)) { this.length++; }
+    store[sKey] = sValue;
+    Cookie.set(COOKIE_STORAGE_KEY, store);
+  },
+
+  getItem: function(sKey) {
+    var store = Cookie.get(COOKIE_STORAGE_KEY);
+    return store && store.hasOwnProperty(sKey) && store[sKey] || null;
+  },
+
+  removeItem: function(sKey) {
+    var store = Cookie.get(COOKIE_STORAGE_KEY);
+    if (!store || !store.hasOwnProperty(sKey)) { return; }
+    delete store[sKey];
+    Cookie.set(COOKIE_STORAGE_KEY, store);
+    this.length--;
+  },
+
+  clear: function() {
+    Cookie.set(COOKIE_STORAGE_KEY, {});
+    this.length = 0;
+  },
+
+  key: function(n) {
+    var store = Cookie.get(COOKIE_STORAGE_KEY);
+    if (!store) { return null; }
+    var keys = Object.keys(store);
+    return n < keys.length && keys[n] || null;
+  }
+};
+
+module.exports = cookieStorage;
+
+}, {"./cookie.js":3}],
 7: [function(require, module, exports) {
 /*
  * JavaScript MD5 1.0.1
@@ -2242,8 +2389,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":20}],
-20: [function(require, module, exports) {
+}, {"querystring":21}],
+21: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2318,8 +2465,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":21,"type":22}],
-21: [function(require, module, exports) {
+}, {"trim":22,"type":23}],
+22: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2339,7 +2486,7 @@ exports.right = function(str){
 };
 
 }, {}],
-22: [function(require, module, exports) {
+23: [function(require, module, exports) {
 /**
  * toString ref.
  */
