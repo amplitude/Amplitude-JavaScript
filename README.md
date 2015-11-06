@@ -7,24 +7,28 @@ Amplitude-Javascript
 1. If you haven't already, go to http://amplitude.com and register for an account. You will receive an API Key.
 2. On every page that uses analytics, paste the following Javascript code between the `<head>` and `</head>` tags:
 
-        <script type="text/javascript">
-          (function(t,e){var n=t.amplitude||{};var r=e.createElement("script");r.type="text/javascript";
-          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.5.0-min.gz.js";
-          r.onload=function(){t.amplitude.runQueuedFunctions()};var s=e.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function o(t){
-          i.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
-          return this}}var a=["add","set","setOnce","unset"];for(var u=0;u<a.length;u++){o(a[u]);
-          }n.Identify=i;n._q=[];function c(t){n[t]=function(){n._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
-          }}var l=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify"];
-          for(var p=0;p<l.length;p++){c(l[p])}t.amplitude=n})(window,document);
+```
+<script type="text/javascript">
+  (function(t,e){var n=t.amplitude||{};var r=e.createElement("script");r.type="text/javascript";
+  r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.6.0-min.gz.js";
+  r.onload=function(){t.amplitude.runQueuedFunctions()};var s=e.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function o(t){
+  i.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+  return this}}var a=["add","set","setOnce","unset"];for(var u=0;u<a.length;u++){o(a[u]);
+  }n.Identify=i;n._q=[];function c(t){n[t]=function(){n._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+  }}var l=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify"];
+  for(var p=0;p<l.length;p++){c(l[p])}t.amplitude=n})(window,document);
 
-          amplitude.init("YOUR_API_KEY_HERE");
-        </script>
+  amplitude.init("YOUR_API_KEY_HERE");
+</script>
+```
 
 3. Replace `YOUR_API_KEY_HERE` with the API Key given to you.
 4. To track an event anywhere on the page, call:
 
-        amplitude.logEvent("EVENT_IDENTIFIER_HERE");
+```javascript
+amplitude.logEvent('EVENT_IDENTIFIER_HERE');
+```
 
 5. Events are uploaded immediately and saved to the browser's local storage until the server confirms the upload. After calling logEvent in your app, you will immediately see data appear on Amplitude.
 
@@ -36,33 +40,31 @@ It's important to think about what types of events you care about as a developer
 
 If your app has its own login system that you want to track users with, you can call `setUserId` at any time:
 
-    amplitude.setUserId("USER_ID_HERE");
+```javascript
+amplitude.setUserId('USER_ID_HERE');
+```
 
 A user's data will be merged on the backend so that any events up to that point from the same browser will be tracked under the same user.
 
 You can also add the user ID as an argument to the `init` call:
 
-    amplitude.init("YOUR_API_KEY_HERE", "USER_ID_HERE");
+```javascript
+amplitude.init('YOUR_API_KEY_HERE', 'USER_ID_HERE');
+```
 
 # Setting Event Properties #
 
 You can attach additional data to any event by passing a Javascript object as the second argument to `logEvent`:
 
-    var eventProperties = {};
-    eventProperties.key = "value";
-    amplitude.logEvent("EVENT_IDENTIFIER_HERE", eventProperties);
-
-# Setting User Properties #
-
-To add properties that are tracked in every event, you can set properties for a user:
-
-    var userProperties = {};
-    userProperties.key = "value";
-    amplitude.setUserProperties(userProperties);
+```javascript
+var eventProperties = {};
+eventProperties.key = 'value';
+amplitude.logEvent('EVENT_IDENTIFIER_HERE', eventProperties);
+```
 
 # User Property Operations #
 
-The SDK supports the operations set, setOnce, unset, and add on individual user properties. The operations are declared via a provided `Identify` interface. Multiple operations can be chained together in a single `Identify` object. The `Identify` object is then passed to the Amplitude client to send to the server. The results of the operations will be visible immediately in the dashboard, and take effect for events logged after.
+The SDK supports the operations `set`, `setOnce`, `unset`, and `add` on individual user properties. The operations are declared via a provided `Identify` interface. Multiple operations can be chained together in a single `Identify` object. The `Identify` object is then passed to the Amplitude client to send to the server. The results of the operations will be visible immediately in the dashboard, and take effect for events logged after.
 
 1. `set`: this sets the value of a user property.
 
@@ -98,15 +100,32 @@ The SDK supports the operations set, setOnce, unset, and add on individual user 
 Note: if a user property is used in multiple operations on the same `Identify` object, only the first operation will be saved, and the rest will be ignored. In this example, only the set operation will be saved, and the add and unset will be ignored:
 
 ```javascript
-var identify = new amplitude.Identify().set('karma', 10).add('karma', 1).unset('karma');
+var identify = new amplitude.Identify()
+    .set('karma', 10)
+    .add('karma', 1)
+    .unset('karma');
 amplitude.identify(identify);
+```
+
+### Setting Multiple Properties with `setUserProperties` ###
+
+You may use `setUserProperties` shorthand to set multiple user properties at once. This method is simply a wrapper around `Identify.set` and `identify`.
+
+```javascript
+var userProperties = {
+    gender: 'female',
+    age: 20
+};
+amplitude.setUserProperties(userProperties);
 ```
 
 # Tracking Revenue #
 
 To track revenue from a user, call
 
-    amplitude.logRevenue(9.99, 1, "product");
+```javascript
+amplitude.logRevenue(9.99, 1, 'product');
+```
 
 The function takes a unit price, a quantity, and a product identifier. Quantity and product identifier are optional parameters.
 
@@ -116,12 +135,16 @@ This allows us to automatically display data relevant to revenue on the Amplitud
 
 You can turn off logging for a given user:
 
-    amplitude.setOptOut(true);
+```javascript
+amplitude.setOptOut(true);
+```
 
 No events will be saved or sent to the server while opt out is enabled. The opt out
 setting will persist across page loads. Calling
 
-    setOptOut(false)
+```javascript
+amplitude.setOptOut(false);
+```
 
 will reenable logging.
 
@@ -129,14 +152,16 @@ will reenable logging.
 
 You can configure Amplitude by passing an object as the third argument to the `init`:
 
-    amplitude.init("YOUR_API_KEY_HERE", null, {
-      // optional configuration options
-      saveEvents: true,
-      includeUtm: true,
-      includeReferrer: true,
-      batchEvents: true,
-      eventUploadThreshold: 50
-    })
+```javascript
+amplitude.init('YOUR_API_KEY_HERE', null, {
+    // optional configuration options
+    saveEvents: true,
+    includeUtm: true,
+    includeReferrer: true,
+    batchEvents: true,
+    eventUploadThreshold: 50
+});
+```
 
 | option | description | default |
 |------------|----------------------------------------------------------------------------------|-----------|
@@ -157,44 +182,54 @@ This SDK automatically grabs useful data about the browser, including browser ty
 
 By default, no version name is set. You can specify a version name to distinguish between different versions of your site by calling `setVersionName`:
 
-    amplitude.setVersionName("VERSION_NAME_HERE");
+```javascript
+amplitude.setVersionName('VERSION_NAME_HERE');
+```
 
 User IDs are automatically generated and stored in cookies if not specified.
 
 Device IDs are generated randomly, although you can define a custom device ID setting it as a configuration option or by calling:
 
-    amplitude.setDeviceId("CUSTOM_DEVICE_ID");
+```javascript
+amplitude.setDeviceId('CUSTOM_DEVICE_ID');
+```
 
 You can pass a callback function to logEvent, which will get called after receiving a response from the server:
 
-    amplitude.logEvent("EVENT_IDENTIFIER_HERE", null, callback_function);
+```javascript
+amplitude.logEvent("EVENT_IDENTIFIER_HERE", null, callback_function);
+```
 
 The status and response from the server are passed to the callback function, which you might find useful. An example of a callback function which redirects the browser to another site after a response:
 
 ```javascript
-  var callback_function = function(status, response) {
+var callback_function = function(status, response) {
     if (status === 200 && response === 'success') {
-      // do something here
+        // do something here
     }
     window.location.replace('URL_OF_OTHER_SITE');
-  };
+};
 ```
 
 You can also use this to track outbound links on your website. For example you would have a link like this:
 
-    <a href="javascript:trackClickLinkA();">Link A</a>
+```html
+<a href="javascript:trackClickLinkA();">Link A</a>
+```
 
 And then you would define a function that is called when the link is clicked like this:
 
 ```javascript
 var trackClickLinkA = function() {
-  amplitude.logEvent('Clicked Link A', null, function() {
-    window.location="LINK_A_URL";
-  });
-}
+    amplitude.logEvent('Clicked Link A', null, function() {
+        window.location='LINK_A_URL';
+    });
+};
 ```
 You can also pass a callback function to init, which will get called after the SDK finishes its asynchronous loading. Note: no values are passed to the init callback function:
 
-    amplitude.init("YOUR_API_KEY_HERE", "USER_ID_HERE", null, callback_function);
+```javascript
+amplitude.init('YOUR_API_KEY_HERE', 'USER_ID_HERE', null, callback_function);
+```
 
 In the case that `optOut` is true, then no event will be logged, but the callback will be called. In the case that `batchEvents` is true, if the batch requirements `eventUploadThreshold` and `eventUploadPeriodMillis` are not met when `logEvent` is called, then no request is sent, but the callback is still called. In these cases, the callback will be called with an input status of 0 and response 'No request sent'.
