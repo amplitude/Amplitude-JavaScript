@@ -6,4 +6,3 @@
   require('./amplitude.js');
   require('./ua-parser.js');
   require('./identify.js');
-  require('./storage.js');
