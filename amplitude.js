@@ -216,6 +216,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     });
     this.options.domain = Cookie.options().domain;
 
+    _migrateLocalStorageDataToCookie(this);
     _loadCookieData(this);
 
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
@@ -334,6 +335,40 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
+var _migrateLocalStorageDataToCookie = function(scope) {
+  var cookieData = Cookie.get(scope.options.cookieName);
+  if (cookieData && cookieData.deviceId && cookieData.userId &&
+      cookieData.optOut !== null && cookieData.optOut !== undefined) {
+    return; // migration not needed
+  }
+
+  var cookieDeviceId = (cookieData && cookieData.deviceId) || null;
+  var cookieUserId = (cookieData && cookieData.userId) || null;
+  var cookieOptOut = (cookieData && cookieData.optOut !== null && cookieData.optOut !== undefined) ?
+      cookieData.optOut : null;
+
+  var keySuffix = '_' + scope.options.apiKey.slice(0, 6);
+  var localStorageDeviceId = localStorage.getItem('amplitude_deviceId' + keySuffix);
+  if (localStorageDeviceId) {
+    localStorage.removeItem('amplitude_deviceId' + keySuffix);
+  }
+  var localStorageUserId = localStorage.getItem('amplitude_userId' + keySuffix);
+  if (localStorageUserId) {
+    localStorage.removeItem('amplitude_userId' + keySuffix);
+  }
+  var localStorageOptOut = localStorage.getItem('amplitude_optOut' + keySuffix);
+  if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
+    localStorage.removeItem('amplitude_optOut' + keySuffix);
+    localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
+  }
+
+  Cookie.set(scope.options.cookieName, {
+    deviceId: cookieDeviceId || localStorageDeviceId,
+    userId: cookieUserId || localStorageUserId,
+    optOut: (cookieOptOut !== undefined && cookieOptOut !== null) ? cookieOptOut : localStorageOptOut
+  });
+};
+
 var _loadCookieData = function(scope) {
   var cookieData = Cookie.get(scope.options.cookieName);
   if (cookieData) {
@@ -343,7 +378,7 @@ var _loadCookieData = function(scope) {
     if (cookieData.userId) {
       scope.options.userId = cookieData.userId;
     }
-    if (cookieData.optOut !== undefined) {
+    if (cookieData.optOut !== null && cookieData.optOut !== undefined) {
       scope.options.optOut = cookieData.optOut;
     }
   }
