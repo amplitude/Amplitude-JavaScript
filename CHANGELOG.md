@@ -1,10 +1,12 @@
 ## Unreleased
 
+## 2.6.1 (November 6, 2015)
+
 * Localstorage is not persisted across subdomains, reverting cookie data migration and adding a reverse migration path for users already on 2.6.0.
 
-## 2.6.0 (November 2, 2015)
+## 2.6.0 (November 2, 2015) - DEPRECATED
 
-* Migrate cookie data to local storage to address issue where having cookies disabled causes SDK to generate a new deviceId for returning users.
+* Migrate cookie data to local storage to address issue where having cookies disabled causes SDK to generate a new deviceId for returning users. - DEPRECATED
 
 ## 2.5.0 (September 30, 2015)
 
