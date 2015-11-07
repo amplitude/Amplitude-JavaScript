@@ -104,19 +104,25 @@ describe('Amplitude', function() {
       var userId = 'test_user_id2';
 
       // use amplitude1 to set cookie values
-      amplitude.init(apiKey, null, {deviceId: deviceId});
+      amplitude.init(apiKey, userId, {deviceId: deviceId});
       assert.equal(amplitude.options.deviceId, deviceId);
-      assert.isNull(amplitude.options.userId);
+      assert.equal(amplitude.options.userId, userId);
       assert.isFalse(amplitude.options.optOut);
 
       var cookieData = cookie.get(amplitude.options.cookieName);
       assert.equal(cookieData.deviceId, deviceId);
-      assert.isNull(cookieData.userId);
+      assert.equal(cookieData.userId, userId);
       assert.isFalse(cookieData.optOut);
 
+      // remove deviceId to make amplitude2 go through migration process
+      cookie.set(amplitude.options.cookieName, {
+        'userId': userId,
+        'optOut': false
+      });
+
       // set local storage values and verify that they are ignored by the init migration
-      localStorage.setItem('amplitude_deviceId' + '_' + apiKey, 'bad_test_device_id');  // ignored
-      localStorage.setItem('amplitude_userId' + '_' + apiKey, userId);  // since userId null, use localStorage value
+      localStorage.setItem('amplitude_deviceId' + '_' + apiKey, deviceId);
+      localStorage.setItem('amplitude_userId' + '_' + apiKey, 'test_bad_user_id');  // ignored
       localStorage.setItem('amplitude_optOut' + '_' + apiKey, true); // ignored
 
       var amplitude2 = new Amplitude();

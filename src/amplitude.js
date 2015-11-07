@@ -42,7 +42,11 @@ var LocalStorageKeys = {
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
-  SESSION_ID: 'amplitude_sessionId'
+  SESSION_ID: 'amplitude_sessionId',
+
+  DEVICE_ID: 'amplitude_deviceId',
+  USER_ID: 'amplitude_userId',
+  OPT_OUT: 'amplitude_optOut'
 };
 
 /*
@@ -231,8 +235,7 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
 
 var _migrateLocalStorageDataToCookie = function(scope) {
   var cookieData = Cookie.get(scope.options.cookieName);
-  if (cookieData && cookieData.deviceId && cookieData.userId &&
-      cookieData.optOut !== null && cookieData.optOut !== undefined) {
+  if (cookieData && cookieData.deviceId) {
     return; // migration not needed
   }
 
@@ -242,17 +245,17 @@ var _migrateLocalStorageDataToCookie = function(scope) {
       cookieData.optOut : null;
 
   var keySuffix = '_' + scope.options.apiKey.slice(0, 6);
-  var localStorageDeviceId = localStorage.getItem('amplitude_deviceId' + keySuffix);
+  var localStorageDeviceId = localStorage.getItem(LocalStorageKeys.DEVICE_ID + keySuffix);
   if (localStorageDeviceId) {
-    localStorage.removeItem('amplitude_deviceId' + keySuffix);
+    localStorage.removeItem(LocalStorageKeys.DEVICE_ID + keySuffix);
   }
-  var localStorageUserId = localStorage.getItem('amplitude_userId' + keySuffix);
+  var localStorageUserId = localStorage.getItem(LocalStorageKeys.USER_ID + keySuffix);
   if (localStorageUserId) {
-    localStorage.removeItem('amplitude_userId' + keySuffix);
+    localStorage.removeItem(LocalStorageKeys.USER_ID + keySuffix);
   }
-  var localStorageOptOut = localStorage.getItem('amplitude_optOut' + keySuffix);
+  var localStorageOptOut = localStorage.getItem(LocalStorageKeys.OPT_OUT + keySuffix);
   if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
-    localStorage.removeItem('amplitude_optOut' + keySuffix);
+    localStorage.removeItem(LocalStorageKeys.OPT_OUT + keySuffix);
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
 
