@@ -74,6 +74,72 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, userId, null, callback);
       assert.equal(counter, 1);
     });
+
+    it ('should migrate deviceId, userId, optOut from localStorage to cookie', function() {
+      var deviceId = 'test_device_id';
+      var userId = 'test_user_id';
+
+      assert.isNull(cookie.get(amplitude.options.cookieName));
+      localStorage.setItem('amplitude_deviceId' + '_' + apiKey, deviceId);
+      localStorage.setItem('amplitude_userId' + '_' + apiKey, userId);
+      localStorage.setItem('amplitude_optOut' + '_' + apiKey, true);
+
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.deviceId, deviceId);
+      assert.equal(amplitude.options.userId, userId);
+      assert.isTrue(amplitude.options.optOut);
+
+      var cookieData = cookie.get(amplitude.options.cookieName);
+      assert.equal(cookieData.deviceId, deviceId);
+      assert.equal(cookieData.userId, userId);
+      assert.isTrue(cookieData.optOut);
+
+      assert.isNull(localStorage.getItem('amplitude_deviceId' + '_' + apiKey));
+      assert.isNull(localStorage.getItem('amplitude_userId' + '_' + apiKey));
+      assert.isNull(localStorage.getItem('amplitude_optOut' + '_' + apiKey));
+    });
+
+    it ('should migrate data from localStorage to cookie but preserve existing values', function() {
+      var deviceId = 'test_device_id2';
+      var userId = 'test_user_id2';
+
+      // use amplitude1 to set cookie values
+      amplitude.init(apiKey, userId, {deviceId: deviceId});
+      assert.equal(amplitude.options.deviceId, deviceId);
+      assert.equal(amplitude.options.userId, userId);
+      assert.isFalse(amplitude.options.optOut);
+
+      var cookieData = cookie.get(amplitude.options.cookieName);
+      assert.equal(cookieData.deviceId, deviceId);
+      assert.equal(cookieData.userId, userId);
+      assert.isFalse(cookieData.optOut);
+
+      // remove deviceId to make amplitude2 go through migration process
+      cookie.set(amplitude.options.cookieName, {
+        'userId': userId,
+        'optOut': false
+      });
+
+      // set local storage values and verify that they are ignored by the init migration
+      localStorage.setItem('amplitude_deviceId' + '_' + apiKey, deviceId);
+      localStorage.setItem('amplitude_userId' + '_' + apiKey, 'test_bad_user_id');  // ignored
+      localStorage.setItem('amplitude_optOut' + '_' + apiKey, true); // ignored
+
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey);
+      assert.equal(amplitude2.options.deviceId, deviceId);
+      assert.equal(amplitude2.options.userId, userId);
+      assert.isFalse(amplitude2.options.optOut);
+
+      cookieData = cookie.get(amplitude.options.cookieName);
+      assert.equal(cookieData.deviceId, deviceId);
+      assert.equal(cookieData.userId, userId);
+      assert.isFalse(cookieData.optOut);
+
+      assert.isNull(localStorage.getItem('amplitude_deviceId' + '_' + apiKey));
+      assert.isNull(localStorage.getItem('amplitude_userId' + '_' + apiKey));
+      assert.isNull(localStorage.getItem('amplitude_optOut' + '_' + apiKey));
+    });
   });
 
   describe('runQueuedFunctions', function() {

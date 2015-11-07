@@ -148,7 +148,11 @@ var LocalStorageKeys = {
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
-  SESSION_ID: 'amplitude_sessionId'
+  SESSION_ID: 'amplitude_sessionId',
+
+  DEVICE_ID: 'amplitude_deviceId',
+  USER_ID: 'amplitude_userId',
+  OPT_OUT: 'amplitude_optOut'
 };
 
 /*
@@ -216,6 +220,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     });
     this.options.domain = Cookie.options().domain;
 
+    _migrateLocalStorageDataToCookie(this);
     _loadCookieData(this);
 
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
@@ -334,6 +339,39 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
+var _migrateLocalStorageDataToCookie = function(scope) {
+  var cookieData = Cookie.get(scope.options.cookieName);
+  if (cookieData && cookieData.deviceId) {
+    return; // migration not needed
+  }
+
+  var cookieDeviceId = (cookieData && cookieData.deviceId) || null;
+  var cookieUserId = (cookieData && cookieData.userId) || null;
+  var cookieOptOut = (cookieData && cookieData.optOut !== null && cookieData.optOut !== undefined) ?
+      cookieData.optOut : null;
+
+  var keySuffix = '_' + scope.options.apiKey.slice(0, 6);
+  var localStorageDeviceId = localStorage.getItem(LocalStorageKeys.DEVICE_ID + keySuffix);
+  if (localStorageDeviceId) {
+    localStorage.removeItem(LocalStorageKeys.DEVICE_ID + keySuffix);
+  }
+  var localStorageUserId = localStorage.getItem(LocalStorageKeys.USER_ID + keySuffix);
+  if (localStorageUserId) {
+    localStorage.removeItem(LocalStorageKeys.USER_ID + keySuffix);
+  }
+  var localStorageOptOut = localStorage.getItem(LocalStorageKeys.OPT_OUT + keySuffix);
+  if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
+    localStorage.removeItem(LocalStorageKeys.OPT_OUT + keySuffix);
+    localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
+  }
+
+  Cookie.set(scope.options.cookieName, {
+    deviceId: cookieDeviceId || localStorageDeviceId,
+    userId: cookieUserId || localStorageUserId,
+    optOut: (cookieOptOut !== undefined && cookieOptOut !== null) ? cookieOptOut : localStorageOptOut
+  });
+};
+
 var _loadCookieData = function(scope) {
   var cookieData = Cookie.get(scope.options.cookieName);
   if (cookieData) {
@@ -343,7 +381,7 @@ var _loadCookieData = function(scope) {
     if (cookieData.userId) {
       scope.options.userId = cookieData.userId;
     }
-    if (cookieData.optOut !== undefined) {
+    if (cookieData.optOut !== null && cookieData.optOut !== undefined) {
       scope.options.optOut = cookieData.optOut;
     }
   }
