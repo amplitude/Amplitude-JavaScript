@@ -21,7 +21,7 @@ Request.prototype.send = function(callback) {
       if (xdr.responseText === 'Request Entity Too Large') {
         callback(413, xdr.responseText);
       } else {
-        callback(400, xdr.responseText);
+        callback(500, xdr.responseText);
       }
     };
     xdr.ontimeout = function () {};
