@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add initial_referrer and initial_referring_domain user properties, which persist the initial referrer for the duration of the user's session.
+
 ## 2.6.1 (November 6, 2015)
 
 * Localstorage is not persisted across subdomains, reverting cookie data migration and adding a reverse migration path for users already on 2.6.0.

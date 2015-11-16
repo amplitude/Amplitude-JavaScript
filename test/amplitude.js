@@ -26,6 +26,7 @@ describe('Amplitude', function() {
 
   function reset() {
     localStorage.clear();
+    sessionStorage.clear();
     cookie.remove(amplitude.options.cookieName);
     cookie.reset();
   }
@@ -1356,6 +1357,8 @@ describe('Amplitude', function() {
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
+        initial_referrer: '',
+        initial_referring_domain: '',
         referrer: 'https://amplitude.com/contact',
         referring_domain: 'amplitude.com'
       });
@@ -1380,10 +1383,45 @@ describe('Amplitude', function() {
       assert.lengthOf(server.requests, 2);
       var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
+        initial_referrer: '',
+        initial_referring_domain: '',
         referrer: 'https://amplitude.com/contact',
         referring_domain: 'amplitude.com'
       });
     });
+
+    it('should grab initial referrer data from session storage', function() {
+      reset();
+      sessionStorage.setItem('amplitude_initialReferrer', 'https://www.google.com/search?');
+      amplitude.init(apiKey, undefined, {includeReferrer: true});
+
+      amplitude.logEvent('Referrer Test Event', {});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
+        initial_referrer: 'https://www.google.com/search?',
+        initial_referring_domain: 'www.google.com',
+        referrer: 'https://amplitude.com/contact',
+        referring_domain: 'amplitude.com'
+      });
+    });
+
+    it('should not override any existing initial referrer values in session storage', function() {
+      reset();
+      sessionStorage.setItem('amplitude_initialReferrer', 'https://www.google.com/search?');
+      amplitude.init(apiKey, undefined, {includeReferrer: true});
+      amplitude._saveInitialReferrer('https://amplitude.com/contact');
+
+      amplitude.logEvent('Referrer Test Event', {});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {
+        initial_referrer: 'https://www.google.com/search?',
+        initial_referring_domain: 'www.google.com',
+        referrer: 'https://amplitude.com/contact',
+        referring_domain: 'amplitude.com'
+      });
+    })
   });
 
   describe('logRevenue', function() {

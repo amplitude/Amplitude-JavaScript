@@ -46,7 +46,9 @@ var LocalStorageKeys = {
 
   DEVICE_ID: 'amplitude_deviceId',
   USER_ID: 'amplitude_userId',
-  OPT_OUT: 'amplitude_optOut'
+  OPT_OUT: 'amplitude_optOut',
+
+  INITIAL_REFERRER: 'amplitude_initialReferrer'
 };
 
 /*
@@ -135,6 +137,10 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
 
     if (this.options.includeUtm) {
       this._initUtmData();
+    }
+
+    if (this.options.includeReferrer) {
+      this._saveInitialReferrer(document.referrer);
     }
 
     this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
@@ -327,12 +333,30 @@ Amplitude.prototype._getReferrer = function() {
   return document.referrer;
 };
 
-Amplitude.prototype._getReferringDomain = function() {
-  var parts = this._getReferrer().split("/");
+Amplitude.prototype._getReferringDomain = function(referrer) {
+  var parts = referrer.split('/');
   if (parts.length >= 3) {
     return parts[2];
   }
-  return "";
+  return '';
+};
+
+Amplitude.prototype._saveInitialReferrer = function(initialReferrer) {
+  if (initialReferrer === '') {
+    return;
+  }
+  var hasSessionStorage = window.sessionStorage ? true : false;
+  if (hasSessionStorage && !window.sessionStorage.getItem(LocalStorageKeys.INITIAL_REFERRER)) {
+    window.sessionStorage.setItem(LocalStorageKeys.INITIAL_REFERRER, initialReferrer);
+  }
+};
+
+Amplitude.prototype._getInitialReferrer = function() {
+  var hasSessionStorage = window.sessionStorage ? true : false;
+  if (hasSessionStorage) {
+    return window.sessionStorage.getItem(LocalStorageKeys.INITIAL_REFERRER) || '';
+  }
+  return '';
 };
 
 Amplitude.prototype.saveEvents = function() {
@@ -493,9 +517,13 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 
       // Add referral info onto the user properties
       if (this.options.includeReferrer) {
+        var referrer = this._getReferrer();
+        var initialReferrer = this._getInitialReferrer();
         object.merge(userProperties, {
-          'referrer': this._getReferrer(),
-          'referring_domain': this._getReferringDomain()
+          'referrer': referrer,
+          'referring_domain': this._getReferringDomain(referrer),
+          'initial_referrer': initialReferrer,
+          'initial_referring_domain': this._getReferringDomain(initialReferrer)
         });
       }
     }
