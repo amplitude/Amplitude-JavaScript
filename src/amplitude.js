@@ -140,7 +140,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     }
 
     if (this.options.includeReferrer) {
-      this._saveInitialReferrer(document.referrer);
+      this._saveInitialReferrer(this._getReferrer());
     }
 
     this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;

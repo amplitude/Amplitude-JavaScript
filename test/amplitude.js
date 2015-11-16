@@ -1357,8 +1357,8 @@ describe('Amplitude', function() {
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
-        initial_referrer: '',
-        initial_referring_domain: '',
+        initial_referrer: 'https://amplitude.com/contact',
+        initial_referring_domain: 'amplitude.com',
         referrer: 'https://amplitude.com/contact',
         referring_domain: 'amplitude.com'
       });
@@ -1383,8 +1383,8 @@ describe('Amplitude', function() {
       assert.lengthOf(server.requests, 2);
       var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
       assert.deepEqual(events[0].user_properties, {
-        initial_referrer: '',
-        initial_referring_domain: '',
+        initial_referrer: 'https://amplitude.com/contact',
+        initial_referring_domain: 'amplitude.com',
         referrer: 'https://amplitude.com/contact',
         referring_domain: 'amplitude.com'
       });
