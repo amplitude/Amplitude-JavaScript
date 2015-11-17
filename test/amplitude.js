@@ -32,6 +32,7 @@ describe('Amplitude', function() {
 
   describe('init', function() {
     beforeEach(function() {
+      reset();
     });
 
     afterEach(function() {
@@ -139,6 +140,46 @@ describe('Amplitude', function() {
       assert.isNull(localStorage.getItem('amplitude_deviceId' + '_' + apiKey));
       assert.isNull(localStorage.getItem('amplitude_userId' + '_' + apiKey));
       assert.isNull(localStorage.getItem('amplitude_optOut' + '_' + apiKey));
+    });
+
+    it('should save cookie data to local storage', function() {
+      amplitude.init(apiKey, userId);
+      var stored = cookie.get(amplitude.options.cookieName);
+      assert.property(stored, 'deviceId');
+      assert.propertyVal(stored, 'userId', userId);
+      assert.lengthOf(stored.deviceId, 36);
+      assert.equal(stored.deviceId, localStorage.getItem('amplitude_deviceId'));
+      assert.equal(stored.userId, localStorage.getItem('amplitude_userId'));
+    });
+
+    it('should fallback to local storage if cookie unavailable', function() {
+      reset();
+      cookie.set(amplitude.options.cookieName, {
+        'userId': userId,
+      });
+      var deviceId = 'test_device_id';
+      var badUserId = 'test_user_id';
+      localStorage.setItem('amplitude_deviceId', deviceId);
+      localStorage.setItem('amplitude_userId', badUserId); // should ignore this since cookie already has value
+      amplitude.init(apiKey);
+
+      assert.equal(amplitude.options.deviceId, deviceId);
+      assert.equal(amplitude.options.userId, userId);
+    });
+
+    it('should not fallback to local storage if cookie available', function() {
+      reset();
+      var deviceId = 'test_device_id';
+      cookie.set(amplitude.options.cookieName, {
+        'deviceId': deviceId,
+        'userId': userId,
+      });
+      localStorage.setItem('amplitude_deviceId', 'bad_device_id');
+      localStorage.setItem('amplitude_userId', 'bad_user_id');
+      amplitude.init(apiKey);
+
+      assert.equal(amplitude.options.deviceId, deviceId);
+      assert.equal(amplitude.options.userId, userId);
     });
   });
 
