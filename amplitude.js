@@ -222,12 +222,17 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
 
     _migrateLocalStorageDataToCookie(this);
     _loadCookieData(this);
+    // if cookie data not available, fallback to local storage
+    if (!this.options.deviceId) {
+      _loadCookieDataFromLocalStorage(this);
+    }
 
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
         opt_config.deviceId !== null && opt_config.deviceId) ||
         this.options.deviceId || UUID();
     this.options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || this.options.userId || null;
     _saveCookieData(this);
+    _saveCookieDataToLocalStorage(this);
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
@@ -339,6 +344,8 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
+// Backwards migration path patch for v2.6.0 -> cookie data was saved in local storage with new key scheme (key_apiKey).
+// Move data from local storage back to cookie
 var _migrateLocalStorageDataToCookie = function(scope) {
   var cookieData = Cookie.get(scope.options.cookieName);
   if (cookieData && cookieData.deviceId) {
@@ -393,6 +400,26 @@ var _saveCookieData = function(scope) {
     userId: scope.options.userId,
     optOut: scope.options.optOut
   });
+};
+
+var _loadCookieDataFromLocalStorage = function(scope) {
+  var deviceId = localStorage.getItem(LocalStorageKeys.DEVICE_ID);
+  if (deviceId && !scope.options.deviceId) {
+    scope.options.deviceId = deviceId;
+  }
+  var userId = localStorage.getItem(LocalStorageKeys.USER_ID);
+  if (userId && !scope.options.userId) {
+    scope.options.userId = userId;
+  }
+};
+
+var _saveCookieDataToLocalStorage = function(scope) {
+  if (scope.options.deviceId) {
+    localStorage.setItem(LocalStorageKeys.DEVICE_ID, scope.options.deviceId);
+  }
+  if (scope.options.userId) {
+    localStorage.setItem(LocalStorageKeys.USER_ID, scope.options.userId);
+  }
 };
 
 Amplitude._getUtmParam = function(name, query) {
@@ -468,6 +495,7 @@ Amplitude.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
+    _saveCookieDataToLocalStorage(this);
     //log('set userId=' + userId);
   } catch (e) {
     log(e);
@@ -478,6 +506,7 @@ Amplitude.prototype.setOptOut = function(enable) {
   try {
     this.options.optOut = enable;
     _saveCookieData(this);
+    _saveCookieDataToLocalStorage(this);
     //log('set optOut=' + enable);
   } catch (e) {
     log(e);
@@ -489,6 +518,7 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
     if (deviceId) {
       this.options.deviceId = ('' + deviceId);
       _saveCookieData(this);
+      _saveCookieDataToLocalStorage(this);
     }
   } catch (e) {
     log(e);
