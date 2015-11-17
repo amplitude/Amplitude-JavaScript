@@ -1,5 +1,7 @@
 ## Unreleased
 
+* If cookie unavailable, then fallback to localStorage for deviceId and userId.
+
 ## 2.6.1 (November 6, 2015)
 
 * Localstorage is not persisted across subdomains, reverting cookie data migration and adding a reverse migration path for users already on 2.6.0.
