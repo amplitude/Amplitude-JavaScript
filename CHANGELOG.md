@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 2.6.2 (November 17, 2015)
+
 * Fix bug where response code is not passed to XDomainRequest callback (affects IE versions 10 and lower).
 
 ## 2.6.1 (November 6, 2015)
