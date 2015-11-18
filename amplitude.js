@@ -2261,8 +2261,18 @@ Request.prototype.send = function(callback) {
     var xdr = new window.XDomainRequest();
     xdr.open('POST', this.url, true);
     xdr.onload = function() {
-      callback(xdr.responseText);
+      callback(200, xdr.responseText);
     };
+    xdr.onerror = function () {
+      // status code not available from xdr, try string matching on responseText
+      if (xdr.responseText === 'Request Entity Too Large') {
+        callback(413, xdr.responseText);
+      } else {
+        callback(500, xdr.responseText);
+      }
+    };
+    xdr.ontimeout = function () {};
+    xdr.onprogress = function() {};
     xdr.send(querystring.stringify(this.data));
   } else {
     var xhr = new XMLHttpRequest();
