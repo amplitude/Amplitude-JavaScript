@@ -172,8 +172,9 @@ amplitude.init('YOUR_API_KEY_HERE', null, {
 | includeReferrer | If `true`, includes `referrer` and `referring_domain` as user propeties on all events uploaded. | `false` |
 | batchEvents | If `true`, events are batched together and uploaded only when the number of unsent events is greater than or equal to `eventUploadThreshold` or after `eventUploadPeriodMillis` milliseconds have passed since the first unsent event was logged. | `false` |
 | eventUploadThreshold | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
-| eventUploadPeriodMillis | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30*1000 |
+| eventUploadPeriodMillis | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
 | deviceId | Custom device ID to set | Randomly generated UUID |
+| sessionTimeout | Time between logged events before a new session starts in milliseconds | 30\*60\*1000 (30 min) |
 
 
 # Advanced #
