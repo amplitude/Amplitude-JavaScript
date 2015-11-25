@@ -154,7 +154,7 @@ var LocalStorageKeys = {
   USER_ID: 'amplitude_userId',
   OPT_OUT: 'amplitude_optOut',
 
-  INITIAL_REFERRER: 'amplitude_initialReferrer'
+  REFERRER: 'amplitude_referrer'
 };
 
 /*
@@ -246,7 +246,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     }
 
     if (this.options.includeReferrer) {
-      this._saveInitialReferrer(this._getReferrer());
+      this._saveReferrer(this._getReferrer());
     }
 
     this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
@@ -440,29 +440,38 @@ Amplitude.prototype._getReferrer = function() {
 };
 
 Amplitude.prototype._getReferringDomain = function(referrer) {
+  if (referrer === null || referrer === undefined || referrer === '') {
+    return null;
+  }
   var parts = referrer.split('/');
   if (parts.length >= 3) {
     return parts[2];
   }
-  return '';
+  return null;
 };
 
-Amplitude.prototype._saveInitialReferrer = function(initialReferrer) {
-  if (initialReferrer === '') {
+// since user properties are propagated on the server, only send once per session, don't need to send with every event
+Amplitude.prototype._saveReferrer = function(referrer) {
+  if (referrer === null || referrer === undefined || referrer === '') {
     return;
   }
-  var hasSessionStorage = window.sessionStorage ? true : false;
-  if (hasSessionStorage && !window.sessionStorage.getItem(LocalStorageKeys.INITIAL_REFERRER)) {
-    window.sessionStorage.setItem(LocalStorageKeys.INITIAL_REFERRER, initialReferrer);
-  }
-};
 
-Amplitude.prototype._getInitialReferrer = function() {
+  // always setOnce initial referrer
+  var referring_domain = this._getReferringDomain(referrer);
+  var identify = new Identify().setOnce('initial_referrer', referrer);
+  identify.setOnce('initial_referring_domain', referring_domain);
+
+  // only save referrer if not already in session storage or if storage disabled
   var hasSessionStorage = window.sessionStorage ? true : false;
-  if (hasSessionStorage) {
-    return window.sessionStorage.getItem(LocalStorageKeys.INITIAL_REFERRER) || '';
+  if ((hasSessionStorage && !window.sessionStorage.getItem(LocalStorageKeys.REFERRER)) || !hasSessionStorage) {
+    identify.set('referrer', referrer).set('referring_domain', referring_domain);
+
+    if (hasSessionStorage) {
+      window.sessionStorage.setItem(LocalStorageKeys.REFERRER, referrer);
+    }
   }
-  return '';
+
+  this.identify(identify);
 };
 
 Amplitude.prototype.saveEvents = function() {
@@ -620,18 +629,6 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     // Only add utm properties to user properties for events
     if (eventType !== IDENTIFY_EVENT) {
       object.merge(userProperties, this._utmProperties);
-
-      // Add referral info onto the user properties
-      if (this.options.includeReferrer) {
-        var referrer = this._getReferrer();
-        var initialReferrer = this._getInitialReferrer();
-        object.merge(userProperties, {
-          'referrer': referrer,
-          'referring_domain': this._getReferringDomain(referrer),
-          'initial_referrer': initialReferrer,
-          'initial_referring_domain': this._getReferringDomain(initialReferrer)
-        });
-      }
     }
 
     apiProperties = apiProperties || {};

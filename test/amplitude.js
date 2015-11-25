@@ -1349,79 +1349,93 @@ describe('Amplitude', function() {
       assert.equal(events[0].user_properties.referring_domain, undefined);
     });
 
-    it('should send referrer data when the includeReferrer flag is true', function() {
+    it('should only send referrer via identify call when the includeReferrer flag is true', function() {
       reset();
-      amplitude.init(apiKey, undefined, {includeReferrer: true});
-
+      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
       amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      assert.deepEqual(events[0].user_properties, {
-        initial_referrer: 'https://amplitude.com/contact',
-        initial_referring_domain: 'amplitude.com',
-        referrer: 'https://amplitude.com/contact',
-        referring_domain: 'amplitude.com'
-      });
-    });
+      assert.lengthOf(events, 2);
 
-    it('should add referrer data to the user properties on events only', function() {
-      reset();
-      amplitude.init(apiKey, undefined, {includeReferrer: true});
-
-      amplitude.setUserProperties({user_prop: true});
-      assert.lengthOf(server.requests, 1);
-      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      // first event should be identify with initial_referrer and referrer
+      assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        $set: {
-          'user_prop': true
+        '$set': {
+          'referrer': 'https://amplitude.com/contact',
+          'referring_domain': 'amplitude.com'
+        },
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
         }
       });
-      server.respondWith('success');
-      server.respond();
 
-      amplitude.logEvent('Referrer test event');
-      assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
-      assert.deepEqual(events[0].user_properties, {
-        initial_referrer: 'https://amplitude.com/contact',
-        initial_referring_domain: 'amplitude.com',
-        referrer: 'https://amplitude.com/contact',
-        referring_domain: 'amplitude.com'
-      });
+      // second event should be the test event with no referrer information
+      assert.equal(events[1].event_type, 'Referrer Test Event');
+      assert.deepEqual(events[1].user_properties, {});
+
+      // referrer should be propagated to session storage
+      assert.equal(sessionStorage.getItem('amplitude_referrer'), 'https://amplitude.com/contact');
     });
 
-    it('should grab initial referrer data from session storage', function() {
+    it('should not set referrer if referrer data already in session storage', function() {
       reset();
-      sessionStorage.setItem('amplitude_initialReferrer', 'https://www.google.com/search?');
-      amplitude.init(apiKey, undefined, {includeReferrer: true});
-
+      sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
+      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
       amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+
+      // first event should be identify with initial_referrer and NO referrer
+      assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        initial_referrer: 'https://www.google.com/search?',
-        initial_referring_domain: 'www.google.com',
-        referrer: 'https://amplitude.com/contact',
-        referring_domain: 'amplitude.com'
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
+        }
       });
+
+      // second event should be the test event with no referrer information
+      assert.equal(events[1].event_type, 'Referrer Test Event');
+      assert.deepEqual(events[1].user_properties, {});
     });
 
     it('should not override any existing initial referrer values in session storage', function() {
       reset();
-      sessionStorage.setItem('amplitude_initialReferrer', 'https://www.google.com/search?');
-      amplitude.init(apiKey, undefined, {includeReferrer: true});
-      amplitude._saveInitialReferrer('https://amplitude.com/contact');
-
+      sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
+      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
+      amplitude._saveReferrer('https://facebook.com/contact');
       amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 3);
+
+      // first event should be identify with initial_referrer and NO referrer
+      assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        initial_referrer: 'https://www.google.com/search?',
-        initial_referring_domain: 'www.google.com',
-        referrer: 'https://amplitude.com/contact',
-        referring_domain: 'amplitude.com'
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
+        }
       });
-    })
+
+      // second event should be another identify but with the new referrer
+      assert.equal(events[1].event_type, '$identify');
+      assert.deepEqual(events[1].user_properties, {
+        '$setOnce': {
+          'initial_referrer': 'https://facebook.com/contact',
+          'initial_referring_domain': 'facebook.com'
+        }
+      });
+
+      // third event should be the test event with no referrer information
+      assert.equal(events[2].event_type, 'Referrer Test Event');
+      assert.deepEqual(events[2].user_properties, {});
+
+      // existing value persists
+      assert.equal(sessionStorage.getItem('amplitude_referrer'), 'https://www.google.com/search?');
+    });
   });
 
   describe('logRevenue', function() {
