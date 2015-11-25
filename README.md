@@ -10,7 +10,7 @@ Amplitude-Javascript
 ```
 <script type="text/javascript">
   (function(t,e){var n=t.amplitude||{};var r=e.createElement("script");r.type="text/javascript";
-  r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.6.1-min.gz.js";
+  r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.6.2-min.gz.js";
   r.onload=function(){t.amplitude.runQueuedFunctions()};var s=e.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function o(t){
   i.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
@@ -172,8 +172,9 @@ amplitude.init('YOUR_API_KEY_HERE', null, {
 | includeReferrer | If `true`, includes `referrer` and `referring_domain` as user propeties on all events uploaded. | `false` |
 | batchEvents | If `true`, events are batched together and uploaded only when the number of unsent events is greater than or equal to `eventUploadThreshold` or after `eventUploadPeriodMillis` milliseconds have passed since the first unsent event was logged. | `false` |
 | eventUploadThreshold | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
-| eventUploadPeriodMillis | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30*1000 |
+| eventUploadPeriodMillis | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
 | deviceId | Custom device ID to set | Randomly generated UUID |
+| sessionTimeout | Time between logged events before a new session starts in milliseconds | 30\*60\*1000 (30 min) |
 
 
 # Advanced #

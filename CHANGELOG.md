@@ -1,6 +1,12 @@
 ## Unreleased
 
+<<<<<<< HEAD
 * Add initial_referrer and initial_referring_domain user properties, which persist the initial referrer for the duration of the user's session.
+=======
+## 2.6.2 (November 17, 2015)
+
+* Fix bug where response code is not passed to XDomainRequest callback (affects IE versions 10 and lower).
+>>>>>>> origin/master
 
 ## 2.6.1 (November 6, 2015)
 
