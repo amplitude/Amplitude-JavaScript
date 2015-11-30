@@ -1,4 +1,4 @@
-var cookieStorage = require('./cookieStorage');
+var cookieStorage = require('./cookiestorage');
 var JSON = require('json'); // jshint ignore:line
 var language = require('./language');
 var localStorage = require('./localstorage');  // jshint ignore:line

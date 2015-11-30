@@ -104,7 +104,7 @@ module.exports = instance;
 
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
-var cookieStorage = require('./cookieStorage');
+var cookieStorage = require('./cookiestorage');
 var JSON = require('json'); // jshint ignore:line
 var language = require('./language');
 var localStorage = require('./localstorage');  // jshint ignore:line
@@ -832,7 +832,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookieStorage":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
+}, {"./cookiestorage":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
 3: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
