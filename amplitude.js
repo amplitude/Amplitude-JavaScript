@@ -104,7 +104,7 @@ module.exports = instance;
 
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
-var Cookie = require('./cookie');
+var cookieStorage = require('./cookieStorage');
 var JSON = require('json'); // jshint ignore:line
 var language = require('./language');
 var localStorage = require('./localstorage');  // jshint ignore:line
@@ -214,11 +214,11 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
       this.options.eventUploadPeriodMillis = opt_config.eventUploadPeriodMillis || this.options.eventUploadPeriodMillis;
     }
 
-    Cookie.options({
+    cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
     });
-    this.options.domain = Cookie.options().domain;
+    this.options.domain = cookieStorage.options().domain;
 
     _migrateLocalStorageDataToCookie(this);
     _loadCookieData(this);
@@ -340,7 +340,7 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
 };
 
 var _migrateLocalStorageDataToCookie = function(scope) {
-  var cookieData = Cookie.get(scope.options.cookieName);
+  var cookieData = cookieStorage.get(scope.options.cookieName);
   if (cookieData && cookieData.deviceId) {
     return; // migration not needed
   }
@@ -365,7 +365,7 @@ var _migrateLocalStorageDataToCookie = function(scope) {
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
 
-  Cookie.set(scope.options.cookieName, {
+  cookieStorage.set(scope.options.cookieName, {
     deviceId: cookieDeviceId || localStorageDeviceId,
     userId: cookieUserId || localStorageUserId,
     optOut: (cookieOptOut !== undefined && cookieOptOut !== null) ? cookieOptOut : localStorageOptOut
@@ -373,7 +373,7 @@ var _migrateLocalStorageDataToCookie = function(scope) {
 };
 
 var _loadCookieData = function(scope) {
-  var cookieData = Cookie.get(scope.options.cookieName);
+  var cookieData = cookieStorage.get(scope.options.cookieName);
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -388,7 +388,7 @@ var _loadCookieData = function(scope) {
 };
 
 var _saveCookieData = function(scope) {
-  Cookie.set(scope.options.cookieName, {
+  cookieStorage.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut
@@ -425,7 +425,7 @@ Amplitude._getUtmData = function(rawCookie, query) {
  */
 Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
-  cookieParams = cookieParams || Cookie.get('__utmz');
+  cookieParams = cookieParams || cookieStorage.get('__utmz');
   this._utmProperties = Amplitude._getUtmData(cookieParams, queryParams);
 };
 
@@ -452,10 +452,10 @@ Amplitude.prototype.saveEvents = function() {
 
 Amplitude.prototype.setDomain = function(domain) {
   try {
-    Cookie.options({
+    cookieStorage.options({
       domain: domain
     });
-    this.options.domain = Cookie.options().domain;
+    this.options.domain = cookieStorage.options().domain;
     _loadCookieData(this);
     _saveCookieData(this);
     //log('set domain=' + domain);
@@ -832,8 +832,69 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
+}, {"./cookieStorage":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
 3: [function(require, module, exports) {
+/* jshint -W020, unused: false, noempty: false, boss: true */
+
+/*
+ * Abstraction layer for cookie storage.
+ * Uses cookie if available, otherwise fallback to localstorage.
+ */
+
+var Cookie = require('./cookie');
+var localStorage = require('./localstorage'); // jshint ignore:line
+
+var cookieStorage; // jshint ignore:line
+
+// test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
+function cookiesEnabled() {
+  var uid = String(new Date());
+  var result;
+  try {
+    Cookie.set(uid, uid);
+    result = Cookie.get(uid) === uid;
+    Cookie.remove(uid);
+    return result;
+  } catch (e) {
+    // cookies are not enabled
+  }
+  return false;
+}
+
+if (cookiesEnabled()) {
+  cookieStorage = Cookie;
+} else {
+  // if cookies disabled, fallback to localstorage
+  // note: localstorage does not persist across subdomains
+  var keyPrefix = 'amp_cookiestore_';
+  cookieStorage = {
+    reset: function() {},
+    options: function(opt) { return {}; }, // options are ignored
+    get: function(name) {
+      return localStorage.getItem(keyPrefix + name);
+    },
+    set: function(name, value) {
+      try {
+        localStorage.setItem(keyPrefix + name, value);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+    remove: function(name) {
+      try {
+        localStorage.removeItem(keyPrefix + name);
+      } catch (e) {
+        return false;
+      }
+    }
+  };
+}
+
+module.exports = cookieStorage;
+
+}, {"./cookie":15,"./localstorage":6}],
+15: [function(require, module, exports) {
 /*
  * Cookie data
  */
@@ -959,8 +1020,8 @@ module.exports = {
 
 };
 
-}, {"./base64":15,"json":4,"top-domain":16}],
-15: [function(require, module, exports) {
+}, {"./base64":16,"json":4,"top-domain":17}],
+16: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -1059,8 +1120,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":17}],
-17: [function(require, module, exports) {
+}, {"./utf8":18}],
+18: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1130,8 +1191,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":18}],
-18: [function(require, module, exports) {
+}, {"json-fallback":19}],
+19: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1621,7 +1682,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-16: [function(require, module, exports) {
+17: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1669,8 +1730,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":19}],
-19: [function(require, module, exports) {
+}, {"url":20}],
+20: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -1753,17 +1814,6 @@ function port (protocol){
       return location.port;
   }
 }
-
-}, {}],
-5: [function(require, module, exports) {
-var getLanguage = function() {
-    return (navigator && ((navigator.languages && navigator.languages[0]) ||
-        navigator.language || navigator.userLanguage)) || undefined;
-};
-
-module.exports = {
-    language: getLanguage()
-};
 
 }, {}],
 6: [function(require, module, exports) {
@@ -1868,6 +1918,17 @@ if (!localStorage) {
 }
 
 module.exports = localStorage;
+
+}, {}],
+5: [function(require, module, exports) {
+var getLanguage = function() {
+    return (navigator && ((navigator.languages && navigator.languages[0]) ||
+        navigator.language || navigator.userLanguage)) || undefined;
+};
+
+module.exports = {
+    language: getLanguage()
+};
 
 }, {}],
 7: [function(require, module, exports) {
@@ -2290,8 +2351,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":20}],
-20: [function(require, module, exports) {
+}, {"querystring":21}],
+21: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2366,8 +2427,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":21,"type":22}],
-21: [function(require, module, exports) {
+}, {"trim":22,"type":23}],
+22: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2387,7 +2448,7 @@ exports.right = function(str){
 };
 
 }, {}],
-22: [function(require, module, exports) {
+23: [function(require, module, exports) {
 /**
  * toString ref.
  */
