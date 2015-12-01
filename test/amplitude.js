@@ -1263,13 +1263,42 @@ describe('Amplitude', function() {
       assert.lengthOf(event.event_properties['key'], 1024);
     });
 
-    it('should  truncate long user property strings', function() {
+    it('should truncate long user property strings', function() {
       var longString = new Array(2000).join('a');
       amplitude.identify(new Identify().set('key', longString));
       var event = JSON.parse(querystring.parse(server.requests[0].requestBody).e)[0];
 
       assert.isTrue('$set' in event.user_properties);
       assert.lengthOf(event.user_properties['$set']['key'], 1024);
+    });
+
+    it('should increment the counters in local storage if cookies disabled', function() {
+      localStorage.clear();
+      var deviceId = 'test_device_id';
+      var amplitude2 = new Amplitude();
+
+      sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
+      amplitude2.init(apiKey, null, {deviceId: deviceId, batchEvents: true, eventUploadThreshold: 5});
+      CookieStorage.prototype._cookiesEnabled.restore();
+
+      amplitude2.logEvent('test');
+      clock.tick(10); // starts the session
+      amplitude2.logEvent('test2');
+      clock.tick(20);
+      amplitude2.setUserProperties({'key':'value'}); // identify event at time 30
+
+      var cookieData = JSON.parse(localStorage.getItem('amp_cookiestore_amplitude_id'));
+      console.log(cookieData);
+      assert.deepEqual(cookieData, {
+        'deviceId': deviceId,
+        'userId': null,
+        'optOut': false,
+        'sessionId': 10,
+        'lastEventTime': 30,
+        'eventId': 2,
+        'identifyId': 1,
+        'sequenceNumber': 3
+      });
     });
   });
 
