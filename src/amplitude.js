@@ -134,8 +134,8 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
       this._sessionId = now;
     }
     this._lastEventTime = now;
-
     _saveCookieData(this);
+
     if (localStorage.getItem(LocalStorageKeys.SESSION_ID)) {
       localStorage.removeItem(LocalStorageKeys.SESSION_ID);
     }

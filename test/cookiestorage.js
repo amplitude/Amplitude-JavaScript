@@ -1,5 +1,5 @@
 describe('cookieStorage', function() {
-  var localStorage = require('../src/localStorage.js');
+  var localStorage = require('../src/localstorage.js');
   var CookieStorage = require('../src/cookiestorage.js');
   var cookie = require('../src/cookie.js');
   var JSON = require('json'); // jshint ignore:line
