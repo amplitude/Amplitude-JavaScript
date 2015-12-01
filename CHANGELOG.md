@@ -1,5 +1,8 @@
 ## Unreleased
 
+* If cookies are disabled by user, then fallback to localstorage to save the cookie data.
+* Migrate sessionId and lastEventTime to cookie storage to support sessions across different subdomains.
+
 ## 2.6.2 (November 17, 2015)
 
 * Fix bug where response code is not passed to XDomainRequest callback (affects IE versions 10 and lower).

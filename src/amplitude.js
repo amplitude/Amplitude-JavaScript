@@ -115,7 +115,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    _migrateLocalStorageDataToCookie(this);
+    _migrateLocalStorageDataToCookie(this); // backwards migration fix for users that upgraded to broken v2.6.0
     _loadCookieData(this);
 
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
@@ -136,6 +136,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     this._lastEventTime = now;
     _saveCookieData(this);
 
+    // sessionId and lastEventTime should only be stored in cookies
     if (localStorage.getItem(LocalStorageKeys.SESSION_ID)) {
       localStorage.removeItem(LocalStorageKeys.SESSION_ID);
     }
