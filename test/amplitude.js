@@ -160,6 +160,61 @@ describe('Amplitude', function() {
       // assert did not write to cookies
       assert.isNull(cookie.get(amplitude2.options.cookieName));
     });
+
+    it('should load sessionId from cookie and ignore the one in localStorage', function() {
+      var clock = sinon.useFakeTimers();
+      clock.tick(1000);
+      localStorage.clear();
+      var sessionIdKey = 'amplitude_sessionId';
+      var lastEventTimeKey = 'amplitude_lastEventTime';
+      var amplitude2 = new Amplitude();
+
+      sessionId = new Date().getTime();
+      localStorage.setItem(sessionIdKey, sessionId + 10); // this will be ignored
+      var cookieData = {
+        deviceId: 'test_device_id',
+        userId: 'test_user_id',
+        optOut: true,
+        sessionId: sessionId,
+        lastEventTime: sessionId
+      }
+      cookie.set(amplitude2.options.cookieName, cookieData);
+      clock.tick(10);
+
+      amplitude2.init(apiKey);
+      assert.equal(amplitude2._sessionId, sessionId);
+      assert.equal(amplitude2._lastEventTime, sessionId + 10);
+      assert.isNull(localStorage.getItem(sessionIdKey));
+      assert.isNull(localStorage.getItem(lastEventTimeKey));
+      clock.restore();
+    });
+
+    it('should load sessionId from localStorage if not in cookie', function() {
+      var clock = sinon.useFakeTimers();
+      clock.tick(1000);
+      localStorage.clear();
+      var sessionIdKey = 'amplitude_sessionId';
+      var lastEventTimeKey = 'amplitude_lastEventTime';
+      var amplitude2 = new Amplitude();
+
+      sessionId = new Date().getTime();
+      localStorage.setItem(sessionIdKey, sessionId);
+      localStorage.setItem(lastEventTimeKey, sessionId);
+      var cookieData = {
+        deviceId: 'test_device_id',
+        userId: 'test_user_id',
+        optOut: true
+      }
+      cookie.set(amplitude2.options.cookieName, cookieData);
+      clock.tick(10);
+
+      amplitude2.init(apiKey);
+      assert.equal(amplitude2._sessionId, sessionId);
+      assert.equal(amplitude2._lastEventTime, sessionId + 10);
+      assert.isNull(localStorage.getItem(sessionIdKey))
+      assert.isNull(localStorage.getItem(lastEventTimeKey));
+      clock.restore();
+    });
   });
 
   describe('runQueuedFunctions', function() {
