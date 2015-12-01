@@ -46,5 +46,19 @@ describe('cookieStorage', function() {
       // assert nothing added to cookie
       assert.isNull(cookie.get(uid));
     });
+
+    it('should load data from localstorage if cookies disabled', function() {
+      var cookieStorage = new CookieStorage();
+      sinon.stub(cookieStorage, '_cookiesEnabled').returns(false);
+      assert.isFalse(cookieStorage._cookiesEnabled());
+
+      localStorage.clear();
+      var uid = String(new Date());
+      localStorage.setItem(keyPrefix + uid, JSON.stringify(uid));
+      assert.equal(cookieStorage.getStorage().get(uid), uid)
+
+      localStorage.removeItem(keyPrefix + uid);
+      assert.isNull(cookieStorage.getStorage().get(uid));
+    });
   });
 });
