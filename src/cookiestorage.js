@@ -8,10 +8,12 @@
 var Cookie = require('./cookie');
 var localStorage = require('./localstorage'); // jshint ignore:line
 
-var cookieStorage; // jshint ignore:line
+var cookieStorage = function() {
+  this.storage = null;
+};
 
 // test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
-function cookiesEnabled() {
+cookieStorage.prototype._cookiesEnabled = function() {
   var uid = String(new Date());
   var result;
   try {
@@ -23,36 +25,57 @@ function cookiesEnabled() {
     // cookies are not enabled
   }
   return false;
-}
+};
 
-if (cookiesEnabled()) {
-  cookieStorage = Cookie;
-} else {
-  // if cookies disabled, fallback to localstorage
-  // note: localstorage does not persist across subdomains
-  var keyPrefix = 'amp_cookiestore_';
-  cookieStorage = {
-    reset: function() {},
-    options: function(opt) { return {}; }, // options are ignored
-    get: function(name) {
-      return localStorage.getItem(keyPrefix + name);
-    },
-    set: function(name, value) {
-      try {
-        localStorage.setItem(keyPrefix + name, value);
-        return true;
-      } catch (e) {
-        return false;
+cookieStorage.prototype.getStorage = function() {
+  if (this.storage !== null) {
+    return this.storage;
+  }
+
+  if (this._cookiesEnabled()) {
+    this.storage = Cookie;
+  } else {
+    // if cookies disabled, fallback to localstorage
+    // note: localstorage does not persist across subdomains
+    var keyPrefix = 'amp_cookiestore_';
+    this.storage = {
+      _options: {
+        expirationDays: undefined,
+        domain: undefined
+      },
+      reset: function() {},
+      options: function(opts) {
+        if (arguments.length === 0) {
+          return this._options;
+        }
+        opts = opts || {};
+        this._options.expirationDays = opts.expirationDays || this._options.expirationDays;
+        // localStorage is specific to subdomains
+        this._options.domain = opts.domain || this._options.domain || window.location.hostname;
+        return this._options;
+      },
+      get: function(name) {
+        return localStorage.getItem(keyPrefix + name);
+      },
+      set: function(name, value) {
+        try {
+          localStorage.setItem(keyPrefix + name, value);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      remove: function(name) {
+        try {
+          localStorage.removeItem(keyPrefix + name);
+        } catch (e) {
+          return false;
+        }
       }
-    },
-    remove: function(name) {
-      try {
-        localStorage.removeItem(keyPrefix + name);
-      } catch (e) {
-        return false;
-      }
-    }
-  };
-}
+    };
+  }
+
+  return this.storage;
+};
 
 module.exports = cookieStorage;

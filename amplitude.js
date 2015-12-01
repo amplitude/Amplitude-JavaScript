@@ -163,6 +163,7 @@ var Amplitude = function() {
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
 };
 
@@ -214,11 +215,11 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
       this.options.eventUploadPeriodMillis = opt_config.eventUploadPeriodMillis || this.options.eventUploadPeriodMillis;
     }
 
-    cookieStorage.options({
+    this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
     });
-    this.options.domain = cookieStorage.options().domain;
+    this.options.domain = this.cookieStorage.options().domain;
 
     _migrateLocalStorageDataToCookie(this);
     _loadCookieData(this);
@@ -340,7 +341,7 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
 };
 
 var _migrateLocalStorageDataToCookie = function(scope) {
-  var cookieData = cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (cookieData && cookieData.deviceId) {
     return; // migration not needed
   }
@@ -365,7 +366,7 @@ var _migrateLocalStorageDataToCookie = function(scope) {
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
 
-  cookieStorage.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName, {
     deviceId: cookieDeviceId || localStorageDeviceId,
     userId: cookieUserId || localStorageUserId,
     optOut: (cookieOptOut !== undefined && cookieOptOut !== null) ? cookieOptOut : localStorageOptOut
@@ -373,7 +374,7 @@ var _migrateLocalStorageDataToCookie = function(scope) {
 };
 
 var _loadCookieData = function(scope) {
-  var cookieData = cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -388,7 +389,7 @@ var _loadCookieData = function(scope) {
 };
 
 var _saveCookieData = function(scope) {
-  cookieStorage.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut
@@ -425,7 +426,7 @@ Amplitude._getUtmData = function(rawCookie, query) {
  */
 Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
-  cookieParams = cookieParams || cookieStorage.get('__utmz');
+  cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   this._utmProperties = Amplitude._getUtmData(cookieParams, queryParams);
 };
 
@@ -452,10 +453,10 @@ Amplitude.prototype.saveEvents = function() {
 
 Amplitude.prototype.setDomain = function(domain) {
   try {
-    cookieStorage.options({
+    this.cookieStorage.options({
       domain: domain
     });
-    this.options.domain = cookieStorage.options().domain;
+    this.options.domain = this.cookieStorage.options().domain;
     _loadCookieData(this);
     _saveCookieData(this);
     //log('set domain=' + domain);
@@ -844,10 +845,12 @@ module.exports = Amplitude;
 var Cookie = require('./cookie');
 var localStorage = require('./localstorage'); // jshint ignore:line
 
-var cookieStorage; // jshint ignore:line
+var cookieStorage = function() {
+  this.storage = null;
+};
 
 // test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
-function cookiesEnabled() {
+cookieStorage.prototype._cookiesEnabled = function() {
   var uid = String(new Date());
   var result;
   try {
@@ -859,37 +862,58 @@ function cookiesEnabled() {
     // cookies are not enabled
   }
   return false;
-}
+};
 
-if (cookiesEnabled()) {
-  cookieStorage = Cookie;
-} else {
-  // if cookies disabled, fallback to localstorage
-  // note: localstorage does not persist across subdomains
-  var keyPrefix = 'amp_cookiestore_';
-  cookieStorage = {
-    reset: function() {},
-    options: function(opt) { return {}; }, // options are ignored
-    get: function(name) {
-      return localStorage.getItem(keyPrefix + name);
-    },
-    set: function(name, value) {
-      try {
-        localStorage.setItem(keyPrefix + name, value);
-        return true;
-      } catch (e) {
-        return false;
+cookieStorage.prototype.getStorage = function() {
+  if (this.storage !== null) {
+    return this.storage;
+  }
+
+  if (this._cookiesEnabled()) {
+    this.storage = Cookie;
+  } else {
+    // if cookies disabled, fallback to localstorage
+    // note: localstorage does not persist across subdomains
+    var keyPrefix = 'amp_cookiestore_';
+    this.storage = {
+      _options: {
+        expirationDays: undefined,
+        domain: undefined
+      },
+      reset: function() {},
+      options: function(opts) {
+        if (arguments.length === 0) {
+          return this._options;
+        }
+        opts = opts || {};
+        this._options.expirationDays = opts.expirationDays || this._options.expirationDays;
+        // localStorage is specific to subdomains
+        this._options.domain = opts.domain || this._options.domain || window.location.hostname;
+        return this._options;
+      },
+      get: function(name) {
+        return localStorage.getItem(keyPrefix + name);
+      },
+      set: function(name, value) {
+        try {
+          localStorage.setItem(keyPrefix + name, value);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      remove: function(name) {
+        try {
+          localStorage.removeItem(keyPrefix + name);
+        } catch (e) {
+          return false;
+        }
       }
-    },
-    remove: function(name) {
-      try {
-        localStorage.removeItem(keyPrefix + name);
-      } catch (e) {
-        return false;
-      }
-    }
-  };
-}
+    };
+  }
+
+  return this.storage;
+};
 
 module.exports = cookieStorage;
 

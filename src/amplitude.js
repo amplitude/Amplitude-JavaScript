@@ -57,6 +57,7 @@ var Amplitude = function() {
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
 };
 
@@ -108,11 +109,11 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
       this.options.eventUploadPeriodMillis = opt_config.eventUploadPeriodMillis || this.options.eventUploadPeriodMillis;
     }
 
-    cookieStorage.options({
+    this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
     });
-    this.options.domain = cookieStorage.options().domain;
+    this.options.domain = this.cookieStorage.options().domain;
 
     _migrateLocalStorageDataToCookie(this);
     _loadCookieData(this);
@@ -234,7 +235,7 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
 };
 
 var _migrateLocalStorageDataToCookie = function(scope) {
-  var cookieData = cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (cookieData && cookieData.deviceId) {
     return; // migration not needed
   }
@@ -259,7 +260,7 @@ var _migrateLocalStorageDataToCookie = function(scope) {
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
 
-  cookieStorage.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName, {
     deviceId: cookieDeviceId || localStorageDeviceId,
     userId: cookieUserId || localStorageUserId,
     optOut: (cookieOptOut !== undefined && cookieOptOut !== null) ? cookieOptOut : localStorageOptOut
@@ -267,7 +268,7 @@ var _migrateLocalStorageDataToCookie = function(scope) {
 };
 
 var _loadCookieData = function(scope) {
-  var cookieData = cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -282,7 +283,7 @@ var _loadCookieData = function(scope) {
 };
 
 var _saveCookieData = function(scope) {
-  cookieStorage.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut
@@ -319,7 +320,7 @@ Amplitude._getUtmData = function(rawCookie, query) {
  */
 Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
-  cookieParams = cookieParams || cookieStorage.get('__utmz');
+  cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   this._utmProperties = Amplitude._getUtmData(cookieParams, queryParams);
 };
 
@@ -346,10 +347,10 @@ Amplitude.prototype.saveEvents = function() {
 
 Amplitude.prototype.setDomain = function(domain) {
   try {
-    cookieStorage.options({
+    this.cookieStorage.options({
       domain: domain
     });
-    this.options.domain = cookieStorage.options().domain;
+    this.options.domain = this.cookieStorage.options().domain;
     _loadCookieData(this);
     _saveCookieData(this);
     //log('set domain=' + domain);
