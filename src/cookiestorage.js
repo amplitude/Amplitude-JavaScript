@@ -44,7 +44,12 @@ cookieStorage.prototype.getStorage = function() {
         expirationDays: undefined,
         domain: undefined
       },
-      reset: function() {},
+      reset: function() {
+        this._options = {
+          expirationDays: undefined,
+          domain: undefined
+        };
+      },
       options: function(opts) {
         if (arguments.length === 0) {
           return this._options;
@@ -57,8 +62,7 @@ cookieStorage.prototype.getStorage = function() {
       },
       get: function(name) {
         try {
-          var value = localStorage.getItem(keyPrefix + name);
-          return JSON.parse(value);
+          return JSON.parse(localStorage.getItem(keyPrefix + name));
         } catch (e) {
         }
         return null;

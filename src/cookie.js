@@ -14,7 +14,10 @@ var _options = {
 
 
 var reset = function() {
-  _options = {};
+  _options = {
+    expirationDays: undefined,
+    domain: undefined
+  };
 };
 
 
