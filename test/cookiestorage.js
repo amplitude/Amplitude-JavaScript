@@ -2,6 +2,7 @@ describe('cookieStorage', function() {
   var localStorage = require('../src/localStorage.js');
   var CookieStorage = require('../src/cookiestorage.js');
   var cookie = require('../src/cookie.js');
+  var JSON = require('json'); // jshint ignore:line
   var Amplitude = require('../src/amplitude.js');
   var amplitude = new Amplitude();
   var keyPrefix = 'amp_cookiestore_';
@@ -35,8 +36,8 @@ describe('cookieStorage', function() {
       var uid = String(new Date());
       cookieStorage.getStorage().set(uid, uid);
       assert.equal(cookieStorage.getStorage().get(uid), uid);
-      assert.equal(localStorage.getItem(keyPrefix + uid), uid);
-      assert.equal(cookieStorage.getStorage().get(uid), localStorage.getItem(keyPrefix + uid));
+      assert.equal(localStorage.getItem(keyPrefix + uid), JSON.stringify(uid));
+      assert.equal(cookieStorage.getStorage().get(uid), JSON.parse(localStorage.getItem(keyPrefix + uid)));
 
       cookieStorage.getStorage().remove(uid);
       assert.isNull(cookieStorage.getStorage().get(uid));

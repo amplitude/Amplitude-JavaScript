@@ -843,6 +843,7 @@ module.exports = Amplitude;
  */
 
 var Cookie = require('./cookie');
+var JSON = require('json'); // jshint ignore:line
 var localStorage = require('./localstorage'); // jshint ignore:line
 
 var cookieStorage = function() {
@@ -892,15 +893,20 @@ cookieStorage.prototype.getStorage = function() {
         return this._options;
       },
       get: function(name) {
-        return localStorage.getItem(keyPrefix + name);
+        try {
+          var value = localStorage.getItem(keyPrefix + name);
+          return JSON.parse(value);
+        } catch (e) {
+        }
+        return null;
       },
       set: function(name, value) {
         try {
-          localStorage.setItem(keyPrefix + name, value);
+          localStorage.setItem(keyPrefix + name, JSON.stringify(value));
           return true;
         } catch (e) {
-          return false;
         }
+        return false;
       },
       remove: function(name) {
         try {
@@ -917,7 +923,7 @@ cookieStorage.prototype.getStorage = function() {
 
 module.exports = cookieStorage;
 
-}, {"./cookie":15,"./localstorage":6}],
+}, {"./cookie":15,"json":4,"./localstorage":6}],
 15: [function(require, module, exports) {
 /*
  * Cookie data

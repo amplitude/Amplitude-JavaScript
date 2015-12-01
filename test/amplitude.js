@@ -1,6 +1,7 @@
 describe('Amplitude', function() {
   var Amplitude = require('../src/amplitude.js');
   var localStorage = require('../src/localstorage.js');
+  var CookieStorage = require('../src/cookiestorage.js');
   var Base64 = require('../src/base64.js');
   var cookie = require('../src/cookie.js');
   var querystring = require('querystring');
@@ -139,6 +140,25 @@ describe('Amplitude', function() {
       assert.isNull(localStorage.getItem('amplitude_deviceId' + '_' + apiKey));
       assert.isNull(localStorage.getItem('amplitude_userId' + '_' + apiKey));
       assert.isNull(localStorage.getItem('amplitude_optOut' + '_' + apiKey));
+    });
+
+    it('should save cookie data to localStorage if cookies are not enabled', function() {
+      var cookieStorageKey = 'amp_cookiestore_amplitude_id';
+      var deviceId = 'test_device_id';
+
+      localStorage.removeItem(cookieStorageKey);
+      sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey, userId, {'deviceId': deviceId});
+
+      var cookieData = JSON.parse(localStorage.getItem(cookieStorageKey));
+      assert.equal(cookieData.deviceId, deviceId)
+
+      localStorage.removeItem('amp_cookiestore_amplitude_id')
+      CookieStorage.prototype._cookiesEnabled.restore();
+
+      // assert did not write to cookies
+      assert.isNull(cookie.get(amplitude2.options.cookieName));
     });
   });
 
