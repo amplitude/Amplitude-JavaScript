@@ -418,21 +418,11 @@ var _saveCookieData = function(scope) {
 
 // the follow fields used to be saved in localStorage, now saved in cookie to support different subdomains
 var _clearSessionAndEventTrackingFromLocalStorage = function() {
-  if (localStorage.getItem(LocalStorageKeys.SESSION_ID)) {
-    localStorage.removeItem(LocalStorageKeys.SESSION_ID);
-  }
-  if (localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) {
-    localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
-  }
-  if (localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID)) {
-    localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
-  }
-  if (localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID)) {
-    localStorage.removeItem(LocalStorageKeys.LAST_IDENTIFY_ID);
-  }
-  if (localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER)) {
-    localStorage.removeItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
-  }
+  localStorage.removeItem(LocalStorageKeys.SESSION_ID);
+  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
+  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
+  localStorage.removeItem(LocalStorageKeys.LAST_IDENTIFY_ID);
+  localStorage.removeItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
 };
 
 Amplitude._getUtmParam = function(name, query) {

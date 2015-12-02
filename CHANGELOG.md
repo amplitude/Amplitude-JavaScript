@@ -1,7 +1,7 @@
 ## Unreleased
 
 * If cookies are disabled by user, then fallback to localstorage to save the cookie data.
-* Migrate sessionId, lastEventTime, eventId, and identifyId to cookie storage to support sessions across different subdomains.
+* Migrate sessionId, lastEventTime, eventId, identifyId, and sequenceNumber to cookie storage to support sessions across different subdomains.
 
 ## 2.6.2 (November 17, 2015)
 
