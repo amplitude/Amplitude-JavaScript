@@ -3469,7 +3469,7 @@ module.exports = uuid;
 
 }, {}],
 12: [function(require, module, exports) {
-module.exports = '2.6.2';
+module.exports = '2.7.0';
 
 }, {}],
 13: [function(require, module, exports) {
