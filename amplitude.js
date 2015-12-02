@@ -290,6 +290,10 @@ Amplitude.prototype.isNewSession = function() {
   return this._newSession;
 };
 
+Amplitude.prototype.getSessionId = function() {
+  return this._sessionId;
+};
+
 Amplitude.prototype.nextEventId = function() {
   this._eventId++;
   return this._eventId;

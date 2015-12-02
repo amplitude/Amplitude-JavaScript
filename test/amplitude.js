@@ -1288,7 +1288,6 @@ describe('Amplitude', function() {
       amplitude2.setUserProperties({'key':'value'}); // identify event at time 30
 
       var cookieData = JSON.parse(localStorage.getItem('amp_cookiestore_amplitude_id'));
-      console.log(cookieData);
       assert.deepEqual(cookieData, {
         'deviceId': deviceId,
         'userId': null,
@@ -1622,6 +1621,16 @@ describe('Amplitude', function() {
       assert.notEqual(events[0].session_id, sessionId);
       assert.notEqual(amplitude._sessionId, sessionId);
       assert.equal(events[0].session_id, amplitude._sessionId);
+    });
+
+    it('should be fetched correctly by getSessionId', function() {
+      var timestamp = 1000;
+      clock.tick(timestamp);
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey);
+      assert.equal(amplitude2._sessionId, timestamp);
+      assert.equal(amplitude2.getSessionId(), timestamp);
+      assert.equal(amplitude2.getSessionId(), amplitude2._sessionId);
     });
   });
 

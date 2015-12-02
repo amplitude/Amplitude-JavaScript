@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add getSessionId helper method to fetch the current sessionId.
+
 ## 2.7.0 (December 1, 2015)
 
 * If cookies are disabled by user, then fallback to localstorage to save the cookie data.
