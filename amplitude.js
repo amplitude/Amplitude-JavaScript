@@ -104,7 +104,7 @@ module.exports = instance;
 
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
-var Cookie = require('./cookie');
+var cookieStorage = require('./cookiestorage');
 var JSON = require('json'); // jshint ignore:line
 var language = require('./language');
 var localStorage = require('./localstorage');  // jshint ignore:line
@@ -163,6 +163,7 @@ var Amplitude = function() {
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
 };
 
@@ -214,11 +215,11 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
       this.options.eventUploadPeriodMillis = opt_config.eventUploadPeriodMillis || this.options.eventUploadPeriodMillis;
     }
 
-    Cookie.options({
+    this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
     });
-    this.options.domain = Cookie.options().domain;
+    this.options.domain = this.cookieStorage.options().domain;
 
     _migrateLocalStorageDataToCookie(this);
     _loadCookieData(this);
@@ -227,7 +228,20 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
         opt_config.deviceId !== null && opt_config.deviceId) ||
         this.options.deviceId || UUID();
     this.options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || this.options.userId || null;
+
+    this._lastEventTime = this._lastEventTime || parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
+    this._sessionId = this._sessionId || parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
+    this._eventId = this._eventId || parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID)) || 0;
+    this._identifyId = this._identifyId || parseInt(localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID)) || 0;
+    this._sequenceNumber = this._sequenceNumber || parseInt(localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER)) || 0;
+    var now = new Date().getTime();
+    if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
+      this._newSession = true;
+      this._sessionId = now;
+    }
+    this._lastEventTime = now;
     _saveCookieData(this);
+    _clearSessionAndEventTrackingFromLocalStorage();
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
@@ -242,20 +256,6 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     if (this.options.includeUtm) {
       this._initUtmData();
     }
-
-    this._lastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
-    this._sessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
-    this._eventId = localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID) || 0;
-    this._identifyId = localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID) || 0;
-    this._sequenceNumber = localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER) || 0;
-    var now = new Date().getTime();
-    if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
-      this._newSession = true;
-      this._sessionId = now;
-      localStorage.setItem(LocalStorageKeys.SESSION_ID, this._sessionId);
-    }
-    this._lastEventTime = now;
-    localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
   } catch (e) {
     log(e);
   }
@@ -339,8 +339,9 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
+// backwards migration fix for users that upgraded to broken v2.6.0
 var _migrateLocalStorageDataToCookie = function(scope) {
-  var cookieData = Cookie.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (cookieData && cookieData.deviceId) {
     return; // migration not needed
   }
@@ -365,7 +366,7 @@ var _migrateLocalStorageDataToCookie = function(scope) {
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
 
-  Cookie.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName, {
     deviceId: cookieDeviceId || localStorageDeviceId,
     userId: cookieUserId || localStorageUserId,
     optOut: (cookieOptOut !== undefined && cookieOptOut !== null) ? cookieOptOut : localStorageOptOut
@@ -373,7 +374,7 @@ var _migrateLocalStorageDataToCookie = function(scope) {
 };
 
 var _loadCookieData = function(scope) {
-  var cookieData = Cookie.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -384,15 +385,44 @@ var _loadCookieData = function(scope) {
     if (cookieData.optOut !== null && cookieData.optOut !== undefined) {
       scope.options.optOut = cookieData.optOut;
     }
+    if (cookieData.sessionId) {
+      scope._sessionId = parseInt(cookieData.sessionId);
+    }
+    if (cookieData.lastEventTime) {
+      scope._lastEventTime = parseInt(cookieData.lastEventTime);
+    }
+    if (cookieData.eventId) {
+      scope._eventId = parseInt(cookieData.eventId);
+    }
+    if (cookieData.identifyId) {
+      scope._identifyId = parseInt(cookieData.identifyId);
+    }
+    if (cookieData.sequenceNumber) {
+      scope._sequenceNumber = parseInt(cookieData.sequenceNumber);
+    }
   }
 };
 
 var _saveCookieData = function(scope) {
-  Cookie.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
-    optOut: scope.options.optOut
+    optOut: scope.options.optOut,
+    sessionId: scope._sessionId,
+    lastEventTime: scope._lastEventTime,
+    eventId: scope._eventId,
+    identifyId: scope._identifyId,
+    sequenceNumber: scope._sequenceNumber
   });
+};
+
+// the follow fields used to be saved in localStorage, now saved in cookie to support different subdomains
+var _clearSessionAndEventTrackingFromLocalStorage = function() {
+  localStorage.removeItem(LocalStorageKeys.SESSION_ID);
+  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
+  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
+  localStorage.removeItem(LocalStorageKeys.LAST_IDENTIFY_ID);
+  localStorage.removeItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
 };
 
 Amplitude._getUtmParam = function(name, query) {
@@ -425,7 +455,7 @@ Amplitude._getUtmData = function(rawCookie, query) {
  */
 Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
-  cookieParams = cookieParams || Cookie.get('__utmz');
+  cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   this._utmProperties = Amplitude._getUtmData(cookieParams, queryParams);
 };
 
@@ -452,10 +482,10 @@ Amplitude.prototype.saveEvents = function() {
 
 Amplitude.prototype.setDomain = function(domain) {
   try {
-    Cookie.options({
+    this.cookieStorage.options({
       domain: domain
     });
-    this.options.domain = Cookie.options().domain;
+    this.options.domain = this.cookieStorage.options().domain;
     _loadCookieData(this);
     _saveCookieData(this);
     //log('set domain=' + domain);
@@ -578,19 +608,17 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     var eventId;
     if (eventType === IDENTIFY_EVENT) {
       eventId = this.nextIdentifyId();
-      localStorage.setItem(LocalStorageKeys.LAST_IDENTIFY_ID, eventId);
     } else {
       eventId = this.nextEventId();
-      localStorage.setItem(LocalStorageKeys.LAST_EVENT_ID, eventId);
     }
+    var sequenceNumber = this.nextSequenceNumber();
     var eventTime = new Date().getTime();
     var ua = this._ua;
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
-      localStorage.setItem(LocalStorageKeys.SESSION_ID, this._sessionId);
     }
     this._lastEventTime = eventTime;
-    localStorage.setItem(LocalStorageKeys.LAST_EVENT_TIME, this._lastEventTime);
+    _saveCookieData(this);
 
     userProperties = userProperties || {};
     // Only add utm properties to user properties for events
@@ -629,7 +657,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
         name: 'amplitude-js',
         version: this.__VERSION__
       },
-      sequence_number: this.nextSequenceNumber() // for ordering events and identifys
+      sequence_number: sequenceNumber // for ordering events and identifys
       // country: null
     };
 
@@ -832,8 +860,102 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookie":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
+}, {"./cookiestorage":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
 3: [function(require, module, exports) {
+/* jshint -W020, unused: false, noempty: false, boss: true */
+
+/*
+ * Abstraction layer for cookie storage.
+ * Uses cookie if available, otherwise fallback to localstorage.
+ */
+
+var Cookie = require('./cookie');
+var JSON = require('json'); // jshint ignore:line
+var localStorage = require('./localstorage'); // jshint ignore:line
+
+var cookieStorage = function() {
+  this.storage = null;
+};
+
+// test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
+cookieStorage.prototype._cookiesEnabled = function() {
+  var uid = String(new Date());
+  var result;
+  try {
+    Cookie.set(uid, uid);
+    result = Cookie.get(uid) === uid;
+    Cookie.remove(uid);
+    return result;
+  } catch (e) {
+    // cookies are not enabled
+  }
+  return false;
+};
+
+cookieStorage.prototype.getStorage = function() {
+  if (this.storage !== null) {
+    return this.storage;
+  }
+
+  if (this._cookiesEnabled()) {
+    this.storage = Cookie;
+  } else {
+    // if cookies disabled, fallback to localstorage
+    // note: localstorage does not persist across subdomains
+    var keyPrefix = 'amp_cookiestore_';
+    this.storage = {
+      _options: {
+        expirationDays: undefined,
+        domain: undefined
+      },
+      reset: function() {
+        this._options = {
+          expirationDays: undefined,
+          domain: undefined
+        };
+      },
+      options: function(opts) {
+        if (arguments.length === 0) {
+          return this._options;
+        }
+        opts = opts || {};
+        this._options.expirationDays = opts.expirationDays || this._options.expirationDays;
+        // localStorage is specific to subdomains
+        this._options.domain = opts.domain || this._options.domain || window.location.hostname;
+        return this._options;
+      },
+      get: function(name) {
+        try {
+          return JSON.parse(localStorage.getItem(keyPrefix + name));
+        } catch (e) {
+        }
+        return null;
+      },
+      set: function(name, value) {
+        try {
+          localStorage.setItem(keyPrefix + name, JSON.stringify(value));
+          return true;
+        } catch (e) {
+        }
+        return false;
+      },
+      remove: function(name) {
+        try {
+          localStorage.removeItem(keyPrefix + name);
+        } catch (e) {
+          return false;
+        }
+      }
+    };
+  }
+
+  return this.storage;
+};
+
+module.exports = cookieStorage;
+
+}, {"./cookie":15,"json":4,"./localstorage":6}],
+15: [function(require, module, exports) {
 /*
  * Cookie data
  */
@@ -850,7 +972,10 @@ var _options = {
 
 
 var reset = function() {
-  _options = {};
+  _options = {
+    expirationDays: undefined,
+    domain: undefined
+  };
 };
 
 
@@ -959,8 +1084,8 @@ module.exports = {
 
 };
 
-}, {"./base64":15,"json":4,"top-domain":16}],
-15: [function(require, module, exports) {
+}, {"./base64":16,"json":4,"top-domain":17}],
+16: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -1059,8 +1184,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":17}],
-17: [function(require, module, exports) {
+}, {"./utf8":18}],
+18: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1130,8 +1255,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":18}],
-18: [function(require, module, exports) {
+}, {"json-fallback":19}],
+19: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1621,7 +1746,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-16: [function(require, module, exports) {
+17: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1669,8 +1794,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":19}],
-19: [function(require, module, exports) {
+}, {"url":20}],
+20: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -1753,17 +1878,6 @@ function port (protocol){
       return location.port;
   }
 }
-
-}, {}],
-5: [function(require, module, exports) {
-var getLanguage = function() {
-    return (navigator && ((navigator.languages && navigator.languages[0]) ||
-        navigator.language || navigator.userLanguage)) || undefined;
-};
-
-module.exports = {
-    language: getLanguage()
-};
 
 }, {}],
 6: [function(require, module, exports) {
@@ -1868,6 +1982,17 @@ if (!localStorage) {
 }
 
 module.exports = localStorage;
+
+}, {}],
+5: [function(require, module, exports) {
+var getLanguage = function() {
+    return (navigator && ((navigator.languages && navigator.languages[0]) ||
+        navigator.language || navigator.userLanguage)) || undefined;
+};
+
+module.exports = {
+    language: getLanguage()
+};
 
 }, {}],
 7: [function(require, module, exports) {
@@ -2290,8 +2415,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":20}],
-20: [function(require, module, exports) {
+}, {"querystring":21}],
+21: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2366,8 +2491,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":21,"type":22}],
-21: [function(require, module, exports) {
+}, {"trim":22,"type":23}],
+22: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2387,7 +2512,7 @@ exports.right = function(str){
 };
 
 }, {}],
-22: [function(require, module, exports) {
+23: [function(require, module, exports) {
 /**
  * toString ref.
  */

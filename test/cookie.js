@@ -34,7 +34,10 @@ describe('Cookie', function() {
 
   describe('options', function() {
     it('should set default options', function() {
-      assert.deepEqual(cookie.options(), {});
+      assert.deepEqual(cookie.options(), {
+        expirationDays: undefined,
+        domain: undefined
+      });
     });
 
     it('should save options', function() {
