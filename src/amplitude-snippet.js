@@ -13,7 +13,7 @@
       this._q.push([fn].concat(Array.prototype.slice.call(arguments, 0))); return this;
     };
   }
-  var identifyFuncs = ['add', 'set', 'setOnce', 'unset'];
+  var identifyFuncs = ['add', 'append', 'set', 'setOnce', 'unset'];
   for (var i = 0; i < identifyFuncs.length; i++) {
     proxyIdentify(identifyFuncs[i]);
   }

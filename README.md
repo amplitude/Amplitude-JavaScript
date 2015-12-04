@@ -97,6 +97,13 @@ The SDK supports the operations `set`, `setOnce`, `unset`, and `add` on individu
     amplitude.identify(identify);
     ```
 
+5. `append`: this will append a value or values to a user property. If the user property does not have a value set yet, it will be initialized to an empty list before the new values are appended. If the user property has an existing value and it is not a list, it will be converted into a list with the new value appended.
+
+    ```javascript
+    var identify = new amplitude.Identify().append('ab-tests', 'new-user-test').append('some_list', [1, 2, 3, 4, 'values']);
+    amplitude.identify(identify);
+    ```
+
 Note: if a user property is used in multiple operations on the same `Identify` object, only the first operation will be saved, and the rest will be ignored. In this example, only the set operation will be saved, and the add and unset will be ignored:
 
 ```javascript
