@@ -3486,6 +3486,7 @@ var type = require('./type');
  */
 
 var AMP_OP_ADD = '$add';
+var AMP_OP_APPEND = '$append';
 var AMP_OP_SET = '$set';
 var AMP_OP_SET_ONCE = '$setOnce';
 var AMP_OP_UNSET = '$unset';
@@ -3505,6 +3506,11 @@ Identify.prototype.add = function(property, value) {
   } else {
     log('Unsupported type for value: ' + type(value) + ', expecting number or string');
   }
+  return this;
+};
+
+Identify.prototype.append = function(property, value) {
+  this._addOperation(AMP_OP_APPEND, property, value);
   return this;
 };
 

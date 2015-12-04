@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Add getSessionId helper method to fetch the current sessionId.
+* Add support for append user property operation.
 
 ## 2.7.0 (December 1, 2015)
 
