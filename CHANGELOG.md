@@ -1,6 +1,6 @@
 ## Unreleased
 
-* Initial_referrer is captured as a setOnce, and referrer is only updated once per session; it is no longer sent with every event.
+* Add tracking of each user's initial_referrer property (which is captured as a set once operation). Referrer property captured once per user session.
 
 ## 2.6.2 (November 17, 2015)
 

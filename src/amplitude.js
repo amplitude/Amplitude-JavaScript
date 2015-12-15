@@ -43,12 +43,12 @@ var LocalStorageKeys = {
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
   SESSION_ID: 'amplitude_sessionId',
+  REFERRER: 'amplitude_referrer',
 
+  // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
   USER_ID: 'amplitude_userId',
-  OPT_OUT: 'amplitude_optOut',
-
-  REFERRER: 'amplitude_referrer'
+  OPT_OUT: 'amplitude_optOut'
 };
 
 /*
