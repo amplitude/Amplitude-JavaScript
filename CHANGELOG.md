@@ -2,6 +2,7 @@
 
 * Add getSessionId helper method to fetch the current sessionId.
 * Add support for append user property operation.
+* Add tracking of each user's initial_referrer property (which is captured as a set once operation). Referrer property captured once per user session.
 
 ## 2.7.0 (December 1, 2015)
 

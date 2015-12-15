@@ -43,7 +43,9 @@ var LocalStorageKeys = {
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
   SESSION_ID: 'amplitude_sessionId',
+  REFERRER: 'amplitude_referrer',
 
+  // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
   USER_ID: 'amplitude_userId',
   OPT_OUT: 'amplitude_optOut'
@@ -149,6 +151,10 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
 
     if (this.options.includeUtm) {
       this._initUtmData();
+    }
+
+    if (this.options.includeReferrer) {
+      this._saveReferrer(this._getReferrer());
     }
   } catch (e) {
     log(e);
@@ -361,12 +367,39 @@ Amplitude.prototype._getReferrer = function() {
   return document.referrer;
 };
 
-Amplitude.prototype._getReferringDomain = function() {
-  var parts = this._getReferrer().split("/");
+Amplitude.prototype._getReferringDomain = function(referrer) {
+  if (referrer === null || referrer === undefined || referrer === '') {
+    return null;
+  }
+  var parts = referrer.split('/');
   if (parts.length >= 3) {
     return parts[2];
   }
-  return "";
+  return null;
+};
+
+// since user properties are propagated on the server, only send once per session, don't need to send with every event
+Amplitude.prototype._saveReferrer = function(referrer) {
+  if (referrer === null || referrer === undefined || referrer === '') {
+    return;
+  }
+
+  // always setOnce initial referrer
+  var referring_domain = this._getReferringDomain(referrer);
+  var identify = new Identify().setOnce('initial_referrer', referrer);
+  identify.setOnce('initial_referring_domain', referring_domain);
+
+  // only save referrer if not already in session storage or if storage disabled
+  var hasSessionStorage = window.sessionStorage ? true : false;
+  if ((hasSessionStorage && !window.sessionStorage.getItem(LocalStorageKeys.REFERRER)) || !hasSessionStorage) {
+    identify.set('referrer', referrer).set('referring_domain', referring_domain);
+
+    if (hasSessionStorage) {
+      window.sessionStorage.setItem(LocalStorageKeys.REFERRER, referrer);
+    }
+  }
+
+  this.identify(identify);
 };
 
 Amplitude.prototype.saveEvents = function() {
@@ -522,14 +555,6 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     // Only add utm properties to user properties for events
     if (eventType !== IDENTIFY_EVENT) {
       object.merge(userProperties, this._utmProperties);
-
-      // Add referral info onto the user properties
-      if (this.options.includeReferrer) {
-        object.merge(userProperties, {
-          'referrer': this._getReferrer(),
-          'referring_domain': this._getReferringDomain()
-        });
-      }
     }
 
     apiProperties = apiProperties || {};

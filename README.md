@@ -44,7 +44,11 @@ If your app has its own login system that you want to track users with, you can 
 amplitude.setUserId('USER_ID_HERE');
 ```
 
-A user's data will be merged on the backend so that any events up to that point from the same browser will be tracked under the same user.
+A user's data will be merged on the backend so that any events up to that point from the same browser will be tracked under the same user. Note: if a user logs out, or you want to log the events under an anonymous user, you may set the userId to `null` like so:
+
+```javascript
+amplitude.setUserId(null); // not string 'null'
+```
 
 You can also add the user ID as an argument to the `init` call:
 
@@ -62,7 +66,7 @@ eventProperties.key = 'value';
 amplitude.logEvent('EVENT_IDENTIFIER_HERE', eventProperties);
 ```
 
-# User Property Operations #
+# User Properties and User Property Operations #
 
 The SDK supports the operations `set`, `setOnce`, `unset`, and `add` on individual user properties. The operations are declared via a provided `Identify` interface. Multiple operations can be chained together in a single `Identify` object. The `Identify` object is then passed to the Amplitude client to send to the server. The results of the operations will be visible immediately in the dashboard, and take effect for events logged after.
 
@@ -111,6 +115,18 @@ var identify = new amplitude.Identify()
     .set('karma', 10)
     .add('karma', 1)
     .unset('karma');
+amplitude.identify(identify);
+```
+
+### Arrays in User Properties ###
+
+The SDK supports arrays in user properties. Any of the user property operations above (with the exception of `add`) can accept a Javascript array. You can directly `set` arrays, or use `append` to generate an array.
+
+```javascript
+var identify = new amplitude.Identify()
+    .set('colors', ['rose', 'gold'])
+    .append('ab-tests', 'campaign_a')
+    .append('existing_list', [4, 5]);
 amplitude.identify(identify);
 ```
 
@@ -176,7 +192,7 @@ amplitude.init('YOUR_API_KEY_HERE', null, {
 | savedMaxCount | Maximum number of events to save in localStorage. If more events are logged while offline, old events are removed. | 1000 |
 | uploadBatchSize | Maximum number of events to send to the server per request. | 100 |
 | includeUtm | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
-| includeReferrer | If `true`, includes `referrer` and `referring_domain` as user propeties on all events uploaded. | `false` |
+| includeReferrer | If `true`, captures the `referrer` and `referring_domain` for each session, as well as the user's `initial_referrer` and `initial_referring_domain` via a set once operation. | `false` |
 | batchEvents | If `true`, events are batched together and uploaded only when the number of unsent events is greater than or equal to `eventUploadThreshold` or after `eventUploadPeriodMillis` milliseconds have passed since the first unsent event was logged. | `false` |
 | eventUploadThreshold | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
 | eventUploadPeriodMillis | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
