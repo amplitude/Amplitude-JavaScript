@@ -118,6 +118,18 @@ var identify = new amplitude.Identify()
 amplitude.identify(identify);
 ```
 
+### Arrays in User Properties ###
+
+The SDK supports arrays in user properties. Any of the user property operations above (with the exception of `add`) can accept a Javascript array. You can directly `set` arrays, or use `append` to generate an array.
+
+```javascript
+var identify = new amplitude.Identify()
+    .set('colors', ['rose', 'gold'])
+    .append('ab-tests', 'campaign_a')
+    .append('existing_list', [4, 5]);
+amplitude.identify(identify);
+```
+
 ### Setting Multiple Properties with `setUserProperties` ###
 
 You may use `setUserProperties` shorthand to set multiple user properties at once. This method is simply a wrapper around `Identify.set` and `identify`.
