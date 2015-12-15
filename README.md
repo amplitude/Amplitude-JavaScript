@@ -10,7 +10,7 @@ Amplitude-Javascript
 ```
 <script type="text/javascript">
   (function(t,e){var n=t.amplitude||{};var r=e.createElement("script");r.type="text/javascript";
-  r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.6.2-min.gz.js";
+  r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.7.0-min.gz.js";
   r.onload=function(){t.amplitude.runQueuedFunctions()};var s=e.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function o(t){
   i.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
@@ -98,6 +98,13 @@ The SDK supports the operations `set`, `setOnce`, `unset`, and `add` on individu
 
     ```javascript
     var identify = new amplitude.Identify().add('karma', 1).add('friends', 1);
+    amplitude.identify(identify);
+    ```
+
+5. `append`: this will append a value or values to a user property. If the user property does not have a value set yet, it will be initialized to an empty list before the new values are appended. If the user property has an existing value and it is not a list, it will be converted into a list with the new value appended.
+
+    ```javascript
+    var identify = new amplitude.Identify().append('ab-tests', 'new-user-test').append('some_list', [1, 2, 3, 4, 'values']);
     amplitude.identify(identify);
     ```
 

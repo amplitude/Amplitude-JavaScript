@@ -1,6 +1,13 @@
 ## Unreleased
 
+* Add getSessionId helper method to fetch the current sessionId.
+* Add support for append user property operation.
 * Add tracking of each user's initial_referrer property (which is captured as a set once operation). Referrer property captured once per user session.
+
+## 2.7.0 (December 1, 2015)
+
+* If cookies are disabled by user, then fallback to localstorage to save the cookie data.
+* Migrate sessionId, lastEventTime, eventId, identifyId, and sequenceNumber to cookie storage to support sessions across different subdomains.
 
 ## 2.6.2 (November 17, 2015)
 
