@@ -3508,7 +3508,7 @@ module.exports = uuid;
 
 }, {}],
 12: [function(require, module, exports) {
-module.exports = '2.7.0';
+module.exports = '2.8.0';
 
 }, {}],
 13: [function(require, module, exports) {
