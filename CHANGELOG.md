@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add ability to clear all user properties.
+
 ## 2.8.0 (December 15, 2015)
 
 * Add getSessionId helper method to fetch the current sessionId.

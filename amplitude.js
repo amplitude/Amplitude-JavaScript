@@ -573,6 +573,13 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
   this.identify(identify);
 };
 
+// Clearing user properties is irreversible!
+Amplitude.prototype.clearUserProperties = function(){
+  var identify = new Identify();
+  identify.clearAll();
+  this.identify(identify);
+};
+
 Amplitude.prototype.identify = function(identify) {
 
   if (type(identify) === 'object' && '_q' in identify) {
@@ -3522,6 +3529,7 @@ var type = require('./type');
 
 var AMP_OP_ADD = '$add';
 var AMP_OP_APPEND = '$append';
+var AMP_OP_CLEAR_ALL = '$clearAll';
 var AMP_OP_SET = '$set';
 var AMP_OP_SET_ONCE = '$setOnce';
 var AMP_OP_UNSET = '$unset';
@@ -3549,6 +3557,20 @@ Identify.prototype.append = function(property, value) {
   return this;
 };
 
+// clearAll should be sent on its own Identify object
+// If there are already other operations, then don't add clearAll
+// If clearAll already in Identify, don't add other operations
+Identify.prototype.clearAll = function() {
+  if (Object.keys(this.userPropertiesOperations).length > 0) {
+    if (!(AMP_OP_CLEAR_ALL in this.userPropertiesOperations)) {
+      log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
+    }
+    return this;
+  }
+  this.userPropertiesOperations[AMP_OP_CLEAR_ALL] = '-';
+  return this;
+};
+
 Identify.prototype.set = function(property, value) {
   this._addOperation(AMP_OP_SET, property, value);
   return this;
@@ -3565,6 +3587,12 @@ Identify.prototype.unset = function(property) {
 };
 
 Identify.prototype._addOperation = function(operation, property, value) {
+  // check that the identify doesn't already contain a clearAll
+  if (AMP_OP_CLEAR_ALL in this.userPropertiesOperations) {
+    log('This identify already contains a $clearAll operation, skipping operation ' + operation);
+    return;
+  }
+
   // check that property wasn't already used in this Identify
   if (this.properties.indexOf(property) !== -1) {
     log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
