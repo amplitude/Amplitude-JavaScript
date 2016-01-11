@@ -9,15 +9,15 @@ Amplitude-Javascript
 
 ```
 <script type="text/javascript">
-  (function(t,e){var n=t.amplitude||{};var r=e.createElement("script");r.type="text/javascript";
+  (function(e,t){var n=e.amplitude||{};var r=t.createElement("script");r.type="text/javascript";
   r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.8.0-min.gz.js";
-  r.onload=function(){t.amplitude.runQueuedFunctions()};var s=e.getElementsByTagName("script")[0];
-  s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function o(t){
-  i.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
-  return this}}var a=["add","append","set","setOnce","unset"];for(var u=0;u<a.length;u++){o(a[u]);
-  }n.Identify=i;n._q=[];function c(t){n[t]=function(){n._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
-  }}var l=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify"];
-  for(var p=0;p<l.length;p++){c(l[p])}t.amplitude=n})(window,document);
+  r.onload=function(){e.amplitude.runQueuedFunctions()};var s=t.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function a(e){
+  i.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
+  return this}}var o=["add","append","clearAll","set","setOnce","unset"];for(var c=0;c<o.length;c++){
+  a(o[c])}n.Identify=i;n._q=[];function u(e){n[e]=function(){n._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
+  }}var l=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties"];
+  for(var p=0;p<l.length;p++){u(l[p])}e.amplitude=n})(window,document);
 
   amplitude.init("YOUR_API_KEY_HERE");
 </script>
@@ -140,6 +140,14 @@ var userProperties = {
     age: 20
 };
 amplitude.setUserProperties(userProperties);
+```
+
+### Clearing User Properties ###
+
+You may use `clearUserProperties` to clear all user properties at once. Note: the result is irreversible!
+
+```javascript
+amplitude.clearUserProperties();
 ```
 
 # Tracking Revenue #

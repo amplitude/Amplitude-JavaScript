@@ -332,6 +332,35 @@ describe('Amplitude', function() {
     });
   });
 
+  describe('clearUserProperties', function() {
+    beforeEach(function() {
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should log identify call from clear user properties', function() {
+      assert.equal(amplitude._unsentCount(), 0);
+      amplitude.clearUserProperties();
+
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 1);
+      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].event_properties, {});
+
+      var expected = {
+        '$clearAll': '-'
+      };
+      assert.deepEqual(events[0].user_properties, expected);
+    });
+  });
+
   describe('setDeviceId', function() {
 
     afterEach(function() {

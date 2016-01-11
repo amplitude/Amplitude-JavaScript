@@ -13,7 +13,7 @@
       this._q.push([fn].concat(Array.prototype.slice.call(arguments, 0))); return this;
     };
   }
-  var identifyFuncs = ['add', 'append', 'set', 'setOnce', 'unset'];
+  var identifyFuncs = ['add', 'append', 'clearAll', 'set', 'setOnce', 'unset'];
   for (var i = 0; i < identifyFuncs.length; i++) {
     proxyIdentify(identifyFuncs[i]);
   }
@@ -26,7 +26,7 @@
   }
   var funcs = ['init', 'logEvent', 'logRevenue', 'setUserId', 'setUserProperties',
                'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId',
-               'setGlobalUserProperties', 'identify'];
+               'setGlobalUserProperties', 'identify', 'clearUserProperties'];
   for (var j = 0; j < funcs.length; j++) {
     proxy(funcs[j]);
   }

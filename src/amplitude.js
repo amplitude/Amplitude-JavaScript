@@ -467,6 +467,13 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
   this.identify(identify);
 };
 
+// Clearing user properties is irreversible!
+Amplitude.prototype.clearUserProperties = function(){
+  var identify = new Identify();
+  identify.clearAll();
+  this.identify(identify);
+};
+
 Amplitude.prototype.identify = function(identify) {
 
   if (type(identify) === 'object' && '_q' in identify) {
