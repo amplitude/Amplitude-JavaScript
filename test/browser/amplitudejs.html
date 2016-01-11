@@ -55,18 +55,18 @@
     var addToPhotoCount = function() {
         var photoCount = parseInt(prompt('Input amount to increment photo count by', '2'), 10);
         amplitude.identify(new amplitude.Identify().add('photoCount', photoCount));
-    }
+    };
     var clickOnLinkA = function() {
         amplitude.logEvent('Clicked on link A', null, function() { window.location='https://www.google.com'; });
     };
     var setPhotoCount = function() {
         var photoCount = parseInt(prompt('Input photo count to set', '2'), 10);
         amplitude.identify(new amplitude.Identify().set('photoCount', photoCount));
-    }
+    };
     var setOncePhotoCount = function() {
         var photoCount = parseInt(prompt('Input photo count to setOnce', '2'), 10);
         amplitude.identify(new amplitude.Identify().setOnce('photoCount', photoCount));
-    }
+    };
 </script>
 <script>
     amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053', null, {includeReferrer: true}, function() {
@@ -95,6 +95,7 @@
     <li><a href="javascript:setPhotoCount();">Set photo count</a></li>
     <li><a href="javascript:setOncePhotoCount();">Set photo count once</a></li>
     <li><a href="javascript:setCity();">Set city via setUserProperties</a></li>
+    <li><a href="javascript:amplitude.clearUserProperties();">Clear all user properties</a></li>
     <br><br>
     <li><a href="/test/browser/amplitudejs2.html">Go to second page</a></li>
 </body>
