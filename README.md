@@ -209,23 +209,25 @@ amplitude.init('YOUR_API_KEY_HERE', null, {
 
 
 # Advanced #
-
 This SDK automatically grabs useful data about the browser, including browser type and operating system version.
 
+### Setting Version Name ###
 By default, no version name is set. You can specify a version name to distinguish between different versions of your site by calling `setVersionName`:
 
 ```javascript
 amplitude.setVersionName('VERSION_NAME_HERE');
 ```
 
-User IDs are automatically generated and stored in cookies if not specified.
-
+### Custom Device Ids ###
 Device IDs are generated randomly, although you can define a custom device ID setting it as a configuration option or by calling:
 
 ```javascript
 amplitude.setDeviceId('CUSTOM_DEVICE_ID');
 ```
 
+**Note: this is not recommended unless you really know what you are doing** (like if you have your own system for tracking user devices). Make sure the deviceId you set is sufficiently unique (we recommend something like a UUID - see `src/uuid.js` for an example of how to generate) to prevent conflicts with other devices in our system.
+
+### Log Event Callbacks and Redirects ###
 You can pass a callback function to logEvent, which will get called after receiving a response from the server:
 
 ```javascript
@@ -258,7 +260,9 @@ var trackClickLinkA = function() {
     });
 };
 ```
-You can also pass a callback function to init, which will get called after the SDK finishes its asynchronous loading. Note: no values are passed to the init callback function:
+
+### Init Callbacks ###
+You can also pass a callback function to init, which will get called after the SDK finishes its asynchronous loading. *Note: no values are passed to the init callback function*:
 
 ```javascript
 amplitude.init('YOUR_API_KEY_HERE', 'USER_ID_HERE', null, callback_function);
