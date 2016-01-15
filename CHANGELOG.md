@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 2.9.0 (January 15, 2016)
+
 * Add ability to clear all user properties.
 
 ## 2.8.0 (December 15, 2015)
