@@ -58,11 +58,21 @@ amplitude.init('YOUR_API_KEY_HERE', 'USER_ID_HERE');
 
 # Setting Event Properties #
 
-You can attach additional data to any event by passing a Javascript object as the second argument to `logEvent`:
+You can attach additional data to any event by passing a Javascript object as the second argument to `logEvent`. The Javascript object should be in the form of key + value pairs that can be JSON serialized (we recommend using String values):
 
 ```javascript
 var eventProperties = {};
 eventProperties.key = 'value';
+amplitude.logEvent('EVENT_IDENTIFIER_HERE', eventProperties);
+```
+
+Alternatively, you can set multiple event properties like this:
+```javascript
+var eventProperties = {
+    'color': 'blue',
+    'age': 20,
+    'key': 'value'
+};
 amplitude.logEvent('EVENT_IDENTIFIER_HERE', eventProperties);
 ```
 
