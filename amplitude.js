@@ -96,11 +96,20 @@
 var Amplitude = require('./amplitude');
 
 var old = window.amplitude || {};
-var instance = new Amplitude();
-instance._q = old._q || [];
+var newInstance = new Amplitude();
+
+// migrate old queue
+newInstance._q = old._q || [];
+
+// migrate each instance's queue
+for (var instance in old._iq) {
+  if (old._iq.hasOwnProperty(instance)) {
+    newInstance.getInstance(instance)._q = old._iq[instance]._q || [];
+  }
+}
 
 // export the instance
-module.exports = instance;
+module.exports = newInstance;
 
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
@@ -108,6 +117,7 @@ var AmplitudeClient = require('./amplitude-client');
 var Identify = require('./identify');
 var language = require('./language');
 var object = require('object');
+var type = require('./type');
 var version = require('./version');
 
 var DEFAULT_OPTIONS = {
@@ -131,18 +141,13 @@ var DEFAULT_OPTIONS = {
 };
 var DEFAULT_INSTANCE = '$defaultInstance';
 
-/*
- * Amplitude API
- */
 var Amplitude = function() {
   this.options = object.merge({}, DEFAULT_OPTIONS);
   this._instances = {}; // mapping of instance names to instances
 };
 
 Amplitude.prototype.getInstance = function(instance) {
-  if (!instance || instance === '') {
-    instance = DEFAULT_INSTANCE;
-  }
+  instance = instance || DEFAULT_INSTANCE;
   if (!(instance in this._instances)) {
     this._instances[instance] = new AmplitudeClient();
   }
@@ -151,17 +156,33 @@ Amplitude.prototype.getInstance = function(instance) {
 
 Amplitude.prototype.Identify = Identify;
 
+Amplitude.prototype.runQueuedFunctions = function () {
+  // run queued up old version of functions
+  for (var i = 0; i < this._q.length; i++) {
+    var fn = this[this._q[i][0]];
+    if (fn && type(fn) === 'function') {
+      fn.apply(this, this._q[i].slice(1));
+    }
+  }
+  this._q = []; // clear function queue after running
+
+  // run queued up functions on instances
+  for (var instance in this._instances) {
+    if (this._instances.hasOwnProperty(instance)) {
+      this._instances[instance].runQueuedFunctions();
+    }
+  }
+};
+
 /**
  *  @deprecated
  *  Maintain mapping of old functions to new instance methods
  */
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
-  this.getInstance().init(apiKey, opt_userId, opt_config, callback);
-  this.options = this.getInstance().options;
-};
-
-Amplitude.prototype.runQueuedFunctions = function () {
-  this.getInstance().runQueuedFunctions();
+  this.getInstance().init(apiKey, opt_userId, opt_config, function() {
+    window.amplitude.options = window.amplitude.getInstance().options;
+    callback();
+  });
 };
 
 Amplitude.prototype.isNewSession = function() {
@@ -208,7 +229,6 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
   this.getInstance().setUserProperties(userProperties);
 };
 
-// Clearing user properties is irreversible!
 Amplitude.prototype.clearUserProperties = function(){
   this.getInstance().clearUserProperties();
 };
@@ -243,7 +263,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./amplitude-client":3,"./identify":4,"./language":5,"object":6,"./version":7}],
+}, {"./amplitude-client":3,"./identify":4,"./language":5,"object":6,"./type":7,"./version":8}],
 3: [function(require, module, exports) {
 var cookieStorage = require('./cookiestorage');
 var getUtmData = require('./utm');
@@ -320,7 +340,6 @@ AmplitudeClient.prototype._sessionId = null;
 AmplitudeClient.prototype._newSession = false;
 AmplitudeClient.prototype._updateScheduled = false;
 
-/* MOVE THIS */
 AmplitudeClient.prototype.Identify = Identify;
 
 /**
@@ -1013,8 +1032,8 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function(numEvents) {
 
 module.exports = AmplitudeClient;
 
-}, {"./cookiestorage":8,"./utm":9,"./identify":4,"json":10,"./language":5,"./localstorage":11,"JavaScript-MD5":12,"object":6,"./xhr":13,"ua-parser-js":14,"./uuid":15,"./version":7,"./type":16}],
-8: [function(require, module, exports) {
+}, {"./cookiestorage":9,"./utm":10,"./identify":4,"json":11,"./language":5,"./localstorage":12,"JavaScript-MD5":13,"object":6,"./xhr":14,"ua-parser-js":15,"./uuid":16,"./version":8,"./type":7}],
+9: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -1107,7 +1126,7 @@ cookieStorage.prototype.getStorage = function() {
 
 module.exports = cookieStorage;
 
-}, {"./cookie":17,"json":10,"./localstorage":11}],
+}, {"./cookie":17,"json":11,"./localstorage":12}],
 17: [function(require, module, exports) {
 /*
  * Cookie data
@@ -1237,7 +1256,7 @@ module.exports = {
 
 };
 
-}, {"./base64":18,"json":10,"top-domain":19}],
+}, {"./base64":18,"json":11,"top-domain":19}],
 18: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
@@ -1398,7 +1417,7 @@ var UTF8 = {
 module.exports = UTF8;
 
 }, {}],
-10: [function(require, module, exports) {
+11: [function(require, module, exports) {
 
 var json = window.JSON || {};
 var stringify = json.stringify;
@@ -2033,7 +2052,7 @@ function port (protocol){
 }
 
 }, {}],
-11: [function(require, module, exports) {
+12: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -2137,7 +2156,7 @@ if (!localStorage) {
 module.exports = localStorage;
 
 }, {}],
-9: [function(require, module, exports) {
+10: [function(require, module, exports) {
 var getUtmParam = function(name, query) {
   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
   var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
@@ -2256,8 +2275,8 @@ Identify.prototype._addOperation = function(operation, property, value) {
 
 module.exports = Identify;
 
-}, {"./type":16}],
-16: [function(require, module, exports) {
+}, {"./type":7}],
+7: [function(require, module, exports) {
 /* Taken from: https://github.com/component/type */
 
 /**
@@ -2316,7 +2335,7 @@ module.exports = {
 };
 
 }, {}],
-12: [function(require, module, exports) {
+13: [function(require, module, exports) {
 /*
  * JavaScript MD5 1.0.1
  * https://github.com/blueimp/JavaScript-MD5
@@ -2690,7 +2709,7 @@ exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
 }, {}],
-13: [function(require, module, exports) {
+14: [function(require, module, exports) {
 var querystring = require('querystring');
 
 /*
@@ -2882,7 +2901,7 @@ function isBuffer(obj) {
 }
 
 }, {}],
-14: [function(require, module, exports) {
+15: [function(require, module, exports) {
 /* jshint eqeqeq: false, forin: false */
 /* global define */
 
@@ -3765,7 +3784,7 @@ function isBuffer(obj) {
 })(this);
 
 }, {}],
-15: [function(require, module, exports) {
+16: [function(require, module, exports) {
 /* jshint bitwise: false, laxbreak: true */
 
 /**
@@ -3799,7 +3818,7 @@ var uuid = function(a) {
 module.exports = uuid;
 
 }, {}],
-7: [function(require, module, exports) {
+8: [function(require, module, exports) {
 module.exports = '2.9.0';
 
 }, {}]}, {}, {"1":""})

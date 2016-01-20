@@ -73,7 +73,6 @@ AmplitudeClient.prototype._sessionId = null;
 AmplitudeClient.prototype._newSession = false;
 AmplitudeClient.prototype._updateScheduled = false;
 
-/* MOVE THIS */
 AmplitudeClient.prototype.Identify = Identify;
 
 /**
