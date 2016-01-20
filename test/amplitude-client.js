@@ -128,7 +128,7 @@ describe('AmplitudeClient', function() {
       localStorage.setItem('amplitude_userId' + '_' + apiKey, 'test_bad_user_id');  // ignored
       localStorage.setItem('amplitude_optOut' + '_' + apiKey, true); // ignored
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey);
       assert.equal(amplitude2.options.deviceId, deviceId);
       assert.equal(amplitude2.options.userId, userId);
@@ -152,7 +152,7 @@ describe('AmplitudeClient', function() {
 
       localStorage.clear();
       sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       CookieStorage.prototype._cookiesEnabled.restore();
       amplitude2.init(apiKey, userId, {'deviceId': deviceId});
       clock.restore();
@@ -179,7 +179,7 @@ describe('AmplitudeClient', function() {
       var eventIdKey = 'amplitude_lastEventId';
       var identifyIdKey = 'amplitude_lastIdentifyId';
       var sequenceNumberKey = 'amplitude_lastSequenceNumber';
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
 
       var clock = sinon.useFakeTimers();
       clock.tick(1000);
@@ -229,7 +229,7 @@ describe('AmplitudeClient', function() {
       var eventIdKey = 'amplitude_lastEventId';
       var identifyIdKey = 'amplitude_lastIdentifyId';
       var sequenceNumberKey = 'amplitude_lastSequenceNumber';
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
 
       var cookieData = {
         deviceId: 'test_device_id',
@@ -1284,7 +1284,7 @@ describe('AmplitudeClient', function() {
     it('should increment the counters in local storage if cookies disabled', function() {
       localStorage.clear();
       var deviceId = 'test_device_id';
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
 
       sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
       amplitude2.init(apiKey, null, {deviceId: deviceId, batchEvents: true, eventUploadThreshold: 5});
@@ -1349,13 +1349,13 @@ describe('AmplitudeClient', function() {
     });
 
     it('should have state be persisted in the cookie', function() {
-      var amplitude = new Amplitude();
+      var amplitude = new AmplitudeClient();
       amplitude.init(apiKey);
       assert.strictEqual(amplitude.options.optOut, false);
 
       amplitude.setOptOut(true);
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey);
       assert.strictEqual(amplitude2.options.optOut, true);
     });
