@@ -41,7 +41,7 @@ Identify.prototype.append = function(property, value) {
 // If clearAll already in Identify, don't add other operations
 Identify.prototype.clearAll = function() {
   if (Object.keys(this.userPropertiesOperations).length > 0) {
-    if (!(AMP_OP_CLEAR_ALL in this.userPropertiesOperations)) {
+    if (!this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
       log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
     }
     return this;

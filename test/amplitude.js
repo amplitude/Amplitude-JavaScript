@@ -1,5 +1,6 @@
-describe('AmplitudeClient', function() {
-  var AmplitudeClient = require('../src/amplitude-client.js');
+// maintain for testing backwards compatability
+describe('Amplitude', function() {
+  var Amplitude = require('../src/amplitude.js');
   var getUtmData = require('../src/utm.js');
   var localStorage = require('../src/localstorage.js');
   var CookieStorage = require('../src/cookiestorage.js');
@@ -14,7 +15,7 @@ describe('AmplitudeClient', function() {
   var server;
 
   beforeEach(function() {
-    amplitude = new AmplitudeClient();
+    amplitude = new Amplitude();
     server = sinon.fakeServer.create();
   });
 
@@ -34,8 +35,7 @@ describe('AmplitudeClient', function() {
   }
 
   describe('init', function() {
-    beforeEach(function() {
-    });
+    // beforeEach(function() {});
 
     afterEach(function() {
       reset();
@@ -144,128 +144,128 @@ describe('AmplitudeClient', function() {
       assert.isNull(localStorage.getItem('amplitude_optOut' + '_' + apiKey));
     });
 
-    it('should save cookie data to localStorage if cookies are not enabled', function() {
-      var cookieStorageKey = 'amp_cookiestore_amplitude_id';
-      var deviceId = 'test_device_id';
-      var clock = sinon.useFakeTimers();
-      clock.tick(1000);
+    // it('should save cookie data to localStorage if cookies are not enabled', function() {
+    //   var cookieStorageKey = 'amp_cookiestore_amplitude_id';
+    //   var deviceId = 'test_device_id';
+    //   var clock = sinon.useFakeTimers();
+    //   clock.tick(1000);
 
-      localStorage.clear();
-      sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
-      var amplitude2 = new Amplitude();
-      CookieStorage.prototype._cookiesEnabled.restore();
-      amplitude2.init(apiKey, userId, {'deviceId': deviceId});
-      clock.restore();
+    //   localStorage.clear();
+    //   sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
+    //   var amplitude2 = new Amplitude();
+    //   CookieStorage.prototype._cookiesEnabled.restore();
+    //   amplitude2.init(apiKey, userId, {'deviceId': deviceId});
+    //   clock.restore();
 
-      var cookieData = JSON.parse(localStorage.getItem(cookieStorageKey));
-      assert.deepEqual(cookieData, {
-        'deviceId': deviceId,
-        'userId': userId,
-        'optOut': false,
-        'sessionId': 1000,
-        'lastEventTime': 1000,
-        'eventId': 0,
-        'identifyId': 0,
-        'sequenceNumber': 0
-      });
+    //   var cookieData = JSON.parse(localStorage.getItem(cookieStorageKey));
+    //   assert.deepEqual(cookieData, {
+    //     'deviceId': deviceId,
+    //     'userId': userId,
+    //     'optOut': false,
+    //     'sessionId': 1000,
+    //     'lastEventTime': 1000,
+    //     'eventId': 0,
+    //     'identifyId': 0,
+    //     'sequenceNumber': 0
+    //   });
 
-      localStorage.removeItem('amp_cookiestore_amplitude_id')
-      assert.isNull(cookie.get(amplitude2.options.cookieName)); // assert did not write to cookies
-    });
+    //   localStorage.removeItem('amp_cookiestore_amplitude_id')
+    //   assert.isNull(cookie.get(amplitude2.options.cookieName)); // assert did not write to cookies
+    // });
 
-    it('should load sessionId, eventId from cookie and ignore the one in localStorage', function() {
-      var sessionIdKey = 'amplitude_sessionId';
-      var lastEventTimeKey = 'amplitude_lastEventTime';
-      var eventIdKey = 'amplitude_lastEventId';
-      var identifyIdKey = 'amplitude_lastIdentifyId';
-      var sequenceNumberKey = 'amplitude_lastSequenceNumber';
-      var amplitude2 = new Amplitude();
+    // it('should load sessionId, eventId from cookie and ignore the one in localStorage', function() {
+    //   var sessionIdKey = 'amplitude_sessionId';
+    //   var lastEventTimeKey = 'amplitude_lastEventTime';
+    //   var eventIdKey = 'amplitude_lastEventId';
+    //   var identifyIdKey = 'amplitude_lastIdentifyId';
+    //   var sequenceNumberKey = 'amplitude_lastSequenceNumber';
+    //   var amplitude2 = new Amplitude();
 
-      var clock = sinon.useFakeTimers();
-      clock.tick(1000);
-      var sessionId = new Date().getTime();
+    //   var clock = sinon.useFakeTimers();
+    //   clock.tick(1000);
+    //   var sessionId = new Date().getTime();
 
-      // the following values in localStorage will all be ignored
-      localStorage.clear();
-      localStorage.setItem(sessionIdKey, 3);
-      localStorage.setItem(lastEventTimeKey, 4);
-      localStorage.setItem(eventIdKey, 5);
-      localStorage.setItem(identifyIdKey, 6);
-      localStorage.setItem(sequenceNumberKey, 7);
+    //   // the following values in localStorage will all be ignored
+    //   localStorage.clear();
+    //   localStorage.setItem(sessionIdKey, 3);
+    //   localStorage.setItem(lastEventTimeKey, 4);
+    //   localStorage.setItem(eventIdKey, 5);
+    //   localStorage.setItem(identifyIdKey, 6);
+    //   localStorage.setItem(sequenceNumberKey, 7);
 
-      var cookieData = {
-        deviceId: 'test_device_id',
-        userId: 'test_user_id',
-        optOut: true,
-        sessionId: sessionId,
-        lastEventTime: sessionId,
-        eventId: 50,
-        identifyId: 60,
-        sequenceNumber: 70
-      }
-      cookie.set(amplitude2.options.cookieName, cookieData);
+    //   var cookieData = {
+    //     deviceId: 'test_device_id',
+    //     userId: 'test_user_id',
+    //     optOut: true,
+    //     sessionId: sessionId,
+    //     lastEventTime: sessionId,
+    //     eventId: 50,
+    //     identifyId: 60,
+    //     sequenceNumber: 70
+    //   }
+    //   cookie.set(amplitude2.options.cookieName, cookieData);
 
-      clock.tick(10);
-      amplitude2.init(apiKey);
-      clock.restore();
+    //   clock.tick(10);
+    //   amplitude2.init(apiKey);
+    //   clock.restore();
 
-      assert.equal(amplitude2._sessionId, sessionId);
-      assert.equal(amplitude2._lastEventTime, sessionId + 10);
-      assert.equal(amplitude2._eventId, 50);
-      assert.equal(amplitude2._identifyId, 60);
-      assert.equal(amplitude2._sequenceNumber, 70);
+    //   assert.equal(amplitude2._sessionId, sessionId);
+    //   assert.equal(amplitude2._lastEventTime, sessionId + 10);
+    //   assert.equal(amplitude2._eventId, 50);
+    //   assert.equal(amplitude2._identifyId, 60);
+    //   assert.equal(amplitude2._sequenceNumber, 70);
 
-      // verify that existing values in localstorage are cleared out
-      assert.isNull(localStorage.getItem(sessionIdKey));
-      assert.isNull(localStorage.getItem(lastEventTimeKey));
-      assert.isNull(localStorage.getItem(eventIdKey));
-      assert.isNull(localStorage.getItem(identifyIdKey));
-      assert.isNull(localStorage.getItem(sequenceNumberKey));
-    });
+    //   // verify that existing values in localstorage are cleared out
+    //   assert.isNull(localStorage.getItem(sessionIdKey));
+    //   assert.isNull(localStorage.getItem(lastEventTimeKey));
+    //   assert.isNull(localStorage.getItem(eventIdKey));
+    //   assert.isNull(localStorage.getItem(identifyIdKey));
+    //   assert.isNull(localStorage.getItem(sequenceNumberKey));
+    // });
 
-    it('should load sessionId from localStorage if not in cookie', function() {
-      var sessionIdKey = 'amplitude_sessionId';
-      var lastEventTimeKey = 'amplitude_lastEventTime';
-      var eventIdKey = 'amplitude_lastEventId';
-      var identifyIdKey = 'amplitude_lastIdentifyId';
-      var sequenceNumberKey = 'amplitude_lastSequenceNumber';
-      var amplitude2 = new Amplitude();
+    // it('should load sessionId from localStorage if not in cookie', function() {
+    //   var sessionIdKey = 'amplitude_sessionId';
+    //   var lastEventTimeKey = 'amplitude_lastEventTime';
+    //   var eventIdKey = 'amplitude_lastEventId';
+    //   var identifyIdKey = 'amplitude_lastIdentifyId';
+    //   var sequenceNumberKey = 'amplitude_lastSequenceNumber';
+    //   var amplitude2 = new Amplitude();
 
-      var cookieData = {
-        deviceId: 'test_device_id',
-        userId: userId,
-        optOut: true
-      }
-      cookie.set(amplitude2.options.cookieName, cookieData);
+    //   var cookieData = {
+    //     deviceId: 'test_device_id',
+    //     userId: userId,
+    //     optOut: true
+    //   }
+    //   cookie.set(amplitude2.options.cookieName, cookieData);
 
-      var clock = sinon.useFakeTimers();
-      clock.tick(1000);
-      var sessionId = new Date().getTime();
+    //   var clock = sinon.useFakeTimers();
+    //   clock.tick(1000);
+    //   var sessionId = new Date().getTime();
 
-      localStorage.clear();
-      localStorage.setItem(sessionIdKey, sessionId);
-      localStorage.setItem(lastEventTimeKey, sessionId);
-      localStorage.setItem(eventIdKey, 50);
-      localStorage.setItem(identifyIdKey, 60);
-      localStorage.setItem(sequenceNumberKey, 70);
+    //   localStorage.clear();
+    //   localStorage.setItem(sessionIdKey, sessionId);
+    //   localStorage.setItem(lastEventTimeKey, sessionId);
+    //   localStorage.setItem(eventIdKey, 50);
+    //   localStorage.setItem(identifyIdKey, 60);
+    //   localStorage.setItem(sequenceNumberKey, 70);
 
-      clock.tick(10);
-      amplitude2.init(apiKey, userId);
-      clock.restore();
+    //   clock.tick(10);
+    //   amplitude2.init(apiKey, userId);
+    //   clock.restore();
 
-      assert.equal(amplitude2._sessionId, sessionId);
-      assert.equal(amplitude2._lastEventTime, sessionId + 10);
-      assert.equal(amplitude2._eventId, 50);
-      assert.equal(amplitude2._identifyId, 60);
-      assert.equal(amplitude2._sequenceNumber, 70);
+    //   assert.equal(amplitude2._sessionId, sessionId);
+    //   assert.equal(amplitude2._lastEventTime, sessionId + 10);
+    //   assert.equal(amplitude2._eventId, 50);
+    //   assert.equal(amplitude2._identifyId, 60);
+    //   assert.equal(amplitude2._sequenceNumber, 70);
 
-      // verify that existing values in localstorage are cleared out
-      assert.isNull(localStorage.getItem(sessionIdKey));
-      assert.isNull(localStorage.getItem(lastEventTimeKey));
-      assert.isNull(localStorage.getItem(eventIdKey));
-      assert.isNull(localStorage.getItem(identifyIdKey));
-      assert.isNull(localStorage.getItem(sequenceNumberKey));
-    });
+    //   // verify that existing values in localstorage are cleared out
+    //   assert.isNull(localStorage.getItem(sessionIdKey));
+    //   assert.isNull(localStorage.getItem(lastEventTimeKey));
+    //   assert.isNull(localStorage.getItem(eventIdKey));
+    //   assert.isNull(localStorage.getItem(identifyIdKey));
+    //   assert.isNull(localStorage.getItem(sequenceNumberKey));
+    // });
   });
 
   describe('runQueuedFunctions', function() {
@@ -278,7 +278,7 @@ describe('AmplitudeClient', function() {
     });
 
     it('should run queued functions', function() {
-      assert.equal(amplitude._unsentCount(), 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
       assert.lengthOf(server.requests, 0);
       var userId = 'testUserId'
       var eventType = 'test_event'
@@ -291,7 +291,7 @@ describe('AmplitudeClient', function() {
       amplitude.runQueuedFunctions();
 
       assert.equal(amplitude.options.userId, userId);
-      assert.equal(amplitude._unsentCount(), 1);
+      assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
@@ -311,12 +311,12 @@ describe('AmplitudeClient', function() {
     });
 
     it('should log identify call from set user properties', function() {
-      assert.equal(amplitude._unsentCount(), 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
       amplitude.setUserProperties({'prop': true, 'key': 'value'});
 
-      assert.lengthOf(amplitude._unsentEvents, 0);
-      assert.lengthOf(amplitude._unsentIdentifys, 1);
-      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 1);
+      assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
@@ -343,12 +343,12 @@ describe('AmplitudeClient', function() {
     });
 
     it('should log identify call from clear user properties', function() {
-      assert.equal(amplitude._unsentCount(), 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
       amplitude.clearUserProperties();
 
-      assert.lengthOf(amplitude._unsentEvents, 0);
-      assert.lengthOf(amplitude._unsentIdentifys, 1);
-      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 1);
+      assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
@@ -407,19 +407,19 @@ describe('AmplitudeClient', function() {
 
     it('should ignore inputs that are not identify objects', function() {
       amplitude.identify('This is a test');
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
       amplitude.identify(150);
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
       amplitude.identify(['test']);
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
       amplitude.identify({'user_prop': true});
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
     });
 
@@ -427,9 +427,9 @@ describe('AmplitudeClient', function() {
       var identify = new Identify().set('prop1', 'value1').unset('prop2').add('prop3', 3).setOnce('prop4', true);
       amplitude.identify(identify);
 
-      assert.lengthOf(amplitude._unsentEvents, 0);
-      assert.lengthOf(amplitude._unsentIdentifys, 1);
-      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 1);
+      assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
@@ -453,17 +453,17 @@ describe('AmplitudeClient', function() {
 
     it('should ignore empty identify objects', function() {
       amplitude.identify(new Identify());
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
     });
 
     it('should ignore empty proxy identify objects', function() {
       amplitude.identify({'_q': {}});
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
       amplitude.identify({});
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
     });
 
@@ -477,9 +477,9 @@ describe('AmplitudeClient', function() {
       ]};
       amplitude.identify(proxyObject);
 
-      assert.lengthOf(amplitude._unsentEvents, 0);
-      assert.lengthOf(amplitude._unsentIdentifys, 1);
-      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 1);
+      assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
@@ -556,11 +556,11 @@ describe('AmplitudeClient', function() {
     });
 
     it('should queue events', function() {
-      amplitude._sending = true;
+      amplitude.getInstance()._sending = true;
       amplitude.logEvent('Event', {index: 1});
       amplitude.logEvent('Event', {index: 2});
       amplitude.logEvent('Event', {index: 3});
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
 
       amplitude.logEvent('Event', {index: 100});
 
@@ -574,11 +574,11 @@ describe('AmplitudeClient', function() {
     it('should limit events queued', function() {
       amplitude.init(apiKey, null, {savedMaxCount: 10});
 
-      amplitude._sending = true;
+      amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
         amplitude.logEvent('Event', {index: i});
       }
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
 
       amplitude.logEvent('Event', {index: 100});
 
@@ -590,10 +590,10 @@ describe('AmplitudeClient', function() {
     });
 
     it('should remove only sent events', function() {
-      amplitude._sending = true;
+      amplitude.getInstance()._sending = true;
       amplitude.logEvent('Event', {index: 1});
       amplitude.logEvent('Event', {index: 2});
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
       amplitude.logEvent('Event', {index: 3});
 
       server.respondWith('success');
@@ -610,11 +610,11 @@ describe('AmplitudeClient', function() {
     it('should limit events sent', function() {
       amplitude.init(apiKey, null, {uploadBatchSize: 10});
 
-      amplitude._sending = true;
+      amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
         amplitude.logEvent('Event', {index: i});
       }
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
 
       amplitude.logEvent('Event', {index: 100});
 
@@ -656,7 +656,7 @@ describe('AmplitudeClient', function() {
       server.respond();
 
       assert.lengthOf(server.requests, 1);
-      var unsentEvents = amplitude._unsentEvents;
+      var unsentEvents = amplitude.getInstance()._unsentEvents;
       assert.lengthOf(unsentEvents, 5);
       assert.deepEqual(unsentEvents[4].event_properties, {index: 14});
 
@@ -665,7 +665,7 @@ describe('AmplitudeClient', function() {
       assert.lengthOf(server.requests, 2);
       server.respondWith('success');
       server.respond();
-      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
       var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 5);
       assert.deepEqual(events[4].event_properties, {index: 14});
@@ -681,7 +681,7 @@ describe('AmplitudeClient', function() {
       amplitude.logEvent('Event');
 
       // saveEvent should not have been called yet
-      assert.lengthOf(amplitude._unsentEvents, 1);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 1);
       assert.lengthOf(server.requests, 0);
 
       // saveEvent should be called after delay
@@ -705,7 +705,7 @@ describe('AmplitudeClient', function() {
       amplitude.logEvent('Event2');
 
       // saveEvent triggered by 2 event batch threshold
-      assert.lengthOf(amplitude._unsentEvents, 2);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 2);
       assert.lengthOf(server.requests, 1);
       server.respondWith('success');
       server.respond();
@@ -714,7 +714,7 @@ describe('AmplitudeClient', function() {
       assert.deepEqual(events[1].event_type, 'Event2');
 
       // saveEvent should be called after delay, but no request made
-      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
       clock.tick(eventUploadPeriodMillis);
       assert.lengthOf(server.requests, 1);
     });
@@ -731,7 +731,7 @@ describe('AmplitudeClient', function() {
       amplitude.logEvent('Event1');
       clock.tick(1);
       amplitude.logEvent('Event2');
-      assert.lengthOf(amplitude._unsentEvents, 2);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 2);
       assert.lengthOf(server.requests, 0);
 
       // advance to upload period millis, and should have 1 server request
@@ -756,11 +756,11 @@ describe('AmplitudeClient', function() {
     it('should back off on 413 status', function() {
       amplitude.init(apiKey, null, {uploadBatchSize: 10});
 
-      amplitude._sending = true;
+      amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
         amplitude.logEvent('Event', {index: i});
       }
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
 
       amplitude.logEvent('Event', {index: 100});
 
@@ -783,11 +783,11 @@ describe('AmplitudeClient', function() {
     it('should back off on 413 status all the way to 1 event with drops', function() {
       amplitude.init(apiKey, null, {uploadBatchSize: 9});
 
-      amplitude._sending = true;
+      amplitude.getInstance()._sending = true;
       for (var i = 0; i < 10; i++) {
         amplitude.logEvent('Event', {index: i});
       }
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
       amplitude.logEvent('Event', {index: 100});
 
       for (var i = 0; i < 6; i++) {
@@ -902,11 +902,11 @@ describe('AmplitudeClient', function() {
       };
 
       // queue up 15 events, since batchsize 10, need to send in 2 batches
-      amplitude._sending = true;
+      amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
         amplitude.logEvent('Event', {index: i});
       }
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
 
       amplitude.logEvent('Event', {index: 100}, callback);
 
@@ -940,11 +940,11 @@ describe('AmplitudeClient', function() {
       };
 
       // queue up 15 events
-      amplitude._sending = true;
+      amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
         amplitude.logEvent('Event', {index: i});
       }
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
 
       // 16th event with 413 will backoff to batches of 8
       amplitude.logEvent('Event', {index: 100}, callback);
@@ -1001,18 +1001,18 @@ describe('AmplitudeClient', function() {
 
     it('should send 3 identify events', function() {
       amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
-      assert.equal(amplitude._unsentCount(), 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
       amplitude.identify(new Identify().add('photoCount', 1));
       amplitude.identify(new Identify().add('photoCount', 1).set('country', 'USA'));
       amplitude.identify(new Identify().add('photoCount', 1));
 
       // verify some internal counters
-      assert.equal(amplitude._eventId, 0);
-      assert.equal(amplitude._identifyId, 3);
-      assert.equal(amplitude._unsentCount(), 3);
-      assert.lengthOf(amplitude._unsentEvents, 0);
-      assert.lengthOf(amplitude._unsentIdentifys, 3);
+      assert.equal(amplitude.getInstance()._eventId, 0);
+      assert.equal(amplitude.getInstance()._identifyId, 3);
+      assert.equal(amplitude.getInstance()._unsentCount(), 3);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 3);
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1028,24 +1028,24 @@ describe('AmplitudeClient', function() {
       // send response and check that remove events works properly
       server.respondWith('success');
       server.respond();
-      assert.equal(amplitude._unsentCount(), 0);
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
     });
 
     it('should send 3 events', function() {
       amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
-      assert.equal(amplitude._unsentCount(), 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
       amplitude.logEvent('test');
       amplitude.logEvent('test');
       amplitude.logEvent('test');
 
       // verify some internal counters
-      assert.equal(amplitude._eventId, 3);
-      assert.equal(amplitude._identifyId, 0);
-      assert.equal(amplitude._unsentCount(), 3);
-      assert.lengthOf(amplitude._unsentEvents, 3);
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.equal(amplitude.getInstance()._eventId, 3);
+      assert.equal(amplitude.getInstance()._identifyId, 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 3);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 3);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1059,23 +1059,23 @@ describe('AmplitudeClient', function() {
       // send response and check that remove events works properly
       server.respondWith('success');
       server.respond();
-      assert.equal(amplitude._unsentCount(), 0);
-      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
     });
 
     it('should send 1 event and 1 identify event', function() {
       amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
-      assert.equal(amplitude._unsentCount(), 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
       amplitude.logEvent('test');
       amplitude.identify(new Identify().add('photoCount', 1));
 
       // verify some internal counters
-      assert.equal(amplitude._eventId, 1);
-      assert.equal(amplitude._identifyId, 1);
-      assert.equal(amplitude._unsentCount(), 2);
-      assert.lengthOf(amplitude._unsentEvents, 1);
-      assert.lengthOf(amplitude._unsentIdentifys, 1);
+      assert.equal(amplitude.getInstance()._eventId, 1);
+      assert.equal(amplitude.getInstance()._identifyId, 1);
+      assert.equal(amplitude.getInstance()._unsentCount(), 2);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 1);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 1);
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1095,14 +1095,14 @@ describe('AmplitudeClient', function() {
       // send response and check that remove events works properly
       server.respondWith('success');
       server.respond();
-      assert.equal(amplitude._unsentCount(), 0);
-      assert.lengthOf(amplitude._unsentEvents, 0);
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
     });
 
     it('should properly coalesce events and identify events into a request', function() {
       amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 6});
-      assert.equal(amplitude._unsentCount(), 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
       amplitude.logEvent('test1');
       clock.tick(1);
@@ -1116,11 +1116,11 @@ describe('AmplitudeClient', function() {
       amplitude.identify(new Identify().add('photoCount', 2));
 
       // verify some internal counters
-      assert.equal(amplitude._eventId, 4);
-      assert.equal(amplitude._identifyId, 2);
-      assert.equal(amplitude._unsentCount(), 6);
-      assert.lengthOf(amplitude._unsentEvents, 4);
-      assert.lengthOf(amplitude._unsentIdentifys, 2);
+      assert.equal(amplitude.getInstance()._eventId, 4);
+      assert.equal(amplitude.getInstance()._identifyId, 2);
+      assert.equal(amplitude.getInstance()._unsentCount(), 6);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 4);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 2);
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1151,28 +1151,28 @@ describe('AmplitudeClient', function() {
       // send response and check that remove events works properly
       server.respondWith('success');
       server.respond();
-      assert.equal(amplitude._unsentCount(), 0);
-      assert.lengthOf(amplitude._unsentEvents, 0);
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
     });
 
     it('should merged events supporting backwards compatability', function() {
       // events logged before v2.5.0 won't have sequence number, should get priority
       amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
-      assert.equal(amplitude._unsentCount(), 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
       amplitude.identify(new Identify().add('photoCount', 1));
       amplitude.logEvent('test');
-      delete amplitude._unsentEvents[0].sequence_number; // delete sequence number to simulate old event
-      amplitude._sequenceNumber = 1; // reset sequence number
+      delete amplitude.getInstance()._unsentEvents[0].sequence_number; // delete sequence number to simulate old event
+      amplitude.getInstance()._sequenceNumber = 1; // reset sequence number
       amplitude.identify(new Identify().add('photoCount', 2));
 
       // verify some internal counters
-      assert.equal(amplitude._eventId, 1);
-      assert.equal(amplitude._identifyId, 2);
-      assert.equal(amplitude._unsentCount(), 3);
-      assert.lengthOf(amplitude._unsentEvents, 1);
-      assert.lengthOf(amplitude._unsentIdentifys, 2);
+      assert.equal(amplitude.getInstance()._eventId, 1);
+      assert.equal(amplitude.getInstance()._identifyId, 2);
+      assert.equal(amplitude.getInstance()._unsentCount(), 3);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 1);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 2);
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1199,9 +1199,9 @@ describe('AmplitudeClient', function() {
       // send response and check that remove events works properly
       server.respondWith('success');
       server.respond();
-      assert.equal(amplitude._unsentCount(), 0);
-      assert.lengthOf(amplitude._unsentEvents, 0);
-      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.equal(amplitude.getInstance()._unsentCount(), 0);
+      assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
+      assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
     });
 
     it('should drop event and keep identify on 413 response', function() {
@@ -1210,21 +1210,21 @@ describe('AmplitudeClient', function() {
       clock.tick(1);
       amplitude.identify(new Identify().add('photoCount', 1));
 
-      assert.equal(amplitude._unsentCount(), 2);
+      assert.equal(amplitude.getInstance()._unsentCount(), 2);
       assert.lengthOf(server.requests, 1);
       server.respondWith([413, {}, '']);
       server.respond();
 
       // backoff and retry
       assert.equal(amplitude.options.uploadBatchSize, 1);
-      assert.equal(amplitude._unsentCount(), 2);
+      assert.equal(amplitude.getInstance()._unsentCount(), 2);
       assert.lengthOf(server.requests, 2);
       server.respondWith([413, {}, '']);
       server.respond();
 
       // after dropping massive event, only 1 event left
       assert.equal(amplitude.options.uploadBatchSize, 1);
-      assert.equal(amplitude._unsentCount(), 1);
+      assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 3);
 
       var events = JSON.parse(querystring.parse(server.requests[2].requestBody).e);
@@ -1240,21 +1240,21 @@ describe('AmplitudeClient', function() {
       clock.tick(1);
       amplitude.logEvent('test');
 
-      assert.equal(amplitude._unsentCount(), 2);
+      assert.equal(amplitude.getInstance()._unsentCount(), 2);
       assert.lengthOf(server.requests, 1);
       server.respondWith([413, {}, '']);
       server.respond();
 
       // backoff and retry
       assert.equal(amplitude.options.uploadBatchSize, 1);
-      assert.equal(amplitude._unsentCount(), 2);
+      assert.equal(amplitude.getInstance()._unsentCount(), 2);
       assert.lengthOf(server.requests, 2);
       server.respondWith([413, {}, '']);
       server.respond();
 
       // after dropping massive event, only 1 event left
       assert.equal(amplitude.options.uploadBatchSize, 1);
-      assert.equal(amplitude._unsentCount(), 1);
+      assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 3);
 
       var events = JSON.parse(querystring.parse(server.requests[2].requestBody).e);
@@ -1329,7 +1329,7 @@ describe('AmplitudeClient', function() {
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
 
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
       amplitude.setOptOut(true);
       amplitude.init(apiKey);
       assert.lengthOf(server.requests, 1);
@@ -1363,11 +1363,11 @@ describe('AmplitudeClient', function() {
     it('should limit identify events queued', function() {
       amplitude.init(apiKey, null, {savedMaxCount: 10});
 
-      amplitude._sending = true;
+      amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
         amplitude.identify(new Identify().add('test', i));
       }
-      amplitude._sending = false;
+      amplitude.getInstance()._sending = false;
 
       amplitude.identify(new Identify().add('test', 100));
       assert.lengthOf(server.requests, 1);
@@ -1421,7 +1421,7 @@ describe('AmplitudeClient', function() {
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
 
       var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
-      amplitude._initUtmData(utmParams);
+      amplitude.getInstance()._initUtmData(utmParams);
 
       amplitude.setUserProperties({user_prop: true});
       assert.lengthOf(server.requests, 1);
@@ -1451,7 +1451,7 @@ describe('AmplitudeClient', function() {
   describe('gatherReferrer', function() {
     beforeEach(function() {
       amplitude.init(apiKey);
-      sinon.stub(amplitude, '_getReferrer').returns('https://amplitude.com/contact');
+      sinon.stub(amplitude.getInstance(), '_getReferrer').returns('https://amplitude.com/contact');
     });
 
     afterEach(function() {
@@ -1524,7 +1524,7 @@ describe('AmplitudeClient', function() {
       reset();
       sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
       amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
-      amplitude._saveReferrer('https://facebook.com/contact');
+      amplitude.getInstance()._saveReferrer('https://facebook.com/contact');
       amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1617,9 +1617,7 @@ describe('AmplitudeClient', function() {
   });
 
   describe('sessionId', function() {
-
     var clock;
-
     beforeEach(function() {
       clock = sinon.useFakeTimers();
       amplitude.init(apiKey);
@@ -1638,77 +1636,18 @@ describe('AmplitudeClient', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events.length, 1);
       assert.notEqual(events[0].session_id, sessionId);
-      assert.notEqual(amplitude._sessionId, sessionId);
-      assert.equal(events[0].session_id, amplitude._sessionId);
+      assert.notEqual(amplitude.getInstance()._sessionId, sessionId);
+      assert.equal(events[0].session_id, amplitude.getInstance()._sessionId);
     });
 
     it('should be fetched correctly by getSessionId', function() {
       var timestamp = 1000;
       clock.tick(timestamp);
-      var amplitude2 = new AmplitudeClient();
+      var amplitude2 = new Amplitude();
       amplitude2.init(apiKey);
-      assert.equal(amplitude2._sessionId, timestamp);
+      assert.equal(amplitude2.getInstance()._sessionId, timestamp);
       assert.equal(amplitude2.getSessionId(), timestamp);
-      assert.equal(amplitude2.getSessionId(), amplitude2._sessionId);
-    });
-  });
-
-  describe('truncate', function() {
-    var longString = new Array(2000).join('a');
-
-    it('should truncate long strings', function() {
-      eventProperties = amplitude._truncate({'test': longString});
-      assert.lengthOf(eventProperties['test'], 1024);
-    });
-
-    it('should ignore keys', function() {
-      var eventProperties = {};
-      eventProperties[longString] = 'test';
-      eventProperties = amplitude._truncate(eventProperties);
-      assert.isTrue(longString in eventProperties);
-    });
-
-    it('should handle arrays', function() {
-      var eventProperties = [longString, longString];
-      eventProperties = amplitude._truncate(eventProperties);
-      assert.lengthOf(eventProperties, 2);
-      assert.lengthOf(eventProperties[0], 1024);
-      assert.lengthOf(eventProperties[1], 1024);
-    });
-
-    it('should handle nested dictionaries', function() {
-      var name = {'first': 'John', 'last': longString};
-      var eventProperties = amplitude._truncate({'name': name});
-      assert.lengthOf(Object.keys(eventProperties), 1);
-      assert.lengthOf(Object.keys(eventProperties['name']), 2);
-      assert.lengthOf(eventProperties['name']['first'], 4);
-      assert.lengthOf(eventProperties['name']['last'], 1024);
-    });
-
-    it('should ignore boolean and number values', function() {
-      var test = {'key1': 24, 'key2': false};
-      assert.deepEqual(test, amplitude._truncate(test));
-    });
-
-    it('should handle nested arrays', function() {
-      var test = [longString, 'test'];
-      var eventProperties = amplitude._truncate([test, test]);
-      assert.lengthOf(eventProperties, 2);
-      assert.lengthOf(eventProperties[0], 2);
-      assert.lengthOf(eventProperties[1], 2);
-      assert.lengthOf(eventProperties[0][0], 1024);
-      assert.lengthOf(eventProperties[0][1], 4);
-      assert.lengthOf(eventProperties[1][0], 1024);
-      assert.lengthOf(eventProperties[1][1], 4);
-    });
-
-    it('should handle arrays nested inside dictionaries', function() {
-      var test = [longString, 'test'];
-      var eventProperties = amplitude._truncate({'name': test});
-      assert.lengthOf(Object.keys(eventProperties), 1);
-      assert.lengthOf(eventProperties['name'], 2);
-      assert.lengthOf(eventProperties['name'][0], 1024);
-      assert.lengthOf(eventProperties['name'][1], 4);
+      assert.equal(amplitude2.getSessionId(), amplitude2.getInstance()._sessionId);
     });
   });
 });

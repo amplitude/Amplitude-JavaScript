@@ -8,4 +8,4 @@
   require('./identify.js');
   require('./cookiestorage.js');
   require('./utm.js');
-  // require('./amplitude.js'); // test for backwards compatability
+  require('./amplitude.js');

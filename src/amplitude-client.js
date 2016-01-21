@@ -73,8 +73,6 @@ AmplitudeClient.prototype._sessionId = null;
 AmplitudeClient.prototype._newSession = false;
 AmplitudeClient.prototype._updateScheduled = false;
 
-AmplitudeClient.prototype.Identify = Identify;
-
 /**
  * Initializes AmplitudeClient.
  * apiKey The API Key for your app
@@ -169,7 +167,6 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
   }
 };
 
-/* DOES THIS HAPPEN ON AMPLITUDE INSTEAD OF AMPLITUDECLIENT? */
 AmplitudeClient.prototype.runQueuedFunctions = function () {
   for (var i = 0; i < this._q.length; i++) {
     var fn = this[this._q[i][0]];

@@ -33,7 +33,7 @@ var Amplitude = function() {
 
 Amplitude.prototype.getInstance = function(instance) {
   instance = instance || DEFAULT_INSTANCE;
-  if (!(instance in this._instances)) {
+  if (!this._instances.hasOwnProperty(instance)) {
     this._instances[instance] = new AmplitudeClient();
   }
   return this._instances[instance];
@@ -65,9 +65,12 @@ Amplitude.prototype.runQueuedFunctions = function () {
  */
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   this.getInstance().init(apiKey, opt_userId, opt_config, function() {
-    window.amplitude.options = window.amplitude.getInstance().options;
-    callback();
-  });
+    // make options such as deviceId available for callback functions
+    this.options = this.getInstance().options;
+    if (callback && type(callback) === 'function') {
+      callback();
+    }
+  }.bind(this));
 };
 
 Amplitude.prototype.isNewSession = function() {

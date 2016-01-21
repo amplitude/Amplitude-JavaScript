@@ -94,21 +94,15 @@
 /* jshint expr:true */
 
 var Amplitude = require('./amplitude');
-
 var old = window.amplitude || {};
 var newInstance = new Amplitude();
-
-// migrate old queue
 newInstance._q = old._q || [];
-
-// migrate each instance's queue
-for (var instance in old._iq) {
+for (var instance in old._iq) { // migrate each instance's queue
   if (old._iq.hasOwnProperty(instance)) {
     newInstance.getInstance(instance)._q = old._iq[instance]._q || [];
   }
 }
 
-// export the instance
 module.exports = newInstance;
 
 }, {"./amplitude":2}],
@@ -148,7 +142,7 @@ var Amplitude = function() {
 
 Amplitude.prototype.getInstance = function(instance) {
   instance = instance || DEFAULT_INSTANCE;
-  if (!(instance in this._instances)) {
+  if (!this._instances.hasOwnProperty(instance)) {
     this._instances[instance] = new AmplitudeClient();
   }
   return this._instances[instance];
@@ -180,9 +174,12 @@ Amplitude.prototype.runQueuedFunctions = function () {
  */
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   this.getInstance().init(apiKey, opt_userId, opt_config, function() {
-    window.amplitude.options = window.amplitude.getInstance().options;
-    callback();
-  });
+    // make options such as deviceId available for callback functions
+    this.options = this.getInstance().options;
+    if (callback && type(callback) === 'function') {
+      callback();
+    }
+  }.bind(this));
 };
 
 Amplitude.prototype.isNewSession = function() {
@@ -340,8 +337,6 @@ AmplitudeClient.prototype._sessionId = null;
 AmplitudeClient.prototype._newSession = false;
 AmplitudeClient.prototype._updateScheduled = false;
 
-AmplitudeClient.prototype.Identify = Identify;
-
 /**
  * Initializes AmplitudeClient.
  * apiKey The API Key for your app
@@ -436,7 +431,6 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
   }
 };
 
-/* DOES THIS HAPPEN ON AMPLITUDE INSTEAD OF AMPLITUDECLIENT? */
 AmplitudeClient.prototype.runQueuedFunctions = function () {
   for (var i = 0; i < this._q.length; i++) {
     var fn = this[this._q[i][0]];
@@ -2229,7 +2223,7 @@ Identify.prototype.append = function(property, value) {
 // If clearAll already in Identify, don't add other operations
 Identify.prototype.clearAll = function() {
   if (Object.keys(this.userPropertiesOperations).length > 0) {
-    if (!(AMP_OP_CLEAR_ALL in this.userPropertiesOperations)) {
+    if (!this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
       log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
     }
     return this;
