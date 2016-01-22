@@ -364,29 +364,36 @@ describe('Amplitude', function() {
 
   describe('setDeviceId', function() {
 
+    beforeEach(function() {
+      reset();
+    });
+
     afterEach(function() {
       reset();
     });
 
     it('should change device id', function() {
+      amplitude.init(apiKey, null, {'deviceId': 'fakeDeviceId'});
       amplitude.setDeviceId('deviceId');
-      amplitude.init(apiKey);
       assert.equal(amplitude.options.deviceId, 'deviceId');
     });
 
     it('should not change device id if empty', function() {
+      amplitude.init(apiKey, null, {'deviceId': 'deviceId'});
       amplitude.setDeviceId('');
-      amplitude.init(apiKey);
       assert.notEqual(amplitude.options.deviceId, '');
+      assert.equal(amplitude.options.deviceId, 'deviceId');
     });
 
     it('should not change device id if null', function() {
+      amplitude.init(apiKey, null, {'deviceId': 'deviceId'});
       amplitude.setDeviceId(null);
-      amplitude.init(apiKey);
       assert.notEqual(amplitude.options.deviceId, null);
+      assert.equal(amplitude.options.deviceId, 'deviceId');
     });
 
     it('should store device id in cookie', function() {
+      amplitude.init(apiKey, null, {'deviceId': 'fakeDeviceId'});
       amplitude.setDeviceId('deviceId');
       var stored = cookie.get(amplitude.options.cookieName);
       assert.propertyVal(stored, 'deviceId', 'deviceId');

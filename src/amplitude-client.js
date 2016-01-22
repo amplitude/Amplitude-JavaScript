@@ -2,7 +2,6 @@ var cookieStorage = require('./cookiestorage');
 var getUtmData = require('./utm');
 var Identify = require('./identify');
 var JSON = require('json'); // jshint ignore:line
-var language = require('./language');
 var localStorage = require('./localstorage');  // jshint ignore:line
 var md5 = require('JavaScript-MD5');
 var object = require('object');
@@ -11,6 +10,7 @@ var UAParser = require('ua-parser-js');
 var UUID = require('./uuid');
 var version = require('./version');
 var type = require('./type');
+var DEFAULT_OPTIONS = require('./options');
 
 var log = function(s) {
   console.log('[Amplitude] ' + s);
@@ -19,25 +19,6 @@ var log = function(s) {
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
 var MAX_STRING_LENGTH = 1024;
-var DEFAULT_OPTIONS = {
-  apiEndpoint: 'api.amplitude.com',
-  cookieExpiration: 365 * 10,
-  cookieName: 'amplitude_id',
-  domain: undefined,
-  includeUtm: false,
-  language: language.language,
-  optOut: false,
-  platform: 'Web',
-  savedMaxCount: 1000,
-  saveEvents: true,
-  sessionTimeout: 30 * 60 * 1000,
-  unsentKey: 'amplitude_unsent',
-  unsentIdentifyKey: 'amplitude_unsent_identify',
-  uploadBatchSize: 100,
-  batchEvents: false,
-  eventUploadThreshold: 30,
-  eventUploadPeriodMillis: 30 * 1000 // 30s
-};
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
@@ -167,6 +148,14 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
   }
 };
 
+AmplitudeClient.prototype._apiKeySet = function(methodName) {
+  if (!this.options.apiKey) {
+    log('apiKey cannot be undefined or null, set apiKey with init() before calling ' + methodName);
+    return false;
+  }
+  return true;
+};
+
 AmplitudeClient.prototype.runQueuedFunctions = function () {
   for (var i = 0; i < this._q.length; i++) {
     var fn = this[this._q[i][0]];
@@ -245,7 +234,11 @@ AmplitudeClient.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
-// backwards migration fix for users that upgraded to broken v2.6.0
+/*
+ * Backwards migration fix for users that upgraded to broken v2.6.0
+ * In v2.6.0 we saved deviceId and userId to localStorage; however, localstorage does not work across subdomains
+ * This migration moves deviceId and userId back to the cookie.
+ */
 var _migrateLocalStorageDataToCookie = function(scope) {
   var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (cookieData && cookieData.deviceId) {
@@ -382,6 +375,10 @@ AmplitudeClient.prototype._saveReferrer = function(referrer) {
 };
 
 AmplitudeClient.prototype.saveEvents = function() {
+  if (!this._apiKeySet('saveEvents()')) {
+    return;
+  }
+
   try {
     localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
     localStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
@@ -391,6 +388,10 @@ AmplitudeClient.prototype.saveEvents = function() {
 };
 
 AmplitudeClient.prototype.setDomain = function(domain) {
+  if (!this._apiKeySet('setDomain()')) {
+    return;
+  }
+
   try {
     this.cookieStorage.options({
       domain: domain
@@ -405,6 +406,10 @@ AmplitudeClient.prototype.setDomain = function(domain) {
 };
 
 AmplitudeClient.prototype.setUserId = function(userId) {
+  if (!this._apiKeySet('setUserId()')) {
+    return;
+  }
+
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
@@ -415,6 +420,10 @@ AmplitudeClient.prototype.setUserId = function(userId) {
 };
 
 AmplitudeClient.prototype.setOptOut = function(enable) {
+  if (!this._apiKeySet('setOptOut()')) {
+    return;
+  }
+
   try {
     this.options.optOut = enable;
     _saveCookieData(this);
@@ -425,6 +434,12 @@ AmplitudeClient.prototype.setOptOut = function(enable) {
 };
 
 AmplitudeClient.prototype.setDeviceId = function(deviceId) {
+  if (!this._apiKeySet('setDeviceId()')) {
+    return;
+  }
+
+  console.log('setting device id to ' + deviceId);
+
   try {
     if (deviceId) {
       this.options.deviceId = ('' + deviceId);
@@ -436,6 +451,9 @@ AmplitudeClient.prototype.setDeviceId = function(deviceId) {
 };
 
 AmplitudeClient.prototype.setUserProperties = function(userProperties) {
+  if (!this._apiKeySet('setUserProperties()')) {
+    return;
+  }
   // convert userProperties into an identify call
   var identify = new Identify();
   for (var property in userProperties) {
@@ -448,12 +466,19 @@ AmplitudeClient.prototype.setUserProperties = function(userProperties) {
 
 // Clearing user properties is irreversible!
 AmplitudeClient.prototype.clearUserProperties = function(){
+  if (!this._apiKeySet('clearUserProperties()')) {
+    return;
+  }
+
   var identify = new Identify();
   identify.clearAll();
   this.identify(identify);
 };
 
 AmplitudeClient.prototype.identify = function(identify) {
+  if (!this._apiKeySet('identify()')) {
+    return;
+  }
 
   if (type(identify) === 'object' && '_q' in identify) {
     var instance = new Identify();
@@ -601,6 +626,9 @@ AmplitudeClient.prototype._limitEventsQueued = function(queue) {
 };
 
 AmplitudeClient.prototype.logEvent = function(eventType, eventProperties, callback) {
+  if (!this._apiKeySet('logEvent()')) {
+    return -1;
+  }
   return this._logEvent(eventType, eventProperties, null, null, callback);
 };
 
@@ -611,9 +639,9 @@ var _isNumber = function(n) {
 
 AmplitudeClient.prototype.logRevenue = function(price, quantity, product) {
   // Test that the parameters are of the right type.
-  if (!_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
+  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
     // log('Price and quantity arguments to logRevenue must be numbers');
-    return;
+    return -1;
   }
 
   return this._logEvent('revenue_amount', {}, {
@@ -651,6 +679,10 @@ AmplitudeClient.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
 };
 
 AmplitudeClient.prototype.sendEvents = function(callback) {
+  if (!this._apiKeySet('sendEvents()')) {
+    return;
+  }
+
   if (!this._sending && !this.options.optOut && this._unsentCount() > 0) {
     this._sending = true;
     var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +

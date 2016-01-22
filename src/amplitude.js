@@ -1,29 +1,10 @@
 var AmplitudeClient = require('./amplitude-client');
 var Identify = require('./identify');
-var language = require('./language');
 var object = require('object');
 var type = require('./type');
 var version = require('./version');
+var DEFAULT_OPTIONS = require('./options');
 
-var DEFAULT_OPTIONS = {
-  apiEndpoint: 'api.amplitude.com',
-  cookieExpiration: 365 * 10,
-  cookieName: 'amplitude_id',
-  domain: undefined,
-  includeUtm: false,
-  language: language.language,
-  optOut: false,
-  platform: 'Web',
-  savedMaxCount: 1000,
-  saveEvents: true,
-  sessionTimeout: 30 * 60 * 1000,
-  unsentKey: 'amplitude_unsent',
-  unsentIdentifyKey: 'amplitude_unsent_identify',
-  uploadBatchSize: 100,
-  batchEvents: false,
-  eventUploadThreshold: 30,
-  eventUploadPeriodMillis: 30 * 1000 // 30s
-};
 var DEFAULT_INSTANCE = '$defaultInstance';
 
 var Amplitude = function() {
