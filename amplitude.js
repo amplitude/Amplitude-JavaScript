@@ -343,21 +343,14 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    _migrateLocalStorageDataToCookie(this);
+    _upgradeCookeData(this);
     _loadCookieData(this);
 
-    /* DEVICE ID WILL BE DIFFERENT ACROSS APPS */
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
         opt_config.deviceId !== null && opt_config.deviceId) ||
         this.options.deviceId || UUID();
     this.options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || this.options.userId || null;
 
-    /* MIGRATE LOCAL STORAGE KEYS? */
-    this._lastEventTime = this._lastEventTime || parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
-    this._sessionId = this._sessionId || parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
-    this._eventId = this._eventId || parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID)) || 0;
-    this._identifyId = this._identifyId || parseInt(localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID)) || 0;
-    this._sequenceNumber = this._sequenceNumber || parseInt(localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER)) || 0;
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
@@ -365,7 +358,6 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     }
     this._lastEventTime = now;
     _saveCookieData(this);
-    _clearSessionAndEventTrackingFromLocalStorage();
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
@@ -479,46 +471,65 @@ AmplitudeClient.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
+var _getAndRemoveFromLocalStorage = function(key) {
+  var value = localStorage.getItem(key);
+  if (value !== undefined && value !== null) {
+    localStorage.removeItem(key);
+  }
+  return value;
+};
+
 /*
- * Backwards migration fix for users that upgraded to broken v2.6.0
- * In v2.6.0 we saved deviceId and userId to localStorage; however, localstorage does not work across subdomains
- * This migration moves deviceId and userId back to the cookie.
+ * cookieData (deviceId, userId, optOut, sessionId, lastEventTime, eventId, identifyId, sequenceNumber)
+ * can be stored in many different places (localStorage, cookie, etc).
+ * Need to unify all sources into one place with a one-time upgrade/migration.
  */
-var _migrateLocalStorageDataToCookie = function(scope) {
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+var _upgradeCookeData = function(scope) {
+  // skip if migration already happened
+  var keySuffix = '_' + scope.options.apiKey.slice(0, 6); // use apiKey to separate different instance storages
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName + keySuffix);
   if (cookieData && cookieData.deviceId) {
-    return; // migration not needed
+    return;
   }
 
-  var cookieDeviceId = (cookieData && cookieData.deviceId) || null;
-  var cookieUserId = (cookieData && cookieData.userId) || null;
-  var cookieOptOut = (cookieData && cookieData.optOut !== null && cookieData.optOut !== undefined) ?
-      cookieData.optOut : null;
-
-  var keySuffix = '_' + scope.options.apiKey.slice(0, 6);
-  var localStorageDeviceId = localStorage.getItem(LocalStorageKeys.DEVICE_ID + keySuffix);
-  if (localStorageDeviceId) {
-    localStorage.removeItem(LocalStorageKeys.DEVICE_ID + keySuffix);
-  }
-  var localStorageUserId = localStorage.getItem(LocalStorageKeys.USER_ID + keySuffix);
-  if (localStorageUserId) {
-    localStorage.removeItem(LocalStorageKeys.USER_ID + keySuffix);
-  }
-  var localStorageOptOut = localStorage.getItem(LocalStorageKeys.OPT_OUT + keySuffix);
+  var localStorageDeviceId = _getAndRemoveFromLocalStorage(LocalStorageKeys.DEVICE_ID + keySuffix);
+  var localStorageUserId = _getAndRemoveFromLocalStorage(LocalStorageKeys.USER_ID + keySuffix);
+  var localStorageOptOut = _getAndRemoveFromLocalStorage(LocalStorageKeys.OPT_OUT + keySuffix);
   if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
-    localStorage.removeItem(LocalStorageKeys.OPT_OUT + keySuffix);
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
+  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.SESSION_ID));
+  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_TIME));
+  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_ID));
+  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID));
+  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER));
 
-  scope.cookieStorage.set(scope.options.cookieName, {
-    deviceId: cookieDeviceId || localStorageDeviceId,
-    userId: cookieUserId || localStorageUserId,
-    optOut: (cookieOptOut !== undefined && cookieOptOut !== null) ? cookieOptOut : localStorageOptOut
-  });
+  var oldCookieData = scope.cookieStorage.get(scope.options.cookieName);
+  var _getFromCookies = function(key) {
+    return (cookieData && cookieData[key]) || (oldCookieData && oldCookieData[key]);
+  };
+
+  scope.options.deviceId = _getFromCookies('deviceId') || localStorageDeviceId;
+  scope.options.userId = _getFromCookies('userId') || localStorageUserId;
+  scope._sessionId = _getFromCookies('sessionId') || localStorageSessionId || scope._sessionId;
+  scope._lastEventTime = _getFromCookies('lastEventTime') || localStorageLastEventTime || scope._lastEventTime;
+  scope._eventId = _getFromCookies('eventId') || localStorageEventId || scope._eventId;
+  scope._identifyId = _getFromCookies('identifyId') || localStorageIdentifyId || scope._identifyId;
+  scope._sequenceNumber = _getFromCookies('sequenceNumber') || localStorageSequenceNumber || scope._sequenceNumber;
+
+  // optOut is a little trickier since it is a boolean
+  scope.options.optOut = localStorageOptOut;
+  if (cookieData && cookieData.optOut !== undefined && cookieData.optOut !== null) {
+    scope.options.optOut = String(cookieData.optOut) === 'true';
+  } else if (oldCookieData && oldCookieData.optOut !== undefined && oldCookieData.optOut !== null) {
+    scope.options.optOut = String(oldCookieData.optOut) === 'true';
+  }
+
+  _saveCookieData(scope);
 };
 
 var _loadCookieData = function(scope) {
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope.options.apiKey.slice(0, 6));
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -548,7 +559,7 @@ var _loadCookieData = function(scope) {
 };
 
 var _saveCookieData = function(scope) {
-  scope.cookieStorage.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName + scope.options.apiKey.slice(0, 6), {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut,
@@ -559,17 +570,6 @@ var _saveCookieData = function(scope) {
     sequenceNumber: scope._sequenceNumber
   });
 };
-
-// the follow fields used to be saved in localStorage, now saved in cookie to support different subdomains
-var _clearSessionAndEventTrackingFromLocalStorage = function() {
-  localStorage.removeItem(LocalStorageKeys.SESSION_ID);
-  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
-  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
-  localStorage.removeItem(LocalStorageKeys.LAST_IDENTIFY_ID);
-  localStorage.removeItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
-};
-
-
 
 /**
  * Parse the utm properties out of cookies and query for adding to user properties.
