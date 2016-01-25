@@ -10,7 +10,7 @@ describe('Amplitude', function() {
   var JSON = require('json');
   var Identify = require('../src/identify.js');
   var apiKey = '000000';
-  var keySuffix = apiKey.slice(0,6);
+  var keySuffix = '_' + apiKey.slice(0,6);
   var userId = 'user';
   var amplitude;
   var server;
@@ -86,9 +86,9 @@ describe('Amplitude', function() {
 
       assert.isNull(cookie.get(amplitude.options.cookieName));
       assert.isNull(cookie.get(amplitude.options.cookieName + keySuffix));
-      localStorage.setItem('amplitude_deviceId' + '_' + keySuffix, deviceId);
-      localStorage.setItem('amplitude_userId' + '_' + keySuffix, userId);
-      localStorage.setItem('amplitude_optOut' + '_' + keySuffix, true);
+      localStorage.setItem('amplitude_deviceId' + keySuffix, deviceId);
+      localStorage.setItem('amplitude_userId' + keySuffix, userId);
+      localStorage.setItem('amplitude_optOut' + keySuffix, true);
 
       amplitude.init(apiKey);
       assert.equal(amplitude.options.deviceId, deviceId);
@@ -101,175 +101,10 @@ describe('Amplitude', function() {
       assert.equal(cookieData.userId, userId);
       assert.isTrue(cookieData.optOut);
 
-      assert.isNull(localStorage.getItem('amplitude_deviceId' + '_' + keySuffix));
-      assert.isNull(localStorage.getItem('amplitude_userId' + '_' + keySuffix));
-      assert.isNull(localStorage.getItem('amplitude_optOut' + '_' + keySuffix));
+      assert.isNull(localStorage.getItem('amplitude_deviceId' + keySuffix));
+      assert.isNull(localStorage.getItem('amplitude_userId' + keySuffix));
+      assert.isNull(localStorage.getItem('amplitude_optOut' + keySuffix));
     });
-
-    // it ('should migrate data from localStorage to cookie but preserve existing values', function() {
-    //   var deviceId = 'test_device_id2';
-    //   var userId = 'test_user_id2';
-
-    //   // use amplitude1 to set cookie values
-    //   amplitude.init(apiKey, userId, {deviceId: deviceId});
-    //   assert.equal(amplitude.options.deviceId, deviceId);
-    //   assert.equal(amplitude.options.userId, userId);
-    //   assert.isFalse(amplitude.options.optOut);
-
-    //   var cookieData = cookie.get(amplitude.options.cookieName);
-    //   assert.equal(cookieData.deviceId, deviceId);
-    //   assert.equal(cookieData.userId, userId);
-    //   assert.isFalse(cookieData.optOut);
-
-    //   // remove deviceId to make amplitude2 go through migration process
-    //   cookie.set(amplitude.options.cookieName, {
-    //     'userId': userId,
-    //     'optOut': false
-    //   });
-
-    //   // set local storage values and verify that they are ignored by the init migration
-    //   localStorage.setItem('amplitude_deviceId' + '_' + apiKey, deviceId);
-    //   localStorage.setItem('amplitude_userId' + '_' + apiKey, 'test_bad_user_id');  // ignored
-    //   localStorage.setItem('amplitude_optOut' + '_' + apiKey, true); // ignored
-
-    //   var amplitude2 = new Amplitude();
-    //   amplitude2.init(apiKey);
-    //   assert.equal(amplitude2.options.deviceId, deviceId);
-    //   assert.equal(amplitude2.options.userId, userId);
-    //   assert.isFalse(amplitude2.options.optOut);
-
-    //   cookieData = cookie.get(amplitude.options.cookieName);
-    //   assert.equal(cookieData.deviceId, deviceId);
-    //   assert.equal(cookieData.userId, userId);
-    //   assert.isFalse(cookieData.optOut);
-
-    //   assert.isNull(localStorage.getItem('amplitude_deviceId' + '_' + apiKey));
-    //   assert.isNull(localStorage.getItem('amplitude_userId' + '_' + apiKey));
-    //   assert.isNull(localStorage.getItem('amplitude_optOut' + '_' + apiKey));
-    // });
-
-    // it('should save cookie data to localStorage if cookies are not enabled', function() {
-    //   var cookieStorageKey = 'amp_cookiestore_amplitude_id';
-    //   var deviceId = 'test_device_id';
-    //   var clock = sinon.useFakeTimers();
-    //   clock.tick(1000);
-
-    //   localStorage.clear();
-    //   sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
-    //   var amplitude2 = new Amplitude();
-    //   CookieStorage.prototype._cookiesEnabled.restore();
-    //   amplitude2.init(apiKey, userId, {'deviceId': deviceId});
-    //   clock.restore();
-
-    //   var cookieData = JSON.parse(localStorage.getItem(cookieStorageKey));
-    //   assert.deepEqual(cookieData, {
-    //     'deviceId': deviceId,
-    //     'userId': userId,
-    //     'optOut': false,
-    //     'sessionId': 1000,
-    //     'lastEventTime': 1000,
-    //     'eventId': 0,
-    //     'identifyId': 0,
-    //     'sequenceNumber': 0
-    //   });
-
-    //   localStorage.removeItem('amp_cookiestore_amplitude_id')
-    //   assert.isNull(cookie.get(amplitude2.options.cookieName)); // assert did not write to cookies
-    // });
-
-    // it('should load sessionId, eventId from cookie and ignore the one in localStorage', function() {
-    //   var sessionIdKey = 'amplitude_sessionId';
-    //   var lastEventTimeKey = 'amplitude_lastEventTime';
-    //   var eventIdKey = 'amplitude_lastEventId';
-    //   var identifyIdKey = 'amplitude_lastIdentifyId';
-    //   var sequenceNumberKey = 'amplitude_lastSequenceNumber';
-    //   var amplitude2 = new Amplitude();
-
-    //   var clock = sinon.useFakeTimers();
-    //   clock.tick(1000);
-    //   var sessionId = new Date().getTime();
-
-    //   // the following values in localStorage will all be ignored
-    //   localStorage.clear();
-    //   localStorage.setItem(sessionIdKey, 3);
-    //   localStorage.setItem(lastEventTimeKey, 4);
-    //   localStorage.setItem(eventIdKey, 5);
-    //   localStorage.setItem(identifyIdKey, 6);
-    //   localStorage.setItem(sequenceNumberKey, 7);
-
-    //   var cookieData = {
-    //     deviceId: 'test_device_id',
-    //     userId: 'test_user_id',
-    //     optOut: true,
-    //     sessionId: sessionId,
-    //     lastEventTime: sessionId,
-    //     eventId: 50,
-    //     identifyId: 60,
-    //     sequenceNumber: 70
-    //   }
-    //   cookie.set(amplitude2.options.cookieName, cookieData);
-
-    //   clock.tick(10);
-    //   amplitude2.init(apiKey);
-    //   clock.restore();
-
-    //   assert.equal(amplitude2._sessionId, sessionId);
-    //   assert.equal(amplitude2._lastEventTime, sessionId + 10);
-    //   assert.equal(amplitude2._eventId, 50);
-    //   assert.equal(amplitude2._identifyId, 60);
-    //   assert.equal(amplitude2._sequenceNumber, 70);
-
-    //   // verify that existing values in localstorage are cleared out
-    //   assert.isNull(localStorage.getItem(sessionIdKey));
-    //   assert.isNull(localStorage.getItem(lastEventTimeKey));
-    //   assert.isNull(localStorage.getItem(eventIdKey));
-    //   assert.isNull(localStorage.getItem(identifyIdKey));
-    //   assert.isNull(localStorage.getItem(sequenceNumberKey));
-    // });
-
-    // it('should load sessionId from localStorage if not in cookie', function() {
-    //   var sessionIdKey = 'amplitude_sessionId';
-    //   var lastEventTimeKey = 'amplitude_lastEventTime';
-    //   var eventIdKey = 'amplitude_lastEventId';
-    //   var identifyIdKey = 'amplitude_lastIdentifyId';
-    //   var sequenceNumberKey = 'amplitude_lastSequenceNumber';
-    //   var amplitude2 = new Amplitude();
-
-    //   var cookieData = {
-    //     deviceId: 'test_device_id',
-    //     userId: userId,
-    //     optOut: true
-    //   }
-    //   cookie.set(amplitude2.options.cookieName, cookieData);
-
-    //   var clock = sinon.useFakeTimers();
-    //   clock.tick(1000);
-    //   var sessionId = new Date().getTime();
-
-    //   localStorage.clear();
-    //   localStorage.setItem(sessionIdKey, sessionId);
-    //   localStorage.setItem(lastEventTimeKey, sessionId);
-    //   localStorage.setItem(eventIdKey, 50);
-    //   localStorage.setItem(identifyIdKey, 60);
-    //   localStorage.setItem(sequenceNumberKey, 70);
-
-    //   clock.tick(10);
-    //   amplitude2.init(apiKey, userId);
-    //   clock.restore();
-
-    //   assert.equal(amplitude2._sessionId, sessionId);
-    //   assert.equal(amplitude2._lastEventTime, sessionId + 10);
-    //   assert.equal(amplitude2._eventId, 50);
-    //   assert.equal(amplitude2._identifyId, 60);
-    //   assert.equal(amplitude2._sequenceNumber, 70);
-
-    //   // verify that existing values in localstorage are cleared out
-    //   assert.isNull(localStorage.getItem(sessionIdKey));
-    //   assert.isNull(localStorage.getItem(lastEventTimeKey));
-    //   assert.isNull(localStorage.getItem(eventIdKey));
-    //   assert.isNull(localStorage.getItem(identifyIdKey));
-    //   assert.isNull(localStorage.getItem(sequenceNumberKey));
-    // });
   });
 
   describe('runQueuedFunctions', function() {
@@ -399,7 +234,7 @@ describe('Amplitude', function() {
     it('should store device id in cookie', function() {
       amplitude.init(apiKey, null, {'deviceId': 'fakeDeviceId'});
       amplitude.setDeviceId('deviceId');
-      var stored = cookie.get(amplitude.options.cookieName);
+      var stored = cookie.get(amplitude.options.cookieName + keySuffix);
       assert.propertyVal(stored, 'deviceId', 'deviceId');
     });
   });
@@ -1307,7 +1142,7 @@ describe('Amplitude', function() {
       clock.tick(20);
       amplitude2.setUserProperties({'key':'value'}); // identify event at time 30
 
-      var cookieData = JSON.parse(localStorage.getItem('amp_cookiestore_amplitude_id'));
+      var cookieData = JSON.parse(localStorage.getItem('amp_cookiestore_amplitude_id' + keySuffix));
       assert.deepEqual(cookieData, {
         'deviceId': deviceId,
         'userId': null,
@@ -1505,7 +1340,7 @@ describe('Amplitude', function() {
       assert.deepEqual(events[1].user_properties, {});
 
       // referrer should be propagated to session storage
-      assert.equal(sessionStorage.getItem('amplitude_referrer'), 'https://amplitude.com/contact');
+      assert.equal(sessionStorage.getItem('amplitude_referrer' + keySuffix), 'https://amplitude.com/contact');
     });
 
     it('should not set referrer if referrer data already in session storage', function() {
