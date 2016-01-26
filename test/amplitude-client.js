@@ -353,6 +353,74 @@ describe('AmplitudeClient', function() {
       assert.isNull(localStorage.getItem(identifyIdKey));
       assert.isNull(localStorage.getItem(sequenceNumberKey));
     });
+
+    it('should load saved events and upgrade localStorage keys from old keys', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130}]';
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131}]';
+      localStorage.setItem('amplitude_unsent', existingEvent);
+      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+      assert.isNull(localStorage.getItem('amplitude_unsent' + keySuffix));
+      assert.isNull(localStorage.getItem('amplitude_unsent_identify' + keySuffix));
+
+      amplitude.init(apiKey, null, {batchEvents: true});
+
+      // check event loaded into memory
+      assert.deepEqual(amplitude._unsentEvents, JSON.parse(existingEvent));
+      assert.deepEqual(amplitude._unsentIdentifys, JSON.parse(existingIdentify));
+
+      // check local storage key update
+      assert.equal(localStorage.getItem('amplitude_unsent' + keySuffix), existingEvent);
+      assert.equal(localStorage.getItem('amplitude_unsent_identify' + keySuffix), existingIdentify);
+      assert.isNull(localStorage.getItem('amplitude_unsent'));
+      assert.isNull(localStorage.getItem('amplitude_unsent_identify'));
+    });
+
+    it ('should load saved events from localStorage new keys and send events', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130}]';
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131}]';
+      localStorage.setItem('amplitude_unsent' + keySuffix, existingEvent);
+      localStorage.setItem('amplitude_unsent_identify' + keySuffix, existingIdentify);
+
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+      server.respondWith('success');
+      server.respond();
+
+      // check event loaded into memory
+      assert.deepEqual(amplitude._unsentEvents, []);
+      assert.deepEqual(amplitude._unsentIdentifys, []);
+
+      // check local storage key update
+      assert.equal(localStorage.getItem('amplitude_unsent' + keySuffix), JSON.stringify([]));
+      assert.equal(localStorage.getItem('amplitude_unsent_identify' + keySuffix), JSON.stringify([]));
+      assert.isNull(localStorage.getItem('amplitude_unsent'));
+      assert.isNull(localStorage.getItem('amplitude_unsent_identify'));
+
+      // check request
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+      assert.equal(events[0].event_id, 49);
+      assert.equal(events[1].event_type, '$identify');
+    });
+
   });
 
   describe('runQueuedFunctions', function() {
@@ -1591,7 +1659,7 @@ describe('AmplitudeClient', function() {
       assert.equal(sessionStorage.getItem('amplitude_referrer' + keySuffix), 'https://amplitude.com/contact');
     });
 
-    it('should not set referrer if referrer data already in session storage', function() {
+    it('should not set referrer if referrer data old key already in session storage', function() {
       reset();
       sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
       amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
@@ -1614,7 +1682,30 @@ describe('AmplitudeClient', function() {
       assert.deepEqual(events[1].user_properties, {});
     });
 
-    it('should not override any existing initial referrer values in session storage', function() {
+    it('should not set referrer if referrer data new key already in session storage', function() {
+      reset();
+      sessionStorage.setItem('amplitude_referrer' + keySuffix, 'https://www.google.com/search?');
+      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
+      amplitude.logEvent('Referrer Test Event', {});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+
+      // first event should be identify with initial_referrer and NO referrer
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
+        }
+      });
+
+      // second event should be the test event with no referrer information
+      assert.equal(events[1].event_type, 'Referrer Test Event');
+      assert.deepEqual(events[1].user_properties, {});
+    });
+
+    it('should not override any existing initial referrer values old key in session storage', function() {
       reset();
       sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
       amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
@@ -1647,7 +1738,43 @@ describe('AmplitudeClient', function() {
       assert.deepEqual(events[2].user_properties, {});
 
       // existing value persists
-      assert.equal(sessionStorage.getItem('amplitude_referrer'), 'https://www.google.com/search?');
+      assert.equal(sessionStorage.getItem('amplitude_referrer' + keySuffix), 'https://www.google.com/search?');
+    });
+
+    it('should not override any existing initial referrer values new key in session storage', function() {
+      reset();
+      sessionStorage.setItem('amplitude_referrer' + keySuffix, 'https://www.google.com/search?');
+      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
+      amplitude._saveReferrer('https://facebook.com/contact');
+      amplitude.logEvent('Referrer Test Event', {});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 3);
+
+      // first event should be identify with initial_referrer and NO referrer
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
+        }
+      });
+
+      // second event should be another identify but with the new referrer
+      assert.equal(events[1].event_type, '$identify');
+      assert.deepEqual(events[1].user_properties, {
+        '$setOnce': {
+          'initial_referrer': 'https://facebook.com/contact',
+          'initial_referring_domain': 'facebook.com'
+        }
+      });
+
+      // third event should be the test event with no referrer information
+      assert.equal(events[2].event_type, 'Referrer Test Event');
+      assert.deepEqual(events[2].user_properties, {});
+
+      // existing value persists
+      assert.equal(sessionStorage.getItem('amplitude_referrer' + keySuffix), 'https://www.google.com/search?');
     });
   });
 

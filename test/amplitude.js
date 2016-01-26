@@ -1399,7 +1399,7 @@ describe('Amplitude', function() {
       assert.deepEqual(events[2].user_properties, {});
 
       // existing value persists
-      assert.equal(sessionStorage.getItem('amplitude_referrer'), 'https://www.google.com/search?');
+      assert.equal(sessionStorage.getItem('amplitude_referrer' + keySuffix), 'https://www.google.com/search?');
     });
   });
 

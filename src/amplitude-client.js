@@ -103,7 +103,6 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
 
     _upgradeCookeData(this);
     _loadCookieData(this);
-
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
         opt_config.deviceId !== null && opt_config.deviceId) ||
         this.options.deviceId || UUID();
@@ -116,18 +115,16 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     }
     this._lastEventTime = now;
     _saveCookieData(this);
-
-    // _upgradeLocalStorageData();
+    _updateStorageKeys(this);
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
 
     if (this.options.saveEvents) {
-      this._loadSavedUnsentEvents(this.options.unsentKey + this._keySuffix, '_unsentEvents');
-      this._loadSavedUnsentEvents(this.options.unsentIdentifyKey + this._keySuffix, '_unsentIdentifys');
+      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey) || this._unsentEvents;
+      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey) || this._unsentIdentifys;
+      this._sendEventsIfReady();
     }
-
-    this._sendEventsIfReady();
 
     if (this.options.includeUtm) {
       this._initUtmData();
@@ -163,15 +160,16 @@ AmplitudeClient.prototype.runQueuedFunctions = function () {
   this._q = []; // clear function queue after running
 };
 
-AmplitudeClient.prototype._loadSavedUnsentEvents = function(unsentKey, queue) {
-  var savedUnsentEventsString = localStorage.getItem(unsentKey);
+AmplitudeClient.prototype._loadSavedUnsentEvents = function(unsentKey) {
+  var savedUnsentEventsString = this._getFromStorage(localStorage, unsentKey);
   if (savedUnsentEventsString) {
     try {
-      this[queue] = JSON.parse(savedUnsentEventsString);
+      return JSON.parse(savedUnsentEventsString);
     } catch (e) {
       //log(e);
     }
   }
+  return null;
 };
 
 AmplitudeClient.prototype.isNewSession = function() {
@@ -231,11 +229,22 @@ AmplitudeClient.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
+// appends apiKey to storage key to support multiple apps
+// storage argument allows for localStorage and sessionStorage
+AmplitudeClient.prototype._getFromStorage = function(storage, key) {
+  return storage.getItem(key + this._keySuffix);
+};
+
+// appends apiKey to storage key to support multiple apps
+// storage argument allows for localStorage and sessionStorage
+AmplitudeClient.prototype._setInStorage = function(storage, key, value) {
+  storage.setItem(key + this._keySuffix, value);
+};
+
+// helper function to clear values saved with old keys from local storage
 var _getAndRemoveFromLocalStorage = function(key) {
   var value = localStorage.getItem(key);
-  if (value !== undefined && value !== null) {
-    localStorage.removeItem(key);
-  }
+  localStorage.removeItem(key);
   return value;
 };
 
@@ -290,19 +299,20 @@ var _upgradeCookeData = function(scope) {
 };
 
 /*
- * New localStorageKeys need to have apiKey to support multiple apps
+ * New localStorageKeys need to have apiKey to support multiple apps. Update existing keys to new format.
  */
-// var _upgradeLocalStorageData = function(scope) {
-//   var transferKey = function(key) {
-//     var value = localStorage.getItem(key);
-//     if (value !== null && value !== undefined) {
-//       localStorage.setItem(key + scope._keySuffix, value);
-//       localStorage.removeItem(key);
-//     }
-//   };
-//   transferKey(scope.options.unsentKey);
-//   transferKey(scope.options.unsentIdentifyKey);
-// };
+var _updateStorageKeys = function(scope) {
+  var transferStorageKey = function(storage, key) {
+    var value = storage.getItem(key);
+    if (value !== null && value !== undefined) {
+      scope._setInStorage(storage, key, value);
+      storage.removeItem(key);
+    }
+  };
+  transferStorageKey(localStorage, scope.options.unsentKey);
+  transferStorageKey(localStorage, scope.options.unsentIdentifyKey);
+  transferStorageKey(sessionStorage, LocalStorageKeys.REFERRER);
+};
 
 var _loadCookieData = function(scope) {
   var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._keySuffix);
@@ -383,13 +393,12 @@ AmplitudeClient.prototype._saveReferrer = function(referrer) {
   identify.setOnce('initial_referring_domain', referring_domain);
 
   // only save referrer if not already in session storage or if storage disabled
-  var hasSessionStorage = window.sessionStorage ? true : false;
-  if ((hasSessionStorage && !(window.sessionStorage.getItem(LocalStorageKeys.REFERRER + this._keySuffix) ||
-      window.sessionStorage.getItem(LocalStorageKeys.REFERRER))) || !hasSessionStorage) {
+  var hasSessionStorage = sessionStorage ? true : false;
+  if ((hasSessionStorage && !(this._getFromStorage(sessionStorage, LocalStorageKeys.REFERRER))) || !hasSessionStorage) {
     identify.set('referrer', referrer).set('referring_domain', referring_domain);
 
     if (hasSessionStorage) {
-      window.sessionStorage.setItem(LocalStorageKeys.REFERRER + this._keySuffix, referrer);
+      this._setInStorage(sessionStorage, LocalStorageKeys.REFERRER, referrer);
     }
   }
 
@@ -402,8 +411,8 @@ AmplitudeClient.prototype.saveEvents = function() {
   }
 
   try {
-    localStorage.setItem(this.options.unsentKey + this._keySuffix, JSON.stringify(this._unsentEvents));
-    localStorage.setItem(this.options.unsentIdentifyKey + this._keySuffix, JSON.stringify(this._unsentIdentifys));
+    this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
     //log(e);
   }
