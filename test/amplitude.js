@@ -36,8 +36,101 @@ describe('Amplitude', function() {
     cookie.reset();
   }
 
+  describe('getInstance', function() {
+    beforeEach(function() {
+      reset();
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should map no instance to default instance', function() {
+      amplitude.init(apiKey);
+      assert.equal(amplitude.getInstance().options.apiKey, apiKey);
+      assert.equal(amplitude.options, amplitude.getInstance().options);
+      assert.equal(amplitude.getInstance('$defaultInstance').options.apiKey, apiKey);
+      assert.equal(amplitude.getInstance(), amplitude.getInstance('$defaultInstance'));
+
+      assert.equal(amplitude.options.deviceId, amplitude.getInstance().options.deviceId);
+    });
+
+    it('should create two separate instances' , function() {
+      var app1 = amplitude.getInstance('app1');
+      app1.init(1);
+      var app2 = amplitude.getInstance('app2');
+      app2.init(2);
+
+      assert.notEqual(app1, app2);
+      assert.equal(app1.options.apiKey, 1);
+      assert.equal(app2.options.apiKey, 2);
+    });
+
+    it('should return same instance for same key', function() {
+      var app = amplitude.getInstance('app');
+      app.init(1);
+      assert.equal(app, amplitude.getInstance('app'));
+      assert.equal(amplitude.getInstance('app').options.apiKey, 1);
+    });
+
+    it('instances should have separate event queues and settings', function() {
+      var app1 = amplitude.getInstance('app1');
+      app1.init(1);
+      var app2 = amplitude.getInstance('app2');
+      app2.init(2);
+
+      assert.notEqual(app1.options.deviceId, app2.options.deviceId);
+
+      var identify = new Identify().set('key', 'value');
+      app1.identify(identify);
+      app2.logEvent('app2 event');
+
+      assert.lengthOf(app1._unsentEvents, 0);
+      assert.lengthOf(app1._unsentIdentifys, 1);
+      assert.lengthOf(app2._unsentEvents, 1);
+      assert.lengthOf(app2._unsentIdentifys, 0);
+
+      assert.deepEqual(app1._unsentEvents, []);
+      assert.deepEqual(app1._unsentIdentifys[0].user_properties, {'$set':{'key':'value'}});
+      assert.deepEqual(app2._unsentEvents[0].event_type, 'app2 event');
+      assert.deepEqual(app2._unsentIdentifys, []);
+
+      assert.equal(app1._eventId, 0);
+      assert.equal(app1._identifyId, 1);
+      assert.equal(app1._sequenceNumber, 1);
+      assert.equal(app2._eventId, 1);
+      assert.equal(app2._identifyId, 0);
+      assert.equal(app2._sequenceNumber, 1);
+
+      // verify separate localstorages
+      assert.equal(localStorage.getItem('amplitude_unsent_1'), JSON.stringify([]));
+      assert.deepEqual(
+        JSON.parse(localStorage.getItem('amplitude_unsent_identify_1'))[0].user_properties, {'$set':{'key':'value'}}
+      );
+      assert.equal(
+        JSON.parse(localStorage.getItem('amplitude_unsent_2'))[0].event_type, 'app2 event'
+      );
+      assert.equal(localStorage.getItem('amplitude_unsent_identify_2'), JSON.stringify([]));
+
+      // verify separate apiKeys in server requests
+      assert.lengthOf(server.requests, 2);
+      assert.equal(JSON.parse(querystring.parse(server.requests[0].requestBody).client), 1);
+      assert.equal(JSON.parse(querystring.parse(server.requests[1].requestBody).client), 2);
+
+      // verify separate cookie data
+      var cookieData1 = cookie.get(app1.options.cookieName + '_1');
+      assert.equal(cookieData1.deviceId, app1.options.deviceId);
+
+      var cookieData2 = cookie.get(app2.options.cookieName + '_2');
+      assert.equal(cookieData2.deviceId, app2.options.deviceId);
+    });
+  });
+
+
   describe('init', function() {
-    // beforeEach(function() {});
+    beforeEach(function() {
+      reset();
+    });
 
     afterEach(function() {
       reset();

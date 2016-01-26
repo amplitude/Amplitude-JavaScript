@@ -420,7 +420,6 @@ describe('AmplitudeClient', function() {
       assert.equal(events[0].event_id, 49);
       assert.equal(events[1].event_type, '$identify');
     });
-
   });
 
   describe('runQueuedFunctions', function() {
