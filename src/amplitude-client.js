@@ -142,6 +142,8 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
   }
 };
 
+AmplitudeClient.prototype.Identify = Identify;
+
 AmplitudeClient.prototype._apiKeySet = function(methodName) {
   if (!this.options.apiKey) {
     log('apiKey cannot be undefined or null, set apiKey with init() before calling ' + methodName);

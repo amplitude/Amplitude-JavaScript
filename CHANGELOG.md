@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add support for logging events to multiple Amplitude apps. **Note this is a major update, and may break backwards compatability.** See [Readme]() for details.
+
 ## 2.9.0 (January 15, 2016)
 
 * Add ability to clear all user properties.

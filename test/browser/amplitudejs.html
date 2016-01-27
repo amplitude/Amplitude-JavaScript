@@ -74,13 +74,20 @@
     };
 </script>
 <script>
-    amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053', null, {includeReferrer: true}, function() {
-        alert(amplitude.options.deviceId);
+    amplitude.getInstance('app1').init('a2dbce0e18dfe5f8e74493843ff5c053', null, {includeReferrer: true}, function() {
+        alert(amplitude.getInstance('app1').options.deviceId);
     });
-    amplitude.setVersionName('Web');
-    amplitude.identify(new amplitude.Identify().add('photoCount', 1));
-    amplitude.identify(new amplitude.Identify().add('photoCount', 1).set('gender', 'male').unset('karma'));
-    amplitude.logEvent('pageLoad');
+    amplitude.getInstance('app1').setVersionName('Web');
+    amplitude.getInstance('app1').identify(new amplitude.Identify().add('photoCount', 1));
+    amplitude.getInstance('app1').identify(new amplitude.Identify().add('photoCount', 1).set('gender', 'male').unset('karma'));
+    amplitude.getInstance('app1').logEvent('pageLoad');
+
+    amplitude.getInstance('app2').logEvent('log event before init');
+    amplitude.getInstance('app2').init('5a7d9276272cd8d8af9992e41dbdeb95', 'checkers@gmail.com', {includeReferrer: true}, function() {
+        alert(amplitude.getInstance('app2').options.deviceId);
+    });
+    amplitude.getInstance('app2').identify(new amplitude.Identify().set('key', 'value'));
+    amplitude.getInstance('app2').logEvent('app 2 page load');
 </script>
 <body>
 <h3>Amplitude JS Test</h3>
