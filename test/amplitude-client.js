@@ -231,6 +231,29 @@ describe('AmplitudeClient', function() {
       assert.equal(amplitude._sequenceNumber, 0);
     });
 
+    it('should skip the migration newBlankInstance is true', function() {
+      var now = new Date().getTime();
+      var oldCookieData = {
+        deviceId: 'old_device_id',
+        userId: 'old_user_id',
+        optOut: true,
+        sessionId: now-500,
+        lastEventTime: now-500,
+        eventId: 50,
+        identifyId: 60
+      }
+      cookie.set(amplitude.options.cookieName, oldCookieData);
+      amplitude.init(apiKey, 'new_user_id', {newBlankInstance: true});
+      assert.notEqual(amplitude.options.deviceId, 'old_device_id');
+      assert.equal(amplitude.options.userId, 'new_user_id');
+      assert.isFalse(amplitude.options.optOut);
+      assert.isTrue(amplitude._sessionId >= now);
+      assert.isTrue(amplitude._lastEventTime >= now);
+      assert.equal(amplitude._eventId, 0);
+      assert.equal(amplitude._identifyId, 0);
+      assert.equal(amplitude._sequenceNumber, 0);
+    });
+
     it('should save cookie data to localStorage if cookies are not enabled', function() {
       var cookieStorageKey = 'amp_cookiestore_amplitude_id' + keySuffix;
       var deviceId = 'test_device_id';

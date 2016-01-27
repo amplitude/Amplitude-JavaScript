@@ -18,5 +18,6 @@ module.exports = {
   uploadBatchSize: 100,
   batchEvents: false,
   eventUploadThreshold: 30,
-  eventUploadPeriodMillis: 30 * 1000 // 30s
+  eventUploadPeriodMillis: 30 * 1000, // 30s
+  newBlankInstance: false
 };

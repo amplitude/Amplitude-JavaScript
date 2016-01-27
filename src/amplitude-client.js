@@ -85,6 +85,9 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
       if (opt_config.batchEvents !== undefined) {
         this.options.batchEvents = !!opt_config.batchEvents;
       }
+      if (opt_config.newBlankInstance !== undefined) {
+        this.options.newBlankInstance = !!opt_config.newBlankInstance;
+      }
       this.options.platform = opt_config.platform || this.options.platform;
       this.options.language = opt_config.language || this.options.language;
       this.options.sessionTimeout = opt_config.sessionTimeout || this.options.sessionTimeout;
@@ -100,7 +103,9 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    _upgradeCookeData(this);
+    if (!this.options.newBlankInstance) {
+      _upgradeCookeData(this);
+    }
     _loadCookieData(this);
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
         opt_config.deviceId !== null && opt_config.deviceId) ||
@@ -242,13 +247,6 @@ AmplitudeClient.prototype._setInStorage = function(storage, key, value) {
   storage.setItem(key + this._keySuffix, value);
 };
 
-// helper function to clear values saved with old keys from local storage
-var _getAndRemoveFromLocalStorage = function(key) {
-  var value = localStorage.getItem(key);
-  localStorage.removeItem(key);
-  return value;
-};
-
 /*
  * cookieData (deviceId, userId, optOut, sessionId, lastEventTime, eventId, identifyId, sequenceNumber)
  * can be stored in many different places (localStorage, cookie, etc).
@@ -261,6 +259,12 @@ var _upgradeCookeData = function(scope) {
   if (cookieData && cookieData.deviceId) {
     return;
   }
+
+  var _getAndRemoveFromLocalStorage = function(key) {
+    var value = localStorage.getItem(key);
+    localStorage.removeItem(key);
+    return value;
+  };
 
   var localStorageDeviceId = _getAndRemoveFromLocalStorage(LocalStorageKeys.DEVICE_ID + scope._keySuffix);
   var localStorageUserId = _getAndRemoveFromLocalStorage(LocalStorageKeys.USER_ID + scope._keySuffix);
@@ -275,7 +279,6 @@ var _upgradeCookeData = function(scope) {
   var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER));
 
   var oldCookieData = scope.cookieStorage.get(scope.options.cookieName);
-  scope.cookieStorage.remove(scope.options.cookieName); // delete old cookie
   var _getFromCookies = function(key) {
     return (cookieData && cookieData[key]) || (oldCookieData && oldCookieData[key]);
   };
