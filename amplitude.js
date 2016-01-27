@@ -339,7 +339,6 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
       this.options.eventUploadPeriodMillis = opt_config.eventUploadPeriodMillis || this.options.eventUploadPeriodMillis;
     }
 
-    /* NEED TO MIGRATE AND FIX THIS */
     this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
