@@ -32,6 +32,9 @@ describe('Snippet', function() {
 
     assert.deepEqual(Object.keys(amplitude._iq), ['instance1', 'instance2']);
     assert.lengthOf(amplitude._iq['instance1']._q, 1);
+    assert.deepEqual(amplitude._iq['instance1']._q[0], ['init', 'API_KEY1']);
     assert.lengthOf(amplitude._iq['instance2']._q, 2);
+    assert.deepEqual(amplitude._iq['instance2']._q[0], ['init', 'API_KEY2']);
+    assert.deepEqual(amplitude._iq['instance2']._q[1], ['logEvent', 'Event']);
   });
 });

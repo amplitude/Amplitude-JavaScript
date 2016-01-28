@@ -43,6 +43,7 @@ var AmplitudeClient = function() {
   this.options = object.merge({}, DEFAULT_OPTIONS);
   this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
+  this._keySuffix = '';
 };
 
 AmplitudeClient.prototype._eventId = 0;
@@ -53,7 +54,6 @@ AmplitudeClient.prototype._lastEventTime = null;
 AmplitudeClient.prototype._sessionId = null;
 AmplitudeClient.prototype._newSession = false;
 AmplitudeClient.prototype._updateScheduled = false;
-AmplitudeClient.prototype._keySuffix = '';
 
 /**
  * Initializes AmplitudeClient.
