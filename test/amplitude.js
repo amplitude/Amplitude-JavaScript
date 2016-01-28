@@ -270,10 +270,6 @@ describe('Amplitude', function() {
       assert.equal(cookieData.deviceId, deviceId);
       assert.equal(cookieData.userId, userId);
       assert.isTrue(cookieData.optOut);
-
-      assert.isNull(localStorage.getItem('amplitude_deviceId' + keySuffix));
-      assert.isNull(localStorage.getItem('amplitude_userId' + keySuffix));
-      assert.isNull(localStorage.getItem('amplitude_optOut' + keySuffix));
     });
   });
 

@@ -101,10 +101,6 @@ describe('AmplitudeClient', function() {
       assert.equal(cookieData.deviceId, deviceId);
       assert.equal(cookieData.userId, userId);
       assert.isTrue(cookieData.optOut);
-
-      assert.isNull(localStorage.getItem('amplitude_deviceId' + keySuffix));
-      assert.isNull(localStorage.getItem('amplitude_userId' + keySuffix));
-      assert.isNull(localStorage.getItem('amplitude_optOut' + keySuffix));
     });
 
     it('should migrate session and event info from localStorage to cookie', function() {
@@ -133,12 +129,6 @@ describe('AmplitudeClient', function() {
       assert.equal(cookieData.eventId, 3000);
       assert.equal(cookieData.identifyId, 4000);
       assert.equal(cookieData.sequenceNumber, 5000);
-
-      assert.isNull(localStorage.getItem('amplitue_sessionId'));
-      assert.isNull(localStorage.getItem('amplitue_lastEventTime'));
-      assert.isNull(localStorage.getItem('amplitue_lastEventId'));
-      assert.isNull(localStorage.getItem('amplitue_lastIdentifyId'));
-      assert.isNull(localStorage.getItem('amplitue_lastSequenceNumber'));
     });
 
     it('should migrate cookie data from old cookie name and ignore local storage values', function(){
@@ -184,15 +174,6 @@ describe('AmplitudeClient', function() {
       assert.equal(cookieData.eventId, 50);
       assert.equal(cookieData.identifyId, 60);
       assert.equal(cookieData.sequenceNumber, 40);
-
-      assert.isNull(localStorage.getItem('amplitude_deviceId' + keySuffix));
-      assert.isNull(localStorage.getItem('amplitude_userId' + keySuffix));
-      assert.isNull(localStorage.getItem('amplitude_optOut' + keySuffix));
-      assert.isNull(localStorage.getItem('amplitue_sessionId'));
-      assert.isNull(localStorage.getItem('amplitue_lastEventTime'));
-      assert.isNull(localStorage.getItem('amplitue_lastEventId'));
-      assert.isNull(localStorage.getItem('amplitue_lastIdentifyId'));
-      assert.isNull(localStorage.getItem('amplitue_lastSequenceNumber'));
     });
 
     it('should skip the migration if the new cookie already has device id', function() {
@@ -324,13 +305,6 @@ describe('AmplitudeClient', function() {
       assert.equal(amplitude2._eventId, 50);
       assert.equal(amplitude2._identifyId, 60);
       assert.equal(amplitude2._sequenceNumber, 70);
-
-      // verify that existing values in localstorage are cleared out
-      assert.isNull(localStorage.getItem(sessionIdKey));
-      assert.isNull(localStorage.getItem(lastEventTimeKey));
-      assert.isNull(localStorage.getItem(eventIdKey));
-      assert.isNull(localStorage.getItem(identifyIdKey));
-      assert.isNull(localStorage.getItem(sequenceNumberKey));
     });
 
     it('should load sessionId from localStorage if not in cookie', function() {
@@ -368,13 +342,6 @@ describe('AmplitudeClient', function() {
       assert.equal(amplitude2._eventId, 50);
       assert.equal(amplitude2._identifyId, 60);
       assert.equal(amplitude2._sequenceNumber, 70);
-
-      // verify that existing values in localstorage are cleared out
-      assert.isNull(localStorage.getItem(sessionIdKey));
-      assert.isNull(localStorage.getItem(lastEventTimeKey));
-      assert.isNull(localStorage.getItem(eventIdKey));
-      assert.isNull(localStorage.getItem(identifyIdKey));
-      assert.isNull(localStorage.getItem(sequenceNumberKey));
     });
 
     it('should load saved events and upgrade localStorage keys from old keys', function() {
@@ -403,8 +370,6 @@ describe('AmplitudeClient', function() {
       // check local storage key update
       assert.equal(localStorage.getItem('amplitude_unsent' + keySuffix), existingEvent);
       assert.equal(localStorage.getItem('amplitude_unsent_identify' + keySuffix), existingIdentify);
-      assert.isNull(localStorage.getItem('amplitude_unsent'));
-      assert.isNull(localStorage.getItem('amplitude_unsent_identify'));
     });
 
     it ('should load saved events from localStorage new keys and send events', function() {
@@ -433,8 +398,6 @@ describe('AmplitudeClient', function() {
       // check local storage key update
       assert.equal(localStorage.getItem('amplitude_unsent' + keySuffix), JSON.stringify([]));
       assert.equal(localStorage.getItem('amplitude_unsent_identify' + keySuffix), JSON.stringify([]));
-      assert.isNull(localStorage.getItem('amplitude_unsent'));
-      assert.isNull(localStorage.getItem('amplitude_unsent_identify'));
 
       // check request
       assert.lengthOf(server.requests, 1);
@@ -442,6 +405,34 @@ describe('AmplitudeClient', function() {
       assert.lengthOf(events, 2);
       assert.equal(events[0].event_id, 49);
       assert.equal(events[1].event_type, '$identify');
+    });
+
+    it('should not load saved events and upgrade localStorage keys from old keys if newBlankInstance', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130}]';
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131}]';
+      localStorage.setItem('amplitude_unsent', existingEvent);
+      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+      assert.isNull(localStorage.getItem('amplitude_unsent' + keySuffix));
+      assert.isNull(localStorage.getItem('amplitude_unsent_identify' + keySuffix));
+
+      amplitude.init(apiKey, null, {batchEvents: true, newBlankInstance: true});
+
+      // check event loaded into memory
+      assert.deepEqual(amplitude._unsentEvents, []);
+      assert.deepEqual(amplitude._unsentIdentifys, []);
+
+      // check local storage key update
+      assert.isNull(localStorage.getItem('amplitude_unsent' + keySuffix));
+      assert.isNull(localStorage.getItem('amplitude_unsent_identify' + keySuffix));
     });
   });
 

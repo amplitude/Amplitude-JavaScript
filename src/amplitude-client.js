@@ -119,7 +119,10 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     }
     this._lastEventTime = now;
     _saveCookieData(this);
-    _updateStorageKeys(this);
+
+    if (!this.options.newBlankInstance) {
+      _updateStorageKeys(this);
+    }
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
@@ -260,23 +263,17 @@ var _upgradeCookeData = function(scope) {
     return;
   }
 
-  var _getAndRemoveFromLocalStorage = function(key) {
-    var value = localStorage.getItem(key);
-    localStorage.removeItem(key);
-    return value;
-  };
-
-  var localStorageDeviceId = _getAndRemoveFromLocalStorage(LocalStorageKeys.DEVICE_ID + scope._keySuffix);
-  var localStorageUserId = _getAndRemoveFromLocalStorage(LocalStorageKeys.USER_ID + scope._keySuffix);
-  var localStorageOptOut = _getAndRemoveFromLocalStorage(LocalStorageKeys.OPT_OUT + scope._keySuffix);
+  var localStorageDeviceId = localStorage.getItem(LocalStorageKeys.DEVICE_ID + scope._keySuffix);
+  var localStorageUserId = localStorage.getItem(LocalStorageKeys.USER_ID + scope._keySuffix);
+  var localStorageOptOut = localStorage.getItem(LocalStorageKeys.OPT_OUT + scope._keySuffix);
   if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
-  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.SESSION_ID));
-  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_TIME));
-  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_ID));
-  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID));
-  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER));
+  var localStorageSessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID));
+  var localStorageLastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME));
+  var localStorageEventId = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID));
+  var localStorageIdentifyId = parseInt(localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID));
+  var localStorageSequenceNumber = parseInt(localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER));
 
   var oldCookieData = scope.cookieStorage.get(scope.options.cookieName);
   var _getFromCookies = function(key) {
@@ -310,7 +307,6 @@ var _updateStorageKeys = function(scope) {
     var value = storage.getItem(key);
     if (value !== null && value !== undefined) {
       scope._setInStorage(storage, key, value);
-      storage.removeItem(key);
     }
   };
   transferStorageKey(localStorage, scope.options.unsentKey);
