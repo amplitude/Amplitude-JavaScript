@@ -123,10 +123,12 @@ var Amplitude = function() {
 
 Amplitude.prototype.getInstance = function(instance) {
   instance = instance || DEFAULT_INSTANCE;
-  if (!this._instances.hasOwnProperty(instance)) {
-    this._instances[instance] = new AmplitudeClient();
+  var client = this._instances[instance];
+  if (client === undefined) {
+    client = new AmplitudeClient();
+    this._instances[instance] = client;
   }
-  return this._instances[instance];
+  return client;
 };
 
 Amplitude.prototype.Identify = Identify;
