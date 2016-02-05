@@ -36,7 +36,7 @@ Amplitude-Javascript
 
 # 3.0.0 Update and Logging Events to Multiple Amplitude Apps #
 
-Version 3.0.0 is a major update that brings support for logging events to multiple Amplitude apps (multiple API keys). **Note: this change may break backwards compatibility on your setup.** See the subsection below on backwards compatibility.
+Version 3.0.0 is a major update that brings support for logging events to multiple Amplitude apps (multiple API keys). **Note: this change is not 100% backwards compatible and may break on your setup.** See the subsection below on backwards compatibility.
 
 ### API Changes ###
 
@@ -292,7 +292,6 @@ amplitude.getInstance().init('YOUR_API_KEY_HERE', null, {
 | eventUploadPeriodMillis | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
 | deviceId | Custom device ID to set | Randomly generated UUID |
 | sessionTimeout | Time between logged events before a new session starts in milliseconds | 30\*60\*1000 (30 min) |
-| newBlankInstance | initialize this instance with a newly generated deviceId (does not inherit existing deviceId and userId values from before [v3.0.0 update](https://github.com/amplitude/Amplitude-Javascrip#logging-events-to-multiple-amplitude-apps)) | `false` |
 
 # Advanced #
 This SDK automatically grabs useful data about the browser, including browser type and operating system version.
