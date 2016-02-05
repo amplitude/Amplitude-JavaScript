@@ -2,21 +2,22 @@ var AmplitudeClient = require('./amplitude-client');
 var Identify = require('./identify');
 var object = require('object');
 var type = require('./type');
+var utils = require('./utils');
 var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
 var DEFAULT_INSTANCE = '$defaultInstance';
 
 var Amplitude = function() {
-  this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.options = object.merge({}, DEFAULT_OPTIONS); // maintain a copy for backwards compatibilty
   this._instances = {}; // mapping of instance names to instances
 };
 
 Amplitude.prototype.getInstance = function(instance) {
-  instance = instance || DEFAULT_INSTANCE;
+  instance = utils.isEmptyString(instance) ? DEFAULT_INSTANCE : instance;
   var client = this._instances[instance];
   if (client === undefined) {
-    client = new AmplitudeClient();
+    client = new AmplitudeClient(instance);
     this._instances[instance] = client;
   }
   return client;

@@ -111,21 +111,22 @@ var AmplitudeClient = require('./amplitude-client');
 var Identify = require('./identify');
 var object = require('object');
 var type = require('./type');
+var utils = require('./utils');
 var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
 var DEFAULT_INSTANCE = '$defaultInstance';
 
 var Amplitude = function() {
-  this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.options = object.merge({}, DEFAULT_OPTIONS); // maintain a copy for backwards compatibilty
   this._instances = {}; // mapping of instance names to instances
 };
 
 Amplitude.prototype.getInstance = function(instance) {
-  instance = instance || DEFAULT_INSTANCE;
+  instance = utils.isEmptyString(instance) ? DEFAULT_INSTANCE : instance;
   var client = this._instances[instance];
   if (client === undefined) {
-    client = new AmplitudeClient();
+    client = new AmplitudeClient(instance);
     this._instances[instance] = client;
   }
   return client;
@@ -243,7 +244,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./amplitude-client":3,"./identify":4,"object":5,"./type":6,"./version":7,"./options":8}],
+}, {"./amplitude-client":3,"./identify":4,"object":5,"./type":6,"./utils":7,"./version":8,"./options":9}],
 3: [function(require, module, exports) {
 var cookieStorage = require('./cookiestorage');
 var getUtmData = require('./utm');
@@ -254,6 +255,7 @@ var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
 var UAParser = require('ua-parser-js');
+var utils = require('./utils');
 var UUID = require('./uuid');
 var version = require('./version');
 var type = require('./type');
@@ -263,6 +265,7 @@ var log = function(s) {
   console.log('[Amplitude] ' + s);
 };
 
+var DEFAULT_INSTANCE = '$defaultInstance';
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
 var MAX_STRING_LENGTH = 1024;
@@ -283,14 +286,15 @@ var LocalStorageKeys = {
 /*
  * AmplitudeClient API
  */
-var AmplitudeClient = function() {
+var AmplitudeClient = function(instanceName) {
+  this._instanceName = utils.isEmptyString(instanceName) ? DEFAULT_INSTANCE : instanceName;
+  this._storageSuffix = this._instanceName === DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
   this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
-  this._keySuffix = '';
 };
 
 AmplitudeClient.prototype._eventId = 0;
@@ -314,7 +318,6 @@ AmplitudeClient.prototype._updateScheduled = false;
 AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   try {
     this.options.apiKey = apiKey;
-    this._keySuffix = '_' + String(apiKey).slice(0, 6);
 
     if (opt_config) {
       if (opt_config.saveEvents !== undefined) {
@@ -350,7 +353,7 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    if (!this.options.newBlankInstance) {
+    if (this._instanceName === DEFAULT_INSTANCE) {
       _upgradeCookeData(this);
     }
     _loadCookieData(this);
@@ -366,10 +369,6 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     }
     this._lastEventTime = now;
     _saveCookieData(this);
-
-    if (!this.options.newBlankInstance) {
-      _updateStorageKeys(this);
-    }
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
@@ -488,81 +487,71 @@ AmplitudeClient.prototype._sendEventsIfReady = function(callback) {
 // appends apiKey to storage key to support multiple apps
 // storage argument allows for localStorage and sessionStorage
 AmplitudeClient.prototype._getFromStorage = function(storage, key) {
-  return storage.getItem(key + this._keySuffix);
+  return storage.getItem(key + this._storageSuffix);
 };
 
 // appends apiKey to storage key to support multiple apps
 // storage argument allows for localStorage and sessionStorage
 AmplitudeClient.prototype._setInStorage = function(storage, key, value) {
-  storage.setItem(key + this._keySuffix, value);
+  storage.setItem(key + this._storageSuffix, value);
 };
 
 /*
  * cookieData (deviceId, userId, optOut, sessionId, lastEventTime, eventId, identifyId, sequenceNumber)
  * can be stored in many different places (localStorage, cookie, etc).
- * Need to unify all sources into one place with a one-time upgrade/migration.
- * Latest cookiename(s) includes apiKey to support multiple apps.
+ * Need to unify all sources into one place with a one-time upgrade/migration for the defaultInstance.
  */
 var _upgradeCookeData = function(scope) {
   // skip if migration already happened
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._keySuffix);
-  if (cookieData && cookieData.deviceId) {
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+  if (cookieData && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
     return;
   }
 
-  var localStorageDeviceId = localStorage.getItem(LocalStorageKeys.DEVICE_ID + scope._keySuffix);
-  var localStorageUserId = localStorage.getItem(LocalStorageKeys.USER_ID + scope._keySuffix);
-  var localStorageOptOut = localStorage.getItem(LocalStorageKeys.OPT_OUT + scope._keySuffix);
+  var _getAndRemoveFromLocalStorage = function(key) {
+    var value = localStorage.getItem(key);
+    localStorage.removeItem(key);
+    return value;
+  };
+
+  // in v2.6.0, deviceId, userId, optOut was migrated to localStorage with keys + first 6 char of apiKey
+  var apiKeySuffix = '_' + scope.options.apiKey.slice(0, 6);
+  var localStorageDeviceId = _getAndRemoveFromLocalStorage(LocalStorageKeys.DEVICE_ID + apiKeySuffix);
+  var localStorageUserId = _getAndRemoveFromLocalStorage(LocalStorageKeys.USER_ID + apiKeySuffix);
+  var localStorageOptOut = _getAndRemoveFromLocalStorage(LocalStorageKeys.OPT_OUT + apiKeySuffix);
   if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
-  var localStorageSessionId = parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID));
-  var localStorageLastEventTime = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME));
-  var localStorageEventId = parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID));
-  var localStorageIdentifyId = parseInt(localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID));
-  var localStorageSequenceNumber = parseInt(localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER));
 
-  var oldCookieData = scope.cookieStorage.get(scope.options.cookieName);
-  var _getFromCookies = function(key) {
-    return (cookieData && cookieData[key]) || (oldCookieData && oldCookieData[key]);
+  // pre-v2.7.0 event and session meta-data was stored in localStorage. move to cookie for sub-domain support
+  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.SESSION_ID));
+  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_TIME));
+  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_ID));
+  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID));
+  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER));
+
+  var _getFromCookie = function(key) {
+    return cookieData && cookieData[key];
   };
-
-  scope.options.deviceId = _getFromCookies('deviceId') || localStorageDeviceId;
-  scope.options.userId = _getFromCookies('userId') || localStorageUserId;
-  scope._sessionId = _getFromCookies('sessionId') || localStorageSessionId || scope._sessionId;
-  scope._lastEventTime = _getFromCookies('lastEventTime') || localStorageLastEventTime || scope._lastEventTime;
-  scope._eventId = _getFromCookies('eventId') || localStorageEventId || scope._eventId;
-  scope._identifyId = _getFromCookies('identifyId') || localStorageIdentifyId || scope._identifyId;
-  scope._sequenceNumber = _getFromCookies('sequenceNumber') || localStorageSequenceNumber || scope._sequenceNumber;
+  scope.options.deviceId = _getFromCookie('deviceId') || localStorageDeviceId;
+  scope.options.userId = _getFromCookie('userId') || localStorageUserId;
+  scope._sessionId = _getFromCookie('sessionId') || localStorageSessionId || scope._sessionId;
+  scope._lastEventTime = _getFromCookie('lastEventTime') || localStorageLastEventTime || scope._lastEventTime;
+  scope._eventId = _getFromCookie('eventId') || localStorageEventId || scope._eventId;
+  scope._identifyId = _getFromCookie('identifyId') || localStorageIdentifyId || scope._identifyId;
+  scope._sequenceNumber = _getFromCookie('sequenceNumber') || localStorageSequenceNumber || scope._sequenceNumber;
 
   // optOut is a little trickier since it is a boolean
   scope.options.optOut = localStorageOptOut || false;
   if (cookieData && cookieData.optOut !== undefined && cookieData.optOut !== null) {
     scope.options.optOut = String(cookieData.optOut) === 'true';
-  } else if (oldCookieData && oldCookieData.optOut !== undefined && oldCookieData.optOut !== null) {
-    scope.options.optOut = String(oldCookieData.optOut) === 'true';
   }
 
   _saveCookieData(scope);
 };
 
-/*
- * New localStorageKeys need to have apiKey to support multiple apps. Update existing keys to new format.
- */
-var _updateStorageKeys = function(scope) {
-  var transferStorageKey = function(storage, key) {
-    var value = storage.getItem(key);
-    if (value !== null && value !== undefined) {
-      scope._setInStorage(storage, key, value);
-    }
-  };
-  transferStorageKey(localStorage, scope.options.unsentKey);
-  transferStorageKey(localStorage, scope.options.unsentIdentifyKey);
-  transferStorageKey(sessionStorage, LocalStorageKeys.REFERRER);
-};
-
 var _loadCookieData = function(scope) {
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._keySuffix);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -592,7 +581,7 @@ var _loadCookieData = function(scope) {
 };
 
 var _saveCookieData = function(scope) {
-  scope.cookieStorage.set(scope.options.cookieName + scope._keySuffix, {
+  scope.cookieStorage.set(scope.options.cookieName + scope._storageSuffix, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut,
@@ -1070,8 +1059,8 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function(numEvents) {
 
 module.exports = AmplitudeClient;
 
-}, {"./cookiestorage":9,"./utm":10,"./identify":4,"json":11,"./localstorage":12,"JavaScript-MD5":13,"object":5,"./xhr":14,"ua-parser-js":15,"./uuid":16,"./version":7,"./type":6,"./options":8}],
-9: [function(require, module, exports) {
+}, {"./cookiestorage":10,"./utm":11,"./identify":4,"json":12,"./localstorage":13,"JavaScript-MD5":14,"object":5,"./xhr":15,"ua-parser-js":16,"./utils":7,"./uuid":17,"./version":8,"./type":6,"./options":9}],
+10: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -1164,8 +1153,8 @@ cookieStorage.prototype.getStorage = function() {
 
 module.exports = cookieStorage;
 
-}, {"./cookie":17,"json":11,"./localstorage":12}],
-17: [function(require, module, exports) {
+}, {"./cookie":18,"json":12,"./localstorage":13}],
+18: [function(require, module, exports) {
 /*
  * Cookie data
  */
@@ -1294,8 +1283,8 @@ module.exports = {
 
 };
 
-}, {"./base64":18,"json":11,"top-domain":19}],
-18: [function(require, module, exports) {
+}, {"./base64":19,"json":12,"top-domain":20}],
+19: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -1394,8 +1383,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":20}],
-20: [function(require, module, exports) {
+}, {"./utf8":21}],
+21: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1455,7 +1444,7 @@ var UTF8 = {
 module.exports = UTF8;
 
 }, {}],
-11: [function(require, module, exports) {
+12: [function(require, module, exports) {
 
 var json = window.JSON || {};
 var stringify = json.stringify;
@@ -1465,8 +1454,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":21}],
-21: [function(require, module, exports) {
+}, {"json-fallback":22}],
+22: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1956,7 +1945,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-19: [function(require, module, exports) {
+20: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2004,8 +1993,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":22}],
-22: [function(require, module, exports) {
+}, {"url":23}],
+23: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -2090,7 +2079,7 @@ function port (protocol){
 }
 
 }, {}],
-12: [function(require, module, exports) {
+13: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -2194,7 +2183,7 @@ if (!localStorage) {
 module.exports = localStorage;
 
 }, {}],
-10: [function(require, module, exports) {
+11: [function(require, module, exports) {
 var getUtmParam = function(name, query) {
   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
   var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
@@ -2362,7 +2351,7 @@ module.exports = function(val){
 };
 
 }, {}],
-13: [function(require, module, exports) {
+14: [function(require, module, exports) {
 /*
  * JavaScript MD5 1.0.1
  * https://github.com/blueimp/JavaScript-MD5
@@ -2736,7 +2725,7 @@ exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
 }, {}],
-14: [function(require, module, exports) {
+15: [function(require, module, exports) {
 var querystring = require('querystring');
 
 /*
@@ -2782,8 +2771,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":23}],
-23: [function(require, module, exports) {
+}, {"querystring":24}],
+24: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2858,8 +2847,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":24,"type":25}],
-24: [function(require, module, exports) {
+}, {"trim":25,"type":26}],
+25: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2879,7 +2868,7 @@ exports.right = function(str){
 };
 
 }, {}],
-25: [function(require, module, exports) {
+26: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -2928,7 +2917,7 @@ function isBuffer(obj) {
 }
 
 }, {}],
-15: [function(require, module, exports) {
+16: [function(require, module, exports) {
 /* jshint eqeqeq: false, forin: false */
 /* global define */
 
@@ -3811,7 +3800,17 @@ function isBuffer(obj) {
 })(this);
 
 }, {}],
-16: [function(require, module, exports) {
+7: [function(require, module, exports) {
+var isEmptyString = function(str) {
+  return (!str || str.length === 0);
+};
+
+module.exports = {
+  isEmptyString: isEmptyString
+};
+
+}, {}],
+17: [function(require, module, exports) {
 /* jshint bitwise: false, laxbreak: true */
 
 /**
@@ -3845,11 +3844,11 @@ var uuid = function(a) {
 module.exports = uuid;
 
 }, {}],
-7: [function(require, module, exports) {
+8: [function(require, module, exports) {
 module.exports = '2.9.0';
 
 }, {}],
-8: [function(require, module, exports) {
+9: [function(require, module, exports) {
 var language = require('./language');
 
 // default options
@@ -3874,8 +3873,8 @@ module.exports = {
   newBlankInstance: false
 };
 
-}, {"./language":26}],
-26: [function(require, module, exports) {
+}, {"./language":27}],
+27: [function(require, module, exports) {
 var getLanguage = function() {
     return (navigator && ((navigator.languages && navigator.languages[0]) ||
         navigator.language || navigator.userLanguage)) || undefined;
