@@ -38,17 +38,17 @@ Amplitude-Javascript
 
 Version 3.0.0 is a major update that brings support for logging events to multiple Amplitude apps (multiple API keys). **Note: this change may break backwards compatibility on your setup.** See the subsection below on backwards compatibility.
 
-### Changes ###
+### API Changes ###
 
-The `amplitude` object can now maintain one or more instances, where each instance has a separate apiKey, userId, deviceId, and settings. These separate instances allow the logging of events to multiple Amplitude apps.
+The `amplitude` object now maintains one or more instances, where each instance has separate apiKey, userId, deviceId, and settings. Having separate instances allows for the logging of events to separate Amplitude apps.
 
-The most important API change is how you use the `amplitude` object. Before v3.0.0, you would directly call `amplitude.logEvent('EVENT_NAME')`. Now you will need to call functions on an instance as follows: `amplitude.getInstance('INSTANCE_NAME').logEvent('EVENT_NAME')` This notation will be familiar to people who have used our iOS and Android SDKs.
+The most important API change is how you interact with the `amplitude` object. Before v3.0.0, you would directly call `amplitude.logEvent('EVENT_NAME')`. Now you will need to call functions on an instance as follows: `amplitude.getInstance('INSTANCE_NAME').logEvent('EVENT_NAME')` This notation will be familiar to people who have used our iOS and Android SDKs.
 
 ### Continue Logging Events to a Single Amplitude App / API Key ###
 
-If you want to continue logging events to a single Amplitude App (and a single API key), then you will want to call functions on the default instance, which you can fetch by calling `amplitude.getInstance()` with no instance name. The code examples in this README have been updated to follow this use case.
+If you want to continue logging events to a single Amplitude App (and a single API key), then you will want to call functions on the `default instance`, which you can fetch by calling `amplitude.getInstance()` with no instance name. The code examples in this README have been updated to follow this use case.
 
-For example, if you wanted to initialize the SDK with your apiKey and log an event, you would do something like this:
+For example, if you wanted to initialize the SDK with your single apiKey and log an event, you would do something like this:
 
 ```javascript
 amplitude.getInstance().init('API_KEY');
@@ -65,7 +65,7 @@ app.logEvent('EVENT_NAME');
 
 ### Backwards Compatibility ###
 
-Most people upgrading to v3.0.0 will continue logging events to a single Amplitude app. To make this transition as smooth as possible, we try to maintain backwards compatibility for most things. All of the *public* methods of `amplitude` should still work as expected, as they have all been mapped to their equivalent on the default instance.
+Most people upgrading to v3.0.0 will continue logging events to a single Amplitude app. To make this transition as smooth as possible, we try to maintain backwards compatibility for most things. All of the existing event data, existing settings, and returning users (users who already have a deviceId and/or userId) will stay with the `default instance`. All of the *public* methods of `amplitude` should still work as expected, as they have all been mapped to their equivalent on the default instance.
 
 For example `amplitude.init('API_KEY')` should still work as it has been mapped to `amplitude.getInstance().init('API_KEY')`.
 
@@ -79,37 +79,33 @@ Likewise `amplitude.logEvent('EVENT_NAME')` should still work as it has been map
 
 If you want to log events to multiple Amplitude apps, you will want to use separate instances for each Amplitude app. As mentioned earlier, each instance will allow for completely independent apiKeys, userIds, deviceIds, and settings.
 
-You will need to assign a name to each Amplitude app / instance, and use that name consistently when fetching that instance to call functions. You could use names such as `app1`, `app2`, or more descriptive names such as `prod_app`, `test_app`. Note these names do not need to correspond to the names of your apps in the Amplitude dashboards. The only thing that matters is that each instance is initialized with the correct apiKey.
+You will need to assign a name to each Amplitude app / instance, and use that name consistently when fetching that instance to call functions. **IMPORTANT: Once you have chosen a name for that instance you cannot change it.** Every instance's data and settings are tied to its name, and you will need to continue using that instance name for all future versions of your app to maintain data continuity, so chose your instance names wisely. Note these names do not need to correspond to the names of your apps in the Amplitude dashboards, but they need to remain consistent through your code. You also need to be sure that each instance is initialized with the correct apiKey.
 
-Here's an example of how to set up and log events to two separate apps:
+Instance names must be nonnull and nonempty strings. You can fetch each instance by name by calling `amplitude.getInstance('INSTANCE_NAME')`.
 
+As mentioned before, each new instance created will have its own apiKey, userId, deviceId, and settings. **You will have to reconfigure all the settings for each instance.** This gives you the freedom to have different settings for each instance.
+
+### Example of how to Set Up and Log Events to Two Separate Apps ###
 ```javascript
-amplitude.getInstance('original_app').init('12345', null, {batchEvents: true});
-amplitude.getInstance('new_app').init('67890', null, {includeReferrer: true});
+amplitude.getInstance().init('12345', null, {batchEvents: true}); // existing app, existing settings, and existing API key
+amplitude.getInstance('new_app').init('67890', null, {includeReferrer: true}); // new app, new API key
 
-amplitude.getInstance('original_app').setUserProperties({'gender':'male'});
-amplitude.getInstance('original_app').logEvent('Clicked');
+amplitude.getInstance('new_app').setUserId('joe@gmail.com'); // need to reconfigure new app
+amplitude.getInstance('new_app').setUserProperties({'gender':'male'});
+amplitude.getInstance('new_app').logEvent('Clicked');
 
 var identify = new amplitude.Identify().add('karma', 1);
-amplitude.getInstance('new_app').identify(identify);
-amplitude.getInstance('new_app').logEvent('Viewed Home Page');
+amplitude.getInstance().identify(identify);
+amplitude.getInstance().logEvent('Viewed Home Page');
 ```
 
-**IMPORTANT - Upgrading from single app to multiple apps:** if you were tracking users with a single app before v3.0.0, you might be wondering what will happen to returning users (users who already have a deviceId and/or userId). By default any instance you initialize will inherit existing deviceId and userId values from before v3.0.0. This will maintain continuity in your existing app, and those users will appear as returning users. In your new app they will still appear as new users. If you wish to initialize an instance that does not inherit existing deviceId and userId values from before v3.0.0, you can set config option `newBlankInstance` to `true` during initialization.
+### Synchronizing Device Ids Between Apps ###
 
-In the above example, both `original_app` and `new_app` inherit existing deviceId and userId values. Below is an example of how to set up and log events to two separate apps, with `new_app` starting from a clean slate (not inheriting existing deviceId and userId values):
+As mentioned before, each instance will have its own deviceId. If you want your apps to share the same deviceId, you can do so *after init* via the `getDeviceId` and `setDeviceId` methods. Here's an example of how to copy the existing deviceId to the `new_app` instance:
 
 ```javascript
-amplitude.getInstance('original_app').init('12345');
-amplitude.getInstance('new_app').init('67890', null, {newBlankInstance: true});
-
-amplitude.getInstance('original_app').setUserProperties({'gender':'male'});
-amplitude.getInstance('original_app').logEvent('Clicked');
-
-var identify = new amplitude.Identify().add('karma', 1);
-amplitude.getInstance('new_app').setUserId('joe@gmail.com');
-amplitude.getInstance('new_app').identify(identify);
-amplitude.getInstance('new_app').logEvent('Viewed Home Page');
+var deviceId = amplitude.getInstance().getDeviceId(); // existing deviceId
+amplitude.getInstance('new_app').setDeviceId(deviceId); // transferring existing deviceId to new_app
 ```
 
 # Tracking Events #
