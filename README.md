@@ -38,34 +38,15 @@ Amplitude-Javascript
 
 Version 3.0.0 is a major update that brings support for logging events to multiple Amplitude apps (multiple API keys). **Note: this change is not 100% backwards compatible and may break on your setup.** See the subsection below on backwards compatibility.
 
-### API Changes ###
+### API Changes and Backwards Compatibility ###
 
 The `amplitude` object now maintains one or more instances, where each instance has separate apiKey, userId, deviceId, and settings. Having separate instances allows for the logging of events to separate Amplitude apps.
 
-The most important API change is how you interact with the `amplitude` object. Before v3.0.0, you would directly call `amplitude.logEvent('EVENT_NAME')`. Now you will need to call functions on an instance as follows: `amplitude.getInstance('INSTANCE_NAME').logEvent('EVENT_NAME')` This notation will be familiar to people who have used our iOS and Android SDKs.
+The most important API change is how you interact with the `amplitude` object. Before v3.0.0, you would directly call `amplitude.logEvent('EVENT_NAME')`. Now the preferred way is to call functions on an instance as follows: `amplitude.getInstance('INSTANCE_NAME').logEvent('EVENT_NAME')` This notation will be familiar to people who have used our iOS and Android SDKs.
 
-### Continue Logging Events to a Single Amplitude App / API Key ###
+Most people upgrading to v3.0.0 will continue logging events to a single Amplitude app. To make this transition as smooth as possible, we try to maintain backwards compatibility for most things by having a `default instance`, which you can fetch by calling `amplitude.getInstance()` with no instance name. The code examples in this README have been updated to follow this use case. All of the existing event data, existing settings, and returning users (users who already have a deviceId and/or userId) will stay with the `default instance`. You should initialize the default instance with your existing apiKey.
 
-If you want to continue logging events to a single Amplitude App (and a single API key), then you will want to call functions on the `default instance`, which you can fetch by calling `amplitude.getInstance()` with no instance name. The code examples in this README have been updated to follow this use case.
-
-For example, if you wanted to initialize the SDK with your single apiKey and log an event, you would do something like this:
-
-```javascript
-amplitude.getInstance().init('API_KEY');
-amplitude.getInstance().logEvent('EVENT_NAME');
-```
-
-You can also assign the instance to a variable and call functions on that variable:
-
-```javascript
-var app = amplitude.getInstance();
-app.init('API_KEY');
-app.logEvent('EVENT_NAME');
-```
-
-### Backwards Compatibility ###
-
-Most people upgrading to v3.0.0 will continue logging events to a single Amplitude app. To make this transition as smooth as possible, we try to maintain backwards compatibility for most things. All of the existing event data, existing settings, and returning users (users who already have a deviceId and/or userId) will stay with the `default instance`. All of the *public* methods of `amplitude` should still work as expected, as they have all been mapped to their equivalent on the default instance.
+All of the *public* methods of `amplitude` should still work as expected, as they have all been mapped to their equivalent on the default instance.
 
 For example `amplitude.init('API_KEY')` should still work as it has been mapped to `amplitude.getInstance().init('API_KEY')`.
 
@@ -75,11 +56,28 @@ Likewise `amplitude.logEvent('EVENT_NAME')` should still work as it has been map
 
 **Things that will break:** if you were accessing private properties on the `amplitude` object, those will no longer work, e.g. `amplitude._sessionId`, `amplitude._eventId`, etc. You will need to update those references to fetch from the default instance like so: `amplitude.getInstance()._sessionId` and `amplitude.getInstance()._eventId`, etc.
 
+### Logging Events to a Single Amplitude App / API Key (Preferred Method) ###
+
+If you want to continue logging events to a single Amplitude App (and a single API key), then you should call functions on the `default instance`, which you can fetch by calling `amplitude.getInstance()` with no instance name. Here is an example:
+
+```javascript
+amplitude.getInstance().init('API_KEY');
+amplitude.getInstance().logEvent('EVENT_NAME');
+```
+
+You can also assign instances to a variable and call functions on that variable like so:
+
+```javascript
+var app = amplitude.getInstance();
+app.init('API_KEY');
+app.logEvent('EVENT_NAME');
+```
+
 ### Logging Events to Multiple Amplitude Apps ###
 
-If you want to log events to multiple Amplitude apps, you will want to use separate instances for each Amplitude app. As mentioned earlier, each instance will allow for completely independent apiKeys, userIds, deviceIds, and settings.
+If you want to log events to multiple Amplitude apps, you will need to have separate instances for each Amplitude app. As mentioned earlier, each instance will allow for completely independent apiKeys, userIds, deviceIds, and settings.
 
-You will need to assign a name to each Amplitude app / instance, and use that name consistently when fetching that instance to call functions. **IMPORTANT: Once you have chosen a name for that instance you cannot change it.** Every instance's data and settings are tied to its name, and you will need to continue using that instance name for all future versions of your app to maintain data continuity, so chose your instance names wisely. Note these names do not need to correspond to the names of your apps in the Amplitude dashboards, but they need to remain consistent through your code. You also need to be sure that each instance is initialized with the correct apiKey.
+You need to assign a name to each Amplitude app / instance, and use that name consistently when fetching that instance to call functions. **IMPORTANT: Once you have chosen a name for that instance you cannot change it.** Every instance's data and settings are tied to its name, and you will need to continue using that instance name for all future versions of your app to maintain data continuity, so chose your instance names wisely. Note these names do not need to be the names of your apps in the Amplitude dashboards, but they need to remain consistent throughout your code. You also need to be sure that each instance is initialized with the correct apiKey.
 
 Instance names must be nonnull and nonempty strings. You can fetch each instance by name by calling `amplitude.getInstance('INSTANCE_NAME')`.
 
