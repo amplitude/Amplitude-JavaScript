@@ -6,7 +6,7 @@ var utils = require('./utils');
 var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
-var DEFAULT_INSTANCE = '$defaultInstance';
+var DEFAULT_INSTANCE = '$default_instance';
 
 var Amplitude = function() {
   this.options = object.merge({}, DEFAULT_OPTIONS); // maintain a copy for backwards compatibilty
@@ -14,7 +14,11 @@ var Amplitude = function() {
 };
 
 Amplitude.prototype.getInstance = function(instance) {
-  instance = utils.isEmptyString(instance) ? DEFAULT_INSTANCE : instance;
+  if (utils.isEmptyString(instance)) {
+    instance = DEFAULT_INSTANCE;
+  }
+  instance = instance.toLowerCase();
+
   var client = this._instances[instance];
   if (client === undefined) {
     client = new AmplitudeClient(instance);

@@ -51,9 +51,12 @@ describe('Amplitude', function() {
       amplitude.init(apiKey);
       assert.equal(amplitude.getInstance().options.apiKey, apiKey);
       assert.equal(amplitude.options, amplitude.getInstance().options);
-      assert.equal(amplitude.getInstance('$defaultInstance').options.apiKey, apiKey);
-      assert.equal(amplitude.getInstance(), amplitude.getInstance('$defaultInstance'));
+      assert.equal(amplitude.getInstance('$default_instance').options.apiKey, apiKey);
+      assert.equal(amplitude.getInstance(), amplitude.getInstance('$default_instance'));
 
+      // test for case insensitivity
+      assert.equal(amplitude.getInstance(), amplitude.getInstance('$DEFAULT_INSTANCE'));
+      assert.equal(amplitude.getInstance(), amplitude.getInstance('$DEFAULT_instance'));
       assert.equal(amplitude.options.deviceId, amplitude.getInstance().options.deviceId);
     });
 
@@ -66,6 +69,15 @@ describe('Amplitude', function() {
       assert.notEqual(app1, app2);
       assert.equal(app1.options.apiKey, 1);
       assert.equal(app2.options.apiKey, 2);
+
+      assert.equal(app1, amplitude.getInstance('app1'));
+      assert.equal(app1, amplitude.getInstance('APP1'));
+      assert.equal(app1, amplitude.getInstance('aPp1'));
+      assert.equal(app2, amplitude.getInstance('app2'));
+      assert.equal(app2, amplitude.getInstance('APP2'));
+      assert.equal(app2, amplitude.getInstance('aPp2'));
+
+      assert.equal(amplitude.getInstance('APP3')._instanceName, 'app3');
     });
 
     it('should return same instance for same key', function() {

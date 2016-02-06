@@ -45,6 +45,11 @@ describe('AmplitudeClient', function() {
       reset();
     });
 
+    it('should make instanceName case-sensitive', function() {
+      assert.equal(new AmplitudeClient('APP3')._instanceName, 'app3');
+      assert.equal(new AmplitudeClient('$DEFAULT_INSTANCE')._instanceName, '$default_instance');
+    });
+
     it('should accept userId', function() {
       amplitude.init(apiKey, userId);
       assert.equal(amplitude.options.userId, userId);
@@ -335,7 +340,7 @@ describe('AmplitudeClient', function() {
       localStorage.setItem('amplitude_unsent', existingEvent);
       localStorage.setItem('amplitude_unsent_identify', existingIdentify);
 
-      var amplitude2 = new AmplitudeClient('$defaultInstance');
+      var amplitude2 = new AmplitudeClient('$default_Instance');
       amplitude2.init(apiKey, null, {batchEvents: true});
 
       // check event loaded into memory

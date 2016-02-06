@@ -17,7 +17,7 @@ var log = function(s) {
   console.log('[Amplitude] ' + s);
 };
 
-var DEFAULT_INSTANCE = '$defaultInstance';
+var DEFAULT_INSTANCE = '$default_instance';
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
 var MAX_STRING_LENGTH = 1024;
@@ -39,7 +39,10 @@ var LocalStorageKeys = {
  * AmplitudeClient API
  */
 var AmplitudeClient = function(instanceName) {
-  this._instanceName = utils.isEmptyString(instanceName) ? DEFAULT_INSTANCE : instanceName;
+  if (utils.isEmptyString(instanceName)) {
+    instanceName = DEFAULT_INSTANCE;
+  }
+  this._instanceName = instanceName.toLowerCase();
   this._storageSuffix = this._instanceName === DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];
   this._unsentIdentifys = [];

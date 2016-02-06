@@ -79,7 +79,7 @@ If you want to log events to multiple Amplitude apps, you will need to have sepa
 
 You need to assign a name to each Amplitude app / instance, and use that name consistently when fetching that instance to call functions. **IMPORTANT: Once you have chosen a name for that instance you cannot change it.** Every instance's data and settings are tied to its name, and you will need to continue using that instance name for all future versions of your app to maintain data continuity, so chose your instance names wisely. Note these names do not need to be the names of your apps in the Amplitude dashboards, but they need to remain consistent throughout your code. You also need to be sure that each instance is initialized with the correct apiKey.
 
-Instance names must be nonnull and nonempty strings. You can fetch each instance by name by calling `amplitude.getInstance('INSTANCE_NAME')`.
+Instance names must be nonnull and nonempty strings. Names are case-insensitive. You can fetch each instance by name by calling `amplitude.getInstance('INSTANCE_NAME')`.
 
 As mentioned before, each new instance created will have its own apiKey, userId, deviceId, and settings. **You will have to reconfigure all the settings for each instance.** This gives you the freedom to have different settings for each instance.
 

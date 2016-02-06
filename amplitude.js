@@ -115,7 +115,7 @@ var utils = require('./utils');
 var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
-var DEFAULT_INSTANCE = '$defaultInstance';
+var DEFAULT_INSTANCE = '$default_instance';
 
 var Amplitude = function() {
   this.options = object.merge({}, DEFAULT_OPTIONS); // maintain a copy for backwards compatibilty
@@ -123,7 +123,11 @@ var Amplitude = function() {
 };
 
 Amplitude.prototype.getInstance = function(instance) {
-  instance = utils.isEmptyString(instance) ? DEFAULT_INSTANCE : instance;
+  if (utils.isEmptyString(instance)) {
+    instance = DEFAULT_INSTANCE;
+  }
+  instance = instance.toLowerCase();
+
   var client = this._instances[instance];
   if (client === undefined) {
     client = new AmplitudeClient(instance);
@@ -265,7 +269,7 @@ var log = function(s) {
   console.log('[Amplitude] ' + s);
 };
 
-var DEFAULT_INSTANCE = '$defaultInstance';
+var DEFAULT_INSTANCE = '$default_instance';
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
 var MAX_STRING_LENGTH = 1024;
@@ -287,7 +291,10 @@ var LocalStorageKeys = {
  * AmplitudeClient API
  */
 var AmplitudeClient = function(instanceName) {
-  this._instanceName = utils.isEmptyString(instanceName) ? DEFAULT_INSTANCE : instanceName;
+  if (utils.isEmptyString(instanceName)) {
+    instanceName = DEFAULT_INSTANCE;
+  }
+  this._instanceName = instanceName.toLowerCase();
   this._storageSuffix = this._instanceName === DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];
   this._unsentIdentifys = [];
