@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Fix bug where saveReferrer throws exception if sessionStorage is disabled.
+
 ## 2.9.0 (January 15, 2016)
 
 * Add ability to clear all user properties.
