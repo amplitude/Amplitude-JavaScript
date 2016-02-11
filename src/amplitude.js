@@ -390,16 +390,20 @@ Amplitude.prototype._saveReferrer = function(referrer) {
   identify.setOnce('initial_referring_domain', referring_domain);
 
   // only save referrer if not already in session storage or if storage disabled
+  var hasSessionStorage = false;
   try {
-    var hasSessionStorage = window.sessionStorage ? true : false;
-    if ((hasSessionStorage && !window.sessionStorage.getItem(LocalStorageKeys.REFERRER)) || !hasSessionStorage) {
-      identify.set('referrer', referrer).set('referring_domain', referring_domain);
-      if (hasSessionStorage) {
-        window.sessionStorage.setItem(LocalStorageKeys.REFERRER, referrer);
-      }
+    if (window.sessionStorage) {
+      hasSessionStorage = true;
     }
   } catch (e) {
-    //log(e); // sessionStorage disabled
+    // log(e);  // sessionStorage disabled
+  }
+
+  if (!hasSessionStorage || (hasSessionStorage && !window.sessionStorage.getItem(LocalStorageKeys.REFERRER))) {
+    identify.set('referrer', referrer).set('referring_domain', referring_domain);
+    if (hasSessionStorage) {
+      window.sessionStorage.setItem(LocalStorageKeys.REFERRER, referrer);
+    }
   }
 
   this.identify(identify);
