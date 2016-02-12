@@ -12,7 +12,11 @@ var Identify = require('./identify');
 var type = require('./type');
 
 var log = function(s) {
-  console.log('[Amplitude] ' + s);
+  try {
+    console.log('[Amplitude] ' + s);
+  } catch (e) {
+    // console logging not available
+  }
 };
 
 var IDENTIFY_EVENT = '$identify';

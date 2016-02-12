@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Fix bug where saveReferrer throws exception if sessionStorage is disabled.
+* Log messages with a try/catch to support IE 8.
 
 ## 2.9.0 (January 15, 2016)
 
