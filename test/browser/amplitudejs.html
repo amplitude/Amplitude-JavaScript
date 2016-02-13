@@ -32,7 +32,7 @@
       }
       setUpProxy(amplitude);
       amplitude.getInstance = function(instance) {
-        instance = instance || '$defaultInstance';
+        instance = ((!instance || instance.length === 0) ? '$default_instance' : instance).toLowerCase();
         if (!amplitude._iq.hasOwnProperty(instance)) {
           amplitude._iq[instance] = {'_q':[]}; setUpProxy(amplitude._iq[instance]);
         }

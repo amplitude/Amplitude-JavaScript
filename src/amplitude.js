@@ -14,10 +14,7 @@ var Amplitude = function() {
 };
 
 Amplitude.prototype.getInstance = function(instance) {
-  if (utils.isEmptyString(instance)) {
-    instance = DEFAULT_INSTANCE;
-  }
-  instance = instance.toLowerCase();
+  instance = (utils.isEmptyString(instance) ? DEFAULT_INSTANCE : instance).toLowerCase();
 
   var client = this._instances[instance];
   if (client === undefined) {

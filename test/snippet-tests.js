@@ -26,11 +26,18 @@ describe('Snippet', function() {
   });
 
   it('amplitude object should proxy instance functions', function() {
-    amplitude.getInstance('instance1').init('API_KEY1');
-    amplitude.getInstance('instance2').init('API_KEY2');
-    amplitude.getInstance('instance2').logEvent('Event');
+    amplitude.getInstance(null).init('API_KEY');
+    amplitude.getInstance('$DEFAULT_instance').logEvent('Click');
+    amplitude.getInstance('').clearUserProperties();
+    amplitude.getInstance('INSTANCE1').init('API_KEY1');
+    amplitude.getInstance('instanCE2').init('API_KEY2');
+    amplitude.getInstance('instaNce2').logEvent('Event');
 
-    assert.deepEqual(Object.keys(amplitude._iq), ['instance1', 'instance2']);
+    assert.deepEqual(Object.keys(amplitude._iq), ['$default_instance', 'instance1', 'instance2']);
+    assert.lengthOf(amplitude._iq['$default_instance']._q, 3);
+    assert.deepEqual(amplitude._iq['$default_instance']._q[0], ['init', 'API_KEY']);
+    assert.deepEqual(amplitude._iq['$default_instance']._q[1], ['logEvent', 'Click']);
+    assert.deepEqual(amplitude._iq['$default_instance']._q[2], ['clearUserProperties']);
     assert.lengthOf(amplitude._iq['instance1']._q, 1);
     assert.deepEqual(amplitude._iq['instance1']._q[0], ['init', 'API_KEY1']);
     assert.lengthOf(amplitude._iq['instance2']._q, 2);

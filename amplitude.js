@@ -123,10 +123,7 @@ var Amplitude = function() {
 };
 
 Amplitude.prototype.getInstance = function(instance) {
-  if (utils.isEmptyString(instance)) {
-    instance = DEFAULT_INSTANCE;
-  }
-  instance = instance.toLowerCase();
+  instance = (utils.isEmptyString(instance) ? DEFAULT_INSTANCE : instance).toLowerCase();
 
   var client = this._instances[instance];
   if (client === undefined) {
@@ -295,10 +292,7 @@ var LocalStorageKeys = {
  * AmplitudeClient API
  */
 var AmplitudeClient = function(instanceName) {
-  if (utils.isEmptyString(instanceName)) {
-    instanceName = DEFAULT_INSTANCE;
-  }
-  this._instanceName = instanceName.toLowerCase();
+  this._instanceName = (utils.isEmptyString(instanceName) ? DEFAULT_INSTANCE : instanceName).toLowerCase();
   this._storageSuffix = this._instanceName === DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];
   this._unsentIdentifys = [];
@@ -640,7 +634,15 @@ AmplitudeClient.prototype._saveReferrer = function(referrer) {
   identify.setOnce('initial_referring_domain', referring_domain);
 
   // only save referrer if not already in session storage or if storage disabled
-  var hasSessionStorage = sessionStorage ? true : false;
+  var hasSessionStorage = false;
+  try {
+    if (window.sessionStorage) {
+      hasSessionStorage = true;
+    }
+  } catch (e) {
+    // log(e); // sessionStorage disabled
+  }
+
   if ((hasSessionStorage && !(this._getFromStorage(sessionStorage, LocalStorageKeys.REFERRER))) || !hasSessionStorage) {
     identify.set('referrer', referrer).set('referring_domain', referring_domain);
 
