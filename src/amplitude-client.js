@@ -14,7 +14,11 @@ var type = require('./type');
 var DEFAULT_OPTIONS = require('./options');
 
 var log = function(s) {
-  console.log('[Amplitude] ' + s);
+  try {
+    console.log('[Amplitude] ' + s);
+  } catch (e) {
+    // console logging not available
+  }
 };
 
 var DEFAULT_INSTANCE = '$default_instance';

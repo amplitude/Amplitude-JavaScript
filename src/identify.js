@@ -14,7 +14,11 @@ var AMP_OP_SET_ONCE = '$setOnce';
 var AMP_OP_UNSET = '$unset';
 
 var log = function(s) {
-  console.log('[Amplitude] ' + s);
+  try {
+    console.log('[Amplitude] ' + s);
+  } catch (e) {
+    // console logging not available
+  }
 };
 
 var Identify = function() {
