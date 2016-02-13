@@ -94,28 +94,173 @@
 /* jshint expr:true */
 
 var Amplitude = require('./amplitude');
-
 var old = window.amplitude || {};
-var instance = new Amplitude();
-instance._q = old._q || [];
+var newInstance = new Amplitude();
+newInstance._q = old._q || [];
+for (var instance in old._iq) { // migrate each instance's queue
+  if (old._iq.hasOwnProperty(instance)) {
+    newInstance.getInstance(instance)._q = old._iq[instance]._q || [];
+  }
+}
 
-// export the instance
-module.exports = instance;
+module.exports = newInstance;
 
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
+var AmplitudeClient = require('./amplitude-client');
+var Identify = require('./identify');
+var object = require('object');
+var type = require('./type');
+var utils = require('./utils');
+var version = require('./version');
+var DEFAULT_OPTIONS = require('./options');
+
+var DEFAULT_INSTANCE = '$default_instance';
+
+var Amplitude = function() {
+  this.options = object.merge({}, DEFAULT_OPTIONS); // maintain a copy for backwards compatibilty
+  this._instances = {}; // mapping of instance names to instances
+};
+
+Amplitude.prototype.getInstance = function(instance) {
+  instance = (utils.isEmptyString(instance) ? DEFAULT_INSTANCE : instance).toLowerCase();
+
+  var client = this._instances[instance];
+  if (client === undefined) {
+    client = new AmplitudeClient(instance);
+    this._instances[instance] = client;
+  }
+  return client;
+};
+
+Amplitude.prototype.Identify = Identify;
+
+Amplitude.prototype.runQueuedFunctions = function () {
+  // run queued up old version of functions
+  for (var i = 0; i < this._q.length; i++) {
+    var fn = this[this._q[i][0]];
+    if (fn && type(fn) === 'function') {
+      fn.apply(this, this._q[i].slice(1));
+    }
+  }
+  this._q = []; // clear function queue after running
+
+  // run queued up functions on instances
+  for (var instance in this._instances) {
+    if (this._instances.hasOwnProperty(instance)) {
+      this._instances[instance].runQueuedFunctions();
+    }
+  }
+};
+
+/**
+ *  @deprecated
+ *  Maintain mapping of old functions to new instance methods
+ */
+Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
+  this.getInstance().init(apiKey, opt_userId, opt_config, function() {
+    // make options such as deviceId available for callback functions
+    this.options = this.getInstance().options;
+    if (callback && type(callback) === 'function') {
+      callback();
+    }
+  }.bind(this));
+};
+
+Amplitude.prototype.isNewSession = function() {
+  return this.getInstance().isNewSession();
+};
+
+Amplitude.prototype.getSessionId = function() {
+  return this.getInstance().getSessionId();
+};
+
+Amplitude.prototype.nextEventId = function() {
+  return this.getInstance().nextEventId();
+};
+
+Amplitude.prototype.nextIdentifyId = function() {
+  return this.getInstance().nextIdentifyId();
+};
+
+Amplitude.prototype.nextSequenceNumber = function() {
+  return this.getInstance().nextSequenceNumber();
+};
+
+Amplitude.prototype.saveEvents = function() {
+  this.getInstance().saveEvents();
+};
+
+Amplitude.prototype.setDomain = function(domain) {
+  this.getInstance().setDomain(domain);
+};
+
+Amplitude.prototype.setUserId = function(userId) {
+  this.getInstance().setUserId(userId);
+};
+
+Amplitude.prototype.setOptOut = function(enable) {
+  this.getInstance().setOptOut(enable);
+};
+
+Amplitude.prototype.setDeviceId = function(deviceId) {
+  this.getInstance().setDeviceId(deviceId);
+};
+
+Amplitude.prototype.setUserProperties = function(userProperties) {
+  this.getInstance().setUserProperties(userProperties);
+};
+
+Amplitude.prototype.clearUserProperties = function(){
+  this.getInstance().clearUserProperties();
+};
+
+Amplitude.prototype.identify = function(identify) {
+  this.getInstance().identify(identify);
+};
+
+Amplitude.prototype.setVersionName = function(versionName) {
+  this.getInstance().setVersionName(versionName);
+};
+
+Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
+  return this.getInstance().logEvent(eventType, eventProperties, callback);
+};
+
+Amplitude.prototype.logRevenue = function(price, quantity, product) {
+  return this.getInstance().logRevenue(price, quantity, product);
+};
+
+Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
+  this.getInstance().removeEvents(maxEventId, maxIdentifyId);
+};
+
+Amplitude.prototype.sendEvents = function(callback) {
+  this.getInstance().sendEvents(callback);
+};
+
+Amplitude.prototype.setGlobalUserProperties = Amplitude.prototype.setUserProperties;
+
+Amplitude.prototype.__VERSION__ = version;
+
+module.exports = Amplitude;
+
+}, {"./amplitude-client":3,"./identify":4,"object":5,"./type":6,"./utils":7,"./version":8,"./options":9}],
+3: [function(require, module, exports) {
 var cookieStorage = require('./cookiestorage');
+var getUtmData = require('./utm');
+var Identify = require('./identify');
 var JSON = require('json'); // jshint ignore:line
-var language = require('./language');
 var localStorage = require('./localstorage');  // jshint ignore:line
 var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
 var UAParser = require('ua-parser-js');
+var utils = require('./utils');
 var UUID = require('./uuid');
 var version = require('./version');
-var Identify = require('./identify');
 var type = require('./type');
+var DEFAULT_OPTIONS = require('./options');
 
 var log = function(s) {
   try {
@@ -125,34 +270,16 @@ var log = function(s) {
   }
 };
 
+var DEFAULT_INSTANCE = '$default_instance';
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
 var MAX_STRING_LENGTH = 1024;
-var DEFAULT_OPTIONS = {
-  apiEndpoint: 'api.amplitude.com',
-  cookieExpiration: 365 * 10,
-  cookieName: 'amplitude_id',
-  domain: undefined,
-  includeUtm: false,
-  language: language.language,
-  optOut: false,
-  platform: 'Web',
-  savedMaxCount: 1000,
-  saveEvents: true,
-  sessionTimeout: 30 * 60 * 1000,
-  unsentKey: 'amplitude_unsent',
-  unsentIdentifyKey: 'amplitude_unsent_identify',
-  uploadBatchSize: 100,
-  batchEvents: false,
-  eventUploadThreshold: 30,
-  eventUploadPeriodMillis: 30 * 1000 // 30s
-};
 var LocalStorageKeys = {
+  SESSION_ID: 'amplitude_sessionId',
+  LAST_EVENT_TIME: 'amplitude_lastEventTime',
   LAST_EVENT_ID: 'amplitude_lastEventId',
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
-  LAST_EVENT_TIME: 'amplitude_lastEventTime',
-  SESSION_ID: 'amplitude_sessionId',
   REFERRER: 'amplitude_referrer',
 
   // Used in cookie as well
@@ -162,9 +289,11 @@ var LocalStorageKeys = {
 };
 
 /*
- * Amplitude API
+ * AmplitudeClient API
  */
-var Amplitude = function() {
+var AmplitudeClient = function(instanceName) {
+  this._instanceName = (utils.isEmptyString(instanceName) ? DEFAULT_INSTANCE : instanceName).toLowerCase();
+  this._storageSuffix = this._instanceName === DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
@@ -173,19 +302,17 @@ var Amplitude = function() {
   this._q = []; // queue for proxied functions before script load
 };
 
-Amplitude.prototype._eventId = 0;
-Amplitude.prototype._identifyId = 0;
-Amplitude.prototype._sequenceNumber = 0;
-Amplitude.prototype._sending = false;
-Amplitude.prototype._lastEventTime = null;
-Amplitude.prototype._sessionId = null;
-Amplitude.prototype._newSession = false;
-Amplitude.prototype._updateScheduled = false;
-
-Amplitude.prototype.Identify = Identify;
+AmplitudeClient.prototype._eventId = 0;
+AmplitudeClient.prototype._identifyId = 0;
+AmplitudeClient.prototype._sequenceNumber = 0;
+AmplitudeClient.prototype._sending = false;
+AmplitudeClient.prototype._lastEventTime = null;
+AmplitudeClient.prototype._sessionId = null;
+AmplitudeClient.prototype._newSession = false;
+AmplitudeClient.prototype._updateScheduled = false;
 
 /**
- * Initializes Amplitude.
+ * Initializes AmplitudeClient.
  * apiKey The API Key for your app
  * opt_userId An identifier for this user
  * opt_config Configuration options
@@ -193,9 +320,10 @@ Amplitude.prototype.Identify = Identify;
  *   - includeUtm (boolean) Whether to send utm parameters with events. Defaults to false.
  *   - includeReferrer (boolean) Whether to send referrer info with events. Defaults to false.
  */
-Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
+AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   try {
     this.options.apiKey = apiKey;
+
     if (opt_config) {
       if (opt_config.saveEvents !== undefined) {
         this.options.saveEvents = !!opt_config.saveEvents;
@@ -212,6 +340,9 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
       if (opt_config.batchEvents !== undefined) {
         this.options.batchEvents = !!opt_config.batchEvents;
       }
+      if (opt_config.newBlankInstance !== undefined) {
+        this.options.newBlankInstance = !!opt_config.newBlankInstance;
+      }
       this.options.platform = opt_config.platform || this.options.platform;
       this.options.language = opt_config.language || this.options.language;
       this.options.sessionTimeout = opt_config.sessionTimeout || this.options.sessionTimeout;
@@ -227,19 +358,15 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    _migrateLocalStorageDataToCookie(this);
+    if (this._instanceName === DEFAULT_INSTANCE) {
+      _upgradeCookeData(this);
+    }
     _loadCookieData(this);
-
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
         opt_config.deviceId !== null && opt_config.deviceId) ||
         this.options.deviceId || UUID();
     this.options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || this.options.userId || null;
 
-    this._lastEventTime = this._lastEventTime || parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_TIME)) || null;
-    this._sessionId = this._sessionId || parseInt(localStorage.getItem(LocalStorageKeys.SESSION_ID)) || null;
-    this._eventId = this._eventId || parseInt(localStorage.getItem(LocalStorageKeys.LAST_EVENT_ID)) || 0;
-    this._identifyId = this._identifyId || parseInt(localStorage.getItem(LocalStorageKeys.LAST_IDENTIFY_ID)) || 0;
-    this._sequenceNumber = this._sequenceNumber || parseInt(localStorage.getItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER)) || 0;
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
@@ -247,17 +374,15 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     }
     this._lastEventTime = now;
     _saveCookieData(this);
-    _clearSessionAndEventTrackingFromLocalStorage();
 
     //log('initialized with apiKey=' + apiKey);
     //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
 
     if (this.options.saveEvents) {
-      this._loadSavedUnsentEvents(this.options.unsentKey, '_unsentEvents');
-      this._loadSavedUnsentEvents(this.options.unsentIdentifyKey, '_unsentIdentifys');
+      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey) || this._unsentEvents;
+      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey) || this._unsentIdentifys;
+      this._sendEventsIfReady();
     }
-
-    this._sendEventsIfReady();
 
     if (this.options.includeUtm) {
       this._initUtmData();
@@ -275,7 +400,17 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   }
 };
 
-Amplitude.prototype.runQueuedFunctions = function () {
+AmplitudeClient.prototype.Identify = Identify;
+
+AmplitudeClient.prototype._apiKeySet = function(methodName) {
+  if (!this.options.apiKey) {
+    log('apiKey cannot be undefined or null, set apiKey with init() before calling ' + methodName);
+    return false;
+  }
+  return true;
+};
+
+AmplitudeClient.prototype.runQueuedFunctions = function () {
   for (var i = 0; i < this._q.length; i++) {
     var fn = this[this._q[i][0]];
     if (fn && type(fn) === 'function') {
@@ -285,47 +420,48 @@ Amplitude.prototype.runQueuedFunctions = function () {
   this._q = []; // clear function queue after running
 };
 
-Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey, queue) {
-  var savedUnsentEventsString = localStorage.getItem(unsentKey);
+AmplitudeClient.prototype._loadSavedUnsentEvents = function(unsentKey) {
+  var savedUnsentEventsString = this._getFromStorage(localStorage, unsentKey);
   if (savedUnsentEventsString) {
     try {
-      this[queue] = JSON.parse(savedUnsentEventsString);
+      return JSON.parse(savedUnsentEventsString);
     } catch (e) {
       //log(e);
     }
   }
+  return null;
 };
 
-Amplitude.prototype.isNewSession = function() {
+AmplitudeClient.prototype.isNewSession = function() {
   return this._newSession;
 };
 
-Amplitude.prototype.getSessionId = function() {
+AmplitudeClient.prototype.getSessionId = function() {
   return this._sessionId;
 };
 
-Amplitude.prototype.nextEventId = function() {
+AmplitudeClient.prototype.nextEventId = function() {
   this._eventId++;
   return this._eventId;
 };
 
-Amplitude.prototype.nextIdentifyId = function() {
+AmplitudeClient.prototype.nextIdentifyId = function() {
   this._identifyId++;
   return this._identifyId;
 };
 
-Amplitude.prototype.nextSequenceNumber = function() {
+AmplitudeClient.prototype.nextSequenceNumber = function() {
   this._sequenceNumber++;
   return this._sequenceNumber;
 };
 
 // returns the number of unsent events and identifys
-Amplitude.prototype._unsentCount = function() {
+AmplitudeClient.prototype._unsentCount = function() {
   return this._unsentEvents.length + this._unsentIdentifys.length;
 };
 
 // returns true if sendEvents called immediately
-Amplitude.prototype._sendEventsIfReady = function(callback) {
+AmplitudeClient.prototype._sendEventsIfReady = function(callback) {
   if (this._unsentCount() === 0) {
     return false;
   }
@@ -353,42 +489,74 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
-// backwards migration fix for users that upgraded to broken v2.6.0
-var _migrateLocalStorageDataToCookie = function(scope) {
+// appends apiKey to storage key to support multiple apps
+// storage argument allows for localStorage and sessionStorage
+AmplitudeClient.prototype._getFromStorage = function(storage, key) {
+  return storage.getItem(key + this._storageSuffix);
+};
+
+// appends apiKey to storage key to support multiple apps
+// storage argument allows for localStorage and sessionStorage
+AmplitudeClient.prototype._setInStorage = function(storage, key, value) {
+  storage.setItem(key + this._storageSuffix, value);
+};
+
+/*
+ * cookieData (deviceId, userId, optOut, sessionId, lastEventTime, eventId, identifyId, sequenceNumber)
+ * can be stored in many different places (localStorage, cookie, etc).
+ * Need to unify all sources into one place with a one-time upgrade/migration for the defaultInstance.
+ */
+var _upgradeCookeData = function(scope) {
+  // skip if migration already happened
   var cookieData = scope.cookieStorage.get(scope.options.cookieName);
-  if (cookieData && cookieData.deviceId) {
-    return; // migration not needed
+  if (cookieData && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
+    return;
   }
 
-  var cookieDeviceId = (cookieData && cookieData.deviceId) || null;
-  var cookieUserId = (cookieData && cookieData.userId) || null;
-  var cookieOptOut = (cookieData && cookieData.optOut !== null && cookieData.optOut !== undefined) ?
-      cookieData.optOut : null;
+  var _getAndRemoveFromLocalStorage = function(key) {
+    var value = localStorage.getItem(key);
+    localStorage.removeItem(key);
+    return value;
+  };
 
-  var keySuffix = '_' + scope.options.apiKey.slice(0, 6);
-  var localStorageDeviceId = localStorage.getItem(LocalStorageKeys.DEVICE_ID + keySuffix);
-  if (localStorageDeviceId) {
-    localStorage.removeItem(LocalStorageKeys.DEVICE_ID + keySuffix);
-  }
-  var localStorageUserId = localStorage.getItem(LocalStorageKeys.USER_ID + keySuffix);
-  if (localStorageUserId) {
-    localStorage.removeItem(LocalStorageKeys.USER_ID + keySuffix);
-  }
-  var localStorageOptOut = localStorage.getItem(LocalStorageKeys.OPT_OUT + keySuffix);
+  // in v2.6.0, deviceId, userId, optOut was migrated to localStorage with keys + first 6 char of apiKey
+  var apiKeySuffix = '_' + scope.options.apiKey.slice(0, 6);
+  var localStorageDeviceId = _getAndRemoveFromLocalStorage(LocalStorageKeys.DEVICE_ID + apiKeySuffix);
+  var localStorageUserId = _getAndRemoveFromLocalStorage(LocalStorageKeys.USER_ID + apiKeySuffix);
+  var localStorageOptOut = _getAndRemoveFromLocalStorage(LocalStorageKeys.OPT_OUT + apiKeySuffix);
   if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
-    localStorage.removeItem(LocalStorageKeys.OPT_OUT + keySuffix);
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
 
-  scope.cookieStorage.set(scope.options.cookieName, {
-    deviceId: cookieDeviceId || localStorageDeviceId,
-    userId: cookieUserId || localStorageUserId,
-    optOut: (cookieOptOut !== undefined && cookieOptOut !== null) ? cookieOptOut : localStorageOptOut
-  });
+  // pre-v2.7.0 event and session meta-data was stored in localStorage. move to cookie for sub-domain support
+  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.SESSION_ID));
+  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_TIME));
+  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_ID));
+  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID));
+  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER));
+
+  var _getFromCookie = function(key) {
+    return cookieData && cookieData[key];
+  };
+  scope.options.deviceId = _getFromCookie('deviceId') || localStorageDeviceId;
+  scope.options.userId = _getFromCookie('userId') || localStorageUserId;
+  scope._sessionId = _getFromCookie('sessionId') || localStorageSessionId || scope._sessionId;
+  scope._lastEventTime = _getFromCookie('lastEventTime') || localStorageLastEventTime || scope._lastEventTime;
+  scope._eventId = _getFromCookie('eventId') || localStorageEventId || scope._eventId;
+  scope._identifyId = _getFromCookie('identifyId') || localStorageIdentifyId || scope._identifyId;
+  scope._sequenceNumber = _getFromCookie('sequenceNumber') || localStorageSequenceNumber || scope._sequenceNumber;
+
+  // optOut is a little trickier since it is a boolean
+  scope.options.optOut = localStorageOptOut || false;
+  if (cookieData && cookieData.optOut !== undefined && cookieData.optOut !== null) {
+    scope.options.optOut = String(cookieData.optOut) === 'true';
+  }
+
+  _saveCookieData(scope);
 };
 
 var _loadCookieData = function(scope) {
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -418,7 +586,7 @@ var _loadCookieData = function(scope) {
 };
 
 var _saveCookieData = function(scope) {
-  scope.cookieStorage.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName + scope._storageSuffix, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut,
@@ -430,54 +598,20 @@ var _saveCookieData = function(scope) {
   });
 };
 
-// the follow fields used to be saved in localStorage, now saved in cookie to support different subdomains
-var _clearSessionAndEventTrackingFromLocalStorage = function() {
-  localStorage.removeItem(LocalStorageKeys.SESSION_ID);
-  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_TIME);
-  localStorage.removeItem(LocalStorageKeys.LAST_EVENT_ID);
-  localStorage.removeItem(LocalStorageKeys.LAST_IDENTIFY_ID);
-  localStorage.removeItem(LocalStorageKeys.LAST_SEQUENCE_NUMBER);
-};
-
-Amplitude._getUtmParam = function(name, query) {
-  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-  var results = regex.exec(query);
-  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
-};
-
-Amplitude._getUtmData = function(rawCookie, query) {
-  // Translate the utmz cookie format into url query string format.
-  var cookie = rawCookie ? '?' + rawCookie.split('.').slice(-1)[0].replace(/\|/g, '&') : '';
-
-  var fetchParam = function (queryName, query, cookieName, cookie) {
-    return Amplitude._getUtmParam(queryName, query) ||
-           Amplitude._getUtmParam(cookieName, cookie);
-  };
-
-  return {
-    utm_source: fetchParam('utm_source', query, 'utmcsr', cookie),
-    utm_medium: fetchParam('utm_medium', query, 'utmcmd', cookie),
-    utm_campaign: fetchParam('utm_campaign', query, 'utmccn', cookie),
-    utm_term: fetchParam('utm_term', query, 'utmctr', cookie),
-    utm_content: fetchParam('utm_content', query, 'utmcct', cookie),
-  };
-};
-
 /**
  * Parse the utm properties out of cookies and query for adding to user properties.
  */
-Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
+AmplitudeClient.prototype._initUtmData = function(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
   cookieParams = cookieParams || this.cookieStorage.get('__utmz');
-  this._utmProperties = Amplitude._getUtmData(cookieParams, queryParams);
+  this._utmProperties = getUtmData(cookieParams, queryParams);
 };
 
-Amplitude.prototype._getReferrer = function() {
+AmplitudeClient.prototype._getReferrer = function() {
   return document.referrer;
 };
 
-Amplitude.prototype._getReferringDomain = function(referrer) {
+AmplitudeClient.prototype._getReferringDomain = function(referrer) {
   if (referrer === null || referrer === undefined || referrer === '') {
     return null;
   }
@@ -489,7 +623,7 @@ Amplitude.prototype._getReferringDomain = function(referrer) {
 };
 
 // since user properties are propagated on the server, only send once per session, don't need to send with every event
-Amplitude.prototype._saveReferrer = function(referrer) {
+AmplitudeClient.prototype._saveReferrer = function(referrer) {
   if (referrer === null || referrer === undefined || referrer === '') {
     return;
   }
@@ -506,29 +640,38 @@ Amplitude.prototype._saveReferrer = function(referrer) {
       hasSessionStorage = true;
     }
   } catch (e) {
-    // log(e);  // sessionStorage disabled
+    // log(e); // sessionStorage disabled
   }
 
-  if (!hasSessionStorage || (hasSessionStorage && !window.sessionStorage.getItem(LocalStorageKeys.REFERRER))) {
+  if ((hasSessionStorage && !(this._getFromStorage(sessionStorage, LocalStorageKeys.REFERRER))) || !hasSessionStorage) {
     identify.set('referrer', referrer).set('referring_domain', referring_domain);
+
     if (hasSessionStorage) {
-      window.sessionStorage.setItem(LocalStorageKeys.REFERRER, referrer);
+      this._setInStorage(sessionStorage, LocalStorageKeys.REFERRER, referrer);
     }
   }
 
   this.identify(identify);
 };
 
-Amplitude.prototype.saveEvents = function() {
+AmplitudeClient.prototype.saveEvents = function() {
+  if (!this._apiKeySet('saveEvents()')) {
+    return;
+  }
+
   try {
-    localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
-    localStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+    this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
     //log(e);
   }
 };
 
-Amplitude.prototype.setDomain = function(domain) {
+AmplitudeClient.prototype.setDomain = function(domain) {
+  if (!this._apiKeySet('setDomain()')) {
+    return;
+  }
+
   try {
     this.cookieStorage.options({
       domain: domain
@@ -542,7 +685,11 @@ Amplitude.prototype.setDomain = function(domain) {
   }
 };
 
-Amplitude.prototype.setUserId = function(userId) {
+AmplitudeClient.prototype.setUserId = function(userId) {
+  if (!this._apiKeySet('setUserId()')) {
+    return;
+  }
+
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
@@ -552,7 +699,11 @@ Amplitude.prototype.setUserId = function(userId) {
   }
 };
 
-Amplitude.prototype.setOptOut = function(enable) {
+AmplitudeClient.prototype.setOptOut = function(enable) {
+  if (!this._apiKeySet('setOptOut()')) {
+    return;
+  }
+
   try {
     this.options.optOut = enable;
     _saveCookieData(this);
@@ -562,7 +713,11 @@ Amplitude.prototype.setOptOut = function(enable) {
   }
 };
 
-Amplitude.prototype.setDeviceId = function(deviceId) {
+AmplitudeClient.prototype.setDeviceId = function(deviceId) {
+  if (!this._apiKeySet('setDeviceId()')) {
+    return;
+  }
+
   try {
     if (deviceId) {
       this.options.deviceId = ('' + deviceId);
@@ -573,7 +728,10 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
   }
 };
 
-Amplitude.prototype.setUserProperties = function(userProperties) {
+AmplitudeClient.prototype.setUserProperties = function(userProperties) {
+  if (!this._apiKeySet('setUserProperties()')) {
+    return;
+  }
   // convert userProperties into an identify call
   var identify = new Identify();
   for (var property in userProperties) {
@@ -585,13 +743,20 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
 };
 
 // Clearing user properties is irreversible!
-Amplitude.prototype.clearUserProperties = function(){
+AmplitudeClient.prototype.clearUserProperties = function(){
+  if (!this._apiKeySet('clearUserProperties()')) {
+    return;
+  }
+
   var identify = new Identify();
   identify.clearAll();
   this.identify(identify);
 };
 
-Amplitude.prototype.identify = function(identify) {
+AmplitudeClient.prototype.identify = function(identify) {
+  if (!this._apiKeySet('identify()')) {
+    return;
+  }
 
   if (type(identify) === 'object' && '_q' in identify) {
     var instance = new Identify();
@@ -610,7 +775,7 @@ Amplitude.prototype.identify = function(identify) {
   }
 };
 
-Amplitude.prototype.setVersionName = function(versionName) {
+AmplitudeClient.prototype.setVersionName = function(versionName) {
   try {
     this.options.versionName = versionName;
     //log('set versionName=' + versionName);
@@ -620,7 +785,7 @@ Amplitude.prototype.setVersionName = function(versionName) {
 };
 
 // truncate string values in event and user properties so that request size does not get too large
-Amplitude.prototype._truncate = function(value) {
+AmplitudeClient.prototype._truncate = function(value) {
   if (type(value) === 'array') {
     for (var i = 0; i < value.length; i++) {
       value[i] = this._truncate(value[i]);
@@ -648,7 +813,7 @@ var _truncateValue = function(value) {
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
-Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
+AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
   if (type(callback) !== 'function') {
     callback = null;
   }
@@ -702,7 +867,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       uuid: UUID(),
       library: {
         name: 'amplitude-js',
-        version: this.__VERSION__
+        version: version
       },
       sequence_number: sequenceNumber // for ordering events and identifys
       // country: null
@@ -732,13 +897,16 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 
 // Remove old events from the beginning of the array if too many
 // have accumulated. Don't want to kill memory. Default is 1000 events.
-Amplitude.prototype._limitEventsQueued = function(queue) {
+AmplitudeClient.prototype._limitEventsQueued = function(queue) {
   if (queue.length > this.options.savedMaxCount) {
     queue.splice(0, queue.length - this.options.savedMaxCount);
   }
 };
 
-Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
+AmplitudeClient.prototype.logEvent = function(eventType, eventProperties, callback) {
+  if (!this._apiKeySet('logEvent()')) {
+    return -1;
+  }
   return this._logEvent(eventType, eventProperties, null, null, callback);
 };
 
@@ -747,11 +915,11 @@ var _isNumber = function(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 };
 
-Amplitude.prototype.logRevenue = function(price, quantity, product) {
+AmplitudeClient.prototype.logRevenue = function(price, quantity, product) {
   // Test that the parameters are of the right type.
-  if (!_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
+  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
     // log('Price and quantity arguments to logRevenue must be numbers');
-    return;
+    return -1;
   }
 
   return this._logEvent('revenue_amount', {}, {
@@ -766,7 +934,7 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
  * Remove events in storage with event ids up to and including maxEventId. Does
  * a true filter in case events get out of order or old events are removed.
  */
-Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
+AmplitudeClient.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
   if (maxEventId >= 0) {
     var filteredEvents = [];
     for (var i = 0; i < this._unsentEvents.length; i++) {
@@ -788,7 +956,11 @@ Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
   }
 };
 
-Amplitude.prototype.sendEvents = function(callback) {
+AmplitudeClient.prototype.sendEvents = function(callback) {
+  if (!this._apiKeySet('sendEvents()')) {
+    return;
+  }
+
   if (!this._sending && !this.options.optOut && this._unsentCount() > 0) {
     this._sending = true;
     var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
@@ -853,7 +1025,7 @@ Amplitude.prototype.sendEvents = function(callback) {
   }
 };
 
-Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
+AmplitudeClient.prototype._mergeEventsAndIdentifys = function(numEvents) {
   // coalesce events from both queues
   var eventsToSend = [];
   var eventIndex = 0;
@@ -898,17 +1070,10 @@ Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
   };
 };
 
-/**
- *  @deprecated
- */
-Amplitude.prototype.setGlobalUserProperties = Amplitude.prototype.setUserProperties;
+module.exports = AmplitudeClient;
 
-Amplitude.prototype.__VERSION__ = version;
-
-module.exports = Amplitude;
-
-}, {"./cookiestorage":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
-3: [function(require, module, exports) {
+}, {"./cookiestorage":10,"./utm":11,"./identify":4,"json":12,"./localstorage":13,"JavaScript-MD5":14,"object":5,"./xhr":15,"ua-parser-js":16,"./utils":7,"./uuid":17,"./version":8,"./type":6,"./options":9}],
+10: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -1001,8 +1166,8 @@ cookieStorage.prototype.getStorage = function() {
 
 module.exports = cookieStorage;
 
-}, {"./cookie":15,"json":4,"./localstorage":6}],
-15: [function(require, module, exports) {
+}, {"./cookie":18,"json":12,"./localstorage":13}],
+18: [function(require, module, exports) {
 /*
  * Cookie data
  */
@@ -1131,8 +1296,8 @@ module.exports = {
 
 };
 
-}, {"./base64":16,"json":4,"top-domain":17}],
-16: [function(require, module, exports) {
+}, {"./base64":19,"json":12,"top-domain":20}],
+19: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -1231,8 +1396,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":18}],
-18: [function(require, module, exports) {
+}, {"./utf8":21}],
+21: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1292,7 +1457,7 @@ var UTF8 = {
 module.exports = UTF8;
 
 }, {}],
-4: [function(require, module, exports) {
+12: [function(require, module, exports) {
 
 var json = window.JSON || {};
 var stringify = json.stringify;
@@ -1302,8 +1467,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":19}],
-19: [function(require, module, exports) {
+}, {"json-fallback":22}],
+22: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1793,7 +1958,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-17: [function(require, module, exports) {
+20: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1841,8 +2006,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":20}],
-20: [function(require, module, exports) {
+}, {"url":23}],
+23: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -1927,7 +2092,7 @@ function port (protocol){
 }
 
 }, {}],
-6: [function(require, module, exports) {
+13: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -2031,18 +2196,179 @@ if (!localStorage) {
 module.exports = localStorage;
 
 }, {}],
-5: [function(require, module, exports) {
-var getLanguage = function() {
-    return (navigator && ((navigator.languages && navigator.languages[0]) ||
-        navigator.language || navigator.userLanguage)) || undefined;
+11: [function(require, module, exports) {
+var getUtmParam = function(name, query) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+  var results = regex.exec(query);
+  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
 };
 
-module.exports = {
-    language: getLanguage()
+var getUtmData = function(rawCookie, query) {
+  // Translate the utmz cookie format into url query string format.
+  var cookie = rawCookie ? '?' + rawCookie.split('.').slice(-1)[0].replace(/\|/g, '&') : '';
+
+  var fetchParam = function (queryName, query, cookieName, cookie) {
+    return getUtmParam(queryName, query) ||
+           getUtmParam(cookieName, cookie);
+  };
+
+  return {
+    utm_source: fetchParam('utm_source', query, 'utmcsr', cookie),
+    utm_medium: fetchParam('utm_medium', query, 'utmcmd', cookie),
+    utm_campaign: fetchParam('utm_campaign', query, 'utmccn', cookie),
+    utm_term: fetchParam('utm_term', query, 'utmctr', cookie),
+    utm_content: fetchParam('utm_content', query, 'utmcct', cookie),
+  };
+};
+
+module.exports = getUtmData;
+
+}, {}],
+4: [function(require, module, exports) {
+var type = require('./type');
+
+/*
+ * Wrapper for a user properties JSON object that supports operations.
+ * Note: if a user property is used in multiple operations on the same Identify object,
+ * only the first operation will be saved, and the rest will be ignored.
+ */
+
+var AMP_OP_ADD = '$add';
+var AMP_OP_APPEND = '$append';
+var AMP_OP_CLEAR_ALL = '$clearAll';
+var AMP_OP_SET = '$set';
+var AMP_OP_SET_ONCE = '$setOnce';
+var AMP_OP_UNSET = '$unset';
+
+var log = function(s) {
+  try {
+    console.log('[Amplitude] ' + s);
+  } catch (e) {
+    // console logging not available
+  }
+};
+
+var Identify = function() {
+  this.userPropertiesOperations = {};
+  this.properties = []; // keep track of keys that have been added
+};
+
+Identify.prototype.add = function(property, value) {
+  if (type(value) === 'number' || type(value) === 'string') {
+    this._addOperation(AMP_OP_ADD, property, value);
+  } else {
+    log('Unsupported type for value: ' + type(value) + ', expecting number or string');
+  }
+  return this;
+};
+
+Identify.prototype.append = function(property, value) {
+  this._addOperation(AMP_OP_APPEND, property, value);
+  return this;
+};
+
+// clearAll should be sent on its own Identify object
+// If there are already other operations, then don't add clearAll
+// If clearAll already in Identify, don't add other operations
+Identify.prototype.clearAll = function() {
+  if (Object.keys(this.userPropertiesOperations).length > 0) {
+    if (!this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
+      log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
+    }
+    return this;
+  }
+  this.userPropertiesOperations[AMP_OP_CLEAR_ALL] = '-';
+  return this;
+};
+
+Identify.prototype.set = function(property, value) {
+  this._addOperation(AMP_OP_SET, property, value);
+  return this;
+};
+
+Identify.prototype.setOnce = function(property, value) {
+  this._addOperation(AMP_OP_SET_ONCE, property, value);
+  return this;
+};
+
+Identify.prototype.unset = function(property) {
+  this._addOperation(AMP_OP_UNSET, property, '-');
+  return this;
+};
+
+Identify.prototype._addOperation = function(operation, property, value) {
+  // check that the identify doesn't already contain a clearAll
+  if (this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
+    log('This identify already contains a $clearAll operation, skipping operation ' + operation);
+    return;
+  }
+
+  // check that property wasn't already used in this Identify
+  if (this.properties.indexOf(property) !== -1) {
+    log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
+    return;
+  }
+
+  if (!this.userPropertiesOperations.hasOwnProperty(operation)){
+    this.userPropertiesOperations[operation] = {};
+  }
+  this.userPropertiesOperations[operation][property] = value;
+  this.properties.push(property);
+};
+
+module.exports = Identify;
+
+}, {"./type":6}],
+6: [function(require, module, exports) {
+/* Taken from: https://github.com/component/type */
+
+/**
+ * toString ref.
+ */
+
+var toString = Object.prototype.toString;
+
+/**
+ * Return the type of `val`.
+ *
+ * @param {Mixed} val
+ * @return {String}
+ * @api public
+ */
+
+module.exports = function(val){
+  switch (toString.call(val)) {
+    case '[object Date]': return 'date';
+    case '[object RegExp]': return 'regexp';
+    case '[object Arguments]': return 'arguments';
+    case '[object Array]': return 'array';
+    case '[object Error]': return 'error';
+  }
+
+  if (val === null) {
+    return 'null';
+  }
+  if (val === undefined) {
+    return 'undefined';
+  }
+  if (val !== val) {
+    return 'nan';
+  }
+  if (val && val.nodeType === 1) {
+    return 'element';
+  }
+
+  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(val)) {
+    return 'buffer';
+  }
+
+  val = val.valueOf ? val.valueOf() : Object.prototype.valueOf.apply(val);
+  return typeof val;
 };
 
 }, {}],
-7: [function(require, module, exports) {
+14: [function(require, module, exports) {
 /*
  * JavaScript MD5 1.0.1
  * https://github.com/blueimp/JavaScript-MD5
@@ -2330,7 +2656,7 @@ module.exports = {
 }(this));
 
 }, {}],
-8: [function(require, module, exports) {
+5: [function(require, module, exports) {
 
 /**
  * HOP ref.
@@ -2416,7 +2742,7 @@ exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
 }, {}],
-9: [function(require, module, exports) {
+15: [function(require, module, exports) {
 var querystring = require('querystring');
 
 /*
@@ -2462,8 +2788,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":21}],
-21: [function(require, module, exports) {
+}, {"querystring":24}],
+24: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2538,8 +2864,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":22,"type":23}],
-22: [function(require, module, exports) {
+}, {"trim":25,"type":26}],
+25: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2559,7 +2885,7 @@ exports.right = function(str){
 };
 
 }, {}],
-23: [function(require, module, exports) {
+26: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -2608,7 +2934,7 @@ function isBuffer(obj) {
 }
 
 }, {}],
-10: [function(require, module, exports) {
+16: [function(require, module, exports) {
 /* jshint eqeqeq: false, forin: false */
 /* global define */
 
@@ -3491,7 +3817,17 @@ function isBuffer(obj) {
 })(this);
 
 }, {}],
-11: [function(require, module, exports) {
+7: [function(require, module, exports) {
+var isEmptyString = function(str) {
+  return (!str || str.length === 0);
+};
+
+module.exports = {
+  isEmptyString: isEmptyString
+};
+
+}, {}],
+17: [function(require, module, exports) {
 /* jshint bitwise: false, laxbreak: true */
 
 /**
@@ -3525,150 +3861,44 @@ var uuid = function(a) {
 module.exports = uuid;
 
 }, {}],
-12: [function(require, module, exports) {
+8: [function(require, module, exports) {
 module.exports = '2.9.0';
 
 }, {}],
-13: [function(require, module, exports) {
-var type = require('./type');
+9: [function(require, module, exports) {
+var language = require('./language');
 
-/*
- * Wrapper for a user properties JSON object that supports operations.
- * Note: if a user property is used in multiple operations on the same Identify object,
- * only the first operation will be saved, and the rest will be ignored.
- */
-
-var AMP_OP_ADD = '$add';
-var AMP_OP_APPEND = '$append';
-var AMP_OP_CLEAR_ALL = '$clearAll';
-var AMP_OP_SET = '$set';
-var AMP_OP_SET_ONCE = '$setOnce';
-var AMP_OP_UNSET = '$unset';
-
-var log = function(s) {
-  try {
-    console.log('[Amplitude] ' + s);
-  } catch (e) {
-    // console logging not available
-  }
+// default options
+module.exports = {
+  apiEndpoint: 'api.amplitude.com',
+  cookieExpiration: 365 * 10,
+  cookieName: 'amplitude_id',
+  domain: undefined,
+  includeUtm: false,
+  language: language.language,
+  optOut: false,
+  platform: 'Web',
+  savedMaxCount: 1000,
+  saveEvents: true,
+  sessionTimeout: 30 * 60 * 1000,
+  unsentKey: 'amplitude_unsent',
+  unsentIdentifyKey: 'amplitude_unsent_identify',
+  uploadBatchSize: 100,
+  batchEvents: false,
+  eventUploadThreshold: 30,
+  eventUploadPeriodMillis: 30 * 1000, // 30s
+  newBlankInstance: false
 };
 
-var Identify = function() {
-  this.userPropertiesOperations = {};
-  this.properties = []; // keep track of keys that have been added
+}, {"./language":27}],
+27: [function(require, module, exports) {
+var getLanguage = function() {
+    return (navigator && ((navigator.languages && navigator.languages[0]) ||
+        navigator.language || navigator.userLanguage)) || undefined;
 };
 
-Identify.prototype.add = function(property, value) {
-  if (type(value) === 'number' || type(value) === 'string') {
-    this._addOperation(AMP_OP_ADD, property, value);
-  } else {
-    log('Unsupported type for value: ' + type(value) + ', expecting number or string');
-  }
-  return this;
-};
-
-Identify.prototype.append = function(property, value) {
-  this._addOperation(AMP_OP_APPEND, property, value);
-  return this;
-};
-
-// clearAll should be sent on its own Identify object
-// If there are already other operations, then don't add clearAll
-// If clearAll already in Identify, don't add other operations
-Identify.prototype.clearAll = function() {
-  if (Object.keys(this.userPropertiesOperations).length > 0) {
-    if (!(AMP_OP_CLEAR_ALL in this.userPropertiesOperations)) {
-      log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
-    }
-    return this;
-  }
-  this.userPropertiesOperations[AMP_OP_CLEAR_ALL] = '-';
-  return this;
-};
-
-Identify.prototype.set = function(property, value) {
-  this._addOperation(AMP_OP_SET, property, value);
-  return this;
-};
-
-Identify.prototype.setOnce = function(property, value) {
-  this._addOperation(AMP_OP_SET_ONCE, property, value);
-  return this;
-};
-
-Identify.prototype.unset = function(property) {
-  this._addOperation(AMP_OP_UNSET, property, '-');
-  return this;
-};
-
-Identify.prototype._addOperation = function(operation, property, value) {
-  // check that the identify doesn't already contain a clearAll
-  if (AMP_OP_CLEAR_ALL in this.userPropertiesOperations) {
-    log('This identify already contains a $clearAll operation, skipping operation ' + operation);
-    return;
-  }
-
-  // check that property wasn't already used in this Identify
-  if (this.properties.indexOf(property) !== -1) {
-    log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
-    return;
-  }
-
-  if (!(operation in this.userPropertiesOperations)){
-    this.userPropertiesOperations[operation] = {};
-  }
-  this.userPropertiesOperations[operation][property] = value;
-  this.properties.push(property);
-};
-
-module.exports = Identify;
-
-}, {"./type":14}],
-14: [function(require, module, exports) {
-/* Taken from: https://github.com/component/type */
-
-/**
- * toString ref.
- */
-
-var toString = Object.prototype.toString;
-
-/**
- * Return the type of `val`.
- *
- * @param {Mixed} val
- * @return {String}
- * @api public
- */
-
-module.exports = function(val){
-  switch (toString.call(val)) {
-    case '[object Date]': return 'date';
-    case '[object RegExp]': return 'regexp';
-    case '[object Arguments]': return 'arguments';
-    case '[object Array]': return 'array';
-    case '[object Error]': return 'error';
-  }
-
-  if (val === null) {
-    return 'null';
-  }
-  if (val === undefined) {
-    return 'undefined';
-  }
-  if (val !== val) {
-    return 'nan';
-  }
-  if (val && val.nodeType === 1) {
-    return 'element';
-  }
-
-  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(val)) {
-    return 'buffer';
-  }
-
-  val = val.valueOf ? val.valueOf() : Object.prototype.valueOf.apply(val);
-  return typeof val;
+module.exports = {
+    language: getLanguage()
 };
 
 }, {}]}, {}, {"1":""})

@@ -45,7 +45,7 @@ Identify.prototype.append = function(property, value) {
 // If clearAll already in Identify, don't add other operations
 Identify.prototype.clearAll = function() {
   if (Object.keys(this.userPropertiesOperations).length > 0) {
-    if (!(AMP_OP_CLEAR_ALL in this.userPropertiesOperations)) {
+    if (!this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
       log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
     }
     return this;
@@ -71,7 +71,7 @@ Identify.prototype.unset = function(property) {
 
 Identify.prototype._addOperation = function(operation, property, value) {
   // check that the identify doesn't already contain a clearAll
-  if (AMP_OP_CLEAR_ALL in this.userPropertiesOperations) {
+  if (this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
     log('This identify already contains a $clearAll operation, skipping operation ' + operation);
     return;
   }
@@ -82,7 +82,7 @@ Identify.prototype._addOperation = function(operation, property, value) {
     return;
   }
 
-  if (!(operation in this.userPropertiesOperations)){
+  if (!this.userPropertiesOperations.hasOwnProperty(operation)){
     this.userPropertiesOperations[operation] = {};
   }
   this.userPropertiesOperations[operation][property] = value;
