@@ -364,8 +364,10 @@ If you are using [RequireJS](http://requirejs.org/) to load your Javascript file
   <script src='scripts/require.js'></script>  <!-- loading RequireJS -->
   <script>
     require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js'], function(amplitude) {
-      amplitude.init('YOUR_API_KEY_HERE');
+      amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
       window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
+
+      // once amplitude is loaded you can log events
       amplitude.logEvent('Clicked Link A');
     });
   </script>
