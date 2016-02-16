@@ -3,6 +3,8 @@
 * Add support for logging events to multiple Amplitude apps. **Note this is a major update, and may break backwards compatability.** See [Readme](https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps) for details.
 * Fix bug where saveReferrer throws exception if sessionStorage is disabled.
 * Log messages with a try/catch to support IE 8.
+* Add instructions for proper integration with RequireJS.
+* Init callback now passes the Amplitude instance as an argument to the callback function.
 
 ## 2.9.0 (January 15, 2016)
 
