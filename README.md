@@ -366,9 +366,30 @@ If you are using [RequireJS](http://requirejs.org/) to load your Javascript file
     require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js'], function(amplitude) {
       amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
       window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
-
-      // once amplitude is loaded you can log events
       amplitude.logEvent('Clicked Link A');
+    });
+  </script>
+```
+
+You can also define the path in your RequireJS configuration like so:
+```html
+  <script src='scripts/require.js'></script>  <!-- loading RequireJS -->
+  <script>
+    requirejs.config({
+      paths: {
+        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz'
+      }
+    });
+
+    require(['amplitude'], function(amplitude) {
+      amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
+      window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
+      amplitude.logEvent('Clicked Link A');
+    });
+  </script>
+  <script>
+    require(['amplitude'], function(amplitude) {
+      amplitude.logEvent('Page loaded');
     });
   </script>
 ```

@@ -2,7 +2,13 @@
 <!--<script src="src/amplitude-snippet.js" type="text/javascript"></script>-->
 <script src='require.js' type='text/javascript'></script>
 <script>
-    require(['../../amplitude.js'], function(amplitude) {
+    requirejs.config({
+      paths: {
+        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz'
+      }
+    });
+
+    require(['amplitude'], function(amplitude) {
       amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053', null, {includeReferrer: true}, function() {
         alert(amplitude.options.deviceId);
       });
@@ -41,6 +47,11 @@
         var photoCount = parseInt(prompt('Input photo count to setOnce', '2'), 10);
         amplitude.identify(new amplitude.Identify().setOnce('photoCount', photoCount));
     };
+</script>
+<script>
+  require(['amplitude'], function(amplitude) {
+    amplitude.logEvent('Page loaded');
+  });
 </script>
 
 <body>
