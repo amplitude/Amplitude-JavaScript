@@ -9,3 +9,4 @@
   require('./cookiestorage.js');
   require('./utm.js');
   require('./amplitude.js');
+  require('./utils.js');
