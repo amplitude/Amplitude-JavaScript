@@ -262,14 +262,6 @@ var version = require('./version');
 var type = require('./type');
 var DEFAULT_OPTIONS = require('./options');
 
-var log = function(s) {
-  try {
-    console.log('[Amplitude] ' + s);
-  } catch (e) {
-    // console logging not available
-  }
-};
-
 var DEFAULT_INSTANCE = '$default_instance';
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
@@ -375,12 +367,19 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     this._lastEventTime = now;
     _saveCookieData(this);
 
-    //log('initialized with apiKey=' + apiKey);
-    //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
+    //utils.log('initialized with apiKey=' + apiKey);
+    //opt_userId !== undefined && opt_userId !== null && utils.log('initialized with userId=' + opt_userId);
 
     if (this.options.saveEvents) {
       this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey) || this._unsentEvents;
       this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey) || this._unsentIdentifys;
+
+      // validate event properties for unsent events
+      for (var i = 0; i < this._unsentEvents.length; i++) {
+        var eventProperties = this._unsentEvents[i].event_properties;
+        this._unsentEvents[i].event_properties = utils.validateProperties(eventProperties);
+      }
+
       this._sendEventsIfReady();
     }
 
@@ -392,7 +391,7 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
       this._saveReferrer(this._getReferrer());
     }
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 
   if (callback && type(callback) === 'function') {
@@ -404,7 +403,7 @@ AmplitudeClient.prototype.Identify = Identify;
 
 AmplitudeClient.prototype._apiKeySet = function(methodName) {
   if (!this.options.apiKey) {
-    log('apiKey cannot be undefined or null, set apiKey with init() before calling ' + methodName);
+    utils.log('apiKey cannot be undefined or null, set apiKey with init() before calling ' + methodName);
     return false;
   }
   return true;
@@ -426,7 +425,7 @@ AmplitudeClient.prototype._loadSavedUnsentEvents = function(unsentKey) {
     try {
       return JSON.parse(savedUnsentEventsString);
     } catch (e) {
-      //log(e);
+      // utils.log(e);
     }
   }
   return null;
@@ -640,7 +639,7 @@ AmplitudeClient.prototype._saveReferrer = function(referrer) {
       hasSessionStorage = true;
     }
   } catch (e) {
-    // log(e); // sessionStorage disabled
+    // utils.log(e); // sessionStorage disabled
   }
 
   if ((hasSessionStorage && !(this._getFromStorage(sessionStorage, LocalStorageKeys.REFERRER))) || !hasSessionStorage) {
@@ -663,7 +662,7 @@ AmplitudeClient.prototype.saveEvents = function() {
     this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
     this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
-    //log(e);
+    // utils.log(e);
   }
 };
 
@@ -679,9 +678,9 @@ AmplitudeClient.prototype.setDomain = function(domain) {
     this.options.domain = this.cookieStorage.options().domain;
     _loadCookieData(this);
     _saveCookieData(this);
-    //log('set domain=' + domain);
+    // utils.log('set domain=' + domain);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -693,9 +692,9 @@ AmplitudeClient.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
-    //log('set userId=' + userId);
+    // utils.log('set userId=' + userId);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -707,9 +706,9 @@ AmplitudeClient.prototype.setOptOut = function(enable) {
   try {
     this.options.optOut = enable;
     _saveCookieData(this);
-    //log('set optOut=' + enable);
+    // utils.log('set optOut=' + enable);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -724,7 +723,7 @@ AmplitudeClient.prototype.setDeviceId = function(deviceId) {
       _saveCookieData(this);
     }
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -778,9 +777,9 @@ AmplitudeClient.prototype.identify = function(identify) {
 AmplitudeClient.prototype.setVersionName = function(versionName) {
   try {
     this.options.versionName = versionName;
-    //log('set versionName=' + versionName);
+    // utils.log('set versionName=' + versionName);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -862,7 +861,7 @@ AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiPr
       device_model: ua.os.name || null,
       language: this.options.language,
       api_properties: apiProperties,
-      event_properties: this._truncate(eventProperties),
+      event_properties: this._truncate(utils.validateProperties(eventProperties)),
       user_properties: this._truncate(userProperties),
       uuid: UUID(),
       library: {
@@ -891,7 +890,7 @@ AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiPr
 
     return eventId;
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -918,7 +917,7 @@ var _isNumber = function(n) {
 AmplitudeClient.prototype.logRevenue = function(price, quantity, product) {
   // Test that the parameters are of the right type.
   if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
-    // log('Price and quantity arguments to logRevenue must be numbers');
+    // utils.log('Price and quantity arguments to logRevenue must be numbers');
     return -1;
   }
 
@@ -987,7 +986,7 @@ AmplitudeClient.prototype.sendEvents = function(callback) {
       scope._sending = false;
       try {
         if (status === 200 && response === 'success') {
-          //log('sucessful upload');
+          // utils.log('sucessful upload');
           scope.removeEvents(maxEventId, maxIdentifyId);
 
           // Update the event cache after the removal of sent events.
@@ -1001,7 +1000,7 @@ AmplitudeClient.prototype.sendEvents = function(callback) {
           }
 
         } else if (status === 413) {
-          //log('request too large');
+          // utils.log('request too large');
           // Can't even get this one massive event through. Drop it.
           if (scope.options.uploadBatchSize === 1) {
             // if massive event is identify, still need to drop it
@@ -1017,7 +1016,7 @@ AmplitudeClient.prototype.sendEvents = function(callback) {
           callback(status, response);
         }
       } catch (e) {
-        //log('failed upload');
+        // utils.log('failed upload');
       }
     });
   } else if (callback) {
@@ -2227,6 +2226,7 @@ module.exports = getUtmData;
 }, {}],
 4: [function(require, module, exports) {
 var type = require('./type');
+var utils = require('./utils');
 
 /*
  * Wrapper for a user properties JSON object that supports operations.
@@ -2241,14 +2241,6 @@ var AMP_OP_SET = '$set';
 var AMP_OP_SET_ONCE = '$setOnce';
 var AMP_OP_UNSET = '$unset';
 
-var log = function(s) {
-  try {
-    console.log('[Amplitude] ' + s);
-  } catch (e) {
-    // console logging not available
-  }
-};
-
 var Identify = function() {
   this.userPropertiesOperations = {};
   this.properties = []; // keep track of keys that have been added
@@ -2258,7 +2250,7 @@ Identify.prototype.add = function(property, value) {
   if (type(value) === 'number' || type(value) === 'string') {
     this._addOperation(AMP_OP_ADD, property, value);
   } else {
-    log('Unsupported type for value: ' + type(value) + ', expecting number or string');
+    utils.log('Unsupported type for value: ' + type(value) + ', expecting number or string');
   }
   return this;
 };
@@ -2274,7 +2266,7 @@ Identify.prototype.append = function(property, value) {
 Identify.prototype.clearAll = function() {
   if (Object.keys(this.userPropertiesOperations).length > 0) {
     if (!this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
-      log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
+      utils.log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
     }
     return this;
   }
@@ -2300,13 +2292,13 @@ Identify.prototype.unset = function(property) {
 Identify.prototype._addOperation = function(operation, property, value) {
   // check that the identify doesn't already contain a clearAll
   if (this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
-    log('This identify already contains a $clearAll operation, skipping operation ' + operation);
+    utils.log('This identify already contains a $clearAll operation, skipping operation ' + operation);
     return;
   }
 
   // check that property wasn't already used in this Identify
   if (this.properties.indexOf(property) !== -1) {
-    log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
+    utils.log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
     return;
   }
 
@@ -2319,7 +2311,7 @@ Identify.prototype._addOperation = function(operation, property, value) {
 
 module.exports = Identify;
 
-}, {"./type":6}],
+}, {"./type":6,"./utils":7}],
 6: [function(require, module, exports) {
 /* Taken from: https://github.com/component/type */
 
@@ -2368,6 +2360,93 @@ module.exports = function(val){
 };
 
 }, {}],
+7: [function(require, module, exports) {
+var type = require('./type');
+
+var log = function(s) {
+  try {
+    console.log('[Amplitude] ' + s);
+  } catch (e) {
+    // console logging not available
+  }
+};
+
+var isEmptyString = function(str) {
+  return (!str || str.length === 0);
+};
+
+var validateProperties = function(properties) {
+  var propsType = type(properties);
+  if (propsType !== 'object') {
+    log('Error: invalid event properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
+    return {};
+  }
+
+  var copy = {}; // create a copy with all of the valid properties
+  for (var property in properties) {
+    if (!properties.hasOwnProperty(property)) {
+      continue;
+    }
+
+    // validate key
+    var key = property;
+    var keyType = type(key);
+    if (keyType !== 'string') {
+      log('WARNING: Non-string property key, received type ' + keyType + ', coercing to string "' + key + '"');
+      key = String(key);
+    }
+
+    // validate value
+    var value = validatePropertyValue(key, properties[property]);
+    if (value === null) {
+      continue;
+    }
+    copy[key] = value;
+  }
+  return copy;
+};
+
+var invalidValueTypes = [
+  'null', 'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
+];
+
+var validatePropertyValue = function(key, value) {
+  var valueType = type(value);
+  if (invalidValueTypes.indexOf(valueType) !== -1) {
+    log('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
+    value = null;
+  }
+  else if (valueType === 'error') {
+    value = String(value);
+    log('WARNING: Property key "' + key + '" with value type error, coercing to ' + value);
+  }
+  else if (valueType === 'array') {
+    // check for nested arrays or objects
+    var arrayCopy = [];
+    for (var i = 0; i < value.length; i++) {
+      var element = value[i];
+      var elemType = type(element);
+      if (elemType === 'array' || elemType === 'object') {
+        log('WARNING: Cannot have ' + elemType + ' nested in an array property value, skipping');
+        continue;
+      }
+      arrayCopy.push(validatePropertyValue(key, element));
+    }
+    value = arrayCopy;
+  }
+  else if (valueType === 'object') {
+    value = validateProperties(value);
+  }
+  return value;
+};
+
+module.exports = {
+  log: log,
+  isEmptyString: isEmptyString,
+  validateProperties: validateProperties
+};
+
+}, {"./type":6}],
 14: [function(require, module, exports) {
 /*
  * JavaScript MD5 1.0.1
@@ -3815,16 +3894,6 @@ function isBuffer(obj) {
     }
 
 })(this);
-
-}, {}],
-7: [function(require, module, exports) {
-var isEmptyString = function(str) {
-  return (!str || str.length === 0);
-};
-
-module.exports = {
-  isEmptyString: isEmptyString
-};
 
 }, {}],
 17: [function(require, module, exports) {
