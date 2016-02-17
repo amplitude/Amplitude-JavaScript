@@ -38,10 +38,8 @@ var validateProperties = function(properties) {
     if (value === null) {
       continue;
     }
-
     copy[key] = value;
   }
-
   return copy;
 };
 

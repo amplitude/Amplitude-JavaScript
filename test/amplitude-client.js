@@ -5,6 +5,7 @@ describe('AmplitudeClient', function() {
   var CookieStorage = require('../src/cookiestorage.js');
   var Base64 = require('../src/base64.js');
   var cookie = require('../src/cookie.js');
+  var utils = require('../src/utils.js');
   var querystring = require('querystring');
   var JSON = require('json');
   var Identify = require('../src/identify.js');
@@ -379,6 +380,21 @@ describe('AmplitudeClient', function() {
       // check local storage keys are still same
       assert.equal(localStorage.getItem('amplitude_unsent_new_app'), existingEvent);
       assert.equal(localStorage.getItem('amplitude_unsent_identify_new_app'), existingIdentify);
+    });
+
+    it('should validate event properties when loading saved events from localStorage', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":"{}","user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130}]';
+      localStorage.setItem('amplitude_unsent', existingEvent);
+
+      var amplitude2 = new AmplitudeClient('$default_Instance');
+      amplitude2.init(apiKey, null, {batchEvents: true});
+
+      // check event loaded into memory
+      assert.deepEqual(amplitude2._unsentEvents[0].event_properties, {});
     });
 
     it ('should load saved events from localStorage new keys and send events', function() {
@@ -1492,6 +1508,55 @@ describe('AmplitudeClient', function() {
         'eventId': 2,
         'identifyId': 1,
         'sequenceNumber': 3
+      });
+    });
+
+    it('should validate event properties', function() {
+      var e = new Error('oops');
+      clock.tick(1);
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 5});
+      clock.tick(1);
+      amplitude.logEvent('String event properties', '{}');
+      clock.tick(1);
+      amplitude.logEvent('Bool event properties', true);
+      clock.tick(1);
+      amplitude.logEvent('Number event properties', 15);
+      clock.tick(1);
+      amplitude.logEvent('Array event properties', [1, 2, 3]);
+      clock.tick(1);
+      amplitude.logEvent('Object event properties', {
+        10: 'false', // coerce key
+        'bool': true,
+        'null': null, // should be ignored
+        'function': utils.log, // should be ignored
+        'regex': /afdg/, // should be ignored
+        'error': e, // coerce value
+        'string': 'test',
+        'array': [0, 1, 2, '3'],
+        'nested_array': ['a', {'key': 'value'}, ['b']],
+        'object': {'key':'value', 15: e},
+        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2', {'k3': 'v3'}]}}
+      });
+      clock.tick(1);
+
+      assert.lengthOf(amplitude._unsentEvents, 5);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 5);
+
+      assert.deepEqual(events[0].event_properties, {});
+      assert.deepEqual(events[1].event_properties, {});
+      assert.deepEqual(events[2].event_properties, {});
+      assert.deepEqual(events[3].event_properties, {});
+      assert.deepEqual(events[4].event_properties, {
+        '10': 'false',
+        'bool': true,
+        'error': 'Error: oops',
+        'string': 'test',
+        'array': [0, 1, 2, '3'],
+        'nested_array': ['a'],
+        'object': {'key':'value', '15':'Error: oops'},
+        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
       });
     });
   });

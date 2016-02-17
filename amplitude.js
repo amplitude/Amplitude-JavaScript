@@ -373,6 +373,13 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     if (this.options.saveEvents) {
       this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey) || this._unsentEvents;
       this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey) || this._unsentIdentifys;
+
+      // validate event properties for unsent events
+      for (var i = 0; i < this._unsentEvents.length; i++) {
+        var eventProperties = this._unsentEvents[0].event_properties;
+        this._unsentEvents[0].event_properties = utils.validateProperties(eventProperties);
+      }
+
       this._sendEventsIfReady();
     }
 
@@ -2394,10 +2401,8 @@ var validateProperties = function(properties) {
     if (value === null) {
       continue;
     }
-
     copy[key] = value;
   }
-
   return copy;
 };
 
