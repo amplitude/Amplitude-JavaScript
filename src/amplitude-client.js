@@ -146,7 +146,7 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
   }
 
   if (callback && type(callback) === 'function') {
-    callback();
+    callback(this);
   }
 };
 

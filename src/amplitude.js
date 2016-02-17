@@ -49,11 +49,11 @@ Amplitude.prototype.runQueuedFunctions = function () {
  *  Maintain mapping of old functions to new instance methods
  */
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
-  this.getInstance().init(apiKey, opt_userId, opt_config, function() {
+  this.getInstance().init(apiKey, opt_userId, opt_config, function(instance) {
     // make options such as deviceId available for callback functions
-    this.options = this.getInstance().options;
+    this.options = instance.options;
     if (callback && type(callback) === 'function') {
-      callback();
+      callback(instance);
     }
   }.bind(this));
 };

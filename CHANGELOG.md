@@ -4,6 +4,8 @@
 * Fix bug where saveReferrer throws exception if sessionStorage is disabled.
 * Log messages with a try/catch to support IE 8.
 * Validate event properties during logEvent and initialization before sending request.
+* Add instructions for proper integration with RequireJS.
+* Init callback now passes the Amplitude instance as an argument to the callback function.
 
 ## 2.9.0 (January 15, 2016)
 

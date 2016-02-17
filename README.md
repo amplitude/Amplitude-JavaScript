@@ -25,6 +25,8 @@ Amplitude-Javascript
         </script>
     ```
 
+    Note: if you are using [RequireJS](http://requirejs.org/), follow these [alternate instructions](https://github.com/amplitude/Amplitude-Javascript#loading-with-requirejs) for Step 2.
+
 3. Replace `YOUR_API_KEY_HERE` with the API Key given to you.
 4. To track an event anywhere on the page, call:
 
@@ -344,11 +346,50 @@ var trackClickLinkA = function() {
 };
 ```
 
+In the case that `optOut` is true, then no event will be logged, but the callback will be called. In the case that `batchEvents` is true, if the batch requirements `eventUploadThreshold` and `eventUploadPeriodMillis` are not met when `logEvent` is called, then no request is sent, but the callback is still called. In these cases, the callback will be called with an input status of 0 and response 'No request sent'.
+
 ### Init Callbacks ###
-You can also pass a callback function to init, which will get called after the SDK finishes its asynchronous loading. *Note: no values are passed to the init callback function*:
+You can also pass a callback function to init, which will get called after the SDK finishes its asynchronous loading. *Note: the Amplitude instance is passed to the callback function as an argument*:
 
 ```javascript
-amplitude.getInstance().init('YOUR_API_KEY_HERE', 'USER_ID_HERE', null, callback_function);
+amplitude.getInstance().init('YOUR_API_KEY_HERE', 'USER_ID_HERE', null, function(instance) {
+  console.log(instance.options.deviceId);  // access the instance's deviceId after initialization
+});
 ```
 
-In the case that `optOut` is true, then no event will be logged, but the callback will be called. In the case that `batchEvents` is true, if the batch requirements `eventUploadThreshold` and `eventUploadPeriodMillis` are not met when `logEvent` is called, then no request is sent, but the callback is still called. In these cases, the callback will be called with an input status of 0 and response 'No request sent'.
+### Loading with RequireJS ###
+If you are using [RequireJS](http://requirejs.org/) to load your Javascript files, you can also use it to load the Amplitude Javascript SDK script directly instead of using our loading snippet. On every page that uses analytics, paste the following Javascript code between the `<head>` and `</head>` tags:
+
+```html
+  <script src='scripts/require.js'></script>  <!-- loading RequireJS -->
+  <script>
+    require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js'], function(amplitude) {
+      amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
+      window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
+      amplitude.logEvent('Clicked Link A');
+    });
+  </script>
+```
+
+You can also define the path in your RequireJS configuration like so:
+```html
+  <script src='scripts/require.js'></script>  <!-- loading RequireJS -->
+  <script>
+    requirejs.config({
+      paths: {
+        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz'
+      }
+    });
+
+    require(['amplitude'], function(amplitude) {
+      amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
+      window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
+      amplitude.logEvent('Clicked Link A');
+    });
+  </script>
+  <script>
+    require(['amplitude'], function(amplitude) {
+      amplitude.logEvent('Page loaded');
+    });
+  </script>
+```
