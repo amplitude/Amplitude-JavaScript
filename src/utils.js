@@ -50,7 +50,7 @@ var invalidValueTypes = [
 var validatePropertyValue = function(key, value) {
   var valueType = type(value);
   if (invalidValueTypes.indexOf(valueType) !== -1) {
-    log('WARNING: Property key "' + key + '" with value type ' + valueType + ', ignoring');
+    log('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
     value = null;
   }
   else if (valueType === 'error') {
@@ -64,7 +64,7 @@ var validatePropertyValue = function(key, value) {
       var element = value[i];
       var elemType = type(element);
       if (elemType === 'array' || elemType === 'object') {
-        log('WARNING: Cannot have array or object nested in an array property value, skipping');
+        log('WARNING: Cannot have ' + elemType + ' nested in an array property value, skipping');
         continue;
       }
       arrayCopy.push(validatePropertyValue(key, element));

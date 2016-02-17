@@ -376,8 +376,8 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
 
       // validate event properties for unsent events
       for (var i = 0; i < this._unsentEvents.length; i++) {
-        var eventProperties = this._unsentEvents[0].event_properties;
-        this._unsentEvents[0].event_properties = utils.validateProperties(eventProperties);
+        var eventProperties = this._unsentEvents[i].event_properties;
+        this._unsentEvents[i].event_properties = utils.validateProperties(eventProperties);
       }
 
       this._sendEventsIfReady();
@@ -425,7 +425,7 @@ AmplitudeClient.prototype._loadSavedUnsentEvents = function(unsentKey) {
     try {
       return JSON.parse(savedUnsentEventsString);
     } catch (e) {
-      //utils.log(e);
+      // utils.log(e);
     }
   }
   return null;
@@ -846,7 +846,7 @@ AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiPr
     }
 
     apiProperties = apiProperties || {};
-    eventProperties = utils.validateProperties(eventProperties) || {};
+    eventProperties = eventProperties || {};
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId || this.options.deviceId,
@@ -861,7 +861,7 @@ AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiPr
       device_model: ua.os.name || null,
       language: this.options.language,
       api_properties: apiProperties,
-      event_properties: this._truncate(eventProperties),
+      event_properties: this._truncate(utils.validateProperties(eventProperties)),
       user_properties: this._truncate(userProperties),
       uuid: UUID(),
       library: {
@@ -2413,7 +2413,7 @@ var invalidValueTypes = [
 var validatePropertyValue = function(key, value) {
   var valueType = type(value);
   if (invalidValueTypes.indexOf(valueType) !== -1) {
-    log('WARNING: Property key "' + key + '" with value type ' + valueType + ', ignoring');
+    log('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
     value = null;
   }
   else if (valueType === 'error') {
@@ -2427,7 +2427,7 @@ var validatePropertyValue = function(key, value) {
       var element = value[i];
       var elemType = type(element);
       if (elemType === 'array' || elemType === 'object') {
-        log('WARNING: Cannot have array or object nested in an array property value, skipping');
+        log('WARNING: Cannot have ' + elemType + ' nested in an array property value, skipping');
         continue;
       }
       arrayCopy.push(validatePropertyValue(key, element));

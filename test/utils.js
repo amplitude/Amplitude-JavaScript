@@ -82,7 +82,7 @@ describe('utils', function() {
         10: 'false', // coerce key
         'bool': true,
         'null': null, // should be ignored
-        'function': utils.log, // should be ignored
+        'function': console.log, // should be ignored
         'regex': /afdg/, // should be ignored
         'error': e, // coerce value
         'string': 'test',

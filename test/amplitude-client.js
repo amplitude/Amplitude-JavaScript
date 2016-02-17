@@ -383,18 +383,36 @@ describe('AmplitudeClient', function() {
     });
 
     it('should validate event properties when loading saved events from localStorage', function() {
-      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
-        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
-        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
-        '"event_properties":"{}","user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
-        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130}]';
-      localStorage.setItem('amplitude_unsent', existingEvent);
+      var existingEvents = '[{"device_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d' +
+        '-2352191877e6","timestamp":1455744744413,"event_id":2,"session_id":1455744733865,"event_type":"clicked",' +
+        '"version_name":"Web","platform":"Web","os_name":"Chrome","os_version":"48","device_model":"Mac","language"' +
+        ':"en-US","api_properties":{},"event_properties":"{}","user_properties":{},"uuid":"1b8859d9-e91e-403e-92d4-' +
+        'c600dfb83432","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":4},{"device_id":"15a82a' +
+        'aa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","timestamp":1455744746295,' +
+        '"event_id":3,"session_id":1455744733865,"event_type":"clicked","version_name":"Web","platform":"Web",' +
+        '"os_name":"Chrome","os_version":"48","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{"10":"false","bool":true,"null":null,"string":"test","array":' +
+        '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
+        '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}},"user_properties":{},"uuid":"650407a1-d705-' +
+        '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
+      localStorage.setItem('amplitude_unsent', existingEvents);
 
       var amplitude2 = new AmplitudeClient('$default_Instance');
       amplitude2.init(apiKey, null, {batchEvents: true});
 
-      // check event loaded into memory
+      var expected = {
+        '10': 'false',
+        'bool': true,
+        'string': 'test',
+        'array': [0, 1, 2, '3'],
+        'nested_array': ['a'],
+        'object': {'key':'value'},
+        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
+      }
+
+      // check that event loaded into memory
       assert.deepEqual(amplitude2._unsentEvents[0].event_properties, {});
+      assert.deepEqual(amplitude2._unsentEvents[1].event_properties, expected);
     });
 
     it ('should load saved events from localStorage new keys and send events', function() {
