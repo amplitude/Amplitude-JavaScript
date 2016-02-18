@@ -1,4 +1,5 @@
 var type = require('./type');
+var utils = require('./utils');
 
 /*
  * Wrapper for a user properties JSON object that supports operations.
@@ -11,10 +12,6 @@ var AMP_OP_SET = '$set';
 var AMP_OP_SET_ONCE = '$setOnce';
 var AMP_OP_UNSET = '$unset';
 
-var log = function(s) {
-  console.log('[Amplitude] ' + s);
-};
-
 var Identify = function() {
   this.userPropertiesOperations = {};
   this.properties = []; // keep track of keys that have been added
@@ -24,7 +21,7 @@ Identify.prototype.add = function(property, value) {
   if (type(value) === 'number' || type(value) === 'string') {
     this._addOperation(AMP_OP_ADD, property, value);
   } else {
-    log('Unsupported type for value: ' + type(value) + ', expecting number or string');
+    utils.log('Unsupported type for value: ' + type(value) + ', expecting number or string');
   }
   return this;
 };
@@ -47,7 +44,7 @@ Identify.prototype.unset = function(property) {
 Identify.prototype._addOperation = function(operation, property, value) {
   // check that property wasn't already used in this Identify
   if (this.properties.indexOf(property) !== -1) {
-    log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
+    utils.log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
     return;
   }
 

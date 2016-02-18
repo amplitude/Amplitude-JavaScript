@@ -6,14 +6,11 @@ var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
 var UAParser = require('ua-parser-js');
+var utils = require('./utils');
 var UUID = require('./uuid');
 var version = require('./version');
 var Identify = require('./identify');
 var type = require('./type');
-
-var log = function(s) {
-  console.log('[Amplitude] ' + s);
-};
 
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
@@ -137,21 +134,27 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     _saveCookieData(this);
     _clearSessionAndEventTrackingFromLocalStorage();
 
-    //log('initialized with apiKey=' + apiKey);
-    //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
+    // utils.log('initialized with apiKey=' + apiKey);
+    //opt_userId !== undefined && opt_userId !== null && utils.log('initialized with userId=' + opt_userId);
 
     if (this.options.saveEvents) {
       this._loadSavedUnsentEvents(this.options.unsentKey, '_unsentEvents');
       this._loadSavedUnsentEvents(this.options.unsentIdentifyKey, '_unsentIdentifys');
-    }
 
-    this._sendEventsIfReady();
+      // validate event properties for unsent events
+      for (var i = 0; i < this._unsentEvents.length; i++) {
+        var eventProperties = this._unsentEvents[i].event_properties;
+        this._unsentEvents[i].event_properties = utils.validateProperties(eventProperties);
+      }
+
+      this._sendEventsIfReady();
+    }
 
     if (this.options.includeUtm) {
       this._initUtmData();
     }
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 
   if (callback && type(callback) === 'function') {
@@ -175,7 +178,7 @@ Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey, queue) {
     try {
       this[queue] = JSON.parse(savedUnsentEventsString);
     } catch (e) {
-      //log(e);
+      // utils.log(e);
     }
   }
 };
@@ -370,7 +373,7 @@ Amplitude.prototype.saveEvents = function() {
     localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
     localStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
-    //log(e);
+    // utils.log(e);
   }
 };
 
@@ -382,9 +385,9 @@ Amplitude.prototype.setDomain = function(domain) {
     this.options.domain = this.cookieStorage.options().domain;
     _loadCookieData(this);
     _saveCookieData(this);
-    //log('set domain=' + domain);
+    // utils.log('set domain=' + domain);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -392,9 +395,9 @@ Amplitude.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
-    //log('set userId=' + userId);
+    // utils.log('set userId=' + userId);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -402,9 +405,9 @@ Amplitude.prototype.setOptOut = function(enable) {
   try {
     this.options.optOut = enable;
     _saveCookieData(this);
-    //log('set optOut=' + enable);
+    // utils.log('set optOut=' + enable);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -415,7 +418,7 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
       _saveCookieData(this);
     }
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -452,9 +455,9 @@ Amplitude.prototype.identify = function(identify) {
 Amplitude.prototype.setVersionName = function(versionName) {
   try {
     this.options.versionName = versionName;
-    //log('set versionName=' + versionName);
+    // utils.log('set versionName=' + versionName);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -544,7 +547,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       device_model: ua.os.name || null,
       language: this.options.language,
       api_properties: apiProperties,
-      event_properties: this._truncate(eventProperties),
+      event_properties: this._truncate(utils.validateProperties(eventProperties)),
       user_properties: this._truncate(userProperties),
       uuid: UUID(),
       library: {
@@ -573,7 +576,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 
     return eventId;
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -662,7 +665,7 @@ Amplitude.prototype.sendEvents = function(callback) {
       scope._sending = false;
       try {
         if (status === 200 && response === 'success') {
-          //log('sucessful upload');
+          // utils.log('sucessful upload');
           scope.removeEvents(maxEventId, maxIdentifyId);
 
           // Update the event cache after the removal of sent events.
@@ -676,7 +679,7 @@ Amplitude.prototype.sendEvents = function(callback) {
           }
 
         } else if (status === 413) {
-          //log('request too large');
+          // utils.log('request too large');
           // Can't even get this one massive event through. Drop it.
           if (scope.options.uploadBatchSize === 1) {
             // if massive event is identify, still need to drop it
@@ -692,7 +695,7 @@ Amplitude.prototype.sendEvents = function(callback) {
           callback(status, response);
         }
       } catch (e) {
-        //log('failed upload');
+        // utils.log('failed upload');
       }
     });
   } else if (callback) {

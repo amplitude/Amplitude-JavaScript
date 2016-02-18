@@ -264,6 +264,50 @@ describe('Amplitude', function() {
       assert.isNull(localStorage.getItem(identifyIdKey));
       assert.isNull(localStorage.getItem(sequenceNumberKey));
     });
+
+    it('should validate event properties when loading saved events from localStorage', function() {
+      var existingEvents = '[{"device_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d' +
+        '-2352191877e6","timestamp":1455744744413,"event_id":2,"session_id":1455744733865,"event_type":"clicked",' +
+        '"version_name":"Web","platform":"Web","os_name":"Chrome","os_version":"48","device_model":"Mac","language"' +
+        ':"en-US","api_properties":{},"event_properties":"{}","user_properties":{},"uuid":"1b8859d9-e91e-403e-92d4-' +
+        'c600dfb83432","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":4},{"device_id":"15a82a' +
+        'aa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","timestamp":1455744746295,' +
+        '"event_id":3,"session_id":1455744733865,"event_type":"clicked","version_name":"Web","platform":"Web",' +
+        '"os_name":"Chrome","os_version":"48","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{"10":"false","bool":true,"null":null,"string":"test","array":' +
+        '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
+        '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}},"user_properties":{},"uuid":"650407a1-d705-' +
+        '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
+      localStorage.setItem('amplitude_unsent', existingEvents);
+
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey, null, {
+        batchEvents: true
+      });
+
+      var expected = {
+        '10': 'false',
+        'bool': true,
+        'string': 'test',
+        'array': [0, 1, 2, '3'],
+        'nested_array': ['a'],
+        'object': {
+          'key': 'value'
+        },
+        'nested_object': {
+          'k': 'v',
+          'l': [0, 1],
+          'o': {
+            'k2': 'v2',
+            'l2': ['e2']
+          }
+        }
+      }
+
+      // check that event loaded into memory
+      assert.deepEqual(amplitude2._unsentEvents[0].event_properties, {});
+      assert.deepEqual(amplitude2._unsentEvents[1].event_properties, expected);
+  });
   });
 
   describe('runQueuedFunctions', function() {
@@ -1298,6 +1342,80 @@ describe('Amplitude', function() {
         'eventId': 2,
         'identifyId': 1,
         'sequenceNumber': 3
+      });
+    });
+
+    it('should validate event properties', function() {
+      var e = new Error('oops');
+      clock.tick(1);
+      amplitude.init(apiKey, null, {
+          batchEvents: true,
+          eventUploadThreshold: 5
+      });
+      clock.tick(1);
+      amplitude.logEvent('String event properties', '{}');
+      clock.tick(1);
+      amplitude.logEvent('Bool event properties', true);
+      clock.tick(1);
+      amplitude.logEvent('Number event properties', 15);
+      clock.tick(1);
+      amplitude.logEvent('Array event properties', [1, 2, 3]);
+      clock.tick(1);
+      amplitude.logEvent('Object event properties', {
+        10: 'false', // coerce key
+        'bool': true,
+        'null': null, // should be ignored
+        'function': console.log, // should be ignored
+        'regex': /afdg/, // should be ignored
+        'error': e, // coerce value
+        'string': 'test',
+        'array': [0, 1, 2, '3'],
+        'nested_array': ['a', {'key': 'value'}, ['b']],
+        'object': {
+          'key': 'value',
+          15: e
+        },
+        'nested_object': {
+          'k': 'v',
+          'l': [0, 1],
+          'o': {
+            'k2': 'v2',
+            'l2': ['e2', {
+              'k3': 'v3'
+            }]
+          }
+        }
+      });
+      clock.tick(1);
+
+      assert.lengthOf(amplitude._unsentEvents, 5);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 5);
+
+      assert.deepEqual(events[0].event_properties, {});
+      assert.deepEqual(events[1].event_properties, {});
+      assert.deepEqual(events[2].event_properties, {});
+      assert.deepEqual(events[3].event_properties, {});
+      assert.deepEqual(events[4].event_properties, {
+        '10': 'false',
+        'bool': true,
+        'error': 'Error: oops',
+        'string': 'test',
+        'array': [0, 1, 2, '3'],
+        'nested_array': ['a'],
+        'object': {
+          'key': 'value',
+          '15': 'Error: oops'
+        },
+        'nested_object': {
+          'k': 'v',
+          'l': [0, 1],
+          'o': {
+            'k2': 'v2',
+            'l2': ['e2']
+          }
+        }
       });
     });
   });

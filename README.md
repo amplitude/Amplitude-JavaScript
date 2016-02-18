@@ -54,7 +54,7 @@ amplitude.init('YOUR_API_KEY_HERE', 'USER_ID_HERE');
 
 # Setting Event Properties #
 
-You can attach additional data to any event by passing a Javascript object as the second argument to `logEvent`:
+You can attach additional data to any event by passing a Javascript object as the second argument to logEvent. The Javascript object should be in the form of key + value pairs that can be JSON serialized. The keys should be string values. The values can be booleans, strings, numbers, arrays of strings/numbers/booleans, nested Javascript objects, and errors (note you cannot nest arrays or Javascript objects inside array values). The SDK will validate the event properties that you set and will log any errors or warnings to console if there are any issues. Here is an example:
 
 ```javascript
 var eventProperties = {};
