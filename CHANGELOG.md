@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 2.7.1 (February 18, 2016)
+
 * Validate event properties during logEvent and initialization before sending request.
 
 ## 2.7.0 (December 1, 2015)
