@@ -3,7 +3,7 @@
   var as = document.createElement('script');
   as.type = 'text/javascript';
   as.async = true;
-  as.src = 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js';
+  as.src = 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz.js';
   as.onload = function() { window.amplitude.runQueuedFunctions(); };
   var s = document.getElementsByTagName('script')[0];
   s.parentNode.insertBefore(as, s);

@@ -10,7 +10,7 @@ Amplitude-Javascript
     ```html
         <script type="text/javascript">
           (function(e,t){var n=e.amplitude||{};var r=t.createElement("script");r.type="text/javascript";
-          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js";
+          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz.js";
           r.onload=function(){e.amplitude.runQueuedFunctions()};var s=t.getElementsByTagName("script")[0];
           s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function o(e){
           i.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
@@ -280,7 +280,7 @@ If you are using [RequireJS](http://requirejs.org/) to load your Javascript file
 ```html
   <script src='scripts/require.js'></script>  <!-- loading RequireJS -->
   <script>
-    require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js'], function(amplitude) {
+    require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz.js'], function(amplitude) {
       amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
       window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
       amplitude.logEvent('Clicked Link A');
@@ -294,7 +294,7 @@ You can also define the path in your RequireJS configuration like so:
   <script>
     requirejs.config({
       paths: {
-        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz'
+        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz'
       }
     });
 
