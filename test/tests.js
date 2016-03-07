@@ -7,3 +7,4 @@
   require('./ua-parser.js');
   require('./identify.js');
   require('./cookiestorage.js');
+  require('./utils.js');

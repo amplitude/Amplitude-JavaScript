@@ -112,14 +112,11 @@ var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
 var UAParser = require('ua-parser-js');
+var utils = require('./utils');
 var UUID = require('./uuid');
 var version = require('./version');
 var Identify = require('./identify');
 var type = require('./type');
-
-var log = function(s) {
-  console.log('[Amplitude] ' + s);
-};
 
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
@@ -245,15 +242,21 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     _saveCookieData(this);
     _clearSessionAndEventTrackingFromLocalStorage();
 
-    //log('initialized with apiKey=' + apiKey);
-    //opt_userId !== undefined && opt_userId !== null && log('initialized with userId=' + opt_userId);
+    // utils.log('initialized with apiKey=' + apiKey);
+    //opt_userId !== undefined && opt_userId !== null && utils.log('initialized with userId=' + opt_userId);
 
     if (this.options.saveEvents) {
       this._loadSavedUnsentEvents(this.options.unsentKey, '_unsentEvents');
       this._loadSavedUnsentEvents(this.options.unsentIdentifyKey, '_unsentIdentifys');
-    }
 
-    this._sendEventsIfReady();
+      // validate event properties for unsent events
+      for (var i = 0; i < this._unsentEvents.length; i++) {
+        var eventProperties = this._unsentEvents[i].event_properties;
+        this._unsentEvents[i].event_properties = utils.validateProperties(eventProperties);
+      }
+
+      this._sendEventsIfReady();
+    }
 
     if (this.options.includeUtm) {
       this._initUtmData();
@@ -263,7 +266,7 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
       this._saveReferrer(this._getReferrer());
     }
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 
   if (callback && type(callback) === 'function') {
@@ -287,7 +290,7 @@ Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey, queue) {
     try {
       this[queue] = JSON.parse(savedUnsentEventsString);
     } catch (e) {
-      //log(e);
+      // utils.log(e);
     }
   }
 };
@@ -502,7 +505,7 @@ Amplitude.prototype._saveReferrer = function(referrer) {
       hasSessionStorage = true;
     }
   } catch (e) {
-    // log(e); // sessionStorage disabled
+    // utils.log(e); // sessionStorage disabled
   }
 
   if (!hasSessionStorage || (hasSessionStorage && !window.sessionStorage.getItem(LocalStorageKeys.REFERRER))) {
@@ -521,7 +524,7 @@ Amplitude.prototype.saveEvents = function() {
     localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
     localStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
   } catch (e) {
-    //log(e);
+    // utils.log(e);
   }
 };
 
@@ -533,9 +536,9 @@ Amplitude.prototype.setDomain = function(domain) {
     this.options.domain = this.cookieStorage.options().domain;
     _loadCookieData(this);
     _saveCookieData(this);
-    //log('set domain=' + domain);
+    // utils.log('set domain=' + domain);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -543,9 +546,9 @@ Amplitude.prototype.setUserId = function(userId) {
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
-    //log('set userId=' + userId);
+    // utils.log('set userId=' + userId);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -553,9 +556,9 @@ Amplitude.prototype.setOptOut = function(enable) {
   try {
     this.options.optOut = enable;
     _saveCookieData(this);
-    //log('set optOut=' + enable);
+    // utils.log('set optOut=' + enable);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -566,7 +569,7 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
       _saveCookieData(this);
     }
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -610,9 +613,9 @@ Amplitude.prototype.identify = function(identify) {
 Amplitude.prototype.setVersionName = function(versionName) {
   try {
     this.options.versionName = versionName;
-    //log('set versionName=' + versionName);
+    // utils.log('set versionName=' + versionName);
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -694,7 +697,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       device_model: ua.os.name || null,
       language: this.options.language,
       api_properties: apiProperties,
-      event_properties: this._truncate(eventProperties),
+      event_properties: this._truncate(utils.validateProperties(eventProperties)),
       user_properties: this._truncate(userProperties),
       uuid: UUID(),
       library: {
@@ -723,7 +726,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 
     return eventId;
   } catch (e) {
-    log(e);
+    utils.log(e);
   }
 };
 
@@ -747,7 +750,7 @@ var _isNumber = function(n) {
 Amplitude.prototype.logRevenue = function(price, quantity, product) {
   // Test that the parameters are of the right type.
   if (!_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
-    // log('Price and quantity arguments to logRevenue must be numbers');
+    // utils.log('Price and quantity arguments to logRevenue must be numbers');
     return;
   }
 
@@ -812,7 +815,7 @@ Amplitude.prototype.sendEvents = function(callback) {
       scope._sending = false;
       try {
         if (status === 200 && response === 'success') {
-          //log('sucessful upload');
+          // utils.log('sucessful upload');
           scope.removeEvents(maxEventId, maxIdentifyId);
 
           // Update the event cache after the removal of sent events.
@@ -826,7 +829,7 @@ Amplitude.prototype.sendEvents = function(callback) {
           }
 
         } else if (status === 413) {
-          //log('request too large');
+          // utils.log('request too large');
           // Can't even get this one massive event through. Drop it.
           if (scope.options.uploadBatchSize === 1) {
             // if massive event is identify, still need to drop it
@@ -842,7 +845,7 @@ Amplitude.prototype.sendEvents = function(callback) {
           callback(status, response);
         }
       } catch (e) {
-        //log('failed upload');
+        // utils.log('failed upload');
       }
     });
   } else if (callback) {
@@ -904,7 +907,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookiestorage":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./uuid":11,"./version":12,"./identify":13,"./type":14}],
+}, {"./cookiestorage":3,"json":4,"./language":5,"./localstorage":6,"JavaScript-MD5":7,"object":8,"./xhr":9,"ua-parser-js":10,"./utils":11,"./uuid":12,"./version":13,"./identify":14,"./type":15}],
 3: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
@@ -998,8 +1001,8 @@ cookieStorage.prototype.getStorage = function() {
 
 module.exports = cookieStorage;
 
-}, {"./cookie":15,"json":4,"./localstorage":6}],
-15: [function(require, module, exports) {
+}, {"./cookie":16,"json":4,"./localstorage":6}],
+16: [function(require, module, exports) {
 /*
  * Cookie data
  */
@@ -1128,8 +1131,8 @@ module.exports = {
 
 };
 
-}, {"./base64":16,"json":4,"top-domain":17}],
-16: [function(require, module, exports) {
+}, {"./base64":17,"json":4,"top-domain":18}],
+17: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -1228,8 +1231,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":18}],
-18: [function(require, module, exports) {
+}, {"./utf8":19}],
+19: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1299,8 +1302,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":19}],
-19: [function(require, module, exports) {
+}, {"json-fallback":20}],
+20: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1790,7 +1793,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-17: [function(require, module, exports) {
+18: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1838,8 +1841,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":20}],
-20: [function(require, module, exports) {
+}, {"url":21}],
+21: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -2459,8 +2462,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":21}],
-21: [function(require, module, exports) {
+}, {"querystring":22}],
+22: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2535,8 +2538,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":22,"type":23}],
-22: [function(require, module, exports) {
+}, {"trim":23,"type":24}],
+23: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2556,7 +2559,7 @@ exports.right = function(str){
 };
 
 }, {}],
-23: [function(require, module, exports) {
+24: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -3489,135 +3492,90 @@ function isBuffer(obj) {
 
 }, {}],
 11: [function(require, module, exports) {
-/* jshint bitwise: false, laxbreak: true */
-
-/**
- * Taken straight from jed's gist: https://gist.github.com/982883
- *
- * Returns a random v4 UUID of the form xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx,
- * where each x is replaced with a random hexadecimal digit from 0 to f, and
- * y is replaced with a random hexadecimal digit from 8 to b.
- */
-
-var uuid = function(a) {
-  return a           // if the placeholder was passed, return
-      ? (              // a random number from 0 to 15
-      a ^            // unless b is 8,
-      Math.random()  // in which case
-      * 16           // a random number from
-      >> a / 4         // 8 to 11
-      ).toString(16) // in hexadecimal
-      : (              // or otherwise a concatenated string:
-      [1e7] +        // 10000000 +
-      -1e3 +         // -1000 +
-      -4e3 +         // -4000 +
-      -8e3 +         // -80000000 +
-      -1e11          // -100000000000,
-      ).replace(     // replacing
-      /[018]/g,    // zeroes, ones, and eights with
-      uuid         // random hex digits
-  );
-};
-
-module.exports = uuid;
-
-}, {}],
-12: [function(require, module, exports) {
-module.exports = '2.9.0';
-
-}, {}],
-13: [function(require, module, exports) {
 var type = require('./type');
 
-/*
- * Wrapper for a user properties JSON object that supports operations.
- * Note: if a user property is used in multiple operations on the same Identify object,
- * only the first operation will be saved, and the rest will be ignored.
- */
-
-var AMP_OP_ADD = '$add';
-var AMP_OP_APPEND = '$append';
-var AMP_OP_CLEAR_ALL = '$clearAll';
-var AMP_OP_SET = '$set';
-var AMP_OP_SET_ONCE = '$setOnce';
-var AMP_OP_UNSET = '$unset';
-
 var log = function(s) {
-  console.log('[Amplitude] ' + s);
-};
-
-var Identify = function() {
-  this.userPropertiesOperations = {};
-  this.properties = []; // keep track of keys that have been added
-};
-
-Identify.prototype.add = function(property, value) {
-  if (type(value) === 'number' || type(value) === 'string') {
-    this._addOperation(AMP_OP_ADD, property, value);
-  } else {
-    log('Unsupported type for value: ' + type(value) + ', expecting number or string');
+  try {
+    console.log('[Amplitude] ' + s);
+  } catch (e) {
+    // console logging not available
   }
-  return this;
 };
 
-Identify.prototype.append = function(property, value) {
-  this._addOperation(AMP_OP_APPEND, property, value);
-  return this;
+var isEmptyString = function(str) {
+  return (!str || str.length === 0);
 };
 
-// clearAll should be sent on its own Identify object
-// If there are already other operations, then don't add clearAll
-// If clearAll already in Identify, don't add other operations
-Identify.prototype.clearAll = function() {
-  if (Object.keys(this.userPropertiesOperations).length > 0) {
-    if (!(AMP_OP_CLEAR_ALL in this.userPropertiesOperations)) {
-      log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
+var validateProperties = function(properties) {
+  var propsType = type(properties);
+  if (propsType !== 'object') {
+    log('Error: invalid event properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
+    return {};
+  }
+
+  var copy = {}; // create a copy with all of the valid properties
+  for (var property in properties) {
+    if (!properties.hasOwnProperty(property)) {
+      continue;
     }
-    return this;
+
+    // validate key
+    var key = property;
+    var keyType = type(key);
+    if (keyType !== 'string') {
+      log('WARNING: Non-string property key, received type ' + keyType + ', coercing to string "' + key + '"');
+      key = String(key);
+    }
+
+    // validate value
+    var value = validatePropertyValue(key, properties[property]);
+    if (value === null) {
+      continue;
+    }
+    copy[key] = value;
   }
-  this.userPropertiesOperations[AMP_OP_CLEAR_ALL] = '-';
-  return this;
+  return copy;
 };
 
-Identify.prototype.set = function(property, value) {
-  this._addOperation(AMP_OP_SET, property, value);
-  return this;
-};
+var invalidValueTypes = [
+  'null', 'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
+];
 
-Identify.prototype.setOnce = function(property, value) {
-  this._addOperation(AMP_OP_SET_ONCE, property, value);
-  return this;
-};
-
-Identify.prototype.unset = function(property) {
-  this._addOperation(AMP_OP_UNSET, property, '-');
-  return this;
-};
-
-Identify.prototype._addOperation = function(operation, property, value) {
-  // check that the identify doesn't already contain a clearAll
-  if (AMP_OP_CLEAR_ALL in this.userPropertiesOperations) {
-    log('This identify already contains a $clearAll operation, skipping operation ' + operation);
-    return;
+var validatePropertyValue = function(key, value) {
+  var valueType = type(value);
+  if (invalidValueTypes.indexOf(valueType) !== -1) {
+    log('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
+    value = null;
+  } else if (valueType === 'error') {
+    value = String(value);
+    log('WARNING: Property key "' + key + '" with value type error, coercing to ' + value);
+  } else if (valueType === 'array') {
+    // check for nested arrays or objects
+    var arrayCopy = [];
+    for (var i = 0; i < value.length; i++) {
+      var element = value[i];
+      var elemType = type(element);
+      if (elemType === 'array' || elemType === 'object') {
+        log('WARNING: Cannot have ' + elemType + ' nested in an array property value, skipping');
+        continue;
+      }
+      arrayCopy.push(validatePropertyValue(key, element));
+    }
+    value = arrayCopy;
+  } else if (valueType === 'object') {
+    value = validateProperties(value);
   }
-
-  // check that property wasn't already used in this Identify
-  if (this.properties.indexOf(property) !== -1) {
-    log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
-    return;
-  }
-
-  if (!(operation in this.userPropertiesOperations)){
-    this.userPropertiesOperations[operation] = {};
-  }
-  this.userPropertiesOperations[operation][property] = value;
-  this.properties.push(property);
+  return value;
 };
 
-module.exports = Identify;
+module.exports = {
+  log: log,
+  isEmptyString: isEmptyString,
+  validateProperties: validateProperties
+};
 
-}, {"./type":14}],
-14: [function(require, module, exports) {
+}, {"./type":15}],
+15: [function(require, module, exports) {
 /* Taken from: https://github.com/component/type */
 
 /**
@@ -3664,5 +3622,131 @@ module.exports = function(val){
   return typeof val;
 };
 
-}, {}]}, {}, {"1":""})
+}, {}],
+12: [function(require, module, exports) {
+/* jshint bitwise: false, laxbreak: true */
+
+/**
+ * Taken straight from jed's gist: https://gist.github.com/982883
+ *
+ * Returns a random v4 UUID of the form xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx,
+ * where each x is replaced with a random hexadecimal digit from 0 to f, and
+ * y is replaced with a random hexadecimal digit from 8 to b.
+ */
+
+var uuid = function(a) {
+  return a           // if the placeholder was passed, return
+      ? (              // a random number from 0 to 15
+      a ^            // unless b is 8,
+      Math.random()  // in which case
+      * 16           // a random number from
+      >> a / 4         // 8 to 11
+      ).toString(16) // in hexadecimal
+      : (              // or otherwise a concatenated string:
+      [1e7] +        // 10000000 +
+      -1e3 +         // -1000 +
+      -4e3 +         // -4000 +
+      -8e3 +         // -80000000 +
+      -1e11          // -100000000000,
+      ).replace(     // replacing
+      /[018]/g,    // zeroes, ones, and eights with
+      uuid         // random hex digits
+  );
+};
+
+module.exports = uuid;
+
+}, {}],
+13: [function(require, module, exports) {
+module.exports = '2.9.0';
+
+}, {}],
+14: [function(require, module, exports) {
+var type = require('./type');
+var utils = require('./utils');
+
+/*
+ * Wrapper for a user properties JSON object that supports operations.
+ * Note: if a user property is used in multiple operations on the same Identify object,
+ * only the first operation will be saved, and the rest will be ignored.
+ */
+
+var AMP_OP_ADD = '$add';
+var AMP_OP_APPEND = '$append';
+var AMP_OP_CLEAR_ALL = '$clearAll';
+var AMP_OP_SET = '$set';
+var AMP_OP_SET_ONCE = '$setOnce';
+var AMP_OP_UNSET = '$unset';
+
+var Identify = function() {
+  this.userPropertiesOperations = {};
+  this.properties = []; // keep track of keys that have been added
+};
+
+Identify.prototype.add = function(property, value) {
+  if (type(value) === 'number' || type(value) === 'string') {
+    this._addOperation(AMP_OP_ADD, property, value);
+  } else {
+    utils.log('Unsupported type for value: ' + type(value) + ', expecting number or string');
+  }
+  return this;
+};
+
+Identify.prototype.append = function(property, value) {
+  this._addOperation(AMP_OP_APPEND, property, value);
+  return this;
+};
+
+// clearAll should be sent on its own Identify object
+// If there are already other operations, then don't add clearAll
+// If clearAll already in Identify, don't add other operations
+Identify.prototype.clearAll = function() {
+  if (Object.keys(this.userPropertiesOperations).length > 0) {
+    if (!(AMP_OP_CLEAR_ALL in this.userPropertiesOperations)) {
+      utils.log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
+    }
+    return this;
+  }
+  this.userPropertiesOperations[AMP_OP_CLEAR_ALL] = '-';
+  return this;
+};
+
+Identify.prototype.set = function(property, value) {
+  this._addOperation(AMP_OP_SET, property, value);
+  return this;
+};
+
+Identify.prototype.setOnce = function(property, value) {
+  this._addOperation(AMP_OP_SET_ONCE, property, value);
+  return this;
+};
+
+Identify.prototype.unset = function(property) {
+  this._addOperation(AMP_OP_UNSET, property, '-');
+  return this;
+};
+
+Identify.prototype._addOperation = function(operation, property, value) {
+  // check that the identify doesn't already contain a clearAll
+  if (AMP_OP_CLEAR_ALL in this.userPropertiesOperations) {
+    utils.log('This identify already contains a $clearAll operation, skipping operation ' + operation);
+    return;
+  }
+
+  // check that property wasn't already used in this Identify
+  if (this.properties.indexOf(property) !== -1) {
+    utils.log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
+    return;
+  }
+
+  if (!(operation in this.userPropertiesOperations)){
+    this.userPropertiesOperations[operation] = {};
+  }
+  this.userPropertiesOperations[operation][property] = value;
+  this.properties.push(property);
+};
+
+module.exports = Identify;
+
+}, {"./type":15,"./utils":11}]}, {}, {"1":""})
 );
