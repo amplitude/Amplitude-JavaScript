@@ -10,7 +10,7 @@ var cwd = process.cwd();
 
 function replaceVersion(filepath) {
   var filename = path.join(cwd, filepath);
-  fs.writeFileSync(filename, fs.readFileSync(filename, 'utf-8').replace(previous, version));
+  fs.writeFileSync(filename, fs.readFileSync(filename, 'utf-8').split(previous).join(version));
   console.log('Updated ', filepath);
 }
 
