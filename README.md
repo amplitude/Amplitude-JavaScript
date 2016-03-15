@@ -9,17 +9,15 @@ Amplitude-Javascript
 
     ```html
         <script type="text/javascript">
-          (function(e,t){var n=e.amplitude||{_q:[],_iq:{}};var r=t.createElement("script");r.type="text/javascript";
-          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js";
-          r.onload=function(){e.amplitude.runQueuedFunctions()};var i=t.getElementsByTagName("script")[0];
-          i.parentNode.insertBefore(r,i);var s=function(){this._q=[];return this};function a(e){
-          s.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
-          return this}}var o=["add","append","clearAll","set","setOnce","unset"];for(var c=0;c<o.length;c++){
-          a(o[c])}n.Identify=s;var u=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties"];
-          function l(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
-          }}for(var n=0;n<u.length;n++){t(u[n])}}l(n);n.getInstance=function(e){e=(!e||e.length===0?"$default_instance":e).toLowerCase();
-          if(!n._iq.hasOwnProperty(e)){n._iq[e]={_q:[]};l(n._iq[e])}return n._iq[e]};e.amplitude=n;
-          })(window,document);
+          (function(e,t){var n=e.amplitude||{};var r=t.createElement("script");r.type="text/javascript";
+          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz.js";
+          r.onload=function(){e.amplitude.runQueuedFunctions()};var s=t.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function o(e){
+          i.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
+          return this}}var a=["add","append","clearAll","set","setOnce","unset"];for(var c=0;c<a.length;c++){
+          o(a[c])}n.Identify=i;n._q=[];function u(e){n[e]=function(){n._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
+          }}var l=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties"];
+          for(var p=0;p<l.length;p++){u(l[p])}e.amplitude=n})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
         </script>
@@ -363,7 +361,7 @@ If you are using [RequireJS](http://requirejs.org/) to load your Javascript file
 ```html
   <script src='scripts/require.js'></script>  <!-- loading RequireJS -->
   <script>
-    require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js'], function(amplitude) {
+    require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz.js'], function(amplitude) {
       amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
       window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
       amplitude.logEvent('Clicked Link A');
@@ -377,7 +375,7 @@ You can also define the path in your RequireJS configuration like so:
   <script>
     requirejs.config({
       paths: {
-        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz'
+        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz'
       }
     });
 
