@@ -599,8 +599,11 @@ Amplitude.prototype.clearUserProperties = function(){
   this.identify(identify);
 };
 
-Amplitude.prototype.identify = function(identify) {
+Amplitude.prototype.identify = function(identify, callback) {
   if (!this._apiKeySet('identify()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
 
@@ -617,7 +620,9 @@ Amplitude.prototype.identify = function(identify) {
   }
 
   if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
-    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
+    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, callback);
+  } else if (callback && type(callback) === 'function') {
+    callback(0, 'No request sent');
   }
 };
 
@@ -751,6 +756,9 @@ Amplitude.prototype._limitEventsQueued = function(queue) {
 
 Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
   if (!this._apiKeySet('logEvent()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return -1;
   }
   return this._logEvent(eventType, eventProperties, null, null, callback);
@@ -804,6 +812,9 @@ Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
 
 Amplitude.prototype.sendEvents = function(callback) {
   if (!this._apiKeySet('sendEvents()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
 

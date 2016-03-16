@@ -238,14 +238,19 @@ amplitude.setDeviceId('CUSTOM_DEVICE_ID');
 
 **Note: this is not recommended unless you really know what you are doing** (like if you have your own system for tracking user devices). Make sure the deviceId you set is sufficiently unique (we recommend something like a UUID - see `src/uuid.js` for an example of how to generate) to prevent conflicts with other devices in our system.
 
-### Log Event Callbacks and Redirects ###
-You can pass a callback function to logEvent, which will get called after receiving a response from the server:
+### Callbacks for LogEvent, Identify, and Redirect ###
+You can pass a callback function to logEvent and identify, which will get called after receiving a response from the server:
 
 ```javascript
 amplitude.logEvent("EVENT_IDENTIFIER_HERE", null, callback_function);
 ```
 
-The status and response from the server are passed to the callback function, which you might find useful. An example of a callback function which redirects the browser to another site after a response:
+```javascript
+var identify = new amplitude.Identify().set('key', 'value');
+amplitude.identify(identify, callback_function);
+```
+
+The status and response body from the server are passed to the callback function, which you might find useful. An example of a callback function which redirects the browser to another site after a response:
 
 ```javascript
 var callback_function = function(status, response) {

@@ -670,6 +670,67 @@ describe('Amplitude', function() {
         '$set': {'key4': 'value5'}
       });
     });
+
+    it('should run the callback after making the identify call', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      var identify = new amplitude.Identify().set('key', 'value');
+      amplitude.identify(identify, callback);
+
+      // before server responds, callback should not fire
+      assert.lengthOf(server.requests, 1);
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      // after server response, fire callback
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
+    it('should run the callback even if client not initialized with apiKey', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      var identify = new amplitude.Identify().set('key', 'value');
+      new Amplitude().identify(identify, callback);
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+    });
+
+    it('should run the callback even with an invalid identify object', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      amplitude.identify(null, callback);
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+    });
   });
 
   describe('logEvent', function() {

@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add support for passing callback function to identify.
+
 ### 2.9.1 (March 6, 2016)
 
 * Fix bug where saveReferrer throws exception if sessionStorage is disabled.

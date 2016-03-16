@@ -59,12 +59,15 @@
     };
     var setPhotoCount = function() {
         var photoCount = parseInt(prompt('Input photo count to set', '2'), 10);
-        amplitude.identify(new amplitude.Identify().set('photoCount', photoCount));
+        amplitude.identify(new amplitude.Identify().set('photoCount', photoCount), function() {alert('setPhotoCount!');});
     };
     var setOncePhotoCount = function() {
         var photoCount = parseInt(prompt('Input photo count to setOnce', '2'), 10);
         amplitude.identify(new amplitude.Identify().setOnce('photoCount', photoCount));
     };
+    var logRevenue = function() {
+        amplitude.logRevenue(9.99, 1, 'productA');
+    }
 </script>
 <script>
     amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053', null, {includeReferrer: true}, function() {
