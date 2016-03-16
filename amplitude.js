@@ -3810,7 +3810,6 @@ module.exports = {
   batchEvents: false,
   eventUploadThreshold: 30,
   eventUploadPeriodMillis: 30 * 1000, // 30s
-  newBlankInstance: false
 };
 
 }, {"./language":26}],
