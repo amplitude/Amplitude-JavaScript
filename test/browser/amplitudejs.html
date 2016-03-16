@@ -2,7 +2,7 @@
 <!--<script src="src/amplitude-snippet.js" type="text/javascript"></script>-->
 <script>
     (function(window, document) {
-      var amplitude = window.amplitude || {'_q':[]};
+      var amplitude = window.amplitude || {'_q':[], '_iq':{}};
       var as = document.createElement('script');
       as.type = 'text/javascript';
       as.async = true;
@@ -31,6 +31,13 @@
         for (var j = 0; j < funcs.length; j++) {proxy(funcs[j]);}
       }
       setUpProxy(amplitude);
+      amplitude.getInstance = function(instance) {
+        instance = ((!instance || instance.length === 0) ? '$default_instance' : instance).toLowerCase();
+        if (!amplitude._iq.hasOwnProperty(instance)) {
+          amplitude._iq[instance] = {'_q':[]}; setUpProxy(amplitude._iq[instance]);
+        }
+        return amplitude._iq[instance];
+      };
       window.amplitude = amplitude;
     })(window, document);
 
@@ -74,6 +81,19 @@
     amplitude.identify(new amplitude.Identify().add('photoCount', 1));
     amplitude.identify(new amplitude.Identify().add('photoCount', 1).set('gender', 'male').unset('karma'));
     amplitude.logEvent('pageLoad');
+
+    amplitude.getInstance('app2').logEvent('log event before init');
+    amplitude.getInstance('app2').init('1d2fe1e104eb3f07a24e94d359f70fd5', 'checkers@gmail.com', {includeReferrer: true}, function() {
+        alert(amplitude.getInstance('app2').options.deviceId);
+    });
+    amplitude.getInstance('app2').identify(new amplitude.Identify().set('key', 'value'));
+    amplitude.getInstance('app2').logEvent('app 2 page load');
+
+    amplitude.getInstance('app3').init('a2dbce0e18dfe5f8e74493843ff5c053', null, {batchEvents: true, eventUploadThreshold: 2});
+    amplitude.getInstance('app3').logEvent('app3 pageLoad');
+
+    amplitude.getInstance('app4').init('1d2fe1e104eb3f07a24e94d359f70fd5', 'joe@gmail.com');
+    amplitude.getInstance('app4').logEvent('app 4 page load');
 </script>
 <body>
 <h3>Amplitude JS Test</h3>
