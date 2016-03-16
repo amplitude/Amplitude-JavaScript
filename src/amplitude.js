@@ -468,11 +468,8 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
   }
 };
 
-Amplitude.prototype.setUserProperties = function(userProperties, callback) {
+Amplitude.prototype.setUserProperties = function(userProperties) {
   if (!this._apiKeySet('setUserProperties()')) {
-    if (callback && type(callback) === 'function') {
-      callback(0, 'No request sent');
-    }
     return;
   }
   // convert userProperties into an identify call
@@ -482,21 +479,18 @@ Amplitude.prototype.setUserProperties = function(userProperties, callback) {
       identify.set(property, userProperties[property]);
     }
   }
-  this.identify(identify, callback);
+  this.identify(identify);
 };
 
 // Clearing user properties is irreversible!
-Amplitude.prototype.clearUserProperties = function(callback){
+Amplitude.prototype.clearUserProperties = function(){
   if (!this._apiKeySet('clearUserProperties()')) {
-    if (callback && type(callback) === 'function') {
-      callback(0, 'No request sent');
-    }
     return;
   }
 
   var identify = new Identify();
   identify.clearAll();
-  this.identify(identify, callback);
+  this.identify(identify);
 };
 
 Amplitude.prototype.identify = function(identify, callback) {
@@ -669,13 +663,10 @@ var _isNumber = function(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 };
 
-Amplitude.prototype.logRevenue = function(price, quantity, product, callback) {
+Amplitude.prototype.logRevenue = function(price, quantity, product) {
   // Test that the parameters are of the right type.
   if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
     // utils.log('Price and quantity arguments to logRevenue must be numbers');
-    if (callback && type(callback) === 'function') {
-      callback(0, 'No request sent');
-    }
     return -1;
   }
 
@@ -684,7 +675,7 @@ Amplitude.prototype.logRevenue = function(price, quantity, product, callback) {
     special: 'revenue_amount',
     quantity: quantity || 1,
     price: price
-  }, null, callback);
+  });
 };
 
 /**
