@@ -88,8 +88,18 @@ describe('utils', function() {
         'string': 'test',
         'array': [0, 1, 2, '3'],
         'nested_array': ['a', {'key': 'value'}, ['b']],
-        'object': {'key':'value', 15: e},
-        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2', {'k3': 'v3'}]}}
+        'object': {
+          'key': 'value',
+          15: e
+        },
+        'nested_object': {
+          'k': 'v',
+          'l': [0, 1],
+          'o': {
+              'k2': 'v2',
+              'l2': ['e2', {'k3': 'v3'}]
+          }
+        }
       }
       var expected = {
         '10': 'false',
@@ -98,8 +108,18 @@ describe('utils', function() {
         'string': 'test',
         'array': [0, 1, 2, '3'],
         'nested_array': ['a'],
-        'object': {'key':'value', '15':'Error: oops'},
-        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
+        'object': {
+          'key': 'value',
+          '15': 'Error: oops'
+        },
+        'nested_object': {
+          'k': 'v',
+          'l': [0, 1],
+          'o': {
+              'k2': 'v2',
+              'l2': ['e2']
+          }
+        }
       }
       assert.deepEqual(utils.validateProperties(properties), expected);
     });
