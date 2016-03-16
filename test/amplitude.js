@@ -459,6 +459,48 @@ describe('Amplitude', function() {
       };
       assert.deepEqual(events[0].user_properties, expected);
     });
+
+    it('should run the callback after making the identify call', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      amplitude.setUserProperties({'key': 'value'}, callback);
+
+      // before server responds, callback should not fire
+      assert.lengthOf(server.requests, 1);
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      // after server response, fire callback
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
+    it('should run the callback even if client not initialized with apiKey', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      new Amplitude().setUserProperties({'key': 'value'}, callback);
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+    });
   });
 
   describe('clearUserProperties', function() {
@@ -487,6 +529,48 @@ describe('Amplitude', function() {
         '$clearAll': '-'
       };
       assert.deepEqual(events[0].user_properties, expected);
+    });
+
+    it('should run the callback after making the identify call', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      amplitude.clearUserProperties(callback);
+
+      // before server responds, callback should not fire
+      assert.lengthOf(server.requests, 1);
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      // after server response, fire callback
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
+    it('should run the callback even if client not initialized with apiKey', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      new Amplitude().clearUserProperties(callback);
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
     });
   });
 
@@ -625,6 +709,67 @@ describe('Amplitude', function() {
         '$unset': {'key1': '-'},
         '$set': {'key4': 'value5'}
       });
+    });
+
+    it('should run the callback after making the identify call', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      var identify = new amplitude.Identify().set('key', 'value');
+      amplitude.identify(identify, callback);
+
+      // before server responds, callback should not fire
+      assert.lengthOf(server.requests, 1);
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      // after server response, fire callback
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
+    it('should run the callback even if client not initialized with apiKey', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      var identify = new amplitude.Identify().set('key', 'value');
+      new Amplitude().identify(identify, callback);
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+    });
+
+    it('should run the callback even with an invalid identify object', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      amplitude.identify(null, callback);
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
     });
   });
 
@@ -1820,6 +1965,69 @@ describe('Amplitude', function() {
         quantity: 7,
         productId: 'chicken.dinner'
       });
+    });
+
+    it('should run the callback logging the revenue event', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      amplitude.logRevenue(9.99, 1, 'product', callback);
+
+      // before server responds, callback should not fire
+      assert.lengthOf(server.requests, 1);
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      // after server response, fire callback
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
+    it('should run the callback even if client not initialized with apiKey', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      new Amplitude().logRevenue(9.99, 1, 'product', callback);
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+    });
+
+    it('should run the callback even with invalid revenue arguments', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+
+      amplitude.logRevenue('three', 1, 'product', callback);
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+
+      amplitude.logRevenue(9.99, true, 'product', callback);
+      assert.equal(counter, 2);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
     });
   });
 

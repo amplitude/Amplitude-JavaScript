@@ -468,8 +468,11 @@ Amplitude.prototype.setDeviceId = function(deviceId) {
   }
 };
 
-Amplitude.prototype.setUserProperties = function(userProperties) {
+Amplitude.prototype.setUserProperties = function(userProperties, callback) {
   if (!this._apiKeySet('setUserProperties()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
   // convert userProperties into an identify call
@@ -479,22 +482,28 @@ Amplitude.prototype.setUserProperties = function(userProperties) {
       identify.set(property, userProperties[property]);
     }
   }
-  this.identify(identify);
+  this.identify(identify, callback);
 };
 
 // Clearing user properties is irreversible!
-Amplitude.prototype.clearUserProperties = function(){
+Amplitude.prototype.clearUserProperties = function(callback){
   if (!this._apiKeySet('clearUserProperties()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
 
   var identify = new Identify();
   identify.clearAll();
-  this.identify(identify);
+  this.identify(identify, callback);
 };
 
-Amplitude.prototype.identify = function(identify) {
+Amplitude.prototype.identify = function(identify, callback) {
   if (!this._apiKeySet('identify()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
 
@@ -511,7 +520,9 @@ Amplitude.prototype.identify = function(identify) {
   }
 
   if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
-    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
+    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, callback);
+  } else if (callback && type(callback) === 'function') {
+    callback(0, 'No request sent');
   }
 };
 
@@ -645,6 +656,9 @@ Amplitude.prototype._limitEventsQueued = function(queue) {
 
 Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
   if (!this._apiKeySet('logEvent()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return -1;
   }
   return this._logEvent(eventType, eventProperties, null, null, callback);
@@ -655,10 +669,13 @@ var _isNumber = function(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 };
 
-Amplitude.prototype.logRevenue = function(price, quantity, product) {
+Amplitude.prototype.logRevenue = function(price, quantity, product, callback) {
   // Test that the parameters are of the right type.
   if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
     // utils.log('Price and quantity arguments to logRevenue must be numbers');
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return -1;
   }
 
@@ -667,7 +684,7 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
     special: 'revenue_amount',
     quantity: quantity || 1,
     price: price
-  });
+  }, null, callback);
 };
 
 /**
@@ -698,6 +715,9 @@ Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
 
 Amplitude.prototype.sendEvents = function(callback) {
   if (!this._apiKeySet('sendEvents()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
 
