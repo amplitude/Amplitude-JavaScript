@@ -337,13 +337,11 @@ Amplitude.prototype._sendEventsIfReady = function(callback) {
   return false;
 };
 
-// appends apiKey to storage key to support multiple apps
 // storage argument allows for localStorage and sessionStorage
 Amplitude.prototype._getFromStorage = function(storage, key) {
   return storage.getItem(key);
 };
 
-// appends apiKey to storage key to support multiple apps
 // storage argument allows for localStorage and sessionStorage
 Amplitude.prototype._setInStorage = function(storage, key, value) {
   storage.setItem(key, value);
