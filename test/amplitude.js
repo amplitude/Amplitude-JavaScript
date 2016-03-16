@@ -33,9 +33,6 @@ describe('Amplitude', function() {
     localStorage.clear();
     sessionStorage.clear();
     cookie.remove(amplitude.options.cookieName);
-    cookie.remove(amplitude.options.cookieName + keySuffix);
-    cookie.remove(amplitude.options.cookieName + '_app1');
-    cookie.remove(amplitude.options.cookieName + '_app2');
     cookie.reset();
   }
 
@@ -743,6 +740,28 @@ describe('Amplitude', function() {
       var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 1);
       assert.deepEqual(events[0].event_properties, {index: 4});
+    });
+
+    it('should save events', function() {
+      amplitude.init(apiKey, null, {saveEvents: true});
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
+      amplitude.logEvent('Event', {index: 3});
+
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey);
+      assert.deepEqual(amplitude2._unsentEvents, amplitude._unsentEvents);
+    });
+
+    it('should not save events', function() {
+      amplitude.init(apiKey, null, {saveEvents: false});
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
+      amplitude.logEvent('Event', {index: 3});
+
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey);
+      assert.deepEqual(amplitude2._unsentEvents, []);
     });
 
     it('should limit events sent', function() {

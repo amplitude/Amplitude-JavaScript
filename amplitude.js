@@ -94,16 +94,13 @@
 /* jshint expr:true */
 
 var Amplitude = require('./amplitude');
-var old = window.amplitude || {};
-var newInstance = new Amplitude();
-newInstance._q = old._q || [];
-for (var instance in old._iq) { // migrate each instance's queue
-  if (old._iq.hasOwnProperty(instance)) {
-    newInstance.getInstance(instance)._q = old._iq[instance]._q || [];
-  }
-}
 
-module.exports = newInstance;
+var old = window.amplitude || {};
+var instance = new Amplitude();
+instance._q = old._q || [];
+
+// export the instance
+module.exports = instance;
 
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
@@ -126,19 +123,22 @@ var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
 var MAX_STRING_LENGTH = 1024;
 var LocalStorageKeys = {
-  SESSION_ID: 'amplitude_sessionId',
-  LAST_EVENT_TIME: 'amplitude_lastEventTime',
   LAST_EVENT_ID: 'amplitude_lastEventId',
+  LAST_EVENT_TIME: 'amplitude_lastEventTime',
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   REFERRER: 'amplitude_referrer',
+  SESSION_ID: 'amplitude_sessionId',
 
   // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
-  USER_ID: 'amplitude_userId',
-  OPT_OUT: 'amplitude_optOut'
+  OPT_OUT: 'amplitude_optOut',
+  USER_ID: 'amplitude_userId'
 };
 
+/*
+ * Amplitude API
+ */
 var Amplitude = function() {
   this._unsentEvents = [];
   this._unsentIdentifys = [];
@@ -159,16 +159,6 @@ Amplitude.prototype._updateScheduled = false;
 
 Amplitude.prototype.Identify = Identify;
 
-Amplitude.prototype.runQueuedFunctions = function () {
-  for (var i = 0; i < this._q.length; i++) {
-    var fn = this[this._q[i][0]];
-    if (fn && type(fn) === 'function') {
-      fn.apply(this, this._q[i].slice(1));
-    }
-  }
-  this._q = []; // clear function queue after running
-};
-
 /**
  * Initializes Amplitude.
  * apiKey The API Key for your app
@@ -181,7 +171,6 @@ Amplitude.prototype.runQueuedFunctions = function () {
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   try {
     this.options.apiKey = apiKey;
-
     if (opt_config) {
       if (opt_config.saveEvents !== undefined) {
         this.options.saveEvents = !!opt_config.saveEvents;
@@ -257,8 +246,18 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   }
 
   if (callback && type(callback) === 'function') {
-    callback(this);
+    callback();
   }
+};
+
+Amplitude.prototype.runQueuedFunctions = function () {
+  for (var i = 0; i < this._q.length; i++) {
+    var fn = this[this._q[i][0]];
+    if (fn && type(fn) === 'function') {
+      fn.apply(this, this._q[i].slice(1));
+    }
+  }
+  this._q = []; // clear function queue after running
 };
 
 Amplitude.prototype._apiKeySet = function(methodName) {
@@ -919,6 +918,9 @@ Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
   };
 };
 
+/**
+ *  @deprecated
+ */
 Amplitude.prototype.setGlobalUserProperties = Amplitude.prototype.setUserProperties;
 
 Amplitude.prototype.__VERSION__ = version;
