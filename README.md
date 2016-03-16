@@ -9,15 +9,17 @@ Amplitude-Javascript
 
     ```html
         <script type="text/javascript">
-          (function(e,t){var n=e.amplitude||{};var r=t.createElement("script");r.type="text/javascript";
-          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz.js";
-          r.onload=function(){e.amplitude.runQueuedFunctions()};var s=t.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function o(e){
-          i.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
+          (function(e,t){var n=e.amplitude||{_q:[],_iq:{}};var r=t.createElement("script");r.type="text/javascript";
+          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js";
+          r.onload=function(){e.amplitude.runQueuedFunctions()};var i=t.getElementsByTagName("script")[0];
+          i.parentNode.insertBefore(r,i);var s=function(){this._q=[];return this};function o(e){
+          s.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
           return this}}var a=["add","append","clearAll","set","setOnce","unset"];for(var c=0;c<a.length;c++){
-          o(a[c])}n.Identify=i;n._q=[];function u(e){n[e]=function(){n._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
-          }}var l=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties"];
-          for(var p=0;p<l.length;p++){u(l[p])}e.amplitude=n})(window,document);
+          o(a[c])}n.Identify=s;var u=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties"];
+          function l(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+          }}for(var n=0;n<u.length;n++){t(u[n])}}l(n);n.getInstance=function(e){e=(!e||e.length===0?"$default_instance":e).toLowerCase();
+          if(!n._iq.hasOwnProperty(e)){n._iq[e]={_q:[]};l(n._iq[e])}return n._iq[e]};e.amplitude=n;
+          })(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
         </script>
@@ -279,7 +281,7 @@ You can also pass a callback function to init, which will get called after the S
 
 ```javascript
 amplitude.init('YOUR_API_KEY_HERE', 'USER_ID_HERE', null, function() {
-  console.log(amplitude..options.deviceId);  // access Amplitude's deviceId after initialization
+  console.log(amplitude.options.deviceId);  // access Amplitude's deviceId after initialization
 });
 ```
 

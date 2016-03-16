@@ -107,146 +107,6 @@ module.exports = newInstance;
 
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
-var AmplitudeClient = require('./amplitude-client');
-var Identify = require('./identify');
-var object = require('object');
-var type = require('./type');
-var utils = require('./utils');
-var version = require('./version');
-var DEFAULT_OPTIONS = require('./options');
-
-var DEFAULT_INSTANCE = '$default_instance';
-
-var Amplitude = function() {
-  this.options = object.merge({}, DEFAULT_OPTIONS); // maintain a copy for backwards compatibilty
-  this._instances = {}; // mapping of instance names to instances
-};
-
-Amplitude.prototype.getInstance = function(instance) {
-  instance = (utils.isEmptyString(instance) ? DEFAULT_INSTANCE : instance).toLowerCase();
-
-  var client = this._instances[instance];
-  if (client === undefined) {
-    client = new AmplitudeClient(instance);
-    this._instances[instance] = client;
-  }
-  return client;
-};
-
-Amplitude.prototype.Identify = Identify;
-
-Amplitude.prototype.runQueuedFunctions = function () {
-  // run queued up old version of functions
-  for (var i = 0; i < this._q.length; i++) {
-    var fn = this[this._q[i][0]];
-    if (fn && type(fn) === 'function') {
-      fn.apply(this, this._q[i].slice(1));
-    }
-  }
-  this._q = []; // clear function queue after running
-
-  // run queued up functions on instances
-  for (var instance in this._instances) {
-    if (this._instances.hasOwnProperty(instance)) {
-      this._instances[instance].runQueuedFunctions();
-    }
-  }
-};
-
-/**
- *  @deprecated
- *  Maintain mapping of old functions to new instance methods
- */
-Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
-  this.getInstance().init(apiKey, opt_userId, opt_config, function(instance) {
-    // make options such as deviceId available for callback functions
-    this.options = instance.options;
-    if (callback && type(callback) === 'function') {
-      callback(instance);
-    }
-  }.bind(this));
-};
-
-Amplitude.prototype.isNewSession = function() {
-  return this.getInstance().isNewSession();
-};
-
-Amplitude.prototype.getSessionId = function() {
-  return this.getInstance().getSessionId();
-};
-
-Amplitude.prototype.nextEventId = function() {
-  return this.getInstance().nextEventId();
-};
-
-Amplitude.prototype.nextIdentifyId = function() {
-  return this.getInstance().nextIdentifyId();
-};
-
-Amplitude.prototype.nextSequenceNumber = function() {
-  return this.getInstance().nextSequenceNumber();
-};
-
-Amplitude.prototype.saveEvents = function() {
-  this.getInstance().saveEvents();
-};
-
-Amplitude.prototype.setDomain = function(domain) {
-  this.getInstance().setDomain(domain);
-};
-
-Amplitude.prototype.setUserId = function(userId) {
-  this.getInstance().setUserId(userId);
-};
-
-Amplitude.prototype.setOptOut = function(enable) {
-  this.getInstance().setOptOut(enable);
-};
-
-Amplitude.prototype.setDeviceId = function(deviceId) {
-  this.getInstance().setDeviceId(deviceId);
-};
-
-Amplitude.prototype.setUserProperties = function(userProperties) {
-  this.getInstance().setUserProperties(userProperties);
-};
-
-Amplitude.prototype.clearUserProperties = function(){
-  this.getInstance().clearUserProperties();
-};
-
-Amplitude.prototype.identify = function(identify) {
-  this.getInstance().identify(identify);
-};
-
-Amplitude.prototype.setVersionName = function(versionName) {
-  this.getInstance().setVersionName(versionName);
-};
-
-Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
-  return this.getInstance().logEvent(eventType, eventProperties, callback);
-};
-
-Amplitude.prototype.logRevenue = function(price, quantity, product) {
-  return this.getInstance().logRevenue(price, quantity, product);
-};
-
-Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
-  this.getInstance().removeEvents(maxEventId, maxIdentifyId);
-};
-
-Amplitude.prototype.sendEvents = function(callback) {
-  this.getInstance().sendEvents(callback);
-};
-
-Amplitude.prototype.setGlobalUserProperties = Amplitude.prototype.setUserProperties;
-
-Amplitude.prototype.__VERSION__ = version;
-
-module.exports = Amplitude;
-
-}, {"./amplitude-client":3,"./identify":4,"object":5,"./type":6,"./utils":7,"./version":8,"./options":9}],
-3: [function(require, module, exports) {
 var cookieStorage = require('./cookiestorage');
 var getUtmData = require('./utm');
 var Identify = require('./identify');
@@ -255,14 +115,13 @@ var localStorage = require('./localstorage');  // jshint ignore:line
 var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
+var type = require('./type');
 var UAParser = require('ua-parser-js');
 var utils = require('./utils');
 var UUID = require('./uuid');
 var version = require('./version');
-var type = require('./type');
 var DEFAULT_OPTIONS = require('./options');
 
-var DEFAULT_INSTANCE = '$default_instance';
 var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
 var MAX_STRING_LENGTH = 1024;
@@ -280,12 +139,7 @@ var LocalStorageKeys = {
   OPT_OUT: 'amplitude_optOut'
 };
 
-/*
- * AmplitudeClient API
- */
-var AmplitudeClient = function(instanceName) {
-  this._instanceName = (utils.isEmptyString(instanceName) ? DEFAULT_INSTANCE : instanceName).toLowerCase();
-  this._storageSuffix = this._instanceName === DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
+var Amplitude = function() {
   this._unsentEvents = [];
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
@@ -294,17 +148,29 @@ var AmplitudeClient = function(instanceName) {
   this._q = []; // queue for proxied functions before script load
 };
 
-AmplitudeClient.prototype._eventId = 0;
-AmplitudeClient.prototype._identifyId = 0;
-AmplitudeClient.prototype._sequenceNumber = 0;
-AmplitudeClient.prototype._sending = false;
-AmplitudeClient.prototype._lastEventTime = null;
-AmplitudeClient.prototype._sessionId = null;
-AmplitudeClient.prototype._newSession = false;
-AmplitudeClient.prototype._updateScheduled = false;
+Amplitude.prototype._eventId = 0;
+Amplitude.prototype._identifyId = 0;
+Amplitude.prototype._sequenceNumber = 0;
+Amplitude.prototype._sending = false;
+Amplitude.prototype._lastEventTime = null;
+Amplitude.prototype._sessionId = null;
+Amplitude.prototype._newSession = false;
+Amplitude.prototype._updateScheduled = false;
+
+Amplitude.prototype.Identify = Identify;
+
+Amplitude.prototype.runQueuedFunctions = function () {
+  for (var i = 0; i < this._q.length; i++) {
+    var fn = this[this._q[i][0]];
+    if (fn && type(fn) === 'function') {
+      fn.apply(this, this._q[i].slice(1));
+    }
+  }
+  this._q = []; // clear function queue after running
+};
 
 /**
- * Initializes AmplitudeClient.
+ * Initializes Amplitude.
  * apiKey The API Key for your app
  * opt_userId An identifier for this user
  * opt_config Configuration options
@@ -312,7 +178,7 @@ AmplitudeClient.prototype._updateScheduled = false;
  *   - includeUtm (boolean) Whether to send utm parameters with events. Defaults to false.
  *   - includeReferrer (boolean) Whether to send referrer info with events. Defaults to false.
  */
-AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
+Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
   try {
     this.options.apiKey = apiKey;
 
@@ -332,9 +198,6 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
       if (opt_config.batchEvents !== undefined) {
         this.options.batchEvents = !!opt_config.batchEvents;
       }
-      if (opt_config.newBlankInstance !== undefined) {
-        this.options.newBlankInstance = !!opt_config.newBlankInstance;
-      }
       this.options.platform = opt_config.platform || this.options.platform;
       this.options.language = opt_config.language || this.options.language;
       this.options.sessionTimeout = opt_config.sessionTimeout || this.options.sessionTimeout;
@@ -350,10 +213,9 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    if (this._instanceName === DEFAULT_INSTANCE) {
-      _upgradeCookeData(this);
-    }
+    _upgradeCookeData(this);
     _loadCookieData(this);
+
     this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
         opt_config.deviceId !== null && opt_config.deviceId) ||
         this.options.deviceId || UUID();
@@ -399,9 +261,7 @@ AmplitudeClient.prototype.init = function(apiKey, opt_userId, opt_config, callba
   }
 };
 
-AmplitudeClient.prototype.Identify = Identify;
-
-AmplitudeClient.prototype._apiKeySet = function(methodName) {
+Amplitude.prototype._apiKeySet = function(methodName) {
   if (!this.options.apiKey) {
     utils.log('apiKey cannot be undefined or null, set apiKey with init() before calling ' + methodName);
     return false;
@@ -409,17 +269,7 @@ AmplitudeClient.prototype._apiKeySet = function(methodName) {
   return true;
 };
 
-AmplitudeClient.prototype.runQueuedFunctions = function () {
-  for (var i = 0; i < this._q.length; i++) {
-    var fn = this[this._q[i][0]];
-    if (fn && type(fn) === 'function') {
-      fn.apply(this, this._q[i].slice(1));
-    }
-  }
-  this._q = []; // clear function queue after running
-};
-
-AmplitudeClient.prototype._loadSavedUnsentEvents = function(unsentKey) {
+Amplitude.prototype._loadSavedUnsentEvents = function(unsentKey) {
   var savedUnsentEventsString = this._getFromStorage(localStorage, unsentKey);
   if (savedUnsentEventsString) {
     try {
@@ -431,36 +281,36 @@ AmplitudeClient.prototype._loadSavedUnsentEvents = function(unsentKey) {
   return null;
 };
 
-AmplitudeClient.prototype.isNewSession = function() {
+Amplitude.prototype.isNewSession = function() {
   return this._newSession;
 };
 
-AmplitudeClient.prototype.getSessionId = function() {
+Amplitude.prototype.getSessionId = function() {
   return this._sessionId;
 };
 
-AmplitudeClient.prototype.nextEventId = function() {
+Amplitude.prototype.nextEventId = function() {
   this._eventId++;
   return this._eventId;
 };
 
-AmplitudeClient.prototype.nextIdentifyId = function() {
+Amplitude.prototype.nextIdentifyId = function() {
   this._identifyId++;
   return this._identifyId;
 };
 
-AmplitudeClient.prototype.nextSequenceNumber = function() {
+Amplitude.prototype.nextSequenceNumber = function() {
   this._sequenceNumber++;
   return this._sequenceNumber;
 };
 
 // returns the number of unsent events and identifys
-AmplitudeClient.prototype._unsentCount = function() {
+Amplitude.prototype._unsentCount = function() {
   return this._unsentEvents.length + this._unsentIdentifys.length;
 };
 
 // returns true if sendEvents called immediately
-AmplitudeClient.prototype._sendEventsIfReady = function(callback) {
+Amplitude.prototype._sendEventsIfReady = function(callback) {
   if (this._unsentCount() === 0) {
     return false;
   }
@@ -490,14 +340,14 @@ AmplitudeClient.prototype._sendEventsIfReady = function(callback) {
 
 // appends apiKey to storage key to support multiple apps
 // storage argument allows for localStorage and sessionStorage
-AmplitudeClient.prototype._getFromStorage = function(storage, key) {
-  return storage.getItem(key + this._storageSuffix);
+Amplitude.prototype._getFromStorage = function(storage, key) {
+  return storage.getItem(key);
 };
 
 // appends apiKey to storage key to support multiple apps
 // storage argument allows for localStorage and sessionStorage
-AmplitudeClient.prototype._setInStorage = function(storage, key, value) {
-  storage.setItem(key + this._storageSuffix, value);
+Amplitude.prototype._setInStorage = function(storage, key, value) {
+  storage.setItem(key, value);
 };
 
 /*
@@ -555,7 +405,7 @@ var _upgradeCookeData = function(scope) {
 };
 
 var _loadCookieData = function(scope) {
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -585,7 +435,7 @@ var _loadCookieData = function(scope) {
 };
 
 var _saveCookieData = function(scope) {
-  scope.cookieStorage.set(scope.options.cookieName + scope._storageSuffix, {
+  scope.cookieStorage.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut,
@@ -600,17 +450,17 @@ var _saveCookieData = function(scope) {
 /**
  * Parse the utm properties out of cookies and query for adding to user properties.
  */
-AmplitudeClient.prototype._initUtmData = function(queryParams, cookieParams) {
+Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
   cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   this._utmProperties = getUtmData(cookieParams, queryParams);
 };
 
-AmplitudeClient.prototype._getReferrer = function() {
+Amplitude.prototype._getReferrer = function() {
   return document.referrer;
 };
 
-AmplitudeClient.prototype._getReferringDomain = function(referrer) {
+Amplitude.prototype._getReferringDomain = function(referrer) {
   if (referrer === null || referrer === undefined || referrer === '') {
     return null;
   }
@@ -622,7 +472,7 @@ AmplitudeClient.prototype._getReferringDomain = function(referrer) {
 };
 
 // since user properties are propagated on the server, only send once per session, don't need to send with every event
-AmplitudeClient.prototype._saveReferrer = function(referrer) {
+Amplitude.prototype._saveReferrer = function(referrer) {
   if (referrer === null || referrer === undefined || referrer === '') {
     return;
   }
@@ -653,7 +503,7 @@ AmplitudeClient.prototype._saveReferrer = function(referrer) {
   this.identify(identify);
 };
 
-AmplitudeClient.prototype.saveEvents = function() {
+Amplitude.prototype.saveEvents = function() {
   if (!this._apiKeySet('saveEvents()')) {
     return;
   }
@@ -666,7 +516,7 @@ AmplitudeClient.prototype.saveEvents = function() {
   }
 };
 
-AmplitudeClient.prototype.setDomain = function(domain) {
+Amplitude.prototype.setDomain = function(domain) {
   if (!this._apiKeySet('setDomain()')) {
     return;
   }
@@ -684,7 +534,7 @@ AmplitudeClient.prototype.setDomain = function(domain) {
   }
 };
 
-AmplitudeClient.prototype.setUserId = function(userId) {
+Amplitude.prototype.setUserId = function(userId) {
   if (!this._apiKeySet('setUserId()')) {
     return;
   }
@@ -698,7 +548,7 @@ AmplitudeClient.prototype.setUserId = function(userId) {
   }
 };
 
-AmplitudeClient.prototype.setOptOut = function(enable) {
+Amplitude.prototype.setOptOut = function(enable) {
   if (!this._apiKeySet('setOptOut()')) {
     return;
   }
@@ -712,7 +562,7 @@ AmplitudeClient.prototype.setOptOut = function(enable) {
   }
 };
 
-AmplitudeClient.prototype.setDeviceId = function(deviceId) {
+Amplitude.prototype.setDeviceId = function(deviceId) {
   if (!this._apiKeySet('setDeviceId()')) {
     return;
   }
@@ -727,7 +577,7 @@ AmplitudeClient.prototype.setDeviceId = function(deviceId) {
   }
 };
 
-AmplitudeClient.prototype.setUserProperties = function(userProperties) {
+Amplitude.prototype.setUserProperties = function(userProperties) {
   if (!this._apiKeySet('setUserProperties()')) {
     return;
   }
@@ -742,7 +592,7 @@ AmplitudeClient.prototype.setUserProperties = function(userProperties) {
 };
 
 // Clearing user properties is irreversible!
-AmplitudeClient.prototype.clearUserProperties = function(){
+Amplitude.prototype.clearUserProperties = function(){
   if (!this._apiKeySet('clearUserProperties()')) {
     return;
   }
@@ -752,7 +602,7 @@ AmplitudeClient.prototype.clearUserProperties = function(){
   this.identify(identify);
 };
 
-AmplitudeClient.prototype.identify = function(identify) {
+Amplitude.prototype.identify = function(identify) {
   if (!this._apiKeySet('identify()')) {
     return;
   }
@@ -774,7 +624,7 @@ AmplitudeClient.prototype.identify = function(identify) {
   }
 };
 
-AmplitudeClient.prototype.setVersionName = function(versionName) {
+Amplitude.prototype.setVersionName = function(versionName) {
   try {
     this.options.versionName = versionName;
     // utils.log('set versionName=' + versionName);
@@ -784,7 +634,7 @@ AmplitudeClient.prototype.setVersionName = function(versionName) {
 };
 
 // truncate string values in event and user properties so that request size does not get too large
-AmplitudeClient.prototype._truncate = function(value) {
+Amplitude.prototype._truncate = function(value) {
   if (type(value) === 'array') {
     for (var i = 0; i < value.length; i++) {
       value[i] = this._truncate(value[i]);
@@ -812,7 +662,7 @@ var _truncateValue = function(value) {
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
-AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
+Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
   if (type(callback) !== 'function') {
     callback = null;
   }
@@ -896,13 +746,13 @@ AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiPr
 
 // Remove old events from the beginning of the array if too many
 // have accumulated. Don't want to kill memory. Default is 1000 events.
-AmplitudeClient.prototype._limitEventsQueued = function(queue) {
+Amplitude.prototype._limitEventsQueued = function(queue) {
   if (queue.length > this.options.savedMaxCount) {
     queue.splice(0, queue.length - this.options.savedMaxCount);
   }
 };
 
-AmplitudeClient.prototype.logEvent = function(eventType, eventProperties, callback) {
+Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
   if (!this._apiKeySet('logEvent()')) {
     return -1;
   }
@@ -914,7 +764,7 @@ var _isNumber = function(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 };
 
-AmplitudeClient.prototype.logRevenue = function(price, quantity, product) {
+Amplitude.prototype.logRevenue = function(price, quantity, product) {
   // Test that the parameters are of the right type.
   if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
     // utils.log('Price and quantity arguments to logRevenue must be numbers');
@@ -933,7 +783,7 @@ AmplitudeClient.prototype.logRevenue = function(price, quantity, product) {
  * Remove events in storage with event ids up to and including maxEventId. Does
  * a true filter in case events get out of order or old events are removed.
  */
-AmplitudeClient.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
+Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
   if (maxEventId >= 0) {
     var filteredEvents = [];
     for (var i = 0; i < this._unsentEvents.length; i++) {
@@ -955,7 +805,7 @@ AmplitudeClient.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
   }
 };
 
-AmplitudeClient.prototype.sendEvents = function(callback) {
+Amplitude.prototype.sendEvents = function(callback) {
   if (!this._apiKeySet('sendEvents()')) {
     return;
   }
@@ -1024,7 +874,7 @@ AmplitudeClient.prototype.sendEvents = function(callback) {
   }
 };
 
-AmplitudeClient.prototype._mergeEventsAndIdentifys = function(numEvents) {
+Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
   // coalesce events from both queues
   var eventsToSend = [];
   var eventIndex = 0;
@@ -1069,10 +919,14 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function(numEvents) {
   };
 };
 
-module.exports = AmplitudeClient;
+Amplitude.prototype.setGlobalUserProperties = Amplitude.prototype.setUserProperties;
 
-}, {"./cookiestorage":10,"./utm":11,"./identify":4,"json":12,"./localstorage":13,"JavaScript-MD5":14,"object":5,"./xhr":15,"ua-parser-js":16,"./utils":7,"./uuid":17,"./version":8,"./type":6,"./options":9}],
-10: [function(require, module, exports) {
+Amplitude.prototype.__VERSION__ = version;
+
+module.exports = Amplitude;
+
+}, {"./cookiestorage":3,"./utm":4,"./identify":5,"json":6,"./localstorage":7,"JavaScript-MD5":8,"object":9,"./xhr":10,"./type":11,"ua-parser-js":12,"./utils":13,"./uuid":14,"./version":15,"./options":16}],
+3: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -1165,8 +1019,8 @@ cookieStorage.prototype.getStorage = function() {
 
 module.exports = cookieStorage;
 
-}, {"./cookie":18,"json":12,"./localstorage":13}],
-18: [function(require, module, exports) {
+}, {"./cookie":17,"json":6,"./localstorage":7}],
+17: [function(require, module, exports) {
 /*
  * Cookie data
  */
@@ -1295,8 +1149,8 @@ module.exports = {
 
 };
 
-}, {"./base64":19,"json":12,"top-domain":20}],
-19: [function(require, module, exports) {
+}, {"./base64":18,"json":6,"top-domain":19}],
+18: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -1395,8 +1249,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":21}],
-21: [function(require, module, exports) {
+}, {"./utf8":20}],
+20: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1456,7 +1310,7 @@ var UTF8 = {
 module.exports = UTF8;
 
 }, {}],
-12: [function(require, module, exports) {
+6: [function(require, module, exports) {
 
 var json = window.JSON || {};
 var stringify = json.stringify;
@@ -1466,8 +1320,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":22}],
-22: [function(require, module, exports) {
+}, {"json-fallback":21}],
+21: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1957,7 +1811,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-20: [function(require, module, exports) {
+19: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2005,8 +1859,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":23}],
-23: [function(require, module, exports) {
+}, {"url":22}],
+22: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -2091,7 +1945,7 @@ function port (protocol){
 }
 
 }, {}],
-13: [function(require, module, exports) {
+7: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -2195,7 +2049,7 @@ if (!localStorage) {
 module.exports = localStorage;
 
 }, {}],
-11: [function(require, module, exports) {
+4: [function(require, module, exports) {
 var getUtmParam = function(name, query) {
   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
   var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
@@ -2224,7 +2078,7 @@ var getUtmData = function(rawCookie, query) {
 module.exports = getUtmData;
 
 }, {}],
-4: [function(require, module, exports) {
+5: [function(require, module, exports) {
 var type = require('./type');
 var utils = require('./utils');
 
@@ -2311,8 +2165,8 @@ Identify.prototype._addOperation = function(operation, property, value) {
 
 module.exports = Identify;
 
-}, {"./type":6,"./utils":7}],
-6: [function(require, module, exports) {
+}, {"./type":11,"./utils":13}],
+11: [function(require, module, exports) {
 /* Taken from: https://github.com/component/type */
 
 /**
@@ -2360,7 +2214,7 @@ module.exports = function(val){
 };
 
 }, {}],
-7: [function(require, module, exports) {
+13: [function(require, module, exports) {
 var type = require('./type');
 
 var log = function(s) {
@@ -2446,8 +2300,8 @@ module.exports = {
   validateProperties: validateProperties
 };
 
-}, {"./type":6}],
-14: [function(require, module, exports) {
+}, {"./type":11}],
+8: [function(require, module, exports) {
 /*
  * JavaScript MD5 1.0.1
  * https://github.com/blueimp/JavaScript-MD5
@@ -2735,7 +2589,7 @@ module.exports = {
 }(this));
 
 }, {}],
-5: [function(require, module, exports) {
+9: [function(require, module, exports) {
 
 /**
  * HOP ref.
@@ -2821,7 +2675,7 @@ exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
 }, {}],
-15: [function(require, module, exports) {
+10: [function(require, module, exports) {
 var querystring = require('querystring');
 
 /*
@@ -2867,8 +2721,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":24}],
-24: [function(require, module, exports) {
+}, {"querystring":23}],
+23: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2943,8 +2797,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":25,"type":26}],
-25: [function(require, module, exports) {
+}, {"trim":24,"type":25}],
+24: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2964,7 +2818,7 @@ exports.right = function(str){
 };
 
 }, {}],
-26: [function(require, module, exports) {
+25: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -3013,7 +2867,7 @@ function isBuffer(obj) {
 }
 
 }, {}],
-16: [function(require, module, exports) {
+12: [function(require, module, exports) {
 /* jshint eqeqeq: false, forin: false */
 /* global define */
 
@@ -3896,7 +3750,7 @@ function isBuffer(obj) {
 })(this);
 
 }, {}],
-17: [function(require, module, exports) {
+14: [function(require, module, exports) {
 /* jshint bitwise: false, laxbreak: true */
 
 /**
@@ -3930,11 +3784,11 @@ var uuid = function(a) {
 module.exports = uuid;
 
 }, {}],
-8: [function(require, module, exports) {
+15: [function(require, module, exports) {
 module.exports = '2.9.0';
 
 }, {}],
-9: [function(require, module, exports) {
+16: [function(require, module, exports) {
 var language = require('./language');
 
 // default options
@@ -3959,8 +3813,8 @@ module.exports = {
   newBlankInstance: false
 };
 
-}, {"./language":27}],
-27: [function(require, module, exports) {
+}, {"./language":26}],
+26: [function(require, module, exports) {
 var getLanguage = function() {
     return (navigator && ((navigator.languages && navigator.languages[0]) ||
         navigator.language || navigator.userLanguage)) || undefined;
