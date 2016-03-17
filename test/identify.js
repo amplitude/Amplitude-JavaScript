@@ -141,6 +141,41 @@ describe('Identify', function() {
     assert.deepEqual([property1, property2, property3, property4, property5], identify.properties);
   });
 
+    it ('should prepend properties', function () {
+    var property1 = 'var value';
+    var value1 = 'testValue';
+
+    var property2 = 'float value';
+    var value2 = 0.123;
+
+    var property3 = 'bool value';
+    var value3 = true;
+
+    var property4 = 'json value';
+    var value4 = {};
+
+    var property5 = 'list value';
+    var value5 = [1, 2, 'test'];
+
+    var identify = new Identify().prepend(property1, value1).prepend(property2, value2);
+    identify.prepend(property3, value3).prepend(property4, value4).prepend(property5, value5);
+
+    // identify should ignore this since duplicate key
+    identify.setOnce(property1, value3);
+
+    var expected = {
+      '$prepend': {}
+    }
+    expected['$prepend'][property1] = value1;
+    expected['$prepend'][property2] = value2;
+    expected['$prepend'][property3] = value3;
+    expected['$prepend'][property4] = value4;
+    expected['$prepend'][property5] = value5;
+
+    assert.deepEqual(expected, identify.userPropertiesOperations);
+    assert.deepEqual([property1, property2, property3, property4, property5], identify.properties);
+  });
+
   it ('should allow multiple operations', function () {
     var property1 = 'string value';
     var value1 = 'testValue';
@@ -156,8 +191,12 @@ describe('Identify', function() {
     var property5 = 'list value';
     var value5 = [1, 2, 'test'];
 
+    var property6 = 'int value';
+    var value6 = 100;
+
     var identify = new Identify().setOnce(property1, value1).add(property2, value2);
     identify.set(property3, value3).unset(property4).append(property5, value5);
+    identify.prepend(property6, value6);
 
     // identify should ignore this since duplicate key
     identify.set(property4, value3);
@@ -165,6 +204,7 @@ describe('Identify', function() {
     var expected = {
       '$add': {},
       '$append': {},
+      '$prepend': {},
       '$set': {},
       '$setOnce': {},
       '$unset': {}
@@ -174,9 +214,10 @@ describe('Identify', function() {
     expected['$set'][property3] = value3;
     expected['$unset'][property4] = '-';
     expected['$append'][property5] = value5;
+    expected['$prepend'][property6] = value6;
 
     assert.deepEqual(expected, identify.userPropertiesOperations);
-    assert.deepEqual([property1, property2, property3, property4, property5], identify.properties);
+    assert.deepEqual([property1, property2, property3, property4, property5, property6], identify.properties);
   });
 
   it ('should disallow duplicate properties', function () {

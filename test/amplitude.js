@@ -653,6 +653,7 @@ describe('Amplitude', function() {
         ['add', 'key1', 'value1'],
         ['set', 'key2', 'value3'],
         ['set', 'key4', 'value5'],
+        ['prepend', 'key5', 'value6']
       ]};
       amplitude.identify(proxyObject);
 
@@ -667,7 +668,8 @@ describe('Amplitude', function() {
       assert.deepEqual(events[0].user_properties, {
         '$setOnce': {'key2': 'value4'},
         '$unset': {'key1': '-'},
-        '$set': {'key4': 'value5'}
+        '$set': {'key4': 'value5'},
+        '$prepend': {'key5': 'value6'}
       });
     });
 
