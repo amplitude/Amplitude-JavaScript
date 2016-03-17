@@ -2102,6 +2102,7 @@ var utils = require('./utils');
 var AMP_OP_ADD = '$add';
 var AMP_OP_APPEND = '$append';
 var AMP_OP_CLEAR_ALL = '$clearAll';
+var AMP_OP_PREPEND = '$prepend';
 var AMP_OP_SET = '$set';
 var AMP_OP_SET_ONCE = '$setOnce';
 var AMP_OP_UNSET = '$unset';
@@ -2136,6 +2137,11 @@ Identify.prototype.clearAll = function() {
     return this;
   }
   this.userPropertiesOperations[AMP_OP_CLEAR_ALL] = '-';
+  return this;
+};
+
+Identify.prototype.prepend = function(property, value) {
+  this._addOperation(AMP_OP_PREPEND, property, value);
   return this;
 };
 

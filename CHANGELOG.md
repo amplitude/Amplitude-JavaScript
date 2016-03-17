@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Add support for passing callback function to identify.
+* Add support for prepend user property operation.
 
 ### 2.9.1 (March 6, 2016)
 

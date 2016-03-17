@@ -14,10 +14,10 @@ Amplitude-Javascript
           r.onload=function(){e.amplitude.runQueuedFunctions()};var i=t.getElementsByTagName("script")[0];
           i.parentNode.insertBefore(r,i);var s=function(){this._q=[];return this};function o(e){
           s.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
-          return this}}var a=["add","append","clearAll","set","setOnce","unset"];for(var c=0;c<a.length;c++){
+          return this}}var a=["add","append","clearAll","prepend","set","setOnce","unset"];for(var c=0;c<a.length;c++){
           o(a[c])}n.Identify=s;var u=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties"];
-          function l(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
-          }}for(var n=0;n<u.length;n++){t(u[n])}}l(n);e.amplitude=n})(window,document);
+          function p(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+          }}for(var n=0;n<u.length;n++){t(u[n])}}p(n);e.amplitude=n})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
         </script>
@@ -117,6 +117,13 @@ The SDK supports the operations `set`, `setOnce`, `unset`, and `add` on individu
 
     ```javascript
     var identify = new amplitude.Identify().append('ab-tests', 'new-user-test').append('some_list', [1, 2, 3, 4, 'values']);
+    amplitude.identify(identify);
+    ```
+
+6. `prepend`: this will prepend a value or values to a user property. If the user property does not have a value set yet, it will be initialized to an empty list before the new values are prepended. If the user property has an existing value and it is not a list, it will be converted into a list with the new value prepended.
+
+    ```javascript
+    var identify = new amplitude.Identify().prepend('ab-tests', 'new-user-test').prepend('some_list', [1, 2, 3, 4, 'values']);
     amplitude.identify(identify);
     ```
 
