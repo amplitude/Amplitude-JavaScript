@@ -584,6 +584,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       this._sessionId = eventTime;
     }
     this._lastEventTime = eventTime;
+    _saveCookieData(this);
 
     userProperties = userProperties || {};
     // Only add utm properties to user properties for events
@@ -617,8 +618,6 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       sequence_number: sequenceNumber // for ordering events and identifys
       // country: null
     };
-
-    _saveCookieData(this);
 
     if (eventType === IDENTIFY_EVENT) {
       this._unsentIdentifys.push(event);
