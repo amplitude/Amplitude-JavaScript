@@ -9,7 +9,7 @@
     "amplitude"
   ],
   "repository": "git://github.com/amplitude/amplitude-javascript.git",
-  "main": "lib/amplitude.js",
+  "main": "src/index.js",
   "dependencies": {},
   "devDependencies": {
     "duo": "0.8",
