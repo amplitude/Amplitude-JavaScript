@@ -2,6 +2,7 @@
 
 * Add support for passing callback function to identify.
 * Add support for prepend user property operation.
+* Add support for keeping sessions and event metadata in sync across multiple windows/tabs.
 
 ### 2.9.1 (March 6, 2016)
 
