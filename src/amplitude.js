@@ -563,6 +563,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     callback = null;
   }
 
+  _loadCookieData(this);
   if (!eventType || this.options.optOut) {
     if (callback) {
       callback(0, 'No request sent');

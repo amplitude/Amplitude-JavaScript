@@ -1621,6 +1621,31 @@ describe('Amplitude', function() {
         'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
       });
     });
+
+    it('should synchronize event data across multiple amplitude instances that share the same cookie', function() {
+      // this test fails if logEvent does not reload cookie data every time
+      var amplitude1 = new Amplitude();
+      amplitude1.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 5});
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 5});
+
+      amplitude1.logEvent('test1');
+      amplitude2.logEvent('test2');
+      amplitude1.logEvent('test3');
+      amplitude2.logEvent('test4');
+      amplitude2.identify(new amplitude2.Identify().set('key', 'value'));
+      amplitude1.logEvent('test5');
+
+      // the event ids should all be sequential since amplitude1 and amplitude2 have synchronized cookies
+      var eventId = amplitude1._unsentEvents[0]['event_id'];
+      assert.equal(amplitude2._unsentEvents[0]['event_id'], eventId + 1);
+      assert.equal(amplitude1._unsentEvents[1]['event_id'], eventId + 2);
+      assert.equal(amplitude2._unsentEvents[1]['event_id'], eventId + 3);
+
+      var sequenceNumber = amplitude1._unsentEvents[0]['sequence_number'];
+      assert.equal(amplitude2._unsentIdentifys[0]['sequence_number'], sequenceNumber + 4);
+      assert.equal(amplitude1._unsentEvents[2]['sequence_number'], sequenceNumber +  5);
+    });
   });
 
   describe('optOut', function() {
