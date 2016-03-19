@@ -439,15 +439,15 @@ Amplitude.prototype.setUserId = function(userId) {
   }
 };
 
-Amplitude.prototype.setGroup = function(groupName, value) {
+Amplitude.prototype.setGroup = function(groupType, groupName) {
   if (!this._apiKeySet('setGroup()')) {
     return;
   }
 
   var groups = {};
-  groups[groupName] = value;
+  groups[groupType] = groupName;
 
-  var identify = new Identify().set(groupName, value);
+  var identify = new Identify().set(groupType, groupName);
   this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null);
 };
 
