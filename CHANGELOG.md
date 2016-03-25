@@ -4,6 +4,8 @@
 * Add support for prepend user property operation.
 * Keep sessions and event metadata in sync across multiple windows/tabs.
 * Add support for setting groups for users and events.
+* Add support for logging events to multiple Amplitude apps. **Note this is a major update, and may break backwards compatability.** See [Readme](https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps) for details.
+* Init callback now passes the Amplitude instance as an argument to the callback function.
 
 ### 2.9.1 (March 6, 2016)
 
