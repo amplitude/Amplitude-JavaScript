@@ -90,6 +90,10 @@ Amplitude.prototype.setUserId = function(userId) {
   this.getInstance().setUserId(userId);
 };
 
+Amplitude.prototype.setGroup = function(groupType, groupName) {
+  this.getInstance().setGroup(groupType, groupName);
+};
+
 Amplitude.prototype.setOptOut = function(enable) {
   this.getInstance().setOptOut(enable);
 };
@@ -106,8 +110,8 @@ Amplitude.prototype.clearUserProperties = function(){
   this.getInstance().clearUserProperties();
 };
 
-Amplitude.prototype.identify = function(identify) {
-  this.getInstance().identify(identify);
+Amplitude.prototype.identify = function(identify, callback) {
+  this.getInstance().identify(identify, callback);
 };
 
 Amplitude.prototype.setVersionName = function(versionName) {
@@ -116,6 +120,10 @@ Amplitude.prototype.setVersionName = function(versionName) {
 
 Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
   return this.getInstance().logEvent(eventType, eventProperties, callback);
+};
+
+Amplitude.prototype.logEventWithGroups = function(eventType, eventProperties, groups, callback) {
+  return this.getInstance().logEventWithGroups(eventType, eventProperties, groups, callback);
 };
 
 Amplitude.prototype.logRevenue = function(price, quantity, product) {

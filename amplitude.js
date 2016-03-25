@@ -199,6 +199,10 @@ Amplitude.prototype.setUserId = function(userId) {
   this.getInstance().setUserId(userId);
 };
 
+Amplitude.prototype.setGroup = function(groupType, groupName) {
+  this.getInstance().setGroup(groupType, groupName);
+};
+
 Amplitude.prototype.setOptOut = function(enable) {
   this.getInstance().setOptOut(enable);
 };
@@ -215,8 +219,8 @@ Amplitude.prototype.clearUserProperties = function(){
   this.getInstance().clearUserProperties();
 };
 
-Amplitude.prototype.identify = function(identify) {
-  this.getInstance().identify(identify);
+Amplitude.prototype.identify = function(identify, callback) {
+  this.getInstance().identify(identify, callback);
 };
 
 Amplitude.prototype.setVersionName = function(versionName) {
@@ -225,6 +229,10 @@ Amplitude.prototype.setVersionName = function(versionName) {
 
 Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
   return this.getInstance().logEvent(eventType, eventProperties, callback);
+};
+
+Amplitude.prototype.logEventWithGroups = function(eventType, eventProperties, groups, callback) {
+  return this.getInstance().logEventWithGroups(eventType, eventProperties, groups, callback);
 };
 
 Amplitude.prototype.logRevenue = function(price, quantity, product) {
@@ -698,6 +706,18 @@ AmplitudeClient.prototype.setUserId = function(userId) {
   }
 };
 
+AmplitudeClient.prototype.setGroup = function(groupType, groupName) {
+  if (!this._apiKeySet('setGroup()')) {
+    return;
+  }
+
+  var groups = {};
+  groups[groupType] = groupName;
+
+  var identify = new Identify().set(groupType, groupName);
+  this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null);
+};
+
 AmplitudeClient.prototype.setOptOut = function(enable) {
   if (!this._apiKeySet('setOptOut()')) {
     return;
@@ -752,8 +772,11 @@ AmplitudeClient.prototype.clearUserProperties = function(){
   this.identify(identify);
 };
 
-AmplitudeClient.prototype.identify = function(identify) {
+AmplitudeClient.prototype.identify = function(identify, callback) {
   if (!this._apiKeySet('identify()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
 
@@ -770,7 +793,9 @@ AmplitudeClient.prototype.identify = function(identify) {
   }
 
   if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
-    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
+    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, null, callback);
+  } else if (callback && type(callback) === 'function') {
+    callback(0, 'No request sent');
   }
 };
 
@@ -812,11 +837,12 @@ var _truncateValue = function(value) {
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
-AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
+AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, groups, callback) {
   if (type(callback) !== 'function') {
     callback = null;
   }
 
+  _loadCookieData(this);
   if (!eventType || this.options.optOut) {
     if (callback) {
       callback(0, 'No request sent');
@@ -847,6 +873,7 @@ AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiPr
 
     apiProperties = apiProperties || {};
     eventProperties = eventProperties || {};
+    groups = groups || {};
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId || this.options.deviceId,
@@ -868,7 +895,8 @@ AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiPr
         name: 'amplitude-js',
         version: version
       },
-      sequence_number: sequenceNumber // for ordering events and identifys
+      sequence_number: sequenceNumber, // for ordering events and identifys
+      groups: this._truncate(utils.validateProperties(groups))
       // country: null
     };
 
@@ -904,9 +932,22 @@ AmplitudeClient.prototype._limitEventsQueued = function(queue) {
 
 AmplitudeClient.prototype.logEvent = function(eventType, eventProperties, callback) {
   if (!this._apiKeySet('logEvent()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, callback);
+  return this._logEvent(eventType, eventProperties, null, null, null, callback);
+};
+
+AmplitudeClient.prototype.logEventWithGroups = function(eventType, eventProperties, groups, callback) {
+  if (!this._apiKeySet('logEventWithGroup()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
+    return -1;
+  }
+  return this._logEvent(eventType, eventProperties, null, null, groups, callback);
 };
 
 // Test that n is a number or a numeric value.
@@ -926,7 +967,7 @@ AmplitudeClient.prototype.logRevenue = function(price, quantity, product) {
     special: 'revenue_amount',
     quantity: quantity || 1,
     price: price
-  });
+  }, null, null, null);
 };
 
 /**
@@ -957,6 +998,9 @@ AmplitudeClient.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
 
 AmplitudeClient.prototype.sendEvents = function(callback) {
   if (!this._apiKeySet('sendEvents()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
 
@@ -2237,6 +2281,7 @@ var utils = require('./utils');
 var AMP_OP_ADD = '$add';
 var AMP_OP_APPEND = '$append';
 var AMP_OP_CLEAR_ALL = '$clearAll';
+var AMP_OP_PREPEND = '$prepend';
 var AMP_OP_SET = '$set';
 var AMP_OP_SET_ONCE = '$setOnce';
 var AMP_OP_UNSET = '$unset';
@@ -2271,6 +2316,11 @@ Identify.prototype.clearAll = function() {
     return this;
   }
   this.userPropertiesOperations[AMP_OP_CLEAR_ALL] = '-';
+  return this;
+};
+
+Identify.prototype.prepend = function(property, value) {
+  this._addOperation(AMP_OP_PREPEND, property, value);
   return this;
 };
 
@@ -2415,12 +2465,10 @@ var validatePropertyValue = function(key, value) {
   if (invalidValueTypes.indexOf(valueType) !== -1) {
     log('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
     value = null;
-  }
-  else if (valueType === 'error') {
+  } else if (valueType === 'error') {
     value = String(value);
     log('WARNING: Property key "' + key + '" with value type error, coercing to ' + value);
-  }
-  else if (valueType === 'array') {
+  } else if (valueType === 'array') {
     // check for nested arrays or objects
     var arrayCopy = [];
     for (var i = 0; i < value.length; i++) {
@@ -2433,8 +2481,7 @@ var validatePropertyValue = function(key, value) {
       arrayCopy.push(validatePropertyValue(key, element));
     }
     value = arrayCopy;
-  }
-  else if (valueType === 'object') {
+  } else if (valueType === 'object') {
     value = validateProperties(value);
   }
   return value;
@@ -3931,7 +3978,7 @@ module.exports = uuid;
 
 }, {}],
 8: [function(require, module, exports) {
-module.exports = '2.9.0';
+module.exports = '2.9.1';
 
 }, {}],
 9: [function(require, module, exports) {
@@ -3956,7 +4003,6 @@ module.exports = {
   batchEvents: false,
   eventUploadThreshold: 30,
   eventUploadPeriodMillis: 30 * 1000, // 30s
-  newBlankInstance: false
 };
 
 }, {"./language":27}],

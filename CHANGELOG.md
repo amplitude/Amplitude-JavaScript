@@ -1,11 +1,18 @@
 ## Unreleased
 
+* Add support for passing callback function to identify.
+* Add support for prepend user property operation.
+* Keep sessions and event metadata in sync across multiple windows/tabs.
+* Add support for setting groups for users and events.
 * Add support for logging events to multiple Amplitude apps. **Note this is a major update, and may break backwards compatability.** See [Readme](https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps) for details.
+* Init callback now passes the Amplitude instance as an argument to the callback function.
+
+### 2.9.1 (March 6, 2016)
+
 * Fix bug where saveReferrer throws exception if sessionStorage is disabled.
 * Log messages with a try/catch to support IE 8.
 * Validate event properties during logEvent and initialization before sending request.
 * Add instructions for proper integration with RequireJS.
-* Init callback now passes the Amplitude instance as an argument to the callback function.
 
 ## 2.9.0 (January 15, 2016)
 

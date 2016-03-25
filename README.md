@@ -9,15 +9,17 @@ Amplitude-Javascript
 
     ```html
         <script type="text/javascript">
-          (function(e,t){var n=e.amplitude||{};var r=t.createElement("script");r.type="text/javascript";
-          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz.js";
-          r.onload=function(){e.amplitude.runQueuedFunctions()};var s=t.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(r,s);var i=function(){this._q=[];return this};function o(e){
-          i.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
-          return this}}var a=["add","append","clearAll","set","setOnce","unset"];for(var c=0;c<a.length;c++){
-          o(a[c])}n.Identify=i;n._q=[];function u(e){n[e]=function(){n._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
-          }}var l=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties"];
-          for(var p=0;p<l.length;p++){u(l[p])}e.amplitude=n})(window,document);
+          (function(e,t){var n=e.amplitude||{_q:[],_iq:{}};var r=t.createElement("script");r.type="text/javascript";
+          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.0-min.gz.js";
+          r.onload=function(){e.amplitude.runQueuedFunctions()};var i=t.getElementsByTagName("script")[0];
+          i.parentNode.insertBefore(r,i);var s=function(){this._q=[];return this};function o(e){
+          s.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
+          return this}}var a=["add","append","clearAll","prepend","set","setOnce","unset"];for(var c=0;c<a.length;c++){
+          o(a[c])}n.Identify=s;var u=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties"];
+          function l(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+          }}for(var n=0;n<u.length;n++){t(u[n])}}l(n);n.getInstance=function(e){e=(!e||e.length===0?"$default_instance":e).toLowerCase();
+          if(!n._iq.hasOwnProperty(e)){n._iq[e]={_q:[]};l(n._iq[e])}return n._iq[e]};e.amplitude=n;
+          })(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
         </script>
@@ -108,7 +110,18 @@ amplitude.getInstance('new_app').setDeviceId(deviceId); // transferring existing
 
 # Tracking Events #
 
-It's important to think about what types of events you care about as a developer. You should aim to track between 20 and 200 types of events on your site. Common event types are actions the user initiates (such as pressing a button) and events you want the user to complete (such as filling out a form, completing a level, or making a payment). Here is our help article on [Event Taxonomy and Best Practices](https://amplitude.zendesk.com/hc/en-us/articles/211988918-How-to-Approach-Your-Event-Taxonomy).
+It's important to think about what types of events you care about as a developer. You should aim to track between 20 and 200 types of events on your site. Common event types are actions the user initiates (such as pressing a button) and events you want the user to complete (such as filling out a form, completing a level, or making a payment).
+
+Here are some resources to help you with your instrumentation planning:
+  * [Event Tracking Quick Start Guide](https://amplitude.zendesk.com/hc/en-us/articles/207108137).
+  * [Event Taxonomy and Best Practices](https://amplitude.zendesk.com/hc/en-us/articles/211988918).
+
+Having large amounts of distinct event types, event properties and user properties, however, can make visualizing and searching of the data very confusing. By default we only show the first:
+  * 1000 distinct event types
+  * 2000 distinct event properties
+  * 1000 distinct user properties
+
+Anything past the above thresholds will not be visualized. **Note that the raw data is not impacted by this in any way, meaning you can still see the values in the raw data, but they will not be visualized on the platform.** We have put in very conservative estimates for the event and property caps which we don’t expect to be exceeded in any practical use case. If you feel that your use case will go above those limits please reach out to support@amplitude.com.
 
 # Settings Custom User IDs #
 
@@ -190,6 +203,13 @@ The SDK supports the operations `set`, `setOnce`, `unset`, and `add` on individu
     ```javascript
     var identify = new amplitude.Identify().append('ab-tests', 'new-user-test').append('some_list', [1, 2, 3, 4, 'values']);
     amplitude.getInstance().identify(identify);
+    ```
+
+6. `prepend`: this will prepend a value or values to a user property. Prepend means inserting the value(s) at the front of a given list. If the user property does not have a value set yet, it will be initialized to an empty list before the new values are prepended. If the user property has an existing value and it is not a list, it will be converted into a list with the new value prepended.
+
+    ```javascript
+    var identify = new amplitude.Identify().prepend('ab-tests', 'new-user-test').prepend('some_list', [1, 2, 3, 4, 'values']);
+    amplitude.identify(identify);
     ```
 
 Note: if a user property is used in multiple operations on the same `Identify` object, only the first operation will be saved, and the rest will be ignored. In this example, only the set operation will be saved, and the add and unset will be ignored:
@@ -294,6 +314,29 @@ amplitude.getInstance().init('YOUR_API_KEY_HERE', null, {
 # Advanced #
 This SDK automatically grabs useful data about the browser, including browser type and operating system version.
 
+### Setting Groups ###
+
+Amplitude supports assigning users to groups, and performing queries such as count by distinct on those groups. An example would be if you want to group your users based on what organization they are in (based on something like an orgId). For example you can designate user Joe to be in orgId 10, while Sue is in orgId 15. When performing an event segmentation query, you can then select Count By: orgId, to query the number of different orgIds that have performed a specific event. As long as at least one member of that group has performed the specific event, that group will be included in the count. See our help article on [Count By Distinct]() for more information.
+
+In the above example, 'orgId' is a `groupType`, and the value 10 or 15 is the `groupName`. Another example of a `groupType` could a sport that the user participates in, and possible `groupNames` within that type would be tennis, baseball, etc.
+
+You can use `setGroup(groupType, groupName)` to designate which groups a user belongs to. Few things to note: this will also set the `groupType: groupName` as a user property. **This will overwrite any existing groupName value set for that user's groupType, as well as the corresponding user property value.** For example if Joe was in orgId 10, and you call `setGroup('orgId', 20)`, 20 would replace 10. You can also call `setGroup` multiple times with different groupTypes to add a user to different groups. For example Sue is in orgId: 15, and she also plays sport: soccer. Now when querying, you can Count By both orgId and sport. **You are allowed to set up to 5 different groupTypes per user.** Any more than that will be ignored from the query UI, although they will still appear as user properties.
+
+```javascript
+amplitude.getInstance().setGroup('orgId', 15);
+amplitude.getInstance().setGroup('sport', 'tennis');
+```
+
+You can also use `logEventWithGroups` to set event-level groups, meaning the group designation only applies for the specific event being logged and does not persist on the user unless you explicitly set it with `setGroup`.
+
+```javascript
+var eventProperties = {
+  'key': 'value'
+}
+
+amplitude.getInstance().logEventWithGroups('initialize_game', eventProperties, {'sport': 'soccer'});
+```
+
 ### Setting Version Name ###
 By default, no version name is set. You can specify a version name to distinguish between different versions of your site by calling `setVersionName`:
 
@@ -310,14 +353,19 @@ amplitude.getInstance().setDeviceId('CUSTOM_DEVICE_ID');
 
 **Note: this is not recommended unless you really know what you are doing** (like if you have your own system for tracking user devices). Make sure the deviceId you set is sufficiently unique (we recommend something like a UUID - see `src/uuid.js` for an example of how to generate) to prevent conflicts with other devices in our system.
 
-### Log Event Callbacks and Redirects ###
-You can pass a callback function to logEvent, which will get called after receiving a response from the server:
+### Callbacks for LogEvent, Identify, and Redirect ###
+You can pass a callback function to logEvent and identify, which will get called after receiving a response from the server:
 
 ```javascript
 amplitude.getInstance().logEvent("EVENT_IDENTIFIER_HERE", null, callback_function);
 ```
 
-The status and response from the server are passed to the callback function, which you might find useful. An example of a callback function which redirects the browser to another site after a response:
+```javascript
+var identify = new amplitude.Identify().set('key', 'value');
+amplitude.identify(identify, callback_function);
+```
+
+The status and response body from the server are passed to the callback function, which you might find useful. An example of a callback function which redirects the browser to another site after a response:
 
 ```javascript
 var callback_function = function(status, response) {
@@ -362,9 +410,9 @@ If you are using [RequireJS](http://requirejs.org/) to load your Javascript file
   <script src='scripts/require.js'></script>  <!-- loading RequireJS -->
   <script>
     require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.9.1-min.gz.js'], function(amplitude) {
-      amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
+      amplitude.getInstance().init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
       window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
-      amplitude.logEvent('Clicked Link A');
+      amplitude.getInstance().logEvent('Clicked Link A');
     });
   </script>
 ```
@@ -380,14 +428,14 @@ You can also define the path in your RequireJS configuration like so:
     });
 
     require(['amplitude'], function(amplitude) {
-      amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
+      amplitude.getInstance().init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
       window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
-      amplitude.logEvent('Clicked Link A');
+      amplitude.getInstance().logEvent('Clicked Link A');
     });
   </script>
   <script>
     require(['amplitude'], function(amplitude) {
-      amplitude.logEvent('Page loaded');
+      amplitude.getInstance().logEvent('Page loaded');
     });
   </script>
 ```

@@ -449,6 +449,18 @@ AmplitudeClient.prototype.setUserId = function(userId) {
   }
 };
 
+AmplitudeClient.prototype.setGroup = function(groupType, groupName) {
+  if (!this._apiKeySet('setGroup()')) {
+    return;
+  }
+
+  var groups = {};
+  groups[groupType] = groupName;
+
+  var identify = new Identify().set(groupType, groupName);
+  this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null);
+};
+
 AmplitudeClient.prototype.setOptOut = function(enable) {
   if (!this._apiKeySet('setOptOut()')) {
     return;
@@ -503,8 +515,11 @@ AmplitudeClient.prototype.clearUserProperties = function(){
   this.identify(identify);
 };
 
-AmplitudeClient.prototype.identify = function(identify) {
+AmplitudeClient.prototype.identify = function(identify, callback) {
   if (!this._apiKeySet('identify()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
 
@@ -521,7 +536,9 @@ AmplitudeClient.prototype.identify = function(identify) {
   }
 
   if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
-    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations);
+    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, null, callback);
+  } else if (callback && type(callback) === 'function') {
+    callback(0, 'No request sent');
   }
 };
 
@@ -563,11 +580,12 @@ var _truncateValue = function(value) {
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
-AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
+AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, groups, callback) {
   if (type(callback) !== 'function') {
     callback = null;
   }
 
+  _loadCookieData(this);
   if (!eventType || this.options.optOut) {
     if (callback) {
       callback(0, 'No request sent');
@@ -598,6 +616,7 @@ AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiPr
 
     apiProperties = apiProperties || {};
     eventProperties = eventProperties || {};
+    groups = groups || {};
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId || this.options.deviceId,
@@ -619,7 +638,8 @@ AmplitudeClient.prototype._logEvent = function(eventType, eventProperties, apiPr
         name: 'amplitude-js',
         version: version
       },
-      sequence_number: sequenceNumber // for ordering events and identifys
+      sequence_number: sequenceNumber, // for ordering events and identifys
+      groups: this._truncate(utils.validateProperties(groups))
       // country: null
     };
 
@@ -655,9 +675,22 @@ AmplitudeClient.prototype._limitEventsQueued = function(queue) {
 
 AmplitudeClient.prototype.logEvent = function(eventType, eventProperties, callback) {
   if (!this._apiKeySet('logEvent()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, callback);
+  return this._logEvent(eventType, eventProperties, null, null, null, callback);
+};
+
+AmplitudeClient.prototype.logEventWithGroups = function(eventType, eventProperties, groups, callback) {
+  if (!this._apiKeySet('logEventWithGroup()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
+    return -1;
+  }
+  return this._logEvent(eventType, eventProperties, null, null, groups, callback);
 };
 
 // Test that n is a number or a numeric value.
@@ -677,7 +710,7 @@ AmplitudeClient.prototype.logRevenue = function(price, quantity, product) {
     special: 'revenue_amount',
     quantity: quantity || 1,
     price: price
-  });
+  }, null, null, null);
 };
 
 /**
@@ -708,6 +741,9 @@ AmplitudeClient.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
 
 AmplitudeClient.prototype.sendEvents = function(callback) {
   if (!this._apiKeySet('sendEvents()')) {
+    if (callback && type(callback) === 'function') {
+      callback(0, 'No request sent');
+    }
     return;
   }
 

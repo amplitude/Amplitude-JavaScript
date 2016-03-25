@@ -479,6 +479,270 @@ describe('AmplitudeClient', function() {
       assert.isNull(localStorage.getItem('amplitude_unsent_new_app'));
       assert.isNull(localStorage.getItem('amplitude_unsent_identify_new_app'));
     });
+
+    it('should migrate session and event info from localStorage to cookie', function() {
+      var now = new Date().getTime();
+
+      assert.isNull(cookie.get(amplitude.options.cookieName));
+      localStorage.setItem('amplitude_sessionId', now);
+      localStorage.setItem('amplitude_lastEventTime', now);
+      localStorage.setItem('amplitude_lastEventId', 3000);
+      localStorage.setItem('amplitude_lastIdentifyId', 4000);
+      localStorage.setItem('amplitude_lastSequenceNumber', 5000);
+
+      amplitude.init(apiKey);
+
+      assert.equal(amplitude._sessionId, now);
+      assert.isTrue(amplitude._lastEventTime >= now);
+      assert.equal(amplitude._eventId, 3000);
+      assert.equal(amplitude._identifyId, 4000);
+      assert.equal(amplitude._sequenceNumber, 5000);
+
+      var cookieData = cookie.get(amplitude.options.cookieName);
+      assert.equal(cookieData.sessionId, now);
+      assert.equal(cookieData.lastEventTime, amplitude._lastEventTime);
+      assert.equal(cookieData.eventId, 3000);
+      assert.equal(cookieData.identifyId, 4000);
+      assert.equal(cookieData.sequenceNumber, 5000);
+    });
+
+    it('should migrate cookie data from old cookie name and ignore local storage values', function(){
+      var now = new Date().getTime();
+
+      // deviceId and sequenceNumber not set, init should load value from localStorage
+      var cookieData = {
+        userId: 'test_user_id',
+        optOut: false,
+        sessionId: now,
+        lastEventTime: now,
+        eventId: 50,
+        identifyId: 60
+      }
+
+      cookie.set(amplitude.options.cookieName, cookieData);
+      localStorage.setItem('amplitude_deviceId' + keySuffix, 'old_device_id');
+      localStorage.setItem('amplitude_userId' + keySuffix, 'fake_user_id');
+      localStorage.setItem('amplitude_optOut' + keySuffix, true);
+      localStorage.setItem('amplitude_sessionId', now-1000);
+      localStorage.setItem('amplitude_lastEventTime', now-1000);
+      localStorage.setItem('amplitude_lastEventId', 20);
+      localStorage.setItem('amplitude_lastIdentifyId', 30);
+      localStorage.setItem('amplitude_lastSequenceNumber', 40);
+
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.deviceId, 'old_device_id');
+      assert.equal(amplitude.options.userId, 'test_user_id');
+      assert.isFalse(amplitude.options.optOut);
+      assert.equal(amplitude._sessionId, now);
+      assert.isTrue(amplitude._lastEventTime >= now);
+      assert.equal(amplitude._eventId, 50);
+      assert.equal(amplitude._identifyId, 60);
+      assert.equal(amplitude._sequenceNumber, 40);
+    });
+
+    it('should skip the migration if the new cookie already has deviceId, sessionId, lastEventTime', function() {
+      var now = new Date().getTime();
+
+      cookie.set(amplitude.options.cookieName, {
+        deviceId: 'new_device_id',
+        sessionId: now,
+        lastEventTime: now
+      });
+
+      localStorage.setItem('amplitude_deviceId' + keySuffix, 'fake_device_id');
+      localStorage.setItem('amplitude_userId' + keySuffix, 'fake_user_id');
+      localStorage.setItem('amplitude_optOut' + keySuffix, true);
+      localStorage.setItem('amplitude_sessionId', now-1000);
+      localStorage.setItem('amplitude_lastEventTime', now-1000);
+      localStorage.setItem('amplitude_lastEventId', 20);
+      localStorage.setItem('amplitude_lastIdentifyId', 30);
+      localStorage.setItem('amplitude_lastSequenceNumber', 40);
+
+      amplitude.init(apiKey, 'new_user_id');
+      assert.equal(amplitude.options.deviceId, 'new_device_id');
+      assert.equal(amplitude.options.userId, 'new_user_id');
+      assert.isFalse(amplitude.options.optOut);
+      assert.isTrue(amplitude._sessionId >= now);
+      assert.isTrue(amplitude._lastEventTime >= now);
+      assert.equal(amplitude._eventId, 0);
+      assert.equal(amplitude._identifyId, 0);
+      assert.equal(amplitude._sequenceNumber, 0);
+    });
+
+    it('should save cookie data to localStorage if cookies are not enabled', function() {
+      var cookieStorageKey = 'amp_cookiestore_amplitude_id';
+      var deviceId = 'test_device_id';
+      var clock = sinon.useFakeTimers();
+      clock.tick(1000);
+
+      localStorage.clear();
+      sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
+      var amplitude2 = new AmplitudeClient();
+      CookieStorage.prototype._cookiesEnabled.restore();
+      amplitude2.init(apiKey, userId, {'deviceId': deviceId});
+      clock.restore();
+
+      var cookieData = JSON.parse(localStorage.getItem(cookieStorageKey));
+      assert.deepEqual(cookieData, {
+        'deviceId': deviceId,
+        'userId': userId,
+        'optOut': false,
+        'sessionId': 1000,
+        'lastEventTime': 1000,
+        'eventId': 0,
+        'identifyId': 0,
+        'sequenceNumber': 0
+      });
+
+      assert.isNull(cookie.get(amplitude2.options.cookieName)); // assert did not write to cookies
+    });
+
+    it('should load sessionId, eventId from cookie and ignore the one in localStorage', function() {
+      var sessionIdKey = 'amplitude_sessionId';
+      var lastEventTimeKey = 'amplitude_lastEventTime';
+      var eventIdKey = 'amplitude_lastEventId';
+      var identifyIdKey = 'amplitude_lastIdentifyId';
+      var sequenceNumberKey = 'amplitude_lastSequenceNumber';
+      var amplitude2 = new AmplitudeClient();
+
+      var clock = sinon.useFakeTimers();
+      clock.tick(1000);
+      var sessionId = new Date().getTime();
+
+      // the following values in localStorage will all be ignored
+      localStorage.clear();
+      localStorage.setItem(sessionIdKey, 3);
+      localStorage.setItem(lastEventTimeKey, 4);
+      localStorage.setItem(eventIdKey, 5);
+      localStorage.setItem(identifyIdKey, 6);
+      localStorage.setItem(sequenceNumberKey, 7);
+
+      var cookieData = {
+        deviceId: 'test_device_id',
+        userId: 'test_user_id',
+        optOut: true,
+        sessionId: sessionId,
+        lastEventTime: sessionId,
+        eventId: 50,
+        identifyId: 60,
+        sequenceNumber: 70
+      }
+      cookie.set(amplitude2.options.cookieName, cookieData);
+
+      clock.tick(10);
+      amplitude2.init(apiKey);
+      clock.restore();
+
+      assert.equal(amplitude2._sessionId, sessionId);
+      assert.equal(amplitude2._lastEventTime, sessionId + 10);
+      assert.equal(amplitude2._eventId, 50);
+      assert.equal(amplitude2._identifyId, 60);
+      assert.equal(amplitude2._sequenceNumber, 70);
+    });
+
+    it('should load saved events from localStorage', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130}]';
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131}]';
+      localStorage.setItem('amplitude_unsent', existingEvent);
+      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+
+      var amplitude2 = new AmplitudeClient();
+      amplitude2.init(apiKey, null, {batchEvents: true});
+
+      // check event loaded into memory
+      assert.deepEqual(amplitude2._unsentEvents, JSON.parse(existingEvent));
+      assert.deepEqual(amplitude2._unsentIdentifys, JSON.parse(existingIdentify));
+
+      // check local storage keys are still same for default instance
+      assert.equal(localStorage.getItem('amplitude_unsent'), existingEvent);
+      assert.equal(localStorage.getItem('amplitude_unsent_identify'), existingIdentify);
+    });
+
+    it('should validate event properties when loading saved events from localStorage', function() {
+      var existingEvents = '[{"device_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d' +
+        '-2352191877e6","timestamp":1455744744413,"event_id":2,"session_id":1455744733865,"event_type":"clicked",' +
+        '"version_name":"Web","platform":"Web","os_name":"Chrome","os_version":"48","device_model":"Mac","language"' +
+        ':"en-US","api_properties":{},"event_properties":"{}","user_properties":{},"uuid":"1b8859d9-e91e-403e-92d4-' +
+        'c600dfb83432","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":4},{"device_id":"15a82a' +
+        'aa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","timestamp":1455744746295,' +
+        '"event_id":3,"session_id":1455744733865,"event_type":"clicked","version_name":"Web","platform":"Web",' +
+        '"os_name":"Chrome","os_version":"48","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{"10":"false","bool":true,"null":null,"string":"test","array":' +
+        '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
+        '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}},"user_properties":{},"uuid":"650407a1-d705-' +
+        '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
+      localStorage.setItem('amplitude_unsent', existingEvents);
+
+      var amplitude2 = new AmplitudeClient();
+      amplitude2.init(apiKey, null, {batchEvents: true});
+
+      var expected = {
+        '10': 'false',
+        'bool': true,
+        'string': 'test',
+        'array': [0, 1, 2, '3'],
+        'nested_array': ['a'],
+        'object': {'key':'value'},
+        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
+      }
+
+      // check that event loaded into memory
+      assert.deepEqual(amplitude2._unsentEvents[0].event_properties, {});
+      assert.deepEqual(amplitude2._unsentEvents[1].event_properties, expected);
+    });
+
+    it('should validate event properties when loading saved events from localStorage', function() {
+      var existingEvents = '[{"device_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d' +
+          '-2352191877e6","timestamp":1455744744413,"event_id":2,"session_id":1455744733865,"event_type":"clicked",' +
+          '"version_name":"Web","platform":"Web","os_name":"Chrome","os_version":"48","device_model":"Mac","language"' +
+          ':"en-US","api_properties":{},"event_properties":"{}","user_properties":{},"uuid":"1b8859d9-e91e-403e-92d4-' +
+          'c600dfb83432","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":4},{"device_id":"15a82a' +
+          'aa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","timestamp":1455744746295,' +
+          '"event_id":3,"session_id":1455744733865,"event_type":"clicked","version_name":"Web","platform":"Web",' +
+          '"os_name":"Chrome","os_version":"48","device_model":"Mac","language":"en-US","api_properties":{},' +
+          '"event_properties":{"10":"false","bool":true,"null":null,"string":"test","array":' +
+          '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
+          '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}},"user_properties":{},"uuid":"650407a1-d705-' +
+          '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]';
+      localStorage.setItem('amplitude_unsent', existingEvents);
+
+      var amplitude2 = new AmplitudeClient();
+      amplitude2.init(apiKey, null, {
+        batchEvents: true
+      });
+
+      var expected = {
+        '10': 'false',
+        'bool': true,
+        'string': 'test',
+        'array': [0, 1, 2, '3'],
+        'nested_array': ['a'],
+        'object': {
+          'key': 'value'
+        },
+        'nested_object': {
+          'k': 'v',
+          'l': [0, 1],
+          'o': {
+              'k2': 'v2',
+              'l2': ['e2']
+          }
+        }
+      }
+
+      // check that event loaded into memory
+      assert.deepEqual(amplitude2._unsentEvents[0].event_properties, {});
+      assert.deepEqual(amplitude2._unsentEvents[1].event_properties, expected);
+    });
   });
 
   describe('runQueuedFunctions', function() {

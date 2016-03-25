@@ -52,12 +52,10 @@ var validatePropertyValue = function(key, value) {
   if (invalidValueTypes.indexOf(valueType) !== -1) {
     log('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
     value = null;
-  }
-  else if (valueType === 'error') {
+  } else if (valueType === 'error') {
     value = String(value);
     log('WARNING: Property key "' + key + '" with value type error, coercing to ' + value);
-  }
-  else if (valueType === 'array') {
+  } else if (valueType === 'array') {
     // check for nested arrays or objects
     var arrayCopy = [];
     for (var i = 0; i < value.length; i++) {
@@ -70,8 +68,7 @@ var validatePropertyValue = function(key, value) {
       arrayCopy.push(validatePropertyValue(key, element));
     }
     value = arrayCopy;
-  }
-  else if (valueType === 'object') {
+  } else if (valueType === 'object') {
     value = validateProperties(value);
   }
   return value;
