@@ -212,6 +212,13 @@ The SDK supports the operations `set`, `setOnce`, `unset`, and `add` on individu
     amplitude.identify(identify);
     ```
 
+6. `prepend`: this will prepend a value or values to a user property. Prepend means inserting the value(s) at the front of a given list. If the user property does not have a value set yet, it will be initialized to an empty list before the new values are prepended. If the user property has an existing value and it is not a list, it will be converted into a list with the new value prepended.
+
+    ```javascript
+    var identify = new amplitude.Identify().prepend('ab-tests', 'new-user-test').prepend('some_list', [1, 2, 3, 4, 'values']);
+    amplitude.identify(identify);
+    ```
+
 Note: if a user property is used in multiple operations on the same `Identify` object, only the first operation will be saved, and the rest will be ignored. In this example, only the set operation will be saved, and the add and unset will be ignored:
 
 ```javascript
@@ -323,8 +330,13 @@ In the above example, 'orgId' is a `groupType`, and the value 10 or 15 is the `g
 You can use `setGroup(groupType, groupName)` to designate which groups a user belongs to. Few things to note: this will also set the `groupType: groupName` as a user property. **This will overwrite any existing groupName value set for that user's groupType, as well as the corresponding user property value.** For example if Joe was in orgId 10, and you call `setGroup('orgId', 20)`, 20 would replace 10. You can also call `setGroup` multiple times with different groupTypes to add a user to different groups. For example Sue is in orgId: 15, and she also plays sport: soccer. Now when querying, you can Count By both orgId and sport. **You are allowed to set up to 5 different groupTypes per user.** Any more than that will be ignored from the query UI, although they will still appear as user properties.
 
 ```javascript
+<<<<<<< HEAD
 amplitude.getInstance().setGroup('orgId', 15);
 amplitude.getInstance().setGroup('sport', 'tennis');
+=======
+amplitude.setGroup('orgId', 15);
+amplitude.setGroup('sport', 'tennis');
+>>>>>>> master
 ```
 
 You can also use `logEventWithGroups` to set event-level groups, meaning the group designation only applies for the specific event being logged and does not persist on the user unless you explicitly set it with `setGroup`.
@@ -334,7 +346,11 @@ var eventProperties = {
   'key': 'value'
 }
 
+<<<<<<< HEAD
 amplitude.getInstance().logEventWithGroups('initialize_game', eventProperties, {'sport': 'soccer'});
+=======
+amplitude.logEventWithGroups('initialize_game', eventProperties, {'sport': 'soccer'});
+>>>>>>> master
 ```
 
 ### Setting Version Name ###
@@ -355,16 +371,27 @@ amplitude.getInstance().setDeviceId('CUSTOM_DEVICE_ID');
 
 ### Callbacks for LogEvent, Identify, and Redirect ###
 You can pass a callback function to logEvent and identify, which will get called after receiving a response from the server:
+<<<<<<< HEAD
 
 ```javascript
 amplitude.getInstance().logEvent("EVENT_IDENTIFIER_HERE", null, callback_function);
 ```
+=======
+>>>>>>> master
 
 ```javascript
 var identify = new amplitude.Identify().set('key', 'value');
 amplitude.identify(identify, callback_function);
 ```
 
+<<<<<<< HEAD
+=======
+```javascript
+var identify = new amplitude.Identify().set('key', 'value');
+amplitude.identify(identify, callback_function);
+```
+
+>>>>>>> master
 The status and response body from the server are passed to the callback function, which you might find useful. An example of a callback function which redirects the browser to another site after a response:
 
 ```javascript
