@@ -1,8 +1,8 @@
 ## Unreleased
 
-* Add support for passing callback function to identify.
-* Add support for prepend user property operation.
-* Keep sessions and event metadata in sync across multiple windows/tabs.
+* Identify function now accepts a callback function as an argument. The callback will be run after the identify event is sent.
+* Add support for `prepend` user property operation. This allows you to insert value(s) at the front of a list. See [Readme](https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations) for more details.
+* Keep sessions and event metadata in-sync across multiple windows/tabs.
 
 ### 2.9.1 (March 6, 2016)
 
