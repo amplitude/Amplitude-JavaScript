@@ -534,36 +534,6 @@ describe('Amplitude', function() {
     });
   });
 
-  describe('setGroup', function() {
-
-    beforeEach(function() {
-      reset();
-      amplitude.init(apiKey);
-    });
-
-    afterEach(function() {
-      reset();
-    });
-
-    it('should generate an identify event with groups set', function() {
-      amplitude.setGroup('orgId', 15);
-      assert.lengthOf(server.requests, 1);
-      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      assert.lengthOf(events, 1);
-
-      // verify identify event
-      var identify = events[0];
-      assert.equal(identify.event_type, '$identify');
-      assert.deepEqual(identify.user_properties, {
-        '$set': {'orgId': 15},
-      });
-      assert.deepEqual(identify.event_properties, {});
-      assert.deepEqual(identify.groups, {
-        'orgId': 15,
-      });
-    });
-  });
-
   describe('setDeviceId', function() {
 
     beforeEach(function() {
@@ -1675,49 +1645,6 @@ describe('Amplitude', function() {
       var sequenceNumber = amplitude1._unsentEvents[0]['sequence_number'];
       assert.equal(amplitude2._unsentIdentifys[0]['sequence_number'], sequenceNumber + 4);
       assert.equal(amplitude1._unsentEvents[2]['sequence_number'], sequenceNumber +  5);
-    });
-
-    it('should handle groups input', function() {
-      var counter = 0;
-      var value = -1;
-      var message = '';
-      var callback = function (status, response) {
-        counter++;
-        value = status;
-        message = response;
-      };
-
-      var eventProperties = {
-        'key': 'value'
-      };
-
-      var groups = {
-        'group1': 'value1',
-        'group2': 'value2',
-      }
-
-      amplitude.logEventWithGroups('Test', eventProperties, groups, callback);
-      assert.lengthOf(server.requests, 1);
-      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      assert.lengthOf(events, 1);
-
-      // verify event is correctly formatted
-      var event = events[0];
-      assert.equal(event.event_type, 'Test');
-      assert.equal(event.event_id, 1);
-      assert.deepEqual(event.user_properties, {});
-      assert.deepEqual(event.event_properties, eventProperties);
-      assert.deepEqual(event.groups, groups);
-
-      // verify callback behavior
-      assert.equal(counter, 0);
-      assert.equal(value, -1);
-      assert.equal(message, '');
-      server.respondWith('success');
-      server.respond();
-      assert.equal(counter, 1);
-      assert.equal(value, 200);
-      assert.equal(message, 'success');
     });
   });
 
