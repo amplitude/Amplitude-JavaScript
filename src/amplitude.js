@@ -439,18 +439,6 @@ Amplitude.prototype.setUserId = function(userId) {
   }
 };
 
-Amplitude.prototype.setGroup = function(groupType, groupName) {
-  if (!this._apiKeySet('setGroup()')) {
-    return;
-  }
-
-  var groups = {};
-  groups[groupType] = groupName;
-
-  var identify = new Identify().set(groupType, groupName);
-  this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null);
-};
-
 Amplitude.prototype.setOptOut = function(enable) {
   if (!this._apiKeySet('setOptOut()')) {
     return;
@@ -526,7 +514,7 @@ Amplitude.prototype.identify = function(identify, callback) {
   }
 
   if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
-    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, null, callback);
+    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, callback);
   } else if (callback && type(callback) === 'function') {
     callback(0, 'No request sent');
   }
@@ -570,7 +558,7 @@ var _truncateValue = function(value) {
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
-Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, groups, callback) {
+Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
   if (type(callback) !== 'function') {
     callback = null;
   }
@@ -606,7 +594,6 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 
     apiProperties = apiProperties || {};
     eventProperties = eventProperties || {};
-    groups = groups || {};
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId || this.options.deviceId,
@@ -628,8 +615,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
         name: 'amplitude-js',
         version: version
       },
-      sequence_number: sequenceNumber, // for ordering events and identifys
-      groups: this._truncate(utils.validateProperties(groups))
+      sequence_number: sequenceNumber // for ordering events and identifys
       // country: null
     };
 
@@ -670,17 +656,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties, callback) {
     }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, null, callback);
-};
-
-Amplitude.prototype.logEventWithGroups = function(eventType, eventProperties, groups, callback) {
-  if (!this._apiKeySet('logEventWithGroup()')) {
-    if (callback && type(callback) === 'function') {
-      callback(0, 'No request sent');
-    }
-    return -1;
-  }
-  return this._logEvent(eventType, eventProperties, null, null, groups, callback);
+  return this._logEvent(eventType, eventProperties, null, null, callback);
 };
 
 // Test that n is a number or a numeric value.
@@ -700,7 +676,7 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
     special: 'revenue_amount',
     quantity: quantity || 1,
     price: price
-  }, null, null, null);
+  });
 };
 
 /**
