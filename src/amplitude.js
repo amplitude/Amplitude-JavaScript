@@ -15,41 +15,44 @@ var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
 /*
- * Amplitude API
+ * Amplitude API - instance constructor
  */
-var Amplitude = function() {
+var Amplitude = function Amplitude() {
   this._unsentEvents = [];
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = object.merge({}, DEFAULT_OPTIONS);
   this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
-};
 
-Amplitude.prototype._eventId = 0;
-Amplitude.prototype._identifyId = 0;
-Amplitude.prototype._sequenceNumber = 0;
-Amplitude.prototype._sending = false;
-Amplitude.prototype._lastEventTime = null;
-Amplitude.prototype._sessionId = null;
-Amplitude.prototype._newSession = false;
-Amplitude.prototype._updateScheduled = false;
+  // event meta data
+  this._eventId = 0;
+  this._identifyId = 0;
+  this._sequenceNumber = 0;
+  this._sending = false;
+  this._lastEventTime = null;
+  this._sessionId = null;
+  this._newSession = false;
+  this._updateScheduled = false;
+};
 
 Amplitude.prototype.Identify = Identify;
 
 /**
- * Initializes Amplitude.
- * apiKey The API Key for your app
- * opt_userId An identifier for this user
- * opt_config Configuration options
+ * Initializes Amplitude
+ * @param {string} apiKey - The API key for your app
+ * @param {string} opt_userId - (optional) An identifier for this user
+ * @param {Object} opt_config - (optional) Configuration options
  *   - saveEvents (boolean) Whether to save events to local storage. Defaults to true.
  *   - includeUtm (boolean) Whether to send utm parameters with events. Defaults to false.
  *   - includeReferrer (boolean) Whether to send referrer info with events. Defaults to false.
+ *   - See https://github.com/amplitude/Amplitude-Javascript#configuration-options for complete list.
+ * @param {function} opt_callback - (optional) Provide a callback function to run after initialization is complete.
  */
-Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
+Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, opt_callback) {
   try {
     this.options.apiKey = apiKey;
-    if (opt_config) {
+    if (opt_config && type(opt_config) === 'object') {
       if (opt_config.saveEvents !== undefined) {
         this.options.saveEvents = !!opt_config.saveEvents;
       }
@@ -121,10 +124,10 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, callback) {
     }
   } catch (e) {
     utils.log(e);
-  }
-
-  if (callback && type(callback) === 'function') {
-    callback();
+  } finally {
+    if (opt_callback && type(opt_callback) === 'function') {
+      opt_callback();
+    }
   }
 };
 
