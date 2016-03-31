@@ -1,3 +1,4 @@
+var Constants = require('./constants');
 var cookieStorage = require('./cookiestorage');
 var getUtmData = require('./utm');
 var Identify = require('./identify');
@@ -12,22 +13,6 @@ var utils = require('./utils');
 var UUID = require('./uuid');
 var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
-
-var API_VERSION = 2;
-var IDENTIFY_EVENT = '$identify';
-var LocalStorageKeys = {
-  LAST_EVENT_ID: 'amplitude_lastEventId',
-  LAST_EVENT_TIME: 'amplitude_lastEventTime',
-  LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
-  LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
-  REFERRER: 'amplitude_referrer',
-  SESSION_ID: 'amplitude_sessionId',
-
-  // Used in cookie as well
-  DEVICE_ID: 'amplitude_deviceId',
-  OPT_OUT: 'amplitude_optOut',
-  USER_ID: 'amplitude_userId'
-};
 
 /*
  * Amplitude API
@@ -260,19 +245,19 @@ var _upgradeCookeData = function(scope) {
 
   // in v2.6.0, deviceId, userId, optOut was migrated to localStorage with keys + first 6 char of apiKey
   var apiKeySuffix = '_' + scope.options.apiKey.slice(0, 6);
-  var localStorageDeviceId = _getAndRemoveFromLocalStorage(LocalStorageKeys.DEVICE_ID + apiKeySuffix);
-  var localStorageUserId = _getAndRemoveFromLocalStorage(LocalStorageKeys.USER_ID + apiKeySuffix);
-  var localStorageOptOut = _getAndRemoveFromLocalStorage(LocalStorageKeys.OPT_OUT + apiKeySuffix);
+  var localStorageDeviceId = _getAndRemoveFromLocalStorage(Constants.DEVICE_ID + apiKeySuffix);
+  var localStorageUserId = _getAndRemoveFromLocalStorage(Constants.USER_ID + apiKeySuffix);
+  var localStorageOptOut = _getAndRemoveFromLocalStorage(Constants.OPT_OUT + apiKeySuffix);
   if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
 
   // pre-v2.7.0 event and session meta-data was stored in localStorage. move to cookie for sub-domain support
-  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.SESSION_ID));
-  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_TIME));
-  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_ID));
-  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID));
-  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER));
+  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(Constants.SESSION_ID));
+  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_EVENT_TIME));
+  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_EVENT_ID));
+  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_IDENTIFY_ID));
+  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_SEQUENCE_NUMBER));
 
   var _getFromCookie = function(key) {
     return cookieData && cookieData[key];
@@ -382,11 +367,11 @@ Amplitude.prototype._saveReferrer = function(referrer) {
     // utils.log(e); // sessionStorage disabled
   }
 
-  if ((hasSessionStorage && !(this._getFromStorage(sessionStorage, LocalStorageKeys.REFERRER))) || !hasSessionStorage) {
+  if ((hasSessionStorage && !(this._getFromStorage(sessionStorage, Constants.REFERRER))) || !hasSessionStorage) {
     identify.set('referrer', referrer).set('referring_domain', referring_domain);
 
     if (hasSessionStorage) {
-      this._setInStorage(sessionStorage, LocalStorageKeys.REFERRER, referrer);
+      this._setInStorage(sessionStorage, Constants.REFERRER, referrer);
     }
   }
 
@@ -513,7 +498,7 @@ Amplitude.prototype.identify = function(identify, callback) {
   }
 
   if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
-    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, callback);
+    this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, callback);
   } else if (callback && type(callback) === 'function') {
     callback(0, 'No request sent');
   }
@@ -547,7 +532,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
   }
   try {
     var eventId;
-    if (eventType === IDENTIFY_EVENT) {
+    if (eventType === Constants.IDENTIFY_EVENT) {
       eventId = this.nextIdentifyId();
     } else {
       eventId = this.nextEventId();
@@ -563,7 +548,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 
     userProperties = userProperties || {};
     // Only add utm properties to user properties for events
-    if (eventType !== IDENTIFY_EVENT) {
+    if (eventType !== Constants.IDENTIFY_EVENT) {
       object.merge(userProperties, this._utmProperties);
     }
 
@@ -594,7 +579,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       // country: null
     };
 
-    if (eventType === IDENTIFY_EVENT) {
+    if (eventType === Constants.IDENTIFY_EVENT) {
       this._unsentIdentifys.push(event);
       this._limitEventsQueued(this._unsentIdentifys);
     } else {
@@ -704,9 +689,9 @@ Amplitude.prototype.sendEvents = function(callback) {
     var data = {
       client: this.options.apiKey,
       e: events,
-      v: API_VERSION,
+      v: Constants.API_VERSION,
       upload_time: uploadTime,
-      checksum: md5(API_VERSION + this.options.apiKey + events + uploadTime)
+      checksum: md5(Constants.API_VERSION + this.options.apiKey + events + uploadTime)
     };
 
     var scope = this;

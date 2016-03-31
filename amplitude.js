@@ -104,6 +104,7 @@ module.exports = instance;
 
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
+var Constants = require('./constants');
 var cookieStorage = require('./cookiestorage');
 var getUtmData = require('./utm');
 var Identify = require('./identify');
@@ -118,22 +119,6 @@ var utils = require('./utils');
 var UUID = require('./uuid');
 var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
-
-var API_VERSION = 2;
-var IDENTIFY_EVENT = '$identify';
-var LocalStorageKeys = {
-  LAST_EVENT_ID: 'amplitude_lastEventId',
-  LAST_EVENT_TIME: 'amplitude_lastEventTime',
-  LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
-  LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
-  REFERRER: 'amplitude_referrer',
-  SESSION_ID: 'amplitude_sessionId',
-
-  // Used in cookie as well
-  DEVICE_ID: 'amplitude_deviceId',
-  OPT_OUT: 'amplitude_optOut',
-  USER_ID: 'amplitude_userId'
-};
 
 /*
  * Amplitude API
@@ -366,19 +351,19 @@ var _upgradeCookeData = function(scope) {
 
   // in v2.6.0, deviceId, userId, optOut was migrated to localStorage with keys + first 6 char of apiKey
   var apiKeySuffix = '_' + scope.options.apiKey.slice(0, 6);
-  var localStorageDeviceId = _getAndRemoveFromLocalStorage(LocalStorageKeys.DEVICE_ID + apiKeySuffix);
-  var localStorageUserId = _getAndRemoveFromLocalStorage(LocalStorageKeys.USER_ID + apiKeySuffix);
-  var localStorageOptOut = _getAndRemoveFromLocalStorage(LocalStorageKeys.OPT_OUT + apiKeySuffix);
+  var localStorageDeviceId = _getAndRemoveFromLocalStorage(Constants.DEVICE_ID + apiKeySuffix);
+  var localStorageUserId = _getAndRemoveFromLocalStorage(Constants.USER_ID + apiKeySuffix);
+  var localStorageOptOut = _getAndRemoveFromLocalStorage(Constants.OPT_OUT + apiKeySuffix);
   if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
 
   // pre-v2.7.0 event and session meta-data was stored in localStorage. move to cookie for sub-domain support
-  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.SESSION_ID));
-  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_TIME));
-  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_EVENT_ID));
-  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_IDENTIFY_ID));
-  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(LocalStorageKeys.LAST_SEQUENCE_NUMBER));
+  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(Constants.SESSION_ID));
+  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_EVENT_TIME));
+  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_EVENT_ID));
+  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_IDENTIFY_ID));
+  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_SEQUENCE_NUMBER));
 
   var _getFromCookie = function(key) {
     return cookieData && cookieData[key];
@@ -488,11 +473,11 @@ Amplitude.prototype._saveReferrer = function(referrer) {
     // utils.log(e); // sessionStorage disabled
   }
 
-  if ((hasSessionStorage && !(this._getFromStorage(sessionStorage, LocalStorageKeys.REFERRER))) || !hasSessionStorage) {
+  if ((hasSessionStorage && !(this._getFromStorage(sessionStorage, Constants.REFERRER))) || !hasSessionStorage) {
     identify.set('referrer', referrer).set('referring_domain', referring_domain);
 
     if (hasSessionStorage) {
-      this._setInStorage(sessionStorage, LocalStorageKeys.REFERRER, referrer);
+      this._setInStorage(sessionStorage, Constants.REFERRER, referrer);
     }
   }
 
@@ -619,7 +604,7 @@ Amplitude.prototype.identify = function(identify, callback) {
   }
 
   if (identify instanceof Identify && Object.keys(identify.userPropertiesOperations).length > 0) {
-    this._logEvent(IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, callback);
+    this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, callback);
   } else if (callback && type(callback) === 'function') {
     callback(0, 'No request sent');
   }
@@ -653,7 +638,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
   }
   try {
     var eventId;
-    if (eventType === IDENTIFY_EVENT) {
+    if (eventType === Constants.IDENTIFY_EVENT) {
       eventId = this.nextIdentifyId();
     } else {
       eventId = this.nextEventId();
@@ -669,7 +654,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 
     userProperties = userProperties || {};
     // Only add utm properties to user properties for events
-    if (eventType !== IDENTIFY_EVENT) {
+    if (eventType !== Constants.IDENTIFY_EVENT) {
       object.merge(userProperties, this._utmProperties);
     }
 
@@ -700,7 +685,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       // country: null
     };
 
-    if (eventType === IDENTIFY_EVENT) {
+    if (eventType === Constants.IDENTIFY_EVENT) {
       this._unsentIdentifys.push(event);
       this._limitEventsQueued(this._unsentIdentifys);
     } else {
@@ -810,9 +795,9 @@ Amplitude.prototype.sendEvents = function(callback) {
     var data = {
       client: this.options.apiKey,
       e: events,
-      v: API_VERSION,
+      v: Constants.API_VERSION,
       upload_time: uploadTime,
-      checksum: md5(API_VERSION + this.options.apiKey + events + uploadTime)
+      checksum: md5(Constants.API_VERSION + this.options.apiKey + events + uploadTime)
     };
 
     var scope = this;
@@ -912,8 +897,28 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./cookiestorage":3,"./utm":4,"./identify":5,"json":6,"./localstorage":7,"JavaScript-MD5":8,"object":9,"./xhr":10,"./type":11,"ua-parser-js":12,"./utils":13,"./uuid":14,"./version":15,"./options":16}],
+}, {"./constants":3,"./cookiestorage":4,"./utm":5,"./identify":6,"json":7,"./localstorage":8,"JavaScript-MD5":9,"object":10,"./xhr":11,"./type":12,"ua-parser-js":13,"./utils":14,"./uuid":15,"./version":16,"./options":17}],
 3: [function(require, module, exports) {
+module.exports = {
+  API_VERSION: 2,
+  IDENTIFY_EVENT: '$identify',
+
+  // localStorageKeys
+  LAST_EVENT_ID: 'amplitude_lastEventId123',
+  LAST_EVENT_TIME: 'amplitude_lastEventTime',
+  LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
+  LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
+  REFERRER: 'amplitude_referrer',
+  SESSION_ID: 'amplitude_sessionId',
+
+  // Used in cookie as well
+  DEVICE_ID: 'amplitude_deviceId',
+  OPT_OUT: 'amplitude_optOut',
+  USER_ID: 'amplitude_userId'
+};
+
+}, {}],
+4: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -1006,8 +1011,8 @@ cookieStorage.prototype.getStorage = function() {
 
 module.exports = cookieStorage;
 
-}, {"./cookie":17,"json":6,"./localstorage":7}],
-17: [function(require, module, exports) {
+}, {"./cookie":18,"json":7,"./localstorage":8}],
+18: [function(require, module, exports) {
 /*
  * Cookie data
  */
@@ -1136,8 +1141,8 @@ module.exports = {
 
 };
 
-}, {"./base64":18,"json":6,"top-domain":19}],
-18: [function(require, module, exports) {
+}, {"./base64":19,"json":7,"top-domain":20}],
+19: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -1236,8 +1241,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":20}],
-20: [function(require, module, exports) {
+}, {"./utf8":21}],
+21: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1297,7 +1302,7 @@ var UTF8 = {
 module.exports = UTF8;
 
 }, {}],
-6: [function(require, module, exports) {
+7: [function(require, module, exports) {
 
 var json = window.JSON || {};
 var stringify = json.stringify;
@@ -1307,8 +1312,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":21}],
-21: [function(require, module, exports) {
+}, {"json-fallback":22}],
+22: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -1798,7 +1803,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-19: [function(require, module, exports) {
+20: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -1846,8 +1851,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":22}],
-22: [function(require, module, exports) {
+}, {"url":23}],
+23: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -1932,7 +1937,7 @@ function port (protocol){
 }
 
 }, {}],
-7: [function(require, module, exports) {
+8: [function(require, module, exports) {
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -2036,7 +2041,7 @@ if (!localStorage) {
 module.exports = localStorage;
 
 }, {}],
-4: [function(require, module, exports) {
+5: [function(require, module, exports) {
 var getUtmParam = function(name, query) {
   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
   var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
@@ -2065,7 +2070,7 @@ var getUtmData = function(rawCookie, query) {
 module.exports = getUtmData;
 
 }, {}],
-5: [function(require, module, exports) {
+6: [function(require, module, exports) {
 var type = require('./type');
 var utils = require('./utils');
 
@@ -2158,8 +2163,8 @@ Identify.prototype._addOperation = function(operation, property, value) {
 
 module.exports = Identify;
 
-}, {"./type":11,"./utils":13}],
-11: [function(require, module, exports) {
+}, {"./type":12,"./utils":14}],
+12: [function(require, module, exports) {
 /* Taken from: https://github.com/component/type */
 
 /**
@@ -2207,7 +2212,7 @@ module.exports = function(val){
 };
 
 }, {}],
-13: [function(require, module, exports) {
+14: [function(require, module, exports) {
 var type = require('./type');
 
 
@@ -2324,8 +2329,8 @@ module.exports = {
   validateProperties: validateProperties
 };
 
-}, {"./type":11}],
-8: [function(require, module, exports) {
+}, {"./type":12}],
+9: [function(require, module, exports) {
 /*
  * JavaScript MD5 1.0.1
  * https://github.com/blueimp/JavaScript-MD5
@@ -2613,7 +2618,7 @@ module.exports = {
 }(this));
 
 }, {}],
-9: [function(require, module, exports) {
+10: [function(require, module, exports) {
 
 /**
  * HOP ref.
@@ -2699,7 +2704,7 @@ exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
 }, {}],
-10: [function(require, module, exports) {
+11: [function(require, module, exports) {
 var querystring = require('querystring');
 
 /*
@@ -2745,8 +2750,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":23}],
-23: [function(require, module, exports) {
+}, {"querystring":24}],
+24: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2821,8 +2826,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":24,"type":25}],
-24: [function(require, module, exports) {
+}, {"trim":25,"type":26}],
+25: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -2842,7 +2847,7 @@ exports.right = function(str){
 };
 
 }, {}],
-25: [function(require, module, exports) {
+26: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -2891,7 +2896,7 @@ function isBuffer(obj) {
 }
 
 }, {}],
-12: [function(require, module, exports) {
+13: [function(require, module, exports) {
 /* jshint eqeqeq: false, forin: false */
 /* global define */
 
@@ -3774,7 +3779,7 @@ function isBuffer(obj) {
 })(this);
 
 }, {}],
-14: [function(require, module, exports) {
+15: [function(require, module, exports) {
 /* jshint bitwise: false, laxbreak: true */
 
 /**
@@ -3808,11 +3813,11 @@ var uuid = function(a) {
 module.exports = uuid;
 
 }, {}],
-15: [function(require, module, exports) {
+16: [function(require, module, exports) {
 module.exports = '2.10.0';
 
 }, {}],
-16: [function(require, module, exports) {
+17: [function(require, module, exports) {
 var language = require('./language');
 
 // default options
@@ -3836,8 +3841,8 @@ module.exports = {
   eventUploadPeriodMillis: 30 * 1000, // 30s
 };
 
-}, {"./language":26}],
-26: [function(require, module, exports) {
+}, {"./language":27}],
+27: [function(require, module, exports) {
 var getLanguage = function() {
     return (navigator && ((navigator.languages && navigator.languages[0]) ||
         navigator.language || navigator.userLanguage)) || undefined;
