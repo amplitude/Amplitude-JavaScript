@@ -119,9 +119,8 @@ var UUID = require('./uuid');
 var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
-var IDENTIFY_EVENT = '$identify';
 var API_VERSION = 2;
-var MAX_STRING_LENGTH = 1024;
+var IDENTIFY_EVENT = '$identify';
 var LocalStorageKeys = {
   LAST_EVENT_ID: 'amplitude_lastEventId',
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
@@ -635,31 +634,7 @@ Amplitude.prototype.setVersionName = function(versionName) {
   }
 };
 
-// truncate string values in event and user properties so that request size does not get too large
-Amplitude.prototype._truncate = function(value) {
-  if (type(value) === 'array') {
-    for (var i = 0; i < value.length; i++) {
-      value[i] = this._truncate(value[i]);
-    }
-  } else if (type(value) === 'object') {
-    for (var key in value) {
-      if (value.hasOwnProperty(key)) {
-        value[key] = this._truncate(value[key]);
-      }
-    }
-  } else {
-    value = _truncateValue(value);
-  }
 
-  return value;
-};
-
-var _truncateValue = function(value) {
-  if (type(value) === 'string') {
-    return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
-  }
-  return value;
-};
 
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
@@ -714,8 +689,8 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
       device_model: ua.os.name || null,
       language: this.options.language,
       api_properties: apiProperties,
-      event_properties: this._truncate(utils.validateProperties(eventProperties)),
-      user_properties: this._truncate(userProperties),
+      event_properties: utils.truncate(utils.validateProperties(eventProperties)),
+      user_properties: utils.truncate(userProperties),
       uuid: UUID(),
       library: {
         name: 'amplitude-js',
@@ -2235,6 +2210,7 @@ module.exports = function(val){
 13: [function(require, module, exports) {
 var type = require('./type');
 
+
 var log = function(s) {
   try {
     console.log('[Amplitude] ' + s);
@@ -2243,9 +2219,40 @@ var log = function(s) {
   }
 };
 
+
 var isEmptyString = function(str) {
   return (!str || str.length === 0);
 };
+
+
+var MAX_STRING_LENGTH = 1024;
+
+// truncate string values in event and user properties so that request size does not get too large
+var truncate = function(value) {
+  if (type(value) === 'array') {
+    for (var i = 0; i < value.length; i++) {
+      value[i] = truncate(value[i]);
+    }
+  } else if (type(value) === 'object') {
+    for (var key in value) {
+      if (value.hasOwnProperty(key)) {
+        value[key] = truncate(value[key]);
+      }
+    }
+  } else {
+    value = _truncateValue(value);
+  }
+
+  return value;
+};
+
+var _truncateValue = function(value) {
+  if (type(value) === 'string') {
+    return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
+  }
+  return value;
+};
+
 
 var validateProperties = function(properties) {
   var propsType = type(properties);
@@ -2309,9 +2316,11 @@ var validatePropertyValue = function(key, value) {
   return value;
 };
 
+
 module.exports = {
   log: log,
   isEmptyString: isEmptyString,
+  truncate: truncate,
   validateProperties: validateProperties
 };
 

@@ -1,5 +1,6 @@
 var type = require('./type');
 
+
 var log = function(s) {
   try {
     console.log('[Amplitude] ' + s);
@@ -8,9 +9,40 @@ var log = function(s) {
   }
 };
 
+
 var isEmptyString = function(str) {
   return (!str || str.length === 0);
 };
+
+
+var MAX_STRING_LENGTH = 1024;
+
+// truncate string values in event and user properties so that request size does not get too large
+var truncate = function(value) {
+  if (type(value) === 'array') {
+    for (var i = 0; i < value.length; i++) {
+      value[i] = truncate(value[i]);
+    }
+  } else if (type(value) === 'object') {
+    for (var key in value) {
+      if (value.hasOwnProperty(key)) {
+        value[key] = truncate(value[key]);
+      }
+    }
+  } else {
+    value = _truncateValue(value);
+  }
+
+  return value;
+};
+
+var _truncateValue = function(value) {
+  if (type(value) === 'string') {
+    return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
+  }
+  return value;
+};
+
 
 var validateProperties = function(properties) {
   var propsType = type(properties);
@@ -74,8 +106,10 @@ var validatePropertyValue = function(key, value) {
   return value;
 };
 
+
 module.exports = {
   log: log,
   isEmptyString: isEmptyString,
+  truncate: truncate,
   validateProperties: validateProperties
 };
