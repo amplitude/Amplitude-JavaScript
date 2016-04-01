@@ -1,7 +1,7 @@
 var type = require('./type');
 
 
-var log = function(s) {
+var log = function log(s) {
   try {
     console.log('[Amplitude] ' + s);
   } catch (e) {
@@ -10,7 +10,7 @@ var log = function(s) {
 };
 
 
-var isEmptyString = function(str) {
+var isEmptyString = function isEmptyString(str) {
   return (!str || str.length === 0);
 };
 
@@ -18,7 +18,7 @@ var isEmptyString = function(str) {
 var MAX_STRING_LENGTH = 1024;
 
 // truncate string values in event and user properties so that request size does not get too large
-var truncate = function(value) {
+var truncate = function truncate(value) {
   if (type(value) === 'array') {
     for (var i = 0; i < value.length; i++) {
       value[i] = truncate(value[i]);
@@ -36,7 +36,7 @@ var truncate = function(value) {
   return value;
 };
 
-var _truncateValue = function(value) {
+var _truncateValue = function _truncateValue(value) {
   if (type(value) === 'string') {
     return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
   }
@@ -44,7 +44,7 @@ var _truncateValue = function(value) {
 };
 
 
-var validateProperties = function(properties) {
+var validateProperties = function validateProperties(properties) {
   var propsType = type(properties);
   if (propsType !== 'object') {
     log('Error: invalid event properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
@@ -75,11 +75,19 @@ var validateProperties = function(properties) {
   return copy;
 };
 
+var validateInput = function validateInput(input, name, expectedType) {
+  if (type(input) !== expectedType) {
+    log('Invalid ' + name + ' input type. Expected ' + expectedType + ' but received ' + type(input));
+    return false;
+  }
+  return true;
+};
+
 var invalidValueTypes = [
   'null', 'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
 ];
 
-var validatePropertyValue = function(key, value) {
+var validatePropertyValue = function validatePropertyValue(key, value) {
   var valueType = type(value);
   if (invalidValueTypes.indexOf(valueType) !== -1) {
     log('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
@@ -111,5 +119,6 @@ module.exports = {
   log: log,
   isEmptyString: isEmptyString,
   truncate: truncate,
+  validateInput: validateInput,
   validateProperties: validateProperties
 };

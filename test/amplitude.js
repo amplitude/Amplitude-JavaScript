@@ -555,6 +555,28 @@ describe('Amplitude', function() {
     });
   });
 
+  describe('setVersionName', function() {
+    beforeEach(function() {
+      reset();
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should set version name', function() {
+      amplitude.init(apiKey, null, {batchEvents: true});
+      amplitude.setVersionName('testVersionName1');
+      amplitude.logEvent('testEvent1');
+      assert.equal(amplitude._unsentEvents[0].version_name, 'testVersionName1');
+
+      // should ignore non-string values
+      amplitude.setVersionName(15000);
+      amplitude.logEvent('testEvent2');
+      assert.equal(amplitude._unsentEvents[1].version_name, 'testVersionName1');
+    });
+  });
+
   describe('setDeviceId', function() {
 
     beforeEach(function() {
