@@ -121,7 +121,10 @@ var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
 /**
- * Amplitude API - instance constructor
+ * Amplitude SDK API - instance constructor.
+ * @constructor Amplitude
+ * @public
+ * @example var amplitude = new Amplitude();
  */
 var Amplitude = function Amplitude() {
   this.options = object.merge({}, DEFAULT_OPTIONS);
@@ -145,6 +148,10 @@ var Amplitude = function Amplitude() {
 
 Amplitude.prototype.Identify = Identify;
 
+/**
+ * Run functions queued up by proxy loading snippet
+ * @private
+ */
 Amplitude.prototype._runQueuedFunctions = function () {
   for (var i = 0; i < this._q.length; i++) {
     var fn = this[this._q[i][0]];
@@ -156,15 +163,14 @@ Amplitude.prototype._runQueuedFunctions = function () {
 };
 
 /**
- * Initializes Amplitude
- * @param {string} apiKey - The API key for your app
- * @param {string} opt_userId - (optional) An identifier for this user
- * @param {Object} opt_config - (optional) Configuration options
- *   - saveEvents (boolean) Whether to save events to local storage. Defaults to true.
- *   - includeUtm (boolean) Whether to send utm parameters with events. Defaults to false.
- *   - includeReferrer (boolean) Whether to send referrer info with events. Defaults to false.
- *   - See https://github.com/amplitude/Amplitude-Javascript#configuration-options for complete list.
+ * Initializes the Amplitude Javascript SDK with your apiKey and any optional configurations.
+ * This is required before any other methods can be called.
+ * @public
+ * @param {string} apiKey - The API key for your app.
+ * @param {string} opt_userId - (optional) An identifier for this user.
+ * @param {object} opt_config - (optional) Configuration options. See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#configuration-options} for list of options and default values.
  * @param {function} opt_callback - (optional) Provide a callback function to run after initialization is complete.
+ * @example amplitude.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
  */
 Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_callback) {
   try {
@@ -225,8 +231,11 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
   }
 };
 
-// parse and validate user specified config values and overwrite existing option value
-// DEFAULT_OPTIONS provides list of all config keys that are modifiable, as well as expected types for values
+/**
+ * Parse and validate user specified config values and overwrite existing option value
+ * DEFAULT_OPTIONS provides list of all config keys that are modifiable, as well as expected types for values
+ * @private
+ */
 var _parseConfig = function _parseConfig(options, config) {
   if (type(config) !== 'object') {
     return;
@@ -254,6 +263,10 @@ var _parseConfig = function _parseConfig(options, config) {
    }
 };
 
+/**
+ * Check that the apiKey is set before calling a function. Logs a warning message if not set.
+ * @private
+ */
 Amplitude.prototype._apiKeySet = function _apiKeySet(methodName) {
   if (utils.isEmptyString(this.options.apiKey)) {
     utils.log('Invalid apiKey. Please set a valid apiKey with init() before calling ' + methodName);
@@ -262,6 +275,10 @@ Amplitude.prototype._apiKeySet = function _apiKeySet(methodName) {
   return true;
 };
 
+/**
+ * Load saved events from localStorage. JSON deserializes event array. Handles case where string is corrupted.
+ * @private
+ */
 Amplitude.prototype._loadSavedUnsentEvents = function _loadSavedUnsentEvents(unsentKey) {
   var savedUnsentEventsString = localStorage.getItem(unsentKey);
   if (utils.isEmptyString(savedUnsentEventsString)) {
@@ -281,39 +298,62 @@ Amplitude.prototype._loadSavedUnsentEvents = function _loadSavedUnsentEvents(uns
 };
 
 /**
- * Returns {boolean} true if a new session was created during initialization, otherwise false.
+ * Returns true if a new session was created during initialization, otherwise false.
+ * @public
+ * @return {boolean} Whether a new session was created during initialization.
  */
 Amplitude.prototype.isNewSession = function isNewSession() {
   return this._newSession;
 };
 
 /**
- * Returns {number} the id of the current session.
+ * Returns the id of the current session.
+ * @public
+ * @return {number} Id of the current session.
  */
 Amplitude.prototype.getSessionId = function getSessionId() {
   return this._sessionId;
 };
 
+/**
+ * Increments the eventId and returns it.
+ * @private
+ */
 Amplitude.prototype._nextEventId = function _nextEventId() {
   this._eventId++;
   return this._eventId;
 };
 
+/**
+ * Increments the identifyId and returns it.
+ * @private
+ */
 Amplitude.prototype._nextIdentifyId = function _nextIdentifyId() {
   this._identifyId++;
   return this._identifyId;
 };
 
+/**
+ * Increments the sequenceNumber and returns it.
+ * @private
+ */
 Amplitude.prototype._nextSequenceNumber = function _nextSequenceNumber() {
   this._sequenceNumber++;
   return this._sequenceNumber;
 };
 
+/**
+ * Returns the total count of unsent events and identifys
+ * @private
+ */
 Amplitude.prototype._unsentCount = function _unsentCount() {
   return this._unsentEvents.length + this._unsentIdentifys.length;
 };
 
-// returns true if sendEvents called immediately
+/**
+ * Send events if ready. Returns true if events are sent.
+ * @private
+ */
 Amplitude.prototype._sendEventsIfReady = function _sendEventsIfReady(callback) {
   if (this._unsentCount() === 0) {
     return false;
@@ -349,6 +389,7 @@ Amplitude.prototype._sendEventsIfReady = function _sendEventsIfReady(callback) {
  * cookieData (deviceId, userId, optOut, sessionId, lastEventTime, eventId, identifyId, sequenceNumber)
  * can be stored in many different places (localStorage, cookie, etc).
  * Need to unify all sources into one place with a one-time upgrade/migration.
+ * @private
  */
 var _upgradeCookeData = function _upgradeCookeData(scope) {
   // skip if migration already happened
@@ -399,6 +440,10 @@ var _upgradeCookeData = function _upgradeCookeData(scope) {
   _saveCookieData(scope);
 };
 
+/**
+ * Fetches deviceId, userId, event meta data from amplitude cookie
+ * @private
+ */
 var _loadCookieData = function _loadCookieData(scope) {
   var cookieData = scope._cookieStorage.get(scope.options.cookieName);
   if (type(cookieData) === 'object') {
@@ -429,6 +474,10 @@ var _loadCookieData = function _loadCookieData(scope) {
   }
 };
 
+/**
+ * Saves deviceId, userId, event meta data to amplitude cookie
+ * @private
+ */
 var _saveCookieData = function _saveCookieData(scope) {
   scope._cookieStorage.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
@@ -444,7 +493,8 @@ var _saveCookieData = function _saveCookieData(scope) {
 
 /**
  * Parse the utm properties out of cookies and query for adding to user properties.
- * Since user properoties are propagated on server, only send once per session, don't need to send with every event
+ * Since user properties are propagated on server, only send once per session, don't need to send with every event
+ * @private
  */
 Amplitude.prototype._saveUtmData = function _saveUtmData(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
@@ -476,10 +526,17 @@ Amplitude.prototype._saveUtmData = function _saveUtmData(queryParams, cookiePara
   this.identify(identify);
 };
 
+/**
+ * @private
+ */
 Amplitude.prototype._getReferrer = function _getReferrer() {
   return document.referrer;
 };
 
+/**
+ * Parse the domain from referrer info
+ * @private
+ */
 var _getReferringDomain = function _getReferringDomain(referrer) {
   if (referrer === null || referrer === undefined || referrer === '') {
     return null;
@@ -491,7 +548,11 @@ var _getReferringDomain = function _getReferringDomain(referrer) {
   return null;
 };
 
-// since user properties are propagated on the server, only send once per session, don't need to send with every event
+/**
+ * Fetch the referrer information, parse the domain and send.
+ * Since user properties are propagated on the server, only send once per session, don't need to send with every event
+ * @private
+ */
 Amplitude.prototype._saveReferrer = function _saveReferrer(referrer) {
   if (referrer === null || referrer === undefined || referrer === '') {
     return;
@@ -516,7 +577,9 @@ Amplitude.prototype._saveReferrer = function _saveReferrer(referrer) {
 };
 
 /**
- * Saves unsent events and identifies to localStorage
+ * Saves unsent events and identifies to localStorage. JSON stringifies event queues before saving.
+ * Note: this is called automatically every time events are logged, unless you explicitly set option saveEvents to false.
+ * @public
  */
 Amplitude.prototype.saveEvents = function saveEvents() {
   if (!this._apiKeySet('saveEvents()')) {
@@ -533,8 +596,10 @@ Amplitude.prototype.saveEvents = function saveEvents() {
 };
 
 /**
- * Sets the cookie domain
- * @param {string} domain
+ * Sets a customer domain for the amplitude cookie. Useful if you want to support cross-subdomain tracking.
+ * @public
+ * @param {string} domain to set.
+ * @example amplitude.setDomain('.amplitude.com');
  */
 Amplitude.prototype.setDomain = function setDomain(domain) {
   if (!this._apiKeySet('setDomain()') || !utils.validateInput(domain, 'domain', 'string')) {
@@ -555,7 +620,9 @@ Amplitude.prototype.setDomain = function setDomain(domain) {
 
 /**
  * Sets an identifier for the current user.
- * @param {string} userId - identifier to set. Can be set to null.
+ * @public
+ * @param {string} userId - identifier to set. Can be null.
+ * @example amplitude.setUserId('joe@gmail.com');
  */
 Amplitude.prototype.setUserId = function setUserId(userId) {
   if (!this._apiKeySet('setUserId()')) {
@@ -572,7 +639,9 @@ Amplitude.prototype.setUserId = function setUserId(userId) {
 
 /**
  * Sets whether to opt current user out of tracking.
+ * @public
  * @param {boolean} enable - if true then no events will be logged or sent.
+ * @example: amplitude.setOptOut(true);
  */
 Amplitude.prototype.setOptOut = function setOptOut(enable) {
   if (!this._apiKeySet('setOptOut()') || !utils.validateInput(enable, 'enable', 'boolean')) {
@@ -589,7 +658,9 @@ Amplitude.prototype.setOptOut = function setOptOut(enable) {
 
 /**
   * Sets a custom deviceId for current user. Note: this is not recommended unless you know what you are doing (like if you have your own system for managing deviceIds). Make sure the deviceId you set is sufficiently unique (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
-  * @param {string} deviceId
+  * @public
+  * @param {string} deviceId - custom deviceId for current user.
+  * @example amplitude.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
   */
 Amplitude.prototype.setDeviceId = function setDeviceId(deviceId) {
   if (!this._apiKeySet('setDeviceId()') || !utils.validateInput(deviceId, 'deviceId', 'string')) {
@@ -608,8 +679,10 @@ Amplitude.prototype.setDeviceId = function setDeviceId(deviceId) {
 
 /**
  * Sets user properties for the current user.
- * @param {object} - object with string keys and values representing the user properties and values to set.
+ * @public
+ * @param {object} - object with string keys and values for the user properties to set.
  * @param {boolean} - DEPRECATED opt_replace: in earlier versions of the JS SDK the user properties object was kept in memory and replace = true would replace the object in memory. Now the properties are no longer stored in memory, so replace is deprecated.
+ * @example amplitude.setUserProperties({'gender': 'female', 'sign_up_complete': true})
  */
 Amplitude.prototype.setUserProperties = function setUserProperties(userProperties) {
   if (!this._apiKeySet('setUserProperties()') || !utils.validateInput(userProperties, 'userProperties', 'object')) {
@@ -628,6 +701,8 @@ Amplitude.prototype.setUserProperties = function setUserProperties(userPropertie
 
 /**
  * Clear all of the user properties for the current user. Note: clearing user properties is irreversible!
+ * @public
+ * @example amplitude.clearUserProperties();
  */
 Amplitude.prototype.clearUserProperties = function clearUserProperties(){
   if (!this._apiKeySet('clearUserProperties()')) {
@@ -640,10 +715,12 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
 
 /**
  * Send an identify call containing user property operations to Amplitude servers.
- * See https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations for more information on user property operations.
- * @param {Identify object} identify - the identify object containing the user property operations to send.
- * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent.
- *        Note: the server response code and response body from the identify event upload are passed to the callback function.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations} for more information on user property operations.
+ * @param {object} identify - the Identify object containing the user property operations to send.
+ * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent. Note: the server response code and response body from the identify event upload are passed to the callback function.
+ * @example
+ * var identify = new amplitude.Identify().set('colors', ['rose', 'gold']).add('karma', 1).setOnce('sign_up_date', '2016-03-31');
+ * amplitude.identify(identify);
  */
 Amplitude.prototype.identify = function(identify, opt_callback) {
   if (!this._apiKeySet('identify()')) {
@@ -681,7 +758,9 @@ Amplitude.prototype.identify = function(identify, opt_callback) {
 
 /**
  * Set a versionName for your application.
+ * @public
  * @param {string} versionName
+ * @example amplitude.setVersionName('1.12.3');
  */
 Amplitude.prototype.setVersionName = function setVersionName(versionName) {
   if (!utils.validateInput(versionName, 'versionName', 'string')) {
@@ -692,6 +771,7 @@ Amplitude.prototype.setVersionName = function setVersionName(versionName) {
 
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
+ * @private
  */
 Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, callback) {
   if (type(callback) !== 'function') {
@@ -771,7 +851,10 @@ Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, a
   }
 };
 
-// Remove old events from the beginning of the array if too many have accumulated. Default limit is 1000 events.
+/**
+ * Remove old events from the beginning of the array if too many have accumulated. Default limit is 1000 events.
+ * @private
+ */
 Amplitude.prototype._limitEventsQueued = function _limitEventsQueued(queue) {
   if (queue.length > this.options.savedMaxCount) {
     queue.splice(0, queue.length - this.options.savedMaxCount);
@@ -779,11 +862,12 @@ Amplitude.prototype._limitEventsQueued = function _limitEventsQueued(queue) {
 };
 
 /**
- * Log event with event type and event properties
- * @param {string} eventType - name of event to log
- * @param {object} eventProperties - (optional) an object with string keys and values representing the event properties
- * @param {function} opt_callback - (optional) a callback function to run after the event is logged
- *        Note: the server response code and response body from the identify event upload are passed to the callback function.
+ * Log an event with eventType and eventProperties
+ * @public
+ * @param {string} eventType - name of event
+ * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
+ * @param {function} opt_callback - (optional) a callback function to run after the event is logged. Note: the server response code and response body from the identify event upload are passed to the callback function.
+ * @example amplitude.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
   if (!this._apiKeySet('logEvent()') || !utils.validateInput(eventType, 'eventType', 'string') ||
@@ -796,16 +880,21 @@ Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt
   return this._logEvent(eventType, eventProperties, null, null, opt_callback);
 };
 
-// Test that n is a number or a numeric value.
+/**
+ * Test that n is a number or a numeric value.
+ * @private
+ */
 var _isNumber = function _isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 };
 
 /**
  * Log revenue event with a price, quantity, and product identifier.
+ * @public
  * @param {number} price - price of revenue event
  * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
  * @param {string} product - (optional) product identifier
+ * @example amplitude.logRevenue(3.99, 1, 'product_1234');
  */
 Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
   // Test that the parameters are of the right type.
@@ -825,6 +914,7 @@ Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
 /**
  * Remove events in storage with event ids up to and including maxEventId. Does
  * a true filter in case events get out of order or old events are removed.
+ * @private
  */
 Amplitude.prototype._removeEvents = function _removeEvents(eventQueue, maxId) {
   if (maxId < 0) {
@@ -841,9 +931,9 @@ Amplitude.prototype._removeEvents = function _removeEvents(eventQueue, maxId) {
 };
 
 /**
- * Send unsent events.
- * @param {function} callback - (optional) callback to run after events are sent.
- *            Note the server response code and response body are passed to the callback as input arguments.
+ * Send unsent events. Note: this is called automatically after events are logged if option batchEvents is false. If batchEvents is true, then events are only sent when batch criterias are met.
+ * @public
+ * @param {function} callback - (optional) callback to run after events are sent. Note the server response code and response body are passed to the callback as input arguments.
  */
 Amplitude.prototype.sendEvents = function sendEvents(callback) {
   if (!this._apiKeySet('sendEvents()')) {
@@ -917,6 +1007,10 @@ Amplitude.prototype.sendEvents = function sendEvents(callback) {
   }
 };
 
+/**
+ * Merge unsent events and identifys together in sequential order based on their sequence number, for uploading.
+ * @private
+ */
 Amplitude.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIdentifys(numEvents) {
   // coalesce events from both queues
   var eventsToSend = [];
@@ -972,9 +1066,13 @@ Amplitude.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIdentifys
 };
 
 /**
- *  @deprecated
+ * Set global user properties. Note this is deprecated, and we recommend using setUserProperties
+ * @public
+ * @deprecated
  */
-Amplitude.prototype.setGlobalUserProperties = Amplitude.prototype.setUserProperties;
+Amplitude.prototype.setGlobalUserProperties = function setGlobalUserProperties(userProperties) {
+  this.setUserProperties(userProperties);
+};
 
 Amplitude.prototype.__VERSION__ = version;
 
