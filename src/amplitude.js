@@ -516,7 +516,7 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
  * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent.
  *        Note: the server response code and response body from the identify event upload are passed to the callback function.
  */
-Amplitude.prototype.identify = function identify(identify, opt_callback) {
+Amplitude.prototype.identify = function (identify, opt_callback) {
   if (!this._apiKeySet('identify()')) {
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent');
