@@ -1,5 +1,6 @@
 module.exports = {
   API_VERSION: 2,
+  MAX_STRING_LENGTH: 1024,
   IDENTIFY_EVENT: '$identify',
 
   // localStorageKeys
@@ -9,6 +10,7 @@ module.exports = {
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   REFERRER: 'amplitude_referrer',
   SESSION_ID: 'amplitude_sessionId',
+  UTM_PROPERTIES: 'amplitude_utm_properties',
 
   // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',

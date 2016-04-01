@@ -209,7 +209,7 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
     }
 
     if (this.options.includeUtm) {
-      this._initUtmData();
+      this._saveUtmData();
     }
     if (this.options.includeReferrer) {
       this._saveReferrer(this._getReferrer());
@@ -440,11 +440,36 @@ var _saveCookieData = function _saveCookieData(scope) {
 
 /**
  * Parse the utm properties out of cookies and query for adding to user properties.
+ * Since user properoties are propagated on server, only send once per session, don't need to send with every event
  */
-Amplitude.prototype._initUtmData = function _initUtmData(queryParams, cookieParams) {
+Amplitude.prototype._saveUtmData = function _saveUtmData(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
   cookieParams = cookieParams || this._cookieStorage.get('__utmz');
-  this._utmProperties = getUtmData(cookieParams, queryParams);
+  var utmProperties = getUtmData(cookieParams, queryParams);
+
+  // always setOnce initial utm params
+  var identify = new Identify();
+  for (var key in utmProperties) {
+    if (utmProperties.hasOwnProperty(key)) {
+      identify.setOnce('initial_' + key, utmProperties[key]);
+    }
+  }
+
+  // only save utm properties if not already in session storage or if storage disabled
+  var hasSessionStorage = utils.sessionStorageEnabled();
+  if ((hasSessionStorage && !(sessionStorage.getItem(Constants.UTM_PROPERTIES))) || !hasSessionStorage) {
+    for (var key2 in utmProperties) {
+      if (utmProperties.hasOwnProperty(key2)) {
+        identify.set(key2, utmProperties[key2]);
+      }
+    }
+
+    if (hasSessionStorage) {
+      sessionStorage.setItem(Constants.UTM_PROPERTIES, JSON.stringify(utmProperties));
+    }
+  }
+
+  this.identify(identify);
 };
 
 Amplitude.prototype._getReferrer = function _getReferrer() {
@@ -474,13 +499,7 @@ Amplitude.prototype._saveReferrer = function _saveReferrer(referrer) {
   identify.setOnce('initial_referring_domain', referring_domain);
 
   // only save referrer if not already in session storage or if storage disabled
-  var hasSessionStorage = false;
-  try {
-    if (window.sessionStorage) {
-      hasSessionStorage = true;
-    }
-  } catch (e) {} // sessionStorage disabled
-
+  var hasSessionStorage = utils.sessionStorageEnabled();
   if ((hasSessionStorage && !(sessionStorage.getItem(Constants.REFERRER))) || !hasSessionStorage) {
     identify.set('referrer', referrer).set('referring_domain', referring_domain);
 
@@ -622,7 +641,7 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
  * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent.
  *        Note: the server response code and response body from the identify event upload are passed to the callback function.
  */
-Amplitude.prototype.identify = function identify(identify, opt_callback) {
+Amplitude.prototype.identify = function(identify, opt_callback) {
   if (!this._apiKeySet('identify()')) {
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent');
@@ -699,10 +718,10 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     _saveCookieData(this);
 
     userProperties = (type(userProperties) === 'object' && userProperties) || {};
-    // Only add utm properties to user properties for events
-    if (eventType !== Constants.IDENTIFY_EVENT) {
-      object.merge(userProperties, this._utmProperties);
-    }
+    // // Only add utm properties to user properties for events
+    // if (eventType !== Constants.IDENTIFY_EVENT) {
+    //   object.merge(userProperties, this._utmProperties);
+    // }
 
     apiProperties = apiProperties || {};
     eventProperties = (type(eventProperties) === 'object' && eventProperties) || {};
@@ -954,6 +973,7 @@ module.exports = Amplitude;
 3: [function(require, module, exports) {
 module.exports = {
   API_VERSION: 2,
+  MAX_STRING_LENGTH: 1024,
   IDENTIFY_EVENT: '$identify',
 
   // localStorageKeys
@@ -963,6 +983,7 @@ module.exports = {
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
   REFERRER: 'amplitude_referrer',
   SESSION_ID: 'amplitude_sessionId',
+  UTM_PROPERTIES: 'amplitude_utm_properties',
 
   // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
@@ -1992,6 +2013,7 @@ function port (protocol){
 
 }, {}],
 14: [function(require, module, exports) {
+var constants = require('./constants');
 var type = require('./type');
 
 
@@ -2009,7 +2031,16 @@ var isEmptyString = function isEmptyString(str) {
 };
 
 
-var MAX_STRING_LENGTH = 1024;
+var sessionStorageEnabled = function sessionStorageEnabled() {
+  try {
+    if (window.sessionStorage) {
+      return true;
+    }
+  } catch (e) {} // sessionStorage disabled
+  return false;
+};
+
+
 
 // truncate string values in event and user properties so that request size does not get too large
 var truncate = function truncate(value) {
@@ -2030,11 +2061,21 @@ var truncate = function truncate(value) {
   return value;
 };
 
+
 var _truncateValue = function _truncateValue(value) {
   if (type(value) === 'string') {
-    return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
+    return value.length > constants.MAX_STRING_LENGTH ? value.substring(0, constants.MAX_STRING_LENGTH) : value;
   }
   return value;
+};
+
+
+var validateInput = function validateInput(input, name, expectedType) {
+  if (type(input) !== expectedType) {
+    log('Invalid ' + name + ' input type. Expected ' + expectedType + ' but received ' + type(input));
+    return false;
+  }
+  return true;
 };
 
 
@@ -2069,13 +2110,6 @@ var validateProperties = function validateProperties(properties) {
   return copy;
 };
 
-var validateInput = function validateInput(input, name, expectedType) {
-  if (type(input) !== expectedType) {
-    log('Invalid ' + name + ' input type. Expected ' + expectedType + ' but received ' + type(input));
-    return false;
-  }
-  return true;
-};
 
 var invalidValueTypes = [
   'null', 'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
@@ -2112,12 +2146,13 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
 module.exports = {
   log: log,
   isEmptyString: isEmptyString,
+  sessionStorageEnabled: sessionStorageEnabled,
   truncate: truncate,
   validateInput: validateInput,
   validateProperties: validateProperties
 };
 
-}, {"./type":12}],
+}, {"./constants":3,"./type":12}],
 12: [function(require, module, exports) {
 /* Taken from: https://github.com/component/type */
 

@@ -1783,35 +1783,57 @@ describe('Amplitude', function() {
       assert.equal(events[0].user_properties.utm_term, undefined);
     });
 
-    it('should send utm data when the includeUtm flag is true', function() {
+    it('should send utm data via identify when the includeUtm flag is true', function() {
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       reset();
-      amplitude.init(apiKey, undefined, {includeUtm: true});
+      amplitude.init(apiKey, undefined, {includeUtm: true, batchEvents: true, eventUploadThreshold: 2});
 
       amplitude.logEvent('UTM Test Event', {});
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        utm_campaign: 'new',
-        utm_content: 'top'
+        '$setOnce': {
+          initial_utm_campaign: 'new',
+          initial_utm_content: 'top'
+        },
+        '$set': {
+          utm_campaign: 'new',
+          utm_content: 'top'
+        }
       });
+
+      assert.equal(events[1].event_type, 'UTM Test Event');
+      assert.deepEqual(events[1].user_properties, {});
     });
 
-    it('should add utm params to the user properties', function() {
+    it('should parse utm params', function() {
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
 
       var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
-      amplitude._initUtmData(utmParams);
+      amplitude._saveUtmData(utmParams);
 
-      amplitude.setUserProperties({user_prop: true});
+      var expectedProperties = {
+          utm_campaign: 'new',
+          utm_content: 'top',
+          utm_medium: 'email',
+          utm_source: 'amplitude',
+          utm_term: 'terms'
+        }
+
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      // identify event should not have utm properties
+      assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        '$set': {
-          'user_prop': true
-        }
+        '$setOnce': {
+          initial_utm_campaign: 'new',
+          initial_utm_content: 'top',
+          initial_utm_medium: 'email',
+          initial_utm_source: 'amplitude',
+          initial_utm_term: 'terms'
+        },
+        '$set': expectedProperties
       });
       server.respondWith('success');
       server.respond();
@@ -1819,13 +1841,45 @@ describe('Amplitude', function() {
       amplitude.logEvent('UTM Test Event', {});
       assert.lengthOf(server.requests, 2);
       var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {});
+
+      // verify session storage set
+      assert.deepEqual(JSON.parse(sessionStorage.getItem('amplitude_utm_properties')), expectedProperties);
+    });
+
+    it('should not set utmProperties if utmProperties data already in session storage', function() {
+      reset();
+      var existingProperties = {
+        utm_campaign: 'old',
+        utm_content: 'bottom',
+        utm_medium: 'texts',
+        utm_source: 'datamonster',
+        utm_term: 'conditions'
+      };
+      sessionStorage.setItem('amplitude_utm_properties', JSON.stringify(existingProperties));
+
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
+      amplitude._saveUtmData(utmParams);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+
+      // first event should be identify with initial_utm properties and NO existing utm properties
+      assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        utm_campaign: 'new',
-        utm_content: 'top',
-        utm_medium: 'email',
-        utm_source: 'amplitude',
-        utm_term: 'terms'
+        '$setOnce': {
+          initial_utm_campaign: 'new',
+          initial_utm_content: 'top',
+          initial_utm_medium: 'email',
+          initial_utm_source: 'amplitude',
+          initial_utm_term: 'terms'
+        }
       });
+
+      // should not override any existing utm properties values in session storage
+      assert.equal(sessionStorage.getItem('amplitude_utm_properties'), JSON.stringify(existingProperties));
     });
   });
 

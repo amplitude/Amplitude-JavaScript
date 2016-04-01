@@ -1,3 +1,4 @@
+var constants = require('./constants');
 var type = require('./type');
 
 
@@ -15,7 +16,16 @@ var isEmptyString = function isEmptyString(str) {
 };
 
 
-var MAX_STRING_LENGTH = 1024;
+var sessionStorageEnabled = function sessionStorageEnabled() {
+  try {
+    if (window.sessionStorage) {
+      return true;
+    }
+  } catch (e) {} // sessionStorage disabled
+  return false;
+};
+
+
 
 // truncate string values in event and user properties so that request size does not get too large
 var truncate = function truncate(value) {
@@ -36,11 +46,21 @@ var truncate = function truncate(value) {
   return value;
 };
 
+
 var _truncateValue = function _truncateValue(value) {
   if (type(value) === 'string') {
-    return value.length > MAX_STRING_LENGTH ? value.substring(0, MAX_STRING_LENGTH) : value;
+    return value.length > constants.MAX_STRING_LENGTH ? value.substring(0, constants.MAX_STRING_LENGTH) : value;
   }
   return value;
+};
+
+
+var validateInput = function validateInput(input, name, expectedType) {
+  if (type(input) !== expectedType) {
+    log('Invalid ' + name + ' input type. Expected ' + expectedType + ' but received ' + type(input));
+    return false;
+  }
+  return true;
 };
 
 
@@ -75,13 +95,6 @@ var validateProperties = function validateProperties(properties) {
   return copy;
 };
 
-var validateInput = function validateInput(input, name, expectedType) {
-  if (type(input) !== expectedType) {
-    log('Invalid ' + name + ' input type. Expected ' + expectedType + ' but received ' + type(input));
-    return false;
-  }
-  return true;
-};
 
 var invalidValueTypes = [
   'null', 'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
@@ -118,6 +131,7 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
 module.exports = {
   log: log,
   isEmptyString: isEmptyString,
+  sessionStorageEnabled: sessionStorageEnabled,
   truncate: truncate,
   validateInput: validateInput,
   validateProperties: validateProperties

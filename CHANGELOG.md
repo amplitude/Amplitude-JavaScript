@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add tracking of each user's initial_utm parameters (which is captured as a set once operation). Utm parameters are now sent only once per user session.
+
 ### 2.10.0 (March 30, 2016)
 
 * Identify function now accepts a callback function as an argument. The callback will be run after the identify event is sent.
