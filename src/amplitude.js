@@ -18,25 +18,36 @@ var DEFAULT_OPTIONS = require('./options');
  * Amplitude API - instance constructor
  */
 var Amplitude = function Amplitude() {
+  this.options = object.merge({}, DEFAULT_OPTIONS);
+
+  this._cookieStorage = new cookieStorage().getStorage();
+  this._q = []; // queue for proxied functions before script load
+  this._sending = false;
+  this._ua = new UAParser(navigator.userAgent).getResult();
   this._unsentEvents = [];
   this._unsentIdentifys = [];
-  this._ua = new UAParser(navigator.userAgent).getResult();
-  this.options = object.merge({}, DEFAULT_OPTIONS);
-  this.cookieStorage = new cookieStorage().getStorage();
-  this._q = []; // queue for proxied functions before script load
+  this._updateScheduled = false;
 
   // event meta data
   this._eventId = 0;
   this._identifyId = 0;
-  this._sequenceNumber = 0;
-  this._sending = false;
   this._lastEventTime = null;
-  this._sessionId = null;
   this._newSession = false;
-  this._updateScheduled = false;
+  this._sequenceNumber = 0;
+  this._sessionId = null;
 };
 
 Amplitude.prototype.Identify = Identify;
+
+Amplitude.prototype._runQueuedFunctions = function () {
+  for (var i = 0; i < this._q.length; i++) {
+    var fn = this[this._q[i][0]];
+    if (fn && type(fn) === 'function') {
+      fn.apply(this, this._q[i].slice(1));
+    }
+  }
+  this._q = []; // clear function queue after running
+};
 
 /**
  * Initializes Amplitude
@@ -51,46 +62,25 @@ Amplitude.prototype.Identify = Identify;
  */
 Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, opt_callback) {
   try {
-    this.options.apiKey = apiKey;
-    if (opt_config && type(opt_config) === 'object') {
-      if (opt_config.saveEvents !== undefined) {
-        this.options.saveEvents = !!opt_config.saveEvents;
-      }
-      if (opt_config.domain !== undefined) {
-        this.options.domain = opt_config.domain;
-      }
-      if (opt_config.includeUtm !== undefined) {
-        this.options.includeUtm = !!opt_config.includeUtm;
-      }
-      if (opt_config.includeReferrer !== undefined) {
-        this.options.includeReferrer = !!opt_config.includeReferrer;
-      }
-      if (opt_config.batchEvents !== undefined) {
-        this.options.batchEvents = !!opt_config.batchEvents;
-      }
-      this.options.platform = opt_config.platform || this.options.platform;
-      this.options.language = opt_config.language || this.options.language;
-      this.options.sessionTimeout = opt_config.sessionTimeout || this.options.sessionTimeout;
-      this.options.uploadBatchSize = opt_config.uploadBatchSize || this.options.uploadBatchSize;
-      this.options.eventUploadThreshold = opt_config.eventUploadThreshold || this.options.eventUploadThreshold;
-      this.options.savedMaxCount = opt_config.savedMaxCount || this.options.savedMaxCount;
-      this.options.eventUploadPeriodMillis = opt_config.eventUploadPeriodMillis || this.options.eventUploadPeriodMillis;
-    }
+    this.options.apiKey = (type(apiKey) === 'string' && !utils.isEmptyString(apiKey) && apiKey) || null;
 
-    this.cookieStorage.options({
+    _parseConfig(this.options, opt_config);
+    this._cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
     });
-    this.options.domain = this.cookieStorage.options().domain;
+    this.options.domain = this._cookieStorage.options().domain;
 
     _upgradeCookeData(this);
     _loadCookieData(this);
 
-    this.options.deviceId = (opt_config && opt_config.deviceId !== undefined &&
-        opt_config.deviceId !== null && opt_config.deviceId) ||
-        this.options.deviceId || UUID();
-    this.options.userId = (opt_userId !== undefined && opt_userId !== null && opt_userId) || this.options.userId || null;
+    // load deviceId and userId from input, or try to fetch existing value from cookie
+    this.options.deviceId = (type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' &&
+        !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) || this.options.deviceId || UUID();
+    this.options.userId = (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
+        this.options.userId || null;
 
+    // determine if starting new session
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
@@ -98,9 +88,6 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, opt_callback
     }
     this._lastEventTime = now;
     _saveCookieData(this);
-
-    //utils.log('initialized with apiKey=' + apiKey);
-    //opt_userId !== undefined && opt_userId !== null && utils.log('initialized with userId=' + opt_userId);
 
     if (this.options.saveEvents) {
       this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey) || this._unsentEvents;
@@ -131,14 +118,33 @@ Amplitude.prototype.init = function(apiKey, opt_userId, opt_config, opt_callback
   }
 };
 
-Amplitude.prototype.runQueuedFunctions = function () {
-  for (var i = 0; i < this._q.length; i++) {
-    var fn = this[this._q[i][0]];
-    if (fn && type(fn) === 'function') {
-      fn.apply(this, this._q[i].slice(1));
-    }
+// parse and validate user specified config values and overwrite existing option value
+// DEFAULT_OPTIONS provides list of all config keys that are modifiable, as well as expected types for values
+var _parseConfig = function _parseConfig(options, config) {
+  if (type(config) !== 'object') {
+    return;
   }
-  this._q = []; // clear function queue after running
+
+  // verifies config value is defined, is the correct type, and some additional value verification
+  var parseValidateLoad = function parseValidateLoad(key, expectedType) {
+    if (type(config[key]) !== expectedType) {
+      return;
+    }
+    if (expectedType === 'boolean') {
+      options[key] = !!config[key];
+    } else {
+      options[key] = (expectedType === 'string' && !utils.isEmptyString(config[key]) && config[key]) ||
+                     (expectedType === 'number' && config[key] > 0 && config[key]) ||
+                     options[key];
+    }
+   };
+
+   // the DEFAULT_OPTIONS object defines all valid keys, and provides expected types for the value
+   for (var key in DEFAULT_OPTIONS) {
+      if (DEFAULT_OPTIONS.hasOwnProperty(key)) {
+        parseValidateLoad(key, type(DEFAULT_OPTIONS[key]));
+      }
+   }
 };
 
 Amplitude.prototype._apiKeySet = function(methodName) {
@@ -235,7 +241,7 @@ Amplitude.prototype._setInStorage = function(storage, key, value) {
  */
 var _upgradeCookeData = function(scope) {
   // skip if migration already happened
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope._cookieStorage.get(scope.options.cookieName);
   if (cookieData && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
     return;
   }
@@ -283,7 +289,7 @@ var _upgradeCookeData = function(scope) {
 };
 
 var _loadCookieData = function(scope) {
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope._cookieStorage.get(scope.options.cookieName);
   if (cookieData) {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -313,7 +319,7 @@ var _loadCookieData = function(scope) {
 };
 
 var _saveCookieData = function(scope) {
-  scope.cookieStorage.set(scope.options.cookieName, {
+  scope._cookieStorage.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut,
@@ -330,7 +336,7 @@ var _saveCookieData = function(scope) {
  */
 Amplitude.prototype._initUtmData = function(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
-  cookieParams = cookieParams || this.cookieStorage.get('__utmz');
+  cookieParams = cookieParams || this._cookieStorage.get('__utmz');
   this._utmProperties = getUtmData(cookieParams, queryParams);
 };
 
@@ -400,10 +406,10 @@ Amplitude.prototype.setDomain = function(domain) {
   }
 
   try {
-    this.cookieStorage.options({
+    this._cookieStorage.options({
       domain: domain
     });
-    this.options.domain = this.cookieStorage.options().domain;
+    this.options.domain = this._cookieStorage.options().domain;
     _loadCookieData(this);
     _saveCookieData(this);
     // utils.log('set domain=' + domain);

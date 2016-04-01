@@ -50,6 +50,27 @@ describe('Amplitude', function() {
       assert.equal(amplitude.options.userId, userId);
     });
 
+    it('should validate config values', function() {
+      var config = {
+          apiEndpoint: 100,  // invalid type
+          batchEvents: 'True',  // invalid type
+          cookieExpiration: -1,   // negative number
+          cookieName: '',  // empty string
+          eventUploadPeriodMillis: '30', // 30s
+          eventUploadThreshold: 0,   // zero value
+          bogusKey: false
+      };
+
+      amplitude.init(apiKey, userId, config);
+      assert.equal(amplitude.options.apiEndpoint, 'api.amplitude.com');
+      assert.equal(amplitude.options.batchEvents, false);
+      assert.equal(amplitude.options.cookieExpiration, 3650);
+      assert.equal(amplitude.options.cookieName, 'amplitude_id');
+      assert.equal(amplitude.options.eventUploadPeriodMillis, 30000);
+      assert.equal(amplitude.options.eventUploadThreshold, 30);
+      assert.equal(amplitude.options.bogusKey, undefined);
+    });
+
     it('should set cookie', function() {
       amplitude.init(apiKey, userId);
       var stored = cookie.get(amplitude.options.cookieName);
@@ -460,7 +481,7 @@ describe('Amplitude', function() {
       ];
       amplitude._q = functions;
       assert.lengthOf(amplitude._q, 2);
-      amplitude.runQueuedFunctions();
+      amplitude._runQueuedFunctions();
 
       assert.equal(amplitude.options.userId, userId);
       assert.equal(amplitude._unsentCount(), 1);
