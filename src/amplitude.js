@@ -587,7 +587,7 @@ Amplitude.prototype.setVersionName = function setVersionName(versionName) {
 /**
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  */
-Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperties, userProperties, callback) {
+Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, callback) {
   if (type(callback) !== 'function') {
     callback = null;
   }
@@ -666,7 +666,7 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
 };
 
 // Remove old events from the beginning of the array if too many have accumulated. Default limit is 1000 events.
-Amplitude.prototype._limitEventsQueued = function(queue) {
+Amplitude.prototype._limitEventsQueued = function _limitEventsQueued(queue) {
   if (queue.length > this.options.savedMaxCount) {
     queue.splice(0, queue.length - this.options.savedMaxCount);
   }
@@ -679,7 +679,7 @@ Amplitude.prototype._limitEventsQueued = function(queue) {
  * @param {function} opt_callback - (optional) a callback function to run after the event is logged
  *        Note: the server response code and response body from the identify event upload are passed to the callback function.
  */
-Amplitude.prototype.logEvent = function(eventType, eventProperties, opt_callback) {
+Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
   if (!this._apiKeySet('logEvent()') || !utils.validateInput(eventType, 'eventType', 'string') ||
         utils.isEmptyString(eventType)) {
     if (type(opt_callback) === 'function') {
@@ -691,7 +691,7 @@ Amplitude.prototype.logEvent = function(eventType, eventProperties, opt_callback
 };
 
 // Test that n is a number or a numeric value.
-var _isNumber = function(n) {
+var _isNumber = function _isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 };
 
@@ -701,7 +701,7 @@ var _isNumber = function(n) {
  * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
  * @param {string} product - (optional) product identifier
  */
-Amplitude.prototype.logRevenue = function(price, quantity, product) {
+Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
   // Test that the parameters are of the right type.
   if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
     // utils.log('Price and quantity arguments to logRevenue must be numbers');
@@ -739,7 +739,7 @@ Amplitude.prototype._removeEvents = function _removeEvents(eventQueue, maxId) {
  * @param {function} callback - (optional) callback to run after events are sent.
  *            Note the server response code and response body are passed to the callback as input arguments.
  */
-Amplitude.prototype.sendEvents = function(callback) {
+Amplitude.prototype.sendEvents = function sendEvents(callback) {
   if (!this._apiKeySet('sendEvents()')) {
     if (type(callback) === 'function') {
       callback(0, 'No request sent');
@@ -811,7 +811,7 @@ Amplitude.prototype.sendEvents = function(callback) {
   }
 };
 
-Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
+Amplitude.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIdentifys(numEvents) {
   // coalesce events from both queues
   var eventsToSend = [];
   var eventIndex = 0;
