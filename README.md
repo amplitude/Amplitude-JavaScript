@@ -3,6 +3,8 @@
 Amplitude-Javascript
 ====================
 
+This Readme will guide you through using Amplitude's Javascript SDK to track users and events. You can also take a look at the [SDK documentation](https://rawgit.com/amplitude/Amplitude-Javascript/defensive_cleanup/documentation/Amplitude.html).
+
 # Setup #
 1. If you haven't already, go to http://amplitude.com and register for an account. You will receive an API Key.
 2. On every page that uses analytics, paste the following Javascript code between the `<head>` and `</head>` tags:
