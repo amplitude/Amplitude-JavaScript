@@ -264,6 +264,10 @@ Amplitude.prototype._apiKeySet = function _apiKeySet(methodName) {
 
 Amplitude.prototype._loadSavedUnsentEvents = function _loadSavedUnsentEvents(unsentKey) {
   var savedUnsentEventsString = localStorage.getItem(unsentKey);
+  if (utils.isEmptyString(savedUnsentEventsString)) {
+    return []; // new app, does not have any saved events
+  }
+
   if (type(savedUnsentEventsString) === 'string') {
     try {
       var events = JSON.parse(savedUnsentEventsString);
@@ -718,11 +722,6 @@ Amplitude.prototype._logEvent = function(eventType, eventProperties, apiProperti
     _saveCookieData(this);
 
     userProperties = (type(userProperties) === 'object' && userProperties) || {};
-    // // Only add utm properties to user properties for events
-    // if (eventType !== Constants.IDENTIFY_EVENT) {
-    //   object.merge(userProperties, this._utmProperties);
-    // }
-
     apiProperties = apiProperties || {};
     eventProperties = (type(eventProperties) === 'object' && eventProperties) || {};
     var event = {
@@ -802,6 +801,12 @@ var _isNumber = function(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 };
 
+/**
+ * Log revenue event with a price, quantity, and product identifier.
+ * @param {number} price - price of revenue event
+ * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
+ * @param {string} product - (optional) product identifier
+ */
 Amplitude.prototype.logRevenue = function(price, quantity, product) {
   // Test that the parameters are of the right type.
   if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
@@ -821,31 +826,28 @@ Amplitude.prototype.logRevenue = function(price, quantity, product) {
  * Remove events in storage with event ids up to and including maxEventId. Does
  * a true filter in case events get out of order or old events are removed.
  */
-Amplitude.prototype.removeEvents = function (maxEventId, maxIdentifyId) {
-  if (maxEventId >= 0) {
-    var filteredEvents = [];
-    for (var i = 0; i < this._unsentEvents.length; i++) {
-      if (this._unsentEvents[i].event_id > maxEventId) {
-        filteredEvents.push(this._unsentEvents[i]);
-      }
-    }
-    this._unsentEvents = filteredEvents;
+Amplitude.prototype._removeEvents = function _removeEvents(eventQueue, maxId) {
+  if (maxId < 0) {
+    return;
   }
 
-  if (maxIdentifyId >= 0) {
-    var filteredIdentifys = [];
-    for (var j = 0; j < this._unsentIdentifys.length; j++) {
-      if (this._unsentIdentifys[j].event_id > maxIdentifyId) {
-        filteredIdentifys.push(this._unsentIdentifys[j]);
-      }
+  var filteredEvents = [];
+  for (var i = 0; i < this[eventQueue].length || 0; i++) {
+    if (this[eventQueue][i].event_id > maxId) {
+      filteredEvents.push(this[eventQueue][i]);
     }
-    this._unsentIdentifys = filteredIdentifys;
   }
+  this[eventQueue] = filteredEvents;
 };
 
+/**
+ * Send unsent events.
+ * @param {function} callback - (optional) callback to run after events are sent.
+ *            Note the server response code and response body are passed to the callback as input arguments.
+ */
 Amplitude.prototype.sendEvents = function(callback) {
   if (!this._apiKeySet('sendEvents()')) {
-    if (callback && type(callback) === 'function') {
+    if (type(callback) === 'function') {
       callback(0, 'No request sent');
     }
     return;
@@ -862,8 +864,8 @@ Amplitude.prototype.sendEvents = function(callback) {
     var maxEventId = mergedEvents.maxEventId;
     var maxIdentifyId = mergedEvents.maxIdentifyId;
     var events = JSON.stringify(mergedEvents.eventsToSend);
-
     var uploadTime = new Date().getTime();
+
     var data = {
       client: this.options.apiKey,
       e: events,
@@ -877,8 +879,8 @@ Amplitude.prototype.sendEvents = function(callback) {
       scope._sending = false;
       try {
         if (status === 200 && response === 'success') {
-          // utils.log('sucessful upload');
-          scope.removeEvents(maxEventId, maxIdentifyId);
+          scope._removeEvents('_unsentEvents', maxEventId);
+          scope._removeEvents('_unsentIdentifys', maxIdentifyId);
 
           // Update the event cache after the removal of sent events.
           if (scope.options.saveEvents) {
@@ -886,31 +888,31 @@ Amplitude.prototype.sendEvents = function(callback) {
           }
 
           // Send more events if any queued during previous send.
-          if (!scope._sendEventsIfReady(callback) && callback) {
+          if (!scope._sendEventsIfReady(callback) && type(callback) === 'function') {
             callback(status, response);
           }
 
+        // handle payload too large
         } else if (status === 413) {
           // utils.log('request too large');
-          // Can't even get this one massive event through. Drop it.
+          // Can't even get this one massive event through. Drop it, even if it is an identify.
           if (scope.options.uploadBatchSize === 1) {
-            // if massive event is identify, still need to drop it
-            scope.removeEvents(maxEventId, maxIdentifyId);
+            scope._removeEvents('_unsentEvents', maxEventId);
+            scope._removeEvents('_unsentIdentifys', maxIdentifyId);
           }
 
-          // The server complained about the length of the request.
-          // Backoff and try again.
+          // The server complained about the length of the request. Backoff and try again.
           scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
           scope.sendEvents(callback);
 
-        } else if (callback) { // If server turns something like a 400
+        } else if (type(callback) === 'function') { // If server turns something like a 400
           callback(status, response);
         }
       } catch (e) {
         // utils.log('failed upload');
       }
     });
-  } else if (callback) {
+  } else if (type(callback) === 'function') {
     callback(0, 'No request sent');
   }
 };
@@ -925,14 +927,23 @@ Amplitude.prototype._mergeEventsAndIdentifys = function(numEvents) {
 
   while (eventsToSend.length < numEvents) {
     var event;
+    var noIdentifys = identifyIndex >= this._unsentIdentifys.length;
+    var noEvents = eventIndex >= this._unsentEvents.length;
+
+    // case 0: no events or identifys left
+    // note this should not happen, this means we have less events and identifys than expected
+    if (noEvents && noIdentifys) {
+      utils.log('Merging Events and Identifys, less events and identifys than expected');
+      break;
+    }
 
     // case 1: no identifys - grab from events
-    if (identifyIndex >= this._unsentIdentifys.length) {
+    else if (noIdentifys) {
       event = this._unsentEvents[eventIndex++];
       maxEventId = event.event_id;
 
     // case 2: no events - grab from identifys
-    } else if (eventIndex >= this._unsentEvents.length) {
+    } else if (noEvents) {
       event = this._unsentIdentifys[identifyIndex++];
       maxIdentifyId = event.event_id;
 
