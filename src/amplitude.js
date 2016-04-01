@@ -21,9 +21,8 @@ var DEFAULT_OPTIONS = require('./options');
  * @example var amplitude = new Amplitude();
  */
 var Amplitude = function Amplitude() {
+  this.cookieStorage = new cookieStorage().getStorage();
   this.options = object.merge({}, DEFAULT_OPTIONS);
-
-  this._cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
   this._ua = new UAParser(navigator.userAgent).getResult();
@@ -46,7 +45,7 @@ Amplitude.prototype.Identify = Identify;
  * Run functions queued up by proxy loading snippet
  * @private
  */
-Amplitude.prototype._runQueuedFunctions = function () {
+Amplitude.prototype.runQueuedFunctions = function () {
   for (var i = 0; i < this._q.length; i++) {
     var fn = this[this._q[i][0]];
     if (type(fn) === 'function') {
@@ -71,11 +70,11 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
     this.options.apiKey = (type(apiKey) === 'string' && !utils.isEmptyString(apiKey) && apiKey) || null;
 
     _parseConfig(this.options, opt_config);
-    this._cookieStorage.options({
+    this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
     });
-    this.options.domain = this._cookieStorage.options().domain;
+    this.options.domain = this.cookieStorage.options().domain;
 
     _upgradeCookeData(this);
     _loadCookieData(this);
@@ -109,7 +108,7 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
     }
 
     if (this.options.includeUtm) {
-      this._saveUtmData();
+      this._initUtmData();
     }
     if (this.options.includeReferrer) {
       this._saveReferrer(this._getReferrer());
@@ -213,7 +212,7 @@ Amplitude.prototype.getSessionId = function getSessionId() {
  * Increments the eventId and returns it.
  * @private
  */
-Amplitude.prototype._nextEventId = function _nextEventId() {
+Amplitude.prototype.nextEventId = function nextEventId() {
   this._eventId++;
   return this._eventId;
 };
@@ -222,7 +221,7 @@ Amplitude.prototype._nextEventId = function _nextEventId() {
  * Increments the identifyId and returns it.
  * @private
  */
-Amplitude.prototype._nextIdentifyId = function _nextIdentifyId() {
+Amplitude.prototype.nextIdentifyId = function nextIdentifyId() {
   this._identifyId++;
   return this._identifyId;
 };
@@ -231,7 +230,7 @@ Amplitude.prototype._nextIdentifyId = function _nextIdentifyId() {
  * Increments the sequenceNumber and returns it.
  * @private
  */
-Amplitude.prototype._nextSequenceNumber = function _nextSequenceNumber() {
+Amplitude.prototype.nextSequenceNumber = function nextSequenceNumber() {
   this._sequenceNumber++;
   return this._sequenceNumber;
 };
@@ -280,6 +279,26 @@ Amplitude.prototype._sendEventsIfReady = function _sendEventsIfReady(callback) {
 };
 
 /**
+ * Helper function to fetch values from storage
+ * Storage argument allows for localStoraoge and sessionStoraoge
+ * @private
+ * @deprecated
+ */
+Amplitude.prototype._getFromStorage = function _getFromStorage(storage, key) {
+  return storage.getItem(key);
+};
+
+/**
+ * Helper function to set values in storage
+ * Storage argument allows for localStoraoge and sessionStoraoge
+ * @private
+ * @deprecated
+ */
+Amplitude.prototype._setInStorage = function _setInStorage(storage, key) {
+  storage.setItem(key);
+};
+
+/**
  * cookieData (deviceId, userId, optOut, sessionId, lastEventTime, eventId, identifyId, sequenceNumber)
  * can be stored in many different places (localStorage, cookie, etc).
  * Need to unify all sources into one place with a one-time upgrade/migration.
@@ -287,7 +306,7 @@ Amplitude.prototype._sendEventsIfReady = function _sendEventsIfReady(callback) {
  */
 var _upgradeCookeData = function _upgradeCookeData(scope) {
   // skip if migration already happened
-  var cookieData = scope._cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
     return;
   }
@@ -339,7 +358,7 @@ var _upgradeCookeData = function _upgradeCookeData(scope) {
  * @private
  */
 var _loadCookieData = function _loadCookieData(scope) {
-  var cookieData = scope._cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
   if (type(cookieData) === 'object') {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -373,7 +392,7 @@ var _loadCookieData = function _loadCookieData(scope) {
  * @private
  */
 var _saveCookieData = function _saveCookieData(scope) {
-  scope._cookieStorage.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut,
@@ -390,9 +409,9 @@ var _saveCookieData = function _saveCookieData(scope) {
  * Since user properties are propagated on server, only send once per session, don't need to send with every event
  * @private
  */
-Amplitude.prototype._saveUtmData = function _saveUtmData(queryParams, cookieParams) {
+Amplitude.prototype._initUtmData = function _initUtmData(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
-  cookieParams = cookieParams || this._cookieStorage.get('__utmz');
+  cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   var utmProperties = getUtmData(cookieParams, queryParams);
 
   // always setOnce initial utm params
@@ -431,7 +450,7 @@ Amplitude.prototype._getReferrer = function _getReferrer() {
  * Parse the domain from referrer info
  * @private
  */
-var _getReferringDomain = function _getReferringDomain(referrer) {
+Amplitude.prototype._getReferringDomain = function _getReferringDomain(referrer) {
   if (referrer === null || referrer === undefined || referrer === '') {
     return null;
   }
@@ -453,7 +472,7 @@ Amplitude.prototype._saveReferrer = function _saveReferrer(referrer) {
   }
 
   // always setOnce initial referrer
-  var referring_domain = _getReferringDomain(referrer);
+  var referring_domain = this._getReferringDomain(referrer);
   var identify = new Identify().setOnce('initial_referrer', referrer);
   identify.setOnce('initial_referring_domain', referring_domain);
 
@@ -501,10 +520,10 @@ Amplitude.prototype.setDomain = function setDomain(domain) {
   }
 
   try {
-    this._cookieStorage.options({
+    this.cookieStorage.options({
       domain: domain
     });
-    this.options.domain = this._cookieStorage.options().domain;
+    this.options.domain = this.cookieStorage.options().domain;
     _loadCookieData(this);
     _saveCookieData(this);
   } catch (e) {
@@ -609,14 +628,14 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
 
 /**
  * Send an identify call containing user property operations to Amplitude servers.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations} for more information on user property operations.
- * @param {object} identify - the Identify object containing the user property operations to send.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations} for more information on the Identify API and user property operations.
+ * @param {Identify_object} identify_obj - the Identify object containing the user property operations to send.
  * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent. Note: the server response code and response body from the identify event upload are passed to the callback function.
  * @example
  * var identify = new amplitude.Identify().set('colors', ['rose', 'gold']).add('karma', 1).setOnce('sign_up_date', '2016-03-31');
  * amplitude.identify(identify);
  */
-Amplitude.prototype.identify = function(identify, opt_callback) {
+Amplitude.prototype.identify = function(identify_obj, opt_callback) {
   if (!this._apiKeySet('identify()')) {
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent');
@@ -625,24 +644,24 @@ Amplitude.prototype.identify = function(identify, opt_callback) {
   }
 
   // if identify input is a proxied object created by the async loading snippet, convert it into an identify object
-  if (type(identify) === 'object' && identify.hasOwnProperty('_q')) {
+  if (type(identify_obj) === 'object' && identify_obj.hasOwnProperty('_q')) {
     var instance = new Identify();
-    for (var i = 0; i < identify._q.length; i++) {
-        var fn = instance[identify._q[i][0]];
+    for (var i = 0; i < identify_obj._q.length; i++) {
+        var fn = instance[identify_obj._q[i][0]];
         if (type(fn) === 'function') {
-          fn.apply(instance, identify._q[i].slice(1));
+          fn.apply(instance, identify_obj._q[i].slice(1));
         }
     }
-    identify = instance;
+    identify_obj = instance;
   }
 
-  if (identify instanceof Identify) {
+  if (identify_obj instanceof Identify) {
     // only send if there are operations
-    if (Object.keys(identify.userPropertiesOperations).length > 0) {
-      return this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, opt_callback);
+    if (Object.keys(identify_obj.userPropertiesOperations).length > 0) {
+      return this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, opt_callback);
     }
   } else {
-    utils.log('Invalid identify input type. Expected Identify object but saw ' + type(identify));
+    utils.log('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
   }
 
   if (type(opt_callback) === 'function') {
@@ -683,11 +702,11 @@ Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, a
   try {
     var eventId;
     if (eventType === Constants.IDENTIFY_EVENT) {
-      eventId = this._nextIdentifyId();
+      eventId = this.nextIdentifyId();
     } else {
-      eventId = this._nextEventId();
+      eventId = this.nextEventId();
     }
-    var sequenceNumber = this._nextSequenceNumber();
+    var sequenceNumber = this.nextSequenceNumber();
     var eventTime = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
@@ -806,22 +825,31 @@ Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
 };
 
 /**
- * Remove events in storage with event ids up to and including maxEventId. Does
- * a true filter in case events get out of order or old events are removed.
+ * Remove events in storage with event ids up to and including maxEventId.
  * @private
  */
-Amplitude.prototype._removeEvents = function _removeEvents(eventQueue, maxId) {
+Amplitude.prototype.removeEvents = function removeEvents(maxEventId, maxIdentifyId) {
+  _removeEvents(this, '_unsentEvents', maxEventId);
+  _removeEvents(this, '_unsentIdentifys', maxIdentifyId);
+};
+
+/**
+ * Helper function to remove events up to maxId from a single queue.
+ * Does a true filter in case events get out of order or old events are removed.
+ * @private
+ */
+var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
   if (maxId < 0) {
     return;
   }
 
   var filteredEvents = [];
-  for (var i = 0; i < this[eventQueue].length || 0; i++) {
-    if (this[eventQueue][i].event_id > maxId) {
-      filteredEvents.push(this[eventQueue][i]);
+  for (var i = 0; i < scope[eventQueue].length || 0; i++) {
+    if (scope[eventQueue][i].event_id > maxId) {
+      filteredEvents.push(scope[eventQueue][i]);
     }
   }
-  this[eventQueue] = filteredEvents;
+  scope[eventQueue] = filteredEvents;
 };
 
 /**
@@ -863,8 +891,7 @@ Amplitude.prototype.sendEvents = function sendEvents(callback) {
       scope._sending = false;
       try {
         if (status === 200 && response === 'success') {
-          scope._removeEvents('_unsentEvents', maxEventId);
-          scope._removeEvents('_unsentIdentifys', maxIdentifyId);
+          scope.removeEvents(maxEventId, maxIdentifyId);
 
           // Update the event cache after the removal of sent events.
           if (scope.options.saveEvents) {
@@ -881,8 +908,7 @@ Amplitude.prototype.sendEvents = function sendEvents(callback) {
           // utils.log('request too large');
           // Can't even get this one massive event through. Drop it, even if it is an identify.
           if (scope.options.uploadBatchSize === 1) {
-            scope._removeEvents('_unsentEvents', maxEventId);
-            scope._removeEvents('_unsentIdentifys', maxIdentifyId);
+            scope.removeEvents(maxEventId, maxIdentifyId);
           }
 
           // The server complained about the length of the request. Backoff and try again.

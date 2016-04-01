@@ -481,7 +481,7 @@ describe('Amplitude', function() {
       ];
       amplitude._q = functions;
       assert.lengthOf(amplitude._q, 2);
-      amplitude._runQueuedFunctions();
+      amplitude.runQueuedFunctions();
 
       assert.equal(amplitude.options.userId, userId);
       assert.equal(amplitude._unsentCount(), 1);
@@ -1812,7 +1812,7 @@ describe('Amplitude', function() {
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
 
       var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
-      amplitude._saveUtmData(utmParams);
+      amplitude._initUtmData(utmParams);
 
       var expectedProperties = {
           utm_campaign: 'new',
@@ -1860,7 +1860,7 @@ describe('Amplitude', function() {
 
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
-      amplitude._saveUtmData(utmParams);
+      amplitude._initUtmData(utmParams);
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);

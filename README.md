@@ -11,7 +11,7 @@ Amplitude-Javascript
         <script type="text/javascript">
           (function(e,t){var n=e.amplitude||{_q:[]};var r=t.createElement("script");r.type="text/javascript";
           r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.10.0-min.gz.js";
-          r.onload=function(){e.amplitude._runQueuedFunctions()};var i=t.getElementsByTagName("script")[0];
+          r.onload=function(){e.amplitude.runQueuedFunctions()};var i=t.getElementsByTagName("script")[0];
           i.parentNode.insertBefore(r,i);var s=function(){this._q=[];return this};function o(e){
           s.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
           return this}}var a=["add","append","clearAll","prepend","set","setOnce","unset"];for(var c=0;c<a.length;c++){

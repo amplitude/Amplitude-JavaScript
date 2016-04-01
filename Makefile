@@ -4,6 +4,7 @@ TESTS = $(wildcard test/*.js)
 BINS = node_modules/.bin
 DUO = $(BINS)/duo
 MINIFY = $(BINS)/uglifyjs
+JSDOC = $(BINS)/jsdoc
 JSHINT = $(BINS)/jshint
 BUILD_DIR = build
 PROJECT = amplitude
@@ -65,6 +66,7 @@ $(OUT): node_modules $(SRC) version
 	@$(JSHINT) --verbose $(SRC)
 	@$(DUO) --standalone amplitude src/index.js > $(OUT)
 	@$(MINIFY) $(OUT) --output $(MIN_OUT)
+	@$(JSDOC) -d ./documentation/ src/amplitude.js
 
 #
 # Target for minified `amplitude-snippet.js` file.
