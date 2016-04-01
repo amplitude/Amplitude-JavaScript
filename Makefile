@@ -66,7 +66,7 @@ $(OUT): node_modules $(SRC) version
 	@$(JSHINT) --verbose $(SRC)
 	@$(DUO) --standalone amplitude src/index.js > $(OUT)
 	@$(MINIFY) $(OUT) --output $(MIN_OUT)
-	@$(JSDOC) -d ./documentation/ src/amplitude.js
+	@$(JSDOC) -d ./documentation/ src/*.js
 
 #
 # Target for minified `amplitude-snippet.js` file.
