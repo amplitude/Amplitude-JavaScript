@@ -66,7 +66,6 @@ $(OUT): node_modules $(SRC) version
 	@$(JSHINT) --verbose $(SRC)
 	@$(DUO) --standalone amplitude src/index.js > $(OUT)
 	@$(MINIFY) $(OUT) --output $(MIN_OUT)
-	@$(JSDOC) -d ./documentation/ src/*.js
 
 #
 # Target for minified `amplitude-snippet.js` file.
@@ -87,6 +86,9 @@ build: $(TESTS) $(OUT) $(SNIPPET_OUT) $(SEGMENT_SNIPPET_OUT) README.md
 	@-mkdir -p build
 	@$(DUO) --development test/tests.js > build/tests.js
 	@$(DUO) --development test/snippet-tests.js > build/snippet-tests.js
+
+docs:
+	@$(JSDOC) -d ./documentation/ src/*.js
 
 #
 # Target for release.
