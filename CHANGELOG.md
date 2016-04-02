@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Add tracking of each user's initial_utm parameters (which is captured as a set once operation). Utm parameters are now sent only once per user session.
+* Add documentation for SDK functions. You can take a look [here](https://rawgit.com/amplitude/Amplitude-Javascript/defensive_cleanup/documentation/Amplitude.html). A link has also been added to the Readme.
 
 ### 2.10.0 (March 30, 2016)
 

@@ -148,20 +148,6 @@ var Amplitude = function Amplitude() {
 Amplitude.prototype.Identify = Identify;
 
 /**
- * Run functions queued up by proxy loading snippet
- * @private
- */
-Amplitude.prototype.runQueuedFunctions = function () {
-  for (var i = 0; i < this._q.length; i++) {
-    var fn = this[this._q[i][0]];
-    if (type(fn) === 'function') {
-      fn.apply(this, this._q[i].slice(1));
-    }
-  }
-  this._q = []; // clear function queue after running
-};
-
-/**
  * Initializes the Amplitude Javascript SDK with your apiKey and any optional configurations.
  * This is required before any other methods can be called.
  * @public
@@ -173,9 +159,13 @@ Amplitude.prototype.runQueuedFunctions = function () {
  * @example amplitude.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
  */
 Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_callback) {
-  try {
-    this.options.apiKey = (type(apiKey) === 'string' && !utils.isEmptyString(apiKey) && apiKey) || null;
+  if (type(apiKey) !== 'string' || utils.isEmptyString(apiKey)) {
+    utils.log('Invalid apiKey. Please re-initialize with a valid apiKey');
+    return;
+  }
 
+  try {
+    this.options.apiKey = apiKey;
     _parseConfig(this.options, opt_config);
     this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
@@ -209,6 +199,12 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
       for (var i = 0; i < this._unsentEvents.length; i++) {
         var eventProperties = this._unsentEvents[i].event_properties;
         this._unsentEvents[i].event_properties = utils.validateProperties(eventProperties);
+      }
+
+      // validate user properties for unsent identifys
+      for (var j = 0; j < this._unsentIdentifys.length; j++) {
+        var userProperties = this._unsentIdentifys[j].user_properties;
+        this._unsentIdentifys[j].user_properties = utils.validateProperties(userProperties);
       }
 
       this._sendEventsIfReady(); // try sending unsent events
@@ -261,6 +257,20 @@ var _parseConfig = function _parseConfig(options, config) {
         parseValidateLoad(key, type(DEFAULT_OPTIONS[key]));
       }
    }
+};
+
+/**
+ * Run functions queued up by proxy loading snippet
+ * @private
+ */
+Amplitude.prototype.runQueuedFunctions = function () {
+  for (var i = 0; i < this._q.length; i++) {
+    var fn = this[this._q[i][0]];
+    if (type(fn) === 'function') {
+      fn.apply(this, this._q[i].slice(1));
+    }
+  }
+  this._q = []; // clear function queue after running
 };
 
 /**
@@ -2187,7 +2197,6 @@ var sessionStorageEnabled = function sessionStorageEnabled() {
   } catch (e) {} // sessionStorage disabled
   return false;
 };
-
 
 
 // truncate string values in event and user properties so that request size does not get too large

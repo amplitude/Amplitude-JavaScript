@@ -26,7 +26,6 @@ var sessionStorageEnabled = function sessionStorageEnabled() {
 };
 
 
-
 // truncate string values in event and user properties so that request size does not get too large
 var truncate = function truncate(value) {
   if (type(value) === 'array') {

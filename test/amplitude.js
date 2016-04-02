@@ -386,6 +386,34 @@ describe('Amplitude', function() {
       assert.deepEqual(amplitude2._unsentEvents[1].event_properties, expected);
     });
 
+    it('should validate user properties when loading saved identifys from localStorage', function() {
+      var existingEvents = '[{"device_id":"15a82a' +
+        'aa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","timestamp":1455744746295,' +
+        '"event_id":3,"session_id":1455744733865,"event_type":"$identify","version_name":"Web","platform":"Web",' +
+        '"os_name":"Chrome","os_version":"48","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"user_properties":{"$set":{"10":"false","bool":true,"null":null,"string":"test","array":' +
+        '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
+        '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}}},"event_properties":{},"uuid":"650407a1-d705-' +
+        '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
+      localStorage.setItem('amplitude_unsent_identify', existingEvents);
+
+      var amplitude2 = new Amplitude();
+      amplitude2.init(apiKey, null, {batchEvents: true});
+
+      var expected = {
+        '10': 'false',
+        'bool': true,
+        'string': 'test',
+        'array': [0, 1, 2, '3'],
+        'nested_array': ['a'],
+        'object': {'key':'value'},
+        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
+      }
+
+      // check that event loaded into memory
+      assert.deepEqual(amplitude2._unsentIdentifys[0].user_properties, {'$set': expected});
+    });
+
     it ('should load saved events from localStorage new keys and send events', function() {
       var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
         '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
@@ -1669,6 +1697,14 @@ describe('Amplitude', function() {
         'object': {'key':'value', '15':'Error: oops'},
         'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
       });
+    });
+
+    it('should validate user propeorties', function() {
+      var identify = new Identify().set(10, 10);
+      amplitude.init(apiKey, null, {batchEvents: true});
+      amplitude.identify(identify);
+
+      assert.deepEqual(amplitude._unsentIdentifys[0].user_properties, {'$set': {'10': 10}});
     });
 
     it('should synchronize event data across multiple amplitude instances that share the same cookie', function() {
