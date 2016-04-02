@@ -45,6 +45,20 @@ describe('Amplitude', function() {
       reset();
     });
 
+    it('fails on invalid apiKeys', function() {
+      amplitude.init(null);
+      assert.equal(amplitude.options.apiKey, undefined);
+      assert.equal(amplitude.options.deviceId, undefined);
+
+      amplitude.init('');
+      assert.equal(amplitude.options.apiKey, undefined);
+      assert.equal(amplitude.options.deviceId, undefined);
+
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.apiKey, apiKey);
+      assert.lengthOf(amplitude.options.deviceId, 37);
+    });
+
     it('should accept userId', function() {
       amplitude.init(apiKey, userId);
       assert.equal(amplitude.options.userId, userId);

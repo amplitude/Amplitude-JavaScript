@@ -66,7 +66,6 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
       domain: this.options.domain
     });
     this.options.domain = this.cookieStorage.options().domain;
-
     _upgradeCookeData(this);
     _loadCookieData(this);
 
@@ -278,8 +277,7 @@ Amplitude.prototype._sendEventsIfReady = function _sendEventsIfReady(callback) {
   // otherwise schedule an upload after 30s
   if (!this._updateScheduled) {  // make sure we only schedule 1 upload
     this._updateScheduled = true;
-    setTimeout(
-      function() {
+    setTimeout(function() {
         this._updateScheduled = false;
         this.sendEvents();
       }.bind(this), this.options.eventUploadPeriodMillis
@@ -701,13 +699,9 @@ Amplitude.prototype.setVersionName = function setVersionName(versionName) {
  * @private
  */
 Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, callback) {
-  if (type(callback) !== 'function') {
-    callback = null;
-  }
-
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
   if (!eventType || this.options.optOut) {
-    if (callback) {
+    if (type(callback) === 'function') {
       callback(0, 'No request sent');
     }
     return;
@@ -728,9 +722,9 @@ Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, a
     this._lastEventTime = eventTime;
     _saveCookieData(this);
 
-    userProperties = (type(userProperties) === 'object' && userProperties) || {};
+    userProperties = userProperties || {};
     apiProperties = apiProperties || {};
-    eventProperties = (type(eventProperties) === 'object' && eventProperties) || {};
+    eventProperties = eventProperties || {};
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId,
@@ -826,7 +820,7 @@ var _isNumber = function _isNumber(n) {
  */
 Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
   // Test that the parameters are of the right type.
-  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
+  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || (quantity !== undefined && !_isNumber(quantity))) {
     // utils.log('Price and quantity arguments to logRevenue must be numbers');
     return -1;
   }
@@ -875,73 +869,68 @@ var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
  * Note the server response code and response body are passed to the callback as input arguments.
  */
 Amplitude.prototype.sendEvents = function sendEvents(callback) {
-  if (!this._apiKeySet('sendEvents()')) {
+  if (!this._apiKeySet('sendEvents()') || this._sending || this.options.optOut || this._unsentCount() === 0) {
     if (type(callback) === 'function') {
       callback(0, 'No request sent');
     }
     return;
   }
 
-  if (!this._sending && !this.options.optOut && this._unsentCount() > 0) {
-    this._sending = true;
-    var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
-        this.options.apiEndpoint + '/';
+  this._sending = true;
+  var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' + this.options.apiEndpoint + '/';
 
-    // fetch events to send
-    var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
-    var mergedEvents = this._mergeEventsAndIdentifys(numEvents);
-    var maxEventId = mergedEvents.maxEventId;
-    var maxIdentifyId = mergedEvents.maxIdentifyId;
-    var events = JSON.stringify(mergedEvents.eventsToSend);
-    var uploadTime = new Date().getTime();
+  // fetch events to send
+  var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
+  var mergedEvents = this._mergeEventsAndIdentifys(numEvents);
+  var maxEventId = mergedEvents.maxEventId;
+  var maxIdentifyId = mergedEvents.maxIdentifyId;
+  var events = JSON.stringify(mergedEvents.eventsToSend);
+  var uploadTime = new Date().getTime();
 
-    var data = {
-      client: this.options.apiKey,
-      e: events,
-      v: Constants.API_VERSION,
-      upload_time: uploadTime,
-      checksum: md5(Constants.API_VERSION + this.options.apiKey + events + uploadTime)
-    };
+  var data = {
+    client: this.options.apiKey,
+    e: events,
+    v: Constants.API_VERSION,
+    upload_time: uploadTime,
+    checksum: md5(Constants.API_VERSION + this.options.apiKey + events + uploadTime)
+  };
 
-    var scope = this;
-    new Request(url, data).send(function(status, response) {
-      scope._sending = false;
-      try {
-        if (status === 200 && response === 'success') {
-          scope.removeEvents(maxEventId, maxIdentifyId);
+  var scope = this;
+  new Request(url, data).send(function(status, response) {
+    scope._sending = false;
+    try {
+      if (status === 200 && response === 'success') {
+        scope.removeEvents(maxEventId, maxIdentifyId);
 
-          // Update the event cache after the removal of sent events.
-          if (scope.options.saveEvents) {
-            scope.saveEvents();
-          }
+        // Update the event cache after the removal of sent events.
+        if (scope.options.saveEvents) {
+          scope.saveEvents();
+        }
 
-          // Send more events if any queued during previous send.
-          if (!scope._sendEventsIfReady(callback) && type(callback) === 'function') {
-            callback(status, response);
-          }
-
-        // handle payload too large
-        } else if (status === 413) {
-          // utils.log('request too large');
-          // Can't even get this one massive event through. Drop it, even if it is an identify.
-          if (scope.options.uploadBatchSize === 1) {
-            scope.removeEvents(maxEventId, maxIdentifyId);
-          }
-
-          // The server complained about the length of the request. Backoff and try again.
-          scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
-          scope.sendEvents(callback);
-
-        } else if (type(callback) === 'function') { // If server turns something like a 400
+        // Send more events if any queued during previous send.
+        if (!scope._sendEventsIfReady(callback) && type(callback) === 'function') {
           callback(status, response);
         }
-      } catch (e) {
-        // utils.log('failed upload');
+
+      // handle payload too large
+      } else if (status === 413) {
+        // utils.log('request too large');
+        // Can't even get this one massive event through. Drop it, even if it is an identify.
+        if (scope.options.uploadBatchSize === 1) {
+          scope.removeEvents(maxEventId, maxIdentifyId);
+        }
+
+        // The server complained about the length of the request. Backoff and try again.
+        scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
+        scope.sendEvents(callback);
+
+      } else if (type(callback) === 'function') { // If server turns something like a 400
+        callback(status, response);
       }
-    });
-  } else if (type(callback) === 'function') {
-    callback(0, 'No request sent');
-  }
+    } catch (e) {
+      // utils.log('failed upload');
+    }
+  });
 };
 
 /**
