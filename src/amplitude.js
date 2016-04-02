@@ -1001,6 +1001,12 @@ Amplitude.prototype.setGlobalUserProperties = function setGlobalUserProperties(u
   this.setUserProperties(userProperties);
 };
 
+/**
+ * Get the current version of Amplitude's Javascript SDK.
+ * @public
+ * @returns {number} version number
+ * @example var amplitudeVersion = amplitude.__VERSION__;
+ */
 Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
