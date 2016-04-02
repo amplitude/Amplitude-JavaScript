@@ -50,6 +50,12 @@ describe('Amplitude', function() {
       assert.equal(amplitude.options.userId, userId);
     });
 
+    it('should generate a random deviceId', function() {
+      amplitude.init(apiKey, userId);
+      assert.lengthOf(amplitude.options.deviceId, 37); // UUID is length 36, but we append 'R' at end
+      assert.equal(amplitude.options.deviceId[36], 'R');
+    });
+
     it('should validate config values', function() {
       var config = {
           apiEndpoint: 100,  // invalid type
@@ -76,7 +82,7 @@ describe('Amplitude', function() {
       var stored = cookie.get(amplitude.options.cookieName);
       assert.property(stored, 'deviceId');
       assert.propertyVal(stored, 'userId', userId);
-      assert.lengthOf(stored.deviceId, 36);
+      assert.lengthOf(stored.deviceId, 37); // increase deviceId length by 1 for 'R' character
     });
 
     it('should set language', function() {

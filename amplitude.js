@@ -188,7 +188,7 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
     this.options.deviceId = (type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' &&
-        !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) || this.options.deviceId || UUID();
+        !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) || this.options.deviceId || UUID() + 'R';
     this.options.userId = (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         this.options.userId || null;
 
