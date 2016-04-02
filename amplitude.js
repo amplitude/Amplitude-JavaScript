@@ -167,7 +167,8 @@ Amplitude.prototype.runQueuedFunctions = function () {
  * @public
  * @param {string} apiKey - The API key for your app.
  * @param {string} opt_userId - (optional) An identifier for this user.
- * @param {object} opt_config - (optional) Configuration options. See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#configuration-options} for list of options and default values.
+ * @param {object} opt_config - (optional) Configuration options.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#configuration-options} for list of options and default values.
  * @param {function} opt_callback - (optional) Provide a callback function to run after initialization is complete.
  * @example amplitude.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
  */
@@ -512,37 +513,47 @@ var _saveCookieData = function _saveCookieData(scope) {
 
 /**
  * Parse the utm properties out of cookies and query for adding to user properties.
- * Since user properties are propagated on server, only send once per session, don't need to send with every event
  * @private
  */
 Amplitude.prototype._initUtmData = function _initUtmData(queryParams, cookieParams) {
   queryParams = queryParams || location.search;
   cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   var utmProperties = getUtmData(cookieParams, queryParams);
+  _sendUserPropertiesOncePerSession(this, Constants.UTM_PROPERTIES, utmProperties);
+};
 
-  // always setOnce initial utm params
+/**
+ * Since user properties are propagated on server, only send once per session, don't need to send with every event
+ * @private
+ */
+var _sendUserPropertiesOncePerSession = function _sendUserPropertiesOncePerSession(scope, storageKey, userProperties) {
+  if (type(userProperties) !== 'object' || Object.keys(userProperties).length === 0) {
+    return;
+  }
+
+  // setOnce the initial user properties
   var identify = new Identify();
-  for (var key in utmProperties) {
-    if (utmProperties.hasOwnProperty(key)) {
-      identify.setOnce('initial_' + key, utmProperties[key]);
+  for (var key in userProperties) {
+    if (userProperties.hasOwnProperty(key)) {
+      identify.setOnce('initial_' + key, userProperties[key]);
     }
   }
 
-  // only save utm properties if not already in session storage or if storage disabled
+  // only save userProperties if not already in sessionStorage under key or if storage disabled
   var hasSessionStorage = utils.sessionStorageEnabled();
-  if ((hasSessionStorage && !(sessionStorage.getItem(Constants.UTM_PROPERTIES))) || !hasSessionStorage) {
-    for (var key2 in utmProperties) {
-      if (utmProperties.hasOwnProperty(key2)) {
-        identify.set(key2, utmProperties[key2]);
+  if ((hasSessionStorage && !(sessionStorage.getItem(storageKey))) || !hasSessionStorage) {
+    for (var property in userProperties) {
+      if (userProperties.hasOwnProperty(property)) {
+        identify.set(property, userProperties[property]);
       }
     }
 
     if (hasSessionStorage) {
-      sessionStorage.setItem(Constants.UTM_PROPERTIES, JSON.stringify(utmProperties));
+      sessionStorage.setItem(storageKey, JSON.stringify(userProperties));
     }
   }
 
-  this.identify(identify);
+  scope.identify(identify);
 };
 
 /**
@@ -557,7 +568,7 @@ Amplitude.prototype._getReferrer = function _getReferrer() {
  * @private
  */
 Amplitude.prototype._getReferringDomain = function _getReferringDomain(referrer) {
-  if (referrer === null || referrer === undefined || referrer === '') {
+  if (utils.isEmptyString(referrer)) {
     return null;
   }
   var parts = referrer.split('/');
@@ -573,26 +584,14 @@ Amplitude.prototype._getReferringDomain = function _getReferringDomain(referrer)
  * @private
  */
 Amplitude.prototype._saveReferrer = function _saveReferrer(referrer) {
-  if (referrer === null || referrer === undefined || referrer === '') {
+  if (utils.isEmptyString(referrer)) {
     return;
   }
-
-  // always setOnce initial referrer
-  var referring_domain = this._getReferringDomain(referrer);
-  var identify = new Identify().setOnce('initial_referrer', referrer);
-  identify.setOnce('initial_referring_domain', referring_domain);
-
-  // only save referrer if not already in session storage or if storage disabled
-  var hasSessionStorage = utils.sessionStorageEnabled();
-  if ((hasSessionStorage && !(sessionStorage.getItem(Constants.REFERRER))) || !hasSessionStorage) {
-    identify.set('referrer', referrer).set('referring_domain', referring_domain);
-
-    if (hasSessionStorage) {
-      sessionStorage.setItem(Constants.REFERRER, referrer);
-    }
-  }
-
-  this.identify(identify);
+  var referrerInfo = {
+    'referrer': referrer,
+    'referring_domain': this._getReferringDomain(referrer)
+  };
+  _sendUserPropertiesOncePerSession(this, Constants.REFERRER, referrerInfo);
 };
 
 /**
@@ -676,7 +675,9 @@ Amplitude.prototype.setOptOut = function setOptOut(enable) {
 };
 
 /**
-  * Sets a custom deviceId for current user. Note: this is not recommended unless you know what you are doing (like if you have your own system for managing deviceIds). Make sure the deviceId you set is sufficiently unique (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
+  * Sets a custom deviceId for current user. Note: this is not recommended unless you know what you are doing
+  * (like if you have your own system for managing deviceIds). Make sure the deviceId you set is sufficiently unique
+  * (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
   * @public
   * @param {string} deviceId - custom deviceId for current user.
   * @example amplitude.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
@@ -700,7 +701,8 @@ Amplitude.prototype.setDeviceId = function setDeviceId(deviceId) {
  * Sets user properties for the current user.
  * @public
  * @param {object} - object with string keys and values for the user properties to set.
- * @param {boolean} - DEPRECATED opt_replace: in earlier versions of the JS SDK the user properties object was kept in memory and replace = true would replace the object in memory. Now the properties are no longer stored in memory, so replace is deprecated.
+ * @param {boolean} - DEPRECATED opt_replace: in earlier versions of the JS SDK the user properties object was kept in
+ * memory and replace = true would replace the object in memory. Now the properties are no longer stored in memory, so replace is deprecated.
  * @example amplitude.setUserProperties({'gender': 'female', 'sign_up_complete': true})
  */
 Amplitude.prototype.setUserProperties = function setUserProperties(userProperties) {
@@ -734,9 +736,11 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
 
 /**
  * Send an identify call containing user property operations to Amplitude servers.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations} for more information on the Identify API and user property operations.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
+ * for more information on the Identify API and user property operations.
  * @param {Identify_object} identify_obj - the Identify object containing the user property operations to send.
- * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent. Note: the server response code and response body from the identify event upload are passed to the callback function.
+ * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent.
+ * Note: the server response code and response body from the identify event upload are passed to the callback function.
  * @example
  * var identify = new amplitude.Identify().set('colors', ['rose', 'gold']).add('karma', 1).setOnce('sign_up_date', '2016-03-31');
  * amplitude.identify(identify);
@@ -885,7 +889,8 @@ Amplitude.prototype._limitEventsQueued = function _limitEventsQueued(queue) {
  * @public
  * @param {string} eventType - name of event
  * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
- * @param {function} opt_callback - (optional) a callback function to run after the event is logged. Note: the server response code and response body from the identify event upload are passed to the callback function.
+ * @param {function} opt_callback - (optional) a callback function to run after the event is logged.
+ * Note: the server response code and response body from the identify event upload are passed to the callback function.
  * @example amplitude.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
@@ -959,9 +964,11 @@ var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
 };
 
 /**
- * Send unsent events. Note: this is called automatically after events are logged if option batchEvents is false. If batchEvents is true, then events are only sent when batch criterias are met.
+ * Send unsent events. Note: this is called automatically after events are logged if option batchEvents is false.
+ * If batchEvents is true, then events are only sent when batch criterias are met.
  * @public
- * @param {function} callback - (optional) callback to run after events are sent. Note the server response code and response body are passed to the callback as input arguments.
+ * @param {function} callback - (optional) callback to run after events are sent.
+ * Note the server response code and response body are passed to the callback as input arguments.
  */
 Amplitude.prototype.sendEvents = function sendEvents(callback) {
   if (!this._apiKeySet('sendEvents()')) {
@@ -2504,10 +2511,11 @@ var Identify = function() {
 };
 
 /**
- * Increment a user property by a given value (can also be negative to decrement). If the user property does not have a value set yet, it will be initialized to 0 before being incremented.
+ * Increment a user property by a given value (can also be negative to decrement).
+ * If the user property does not have a value set yet, it will be initialized to 0 before being incremented.
  * @public
  * @param {string} property - The user property key.
- * @param {number/string} value - The amount by which to increment the user property. Allows numbers as strings (ex: '123').
+ * @param {number|string} value - The amount by which to increment the user property. Allows numbers as strings (ex: '123').
  * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().add('karma', 1).add('friends', 1);
  * amplitude.identify(identify); // send the Identify call
@@ -2523,11 +2531,14 @@ Identify.prototype.add = function(property, value) {
 
 /**
  * Append a value or values to a user property.
- * If the user property does not have a value set yet, it will be initialized to an empty list before the new values are appended.
- * If the user property has an existing value and it is not a list, the existing value will be converted into a list with the new values appended.
+ * If the user property does not have a value set yet,
+ * it will be initialized to an empty list before the new values are appended.
+ * If the user property has an existing value and it is not a list,
+ * the existing value will be converted into a list with the new values appended.
  * @public
  * @param {string} property - The user property key.
- * @param {number/string/list/object} value - A value or values to append. Values can be numbers, strings, lists, or object (key:value dict will be flattened).
+ * @param {number|string|list|object} value - A value or values to append.
+ * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
  * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().append('ab-tests', 'new-user-tests');
  * identify.append('some_list', [1, 2, 3, 4, 'values']);
@@ -2557,12 +2568,16 @@ Identify.prototype.clearAll = function() {
 };
 
 /**
- * Prepend a value or values to a user property. Prepend means inserting the value or values at the front of a list.
- * If the user property does not have a value set yet, it will be initialized to an empty list before the new values are prepended.
- * If the user property has an existing value and it is not a list, the existing value will be converted into a list with the new values prepended.
+ * Prepend a value or values to a user property.
+ * Prepend means inserting the value or values at the front of a list.
+ * If the user property does not have a value set yet,
+ * it will be initialized to an empty list before the new values are prepended.
+ * If the user property has an existing value and it is not a list,
+ * the existing value will be converted into a list with the new values prepended.
  * @public
  * @param {string} property - The user property key.
- * @param {number/string/list/object} value - A value or values to prepend. Values can be numbers, strings, lists, or object (key:value dict will be flattened).
+ * @param {number|string|list|object} value - A value or values to prepend.
+ * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
  * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().prepend('ab-tests', 'new-user-tests');
  * identify.prepend('some_list', [1, 2, 3, 4, 'values']);
@@ -2577,7 +2592,8 @@ Identify.prototype.prepend = function(property, value) {
  * Sets the value of a given user property. If a value already exists, it will be overwriten with the new value.
  * @public
  * @param {string} property - The user property key.
- * @param {number/string/list/object} value - A value or values to set. Values can be numbers, strings, lists, or object (key:value dict will be flattened).
+ * @param {number|string|list|object} value - A value or values to set.
+ * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
  * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().set('user_type', 'beta');
  * identify.set('name', {'first': 'John', 'last': 'Doe'}); // dict is flattened and becomes name.first: John, name.last: Doe
@@ -2589,11 +2605,13 @@ Identify.prototype.set = function(property, value) {
 };
 
 /**
- * Sets the value of a given user property only once. Subsequent setOnce operations on that user property will be ignored; however, that user property can still be modified through any of the other operations.
+ * Sets the value of a given user property only once. Subsequent setOnce operations on that user property will be ignored;
+ * however, that user property can still be modified through any of the other operations.
  * Useful for capturing properties such as 'initial_signup_date', 'initial_referrer', etc.
  * @public
  * @param {string} property - The user property key.
- * @param {number/string/list/object} value - A value or values to set once. Values can be numbers, strings, lists, or object (key:value dict will be flattened).
+ * @param {number|string|list|object} value - A value or values to set once.
+ * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
  * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().setOnce('sign_up_date', '2016-04-01');
  * amplitude.identify(identify); // send the Identify call

@@ -158,7 +158,8 @@ for more information on the Identify API and user property operations.
 
 
 <div class="description">
-    Increment a user property by a given value (can also be negative to decrement). If the user property does not have a value set yet, it will be initialized to 0 before being incremented.
+    Increment a user property by a given value (can also be negative to decrement).
+If the user property does not have a value set yet, it will be initialized to 0 before being incremented.
 </div>
 
 
@@ -277,7 +278,7 @@ for more information on the Identify API and user property operations.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line44">line 44</a>
+        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line45">line 45</a>
     </li></ul></dd>
     
 
@@ -344,8 +345,10 @@ amplitude.identify(identify); // send the Identify call</code></pre>
 
 <div class="description">
     Append a value or values to a user property.
-If the user property does not have a value set yet, it will be initialized to an empty list before the new values are appended.
-If the user property has an existing value and it is not a list, the existing value will be converted into a list with the new values appended.
+If the user property does not have a value set yet,
+it will be initialized to an empty list before the new values are appended.
+If the user property has an existing value and it is not a list,
+the existing value will be converted into a list with the new values appended.
 </div>
 
 
@@ -429,7 +432,8 @@ If the user property has an existing value and it is not a list, the existing va
 
             
 
-            <td class="description last">A value or values to append. Values can be numbers, strings, lists, or object (key:value dict will be flattened).</td>
+            <td class="description last">A value or values to append.
+Values can be numbers, strings, lists, or object (key:value dict will be flattened).</td>
         </tr>
 
     
@@ -470,7 +474,7 @@ If the user property has an existing value and it is not a list, the existing va
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line65">line 65</a>
+        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line69">line 69</a>
     </li></ul></dd>
     
 
@@ -537,9 +541,12 @@ amplitude.identify(identify); // send the Identify call</code></pre>
 
 
 <div class="description">
-    Prepend a value or values to a user property. Prepend means inserting the value or values at the front of a list.
-If the user property does not have a value set yet, it will be initialized to an empty list before the new values are prepended.
-If the user property has an existing value and it is not a list, the existing value will be converted into a list with the new values prepended.
+    Prepend a value or values to a user property.
+Prepend means inserting the value or values at the front of a list.
+If the user property does not have a value set yet,
+it will be initialized to an empty list before the new values are prepended.
+If the user property has an existing value and it is not a list,
+the existing value will be converted into a list with the new values prepended.
 </div>
 
 
@@ -623,7 +630,8 @@ If the user property has an existing value and it is not a list, the existing va
 
             
 
-            <td class="description last">A value or values to prepend. Values can be numbers, strings, lists, or object (key:value dict will be flattened).</td>
+            <td class="description last">A value or values to prepend.
+Values can be numbers, strings, lists, or object (key:value dict will be flattened).</td>
         </tr>
 
     
@@ -664,7 +672,7 @@ If the user property has an existing value and it is not a list, the existing va
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line100">line 100</a>
+        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line108">line 108</a>
     </li></ul></dd>
     
 
@@ -815,7 +823,8 @@ amplitude.identify(identify); // send the Identify call</code></pre>
 
             
 
-            <td class="description last">A value or values to set. Values can be numbers, strings, lists, or object (key:value dict will be flattened).</td>
+            <td class="description last">A value or values to set.
+Values can be numbers, strings, lists, or object (key:value dict will be flattened).</td>
         </tr>
 
     
@@ -856,7 +865,7 @@ amplitude.identify(identify); // send the Identify call</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line115">line 115</a>
+        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line124">line 124</a>
     </li></ul></dd>
     
 
@@ -923,7 +932,8 @@ amplitude.identify(identify); // send the Identify call</code></pre>
 
 
 <div class="description">
-    Sets the value of a given user property only once. Subsequent setOnce operations on that user property will be ignored; however, that user property can still be modified through any of the other operations.
+    Sets the value of a given user property only once. Subsequent setOnce operations on that user property will be ignored;
+however, that user property can still be modified through any of the other operations.
 Useful for capturing properties such as 'initial_signup_date', 'initial_referrer', etc.
 </div>
 
@@ -1008,7 +1018,8 @@ Useful for capturing properties such as 'initial_signup_date', 'initial_referrer
 
             
 
-            <td class="description last">A value or values to set once. Values can be numbers, strings, lists, or object (key:value dict will be flattened).</td>
+            <td class="description last">A value or values to set once.
+Values can be numbers, strings, lists, or object (key:value dict will be flattened).</td>
         </tr>
 
     
@@ -1049,7 +1060,7 @@ Useful for capturing properties such as 'initial_signup_date', 'initial_referrer
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line130">line 130</a>
+        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line141">line 141</a>
     </li></ul></dd>
     
 
@@ -1208,7 +1219,7 @@ amplitude.identify(identify); // send the Identify call</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line143">line 143</a>
+        <a href="identify.js.html">identify.js</a>, <a href="identify.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -1284,7 +1295,7 @@ amplitude.identify(identify); // send the Identify call</code></pre>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Apr 01 2016 16:45:14 GMT-0700 (PDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Apr 01 2016 17:34:16 GMT-0700 (PDT)
 </footer>
 
 <script> prettyPrint(); </script>

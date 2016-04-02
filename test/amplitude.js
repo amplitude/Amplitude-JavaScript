@@ -1912,13 +1912,15 @@ describe('Amplitude', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 2);
 
+      var expected = {
+        'referrer': 'https://amplitude.com/contact',
+        'referring_domain': 'amplitude.com'
+      };
+
       // first event should be identify with initial_referrer and referrer
       assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        '$set': {
-          'referrer': 'https://amplitude.com/contact',
-          'referring_domain': 'amplitude.com'
-        },
+        '$set': expected,
         '$setOnce': {
           'initial_referrer': 'https://amplitude.com/contact',
           'initial_referring_domain': 'amplitude.com'
@@ -1930,7 +1932,7 @@ describe('Amplitude', function() {
       assert.deepEqual(events[1].user_properties, {});
 
       // referrer should be propagated to session storage
-      assert.equal(sessionStorage.getItem('amplitude_referrer'), 'https://amplitude.com/contact');
+      assert.equal(sessionStorage.getItem('amplitude_referrer'), JSON.stringify(expected));
     });
 
     it('should not set referrer if referrer data already in session storage', function() {
