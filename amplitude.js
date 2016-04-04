@@ -127,13 +127,13 @@ var DEFAULT_OPTIONS = require('./options');
  * @example var amplitude = new Amplitude();
  */
 var Amplitude = function Amplitude() {
-  this.cookieStorage = new cookieStorage().getStorage();
-  this.options = object.merge({}, DEFAULT_OPTIONS);
-  this._q = []; // queue for proxied functions before script load
-  this._sending = false;
-  this._ua = new UAParser(navigator.userAgent).getResult();
   this._unsentEvents = [];
   this._unsentIdentifys = [];
+  this._ua = new UAParser(navigator.userAgent).getResult();
+  this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.cookieStorage = new cookieStorage().getStorage();
+  this._q = []; // queue for proxied functions before script load
+  this._sending = false;
   this._updateScheduled = false;
 
   // event meta data
@@ -172,6 +172,7 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
       domain: this.options.domain
     });
     this.options.domain = this.cookieStorage.options().domain;
+
     _upgradeCookeData(this);
     _loadCookieData(this);
 
@@ -181,7 +182,6 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
     this.options.userId = (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         this.options.userId || null;
 
-    // determine if starting new session
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
@@ -212,13 +212,12 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
     if (this.options.includeUtm) {
       this._initUtmData();
     }
+
     if (this.options.includeReferrer) {
       this._saveReferrer(this._getReferrer());
     }
-
   } catch (e) {
     utils.log(e);
-
   } finally {
     if (type(opt_callback) === 'function') {
       opt_callback();
@@ -238,14 +237,15 @@ var _parseConfig = function _parseConfig(options, config) {
 
   // verifies config value is defined, is the correct type, and some additional value verification
   var parseValidateLoad = function parseValidateLoad(key, expectedType) {
-    if (type(config[key]) !== expectedType) {
+    var input_value = config[key];
+    if(input_value === undefined || !utils.validateInput(input_value, key + ' option', expectedType)) {
       return;
     }
     if (expectedType === 'boolean') {
-      options[key] = !!config[key];
+      options[key] = !!input_value;
     } else {
-      options[key] = (expectedType === 'string' && !utils.isEmptyString(config[key]) && config[key]) ||
-                     (expectedType === 'number' && config[key] > 0 && config[key]) ||
+      options[key] = (expectedType === 'string' && !utils.isEmptyString(input_value) && input_value) ||
+                     (expectedType === 'number' && config[key] > 0 && input_value) ||
                      options[key];
     }
    };
@@ -717,7 +717,6 @@ Amplitude.prototype.setUserProperties = function setUserProperties(userPropertie
   if (!this._apiKeySet('setUserProperties()') || !utils.validateInput(userProperties, 'userProperties', 'object')) {
     return;
   }
-
   // convert userProperties into an identify call
   var identify = new Identify();
   for (var property in userProperties) {
@@ -737,6 +736,7 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
   if (!this._apiKeySet('clearUserProperties()')) {
     return;
   }
+
   var identify = new Identify();
   identify.clearAll();
   this.identify(identify);
@@ -2163,7 +2163,6 @@ function port (protocol){
 var constants = require('./constants');
 var type = require('./type');
 
-
 var log = function log(s) {
   try {
     console.log('[Amplitude] ' + s);
@@ -2172,11 +2171,9 @@ var log = function log(s) {
   }
 };
 
-
 var isEmptyString = function isEmptyString(str) {
   return (!str || str.length === 0);
 };
-
 
 var sessionStorageEnabled = function sessionStorageEnabled() {
   try {
@@ -2186,7 +2183,6 @@ var sessionStorageEnabled = function sessionStorageEnabled() {
   } catch (e) {} // sessionStorage disabled
   return false;
 };
-
 
 // truncate string values in event and user properties so that request size does not get too large
 var truncate = function truncate(value) {
@@ -2207,14 +2203,12 @@ var truncate = function truncate(value) {
   return value;
 };
 
-
 var _truncateValue = function _truncateValue(value) {
   if (type(value) === 'string') {
     return value.length > constants.MAX_STRING_LENGTH ? value.substring(0, constants.MAX_STRING_LENGTH) : value;
   }
   return value;
 };
-
 
 var validateInput = function validateInput(input, name, expectedType) {
   if (type(input) !== expectedType) {
@@ -2223,7 +2217,6 @@ var validateInput = function validateInput(input, name, expectedType) {
   }
   return true;
 };
-
 
 var validateProperties = function validateProperties(properties) {
   var propsType = type(properties);
@@ -2256,7 +2249,6 @@ var validateProperties = function validateProperties(properties) {
   return copy;
 };
 
-
 var invalidValueTypes = [
   'null', 'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
 ];
@@ -2287,7 +2279,6 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
   }
   return value;
 };
-
 
 module.exports = {
   log: log,
@@ -4159,12 +4150,9 @@ var language = require('./language');
 // default options
 module.exports = {
   apiEndpoint: 'api.amplitude.com',
-  batchEvents: false,
   cookieExpiration: 365 * 10,
   cookieName: 'amplitude_id',
   domain: '',
-  eventUploadPeriodMillis: 30 * 1000, // 30s
-  eventUploadThreshold: 30,
   includeReferrer: false,
   includeUtm: false,
   language: language.language,
@@ -4175,7 +4163,10 @@ module.exports = {
   sessionTimeout: 30 * 60 * 1000,
   unsentKey: 'amplitude_unsent',
   unsentIdentifyKey: 'amplitude_unsent_identify',
-  uploadBatchSize: 100
+  uploadBatchSize: 100,
+  batchEvents: false,
+  eventUploadThreshold: 30,
+  eventUploadPeriodMillis: 30 * 1000, // 30s
 };
 
 }, {"./language":27}],

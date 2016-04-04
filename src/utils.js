@@ -1,7 +1,6 @@
 var constants = require('./constants');
 var type = require('./type');
 
-
 var log = function log(s) {
   try {
     console.log('[Amplitude] ' + s);
@@ -10,11 +9,9 @@ var log = function log(s) {
   }
 };
 
-
 var isEmptyString = function isEmptyString(str) {
   return (!str || str.length === 0);
 };
-
 
 var sessionStorageEnabled = function sessionStorageEnabled() {
   try {
@@ -24,7 +21,6 @@ var sessionStorageEnabled = function sessionStorageEnabled() {
   } catch (e) {} // sessionStorage disabled
   return false;
 };
-
 
 // truncate string values in event and user properties so that request size does not get too large
 var truncate = function truncate(value) {
@@ -45,14 +41,12 @@ var truncate = function truncate(value) {
   return value;
 };
 
-
 var _truncateValue = function _truncateValue(value) {
   if (type(value) === 'string') {
     return value.length > constants.MAX_STRING_LENGTH ? value.substring(0, constants.MAX_STRING_LENGTH) : value;
   }
   return value;
 };
-
 
 var validateInput = function validateInput(input, name, expectedType) {
   if (type(input) !== expectedType) {
@@ -61,7 +55,6 @@ var validateInput = function validateInput(input, name, expectedType) {
   }
   return true;
 };
-
 
 var validateProperties = function validateProperties(properties) {
   var propsType = type(properties);
@@ -94,7 +87,6 @@ var validateProperties = function validateProperties(properties) {
   return copy;
 };
 
-
 var invalidValueTypes = [
   'null', 'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
 ];
@@ -125,7 +117,6 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
   }
   return value;
 };
-
 
 module.exports = {
   log: log,
