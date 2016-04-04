@@ -640,7 +640,7 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
  * Send an identify call containing user property operations to Amplitude servers.
  * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
  * for more information on the Identify API and user property operations.
- * @param {Identify_object} identify_obj - the Identify object containing the user property operations to send.
+ * @param {Identify} identify_obj - the Identify object containing the user property operations to send.
  * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent.
  * Note: the server response code and response body from the identify event upload are passed to the callback function.
  * @example

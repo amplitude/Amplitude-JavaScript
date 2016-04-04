@@ -49,13 +49,13 @@ var DEFAULT_OPTIONS = require('./options');
  * @example var amplitude = new Amplitude();
  */
 var Amplitude = function Amplitude() {
-  this.cookieStorage = new cookieStorage().getStorage();
-  this.options = object.merge({}, DEFAULT_OPTIONS);
-  this._q = []; // queue for proxied functions before script load
-  this._sending = false;
-  this._ua = new UAParser(navigator.userAgent).getResult();
   this._unsentEvents = [];
   this._unsentIdentifys = [];
+  this._ua = new UAParser(navigator.userAgent).getResult();
+  this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.cookieStorage = new cookieStorage().getStorage();
+  this._q = []; // queue for proxied functions before script load
+  this._sending = false;
   this._updateScheduled = false;
 
   // event meta data
@@ -104,7 +104,6 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
     this.options.userId = (type(opt_userId) === 'string' &amp;&amp; !utils.isEmptyString(opt_userId) &amp;&amp; opt_userId) ||
         this.options.userId || null;
 
-    // determine if starting new session
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
@@ -135,13 +134,12 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
     if (this.options.includeUtm) {
       this._initUtmData();
     }
+
     if (this.options.includeReferrer) {
       this._saveReferrer(this._getReferrer());
     }
-
   } catch (e) {
     utils.log(e);
-
   } finally {
     if (type(opt_callback) === 'function') {
       opt_callback();
@@ -161,14 +159,15 @@ var _parseConfig = function _parseConfig(options, config) {
 
   // verifies config value is defined, is the correct type, and some additional value verification
   var parseValidateLoad = function parseValidateLoad(key, expectedType) {
-    if (type(config[key]) !== expectedType) {
+    var input_value = config[key];
+    if(input_value === undefined || !utils.validateInput(input_value, key + ' option', expectedType)) {
       return;
     }
     if (expectedType === 'boolean') {
-      options[key] = !!config[key];
+      options[key] = !!input_value;
     } else {
-      options[key] = (expectedType === 'string' &amp;&amp; !utils.isEmptyString(config[key]) &amp;&amp; config[key]) ||
-                     (expectedType === 'number' &amp;&amp; config[key] > 0 &amp;&amp; config[key]) ||
+      options[key] = (expectedType === 'string' &amp;&amp; !utils.isEmptyString(input_value) &amp;&amp; input_value) ||
+                     (expectedType === 'number' &amp;&amp; config[key] > 0 &amp;&amp; input_value) ||
                      options[key];
     }
    };
@@ -306,8 +305,7 @@ Amplitude.prototype._sendEventsIfReady = function _sendEventsIfReady(callback) {
   // otherwise schedule an upload after 30s
   if (!this._updateScheduled) {  // make sure we only schedule 1 upload
     this._updateScheduled = true;
-    setTimeout(
-      function() {
+    setTimeout(function() {
         this._updateScheduled = false;
         this.sendEvents();
       }.bind(this), this.options.eventUploadPeriodMillis
@@ -641,7 +639,6 @@ Amplitude.prototype.setUserProperties = function setUserProperties(userPropertie
   if (!this._apiKeySet('setUserProperties()') || !utils.validateInput(userProperties, 'userProperties', 'object')) {
     return;
   }
-
   // convert userProperties into an identify call
   var identify = new Identify();
   for (var property in userProperties) {
@@ -661,6 +658,7 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
   if (!this._apiKeySet('clearUserProperties()')) {
     return;
   }
+
   var identify = new Identify();
   identify.clearAll();
   this.identify(identify);
@@ -670,7 +668,7 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
  * Send an identify call containing user property operations to Amplitude servers.
  * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
  * for more information on the Identify API and user property operations.
- * @param {Identify_object} identify_obj - the Identify object containing the user property operations to send.
+ * @param {Identify} identify_obj - the Identify object containing the user property operations to send.
  * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent.
  * Note: the server response code and response body from the identify event upload are passed to the callback function.
  * @example
@@ -729,13 +727,9 @@ Amplitude.prototype.setVersionName = function setVersionName(versionName) {
  * @private
  */
 Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, callback) {
-  if (type(callback) !== 'function') {
-    callback = null;
-  }
-
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
   if (!eventType || this.options.optOut) {
-    if (callback) {
+    if (type(callback) === 'function') {
       callback(0, 'No request sent');
     }
     return;
@@ -756,9 +750,9 @@ Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, a
     this._lastEventTime = eventTime;
     _saveCookieData(this);
 
-    userProperties = (type(userProperties) === 'object' &amp;&amp; userProperties) || {};
+    userProperties = userProperties || {};
     apiProperties = apiProperties || {};
-    eventProperties = (type(eventProperties) === 'object' &amp;&amp; eventProperties) || {};
+    eventProperties = eventProperties || {};
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId,
@@ -854,7 +848,7 @@ var _isNumber = function _isNumber(n) {
  */
 Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
   // Test that the parameters are of the right type.
-  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined &amp;&amp; !_isNumber(quantity)) {
+  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || (quantity !== undefined &amp;&amp; !_isNumber(quantity))) {
     // utils.log('Price and quantity arguments to logRevenue must be numbers');
     return -1;
   }
@@ -903,73 +897,68 @@ var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
  * Note the server response code and response body are passed to the callback as input arguments.
  */
 Amplitude.prototype.sendEvents = function sendEvents(callback) {
-  if (!this._apiKeySet('sendEvents()')) {
+  if (!this._apiKeySet('sendEvents()') || this._sending || this.options.optOut || this._unsentCount() === 0) {
     if (type(callback) === 'function') {
       callback(0, 'No request sent');
     }
     return;
   }
 
-  if (!this._sending &amp;&amp; !this.options.optOut &amp;&amp; this._unsentCount() > 0) {
-    this._sending = true;
-    var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' +
-        this.options.apiEndpoint + '/';
+  this._sending = true;
+  var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' + this.options.apiEndpoint + '/';
 
-    // fetch events to send
-    var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
-    var mergedEvents = this._mergeEventsAndIdentifys(numEvents);
-    var maxEventId = mergedEvents.maxEventId;
-    var maxIdentifyId = mergedEvents.maxIdentifyId;
-    var events = JSON.stringify(mergedEvents.eventsToSend);
-    var uploadTime = new Date().getTime();
+  // fetch events to send
+  var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
+  var mergedEvents = this._mergeEventsAndIdentifys(numEvents);
+  var maxEventId = mergedEvents.maxEventId;
+  var maxIdentifyId = mergedEvents.maxIdentifyId;
+  var events = JSON.stringify(mergedEvents.eventsToSend);
+  var uploadTime = new Date().getTime();
 
-    var data = {
-      client: this.options.apiKey,
-      e: events,
-      v: Constants.API_VERSION,
-      upload_time: uploadTime,
-      checksum: md5(Constants.API_VERSION + this.options.apiKey + events + uploadTime)
-    };
+  var data = {
+    client: this.options.apiKey,
+    e: events,
+    v: Constants.API_VERSION,
+    upload_time: uploadTime,
+    checksum: md5(Constants.API_VERSION + this.options.apiKey + events + uploadTime)
+  };
 
-    var scope = this;
-    new Request(url, data).send(function(status, response) {
-      scope._sending = false;
-      try {
-        if (status === 200 &amp;&amp; response === 'success') {
-          scope.removeEvents(maxEventId, maxIdentifyId);
+  var scope = this;
+  new Request(url, data).send(function(status, response) {
+    scope._sending = false;
+    try {
+      if (status === 200 &amp;&amp; response === 'success') {
+        scope.removeEvents(maxEventId, maxIdentifyId);
 
-          // Update the event cache after the removal of sent events.
-          if (scope.options.saveEvents) {
-            scope.saveEvents();
-          }
+        // Update the event cache after the removal of sent events.
+        if (scope.options.saveEvents) {
+          scope.saveEvents();
+        }
 
-          // Send more events if any queued during previous send.
-          if (!scope._sendEventsIfReady(callback) &amp;&amp; type(callback) === 'function') {
-            callback(status, response);
-          }
-
-        // handle payload too large
-        } else if (status === 413) {
-          // utils.log('request too large');
-          // Can't even get this one massive event through. Drop it, even if it is an identify.
-          if (scope.options.uploadBatchSize === 1) {
-            scope.removeEvents(maxEventId, maxIdentifyId);
-          }
-
-          // The server complained about the length of the request. Backoff and try again.
-          scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
-          scope.sendEvents(callback);
-
-        } else if (type(callback) === 'function') { // If server turns something like a 400
+        // Send more events if any queued during previous send.
+        if (!scope._sendEventsIfReady(callback) &amp;&amp; type(callback) === 'function') {
           callback(status, response);
         }
-      } catch (e) {
-        // utils.log('failed upload');
+
+      // handle payload too large
+      } else if (status === 413) {
+        // utils.log('request too large');
+        // Can't even get this one massive event through. Drop it, even if it is an identify.
+        if (scope.options.uploadBatchSize === 1) {
+          scope.removeEvents(maxEventId, maxIdentifyId);
+        }
+
+        // The server complained about the length of the request. Backoff and try again.
+        scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
+        scope.sendEvents(callback);
+
+      } else if (type(callback) === 'function') { // If server turns something like a 400
+        callback(status, response);
       }
-    });
-  } else if (type(callback) === 'function') {
-    callback(0, 'No request sent');
-  }
+    } catch (e) {
+      // utils.log('failed upload');
+    }
+  });
 };
 
 /**
@@ -1064,7 +1053,7 @@ module.exports = Amplitude;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Apr 01 2016 18:25:31 GMT-0700 (PDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Mon Apr 04 2016 16:26:40 GMT-0700 (PDT)
 </footer>
 
 <script> prettyPrint(); </script>

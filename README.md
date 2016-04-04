@@ -216,13 +216,13 @@ will reenable logging.
 You can configure Amplitude by passing an object as the third argument to the `init`:
 
 ```javascript
-amplitude.init('YOUR_API_KEY_HERE', 'USER_ID', {
+amplitude.init('YOUR_API_KEY_HERE', null, {
     // optional configuration options
-    batchEvents: true,
-    eventUploadThreshold: 50,
-    includeReferrer: true,
+    saveEvents: true,
     includeUtm: true,
-    saveEvents: true
+    includeReferrer: true,
+    batchEvents: true,
+    eventUploadThreshold: 50
 });
 ```
 
