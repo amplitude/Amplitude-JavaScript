@@ -1,6 +1,6 @@
 module.exports = {
   API_VERSION: 2,
-  MAX_STRING_LENGTH: 1024,
+  MAX_STRING_LENGTH: 4096,
   IDENTIFY_EVENT: '$identify',
 
   // localStorageKeys

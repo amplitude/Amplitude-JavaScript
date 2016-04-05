@@ -235,18 +235,17 @@ var _parseConfig = function _parseConfig(options, config) {
     return;
   }
 
-  // verifies config value is defined, is the correct type, and some additional value verification
+  // validates config value is defined, is the correct type, and some additional value sanity checks
   var parseValidateLoad = function parseValidateLoad(key, expectedType) {
-    var input_value = config[key];
-    if(input_value === undefined || !utils.validateInput(input_value, key + ' option', expectedType)) {
+    var inputValue = config[key];
+    if (inputValue === undefined || !utils.validateInput(inputValue, key + ' option', expectedType)) {
       return;
     }
     if (expectedType === 'boolean') {
-      options[key] = !!input_value;
-    } else {
-      options[key] = (expectedType === 'string' && !utils.isEmptyString(input_value) && input_value) ||
-                     (expectedType === 'number' && config[key] > 0 && input_value) ||
-                     options[key];
+      options[key] = !!inputValue;
+    } else if ((expectedType === 'string' && !utils.isEmptyString(inputValue)) ||
+        (expectedType === 'number' && inputValue > 0)) {
+      options[key] = inputValue;
     }
    };
 
@@ -289,7 +288,7 @@ Amplitude.prototype._apiKeySet = function _apiKeySet(methodName) {
  * @private
  */
 Amplitude.prototype._loadSavedUnsentEvents = function _loadSavedUnsentEvents(unsentKey) {
-  var savedUnsentEventsString = localStorage.getItem(unsentKey);
+  var savedUnsentEventsString = this._getFromStorage(localStorage, unsentKey);
   if (utils.isEmptyString(savedUnsentEventsString)) {
     return []; // new app, does not have any saved events
   }
@@ -397,7 +396,6 @@ Amplitude.prototype._sendEventsIfReady = function _sendEventsIfReady(callback) {
  * Helper function to fetch values from storage
  * Storage argument allows for localStoraoge and sessionStoraoge
  * @private
- * @deprecated
  */
 Amplitude.prototype._getFromStorage = function _getFromStorage(storage, key) {
   return storage.getItem(key);
@@ -407,10 +405,9 @@ Amplitude.prototype._getFromStorage = function _getFromStorage(storage, key) {
  * Helper function to set values in storage
  * Storage argument allows for localStoraoge and sessionStoraoge
  * @private
- * @deprecated
  */
-Amplitude.prototype._setInStorage = function _setInStorage(storage, key) {
-  storage.setItem(key);
+Amplitude.prototype._setInStorage = function _setInStorage(storage, key, value) {
+  storage.setItem(key, value);
 };
 
 /**
@@ -549,7 +546,7 @@ var _sendUserPropertiesOncePerSession = function _sendUserPropertiesOncePerSessi
 
   // only save userProperties if not already in sessionStorage under key or if storage disabled
   var hasSessionStorage = utils.sessionStorageEnabled();
-  if ((hasSessionStorage && !(sessionStorage.getItem(storageKey))) || !hasSessionStorage) {
+  if ((hasSessionStorage && !(scope._getFromStorage(sessionStorage, storageKey))) || !hasSessionStorage) {
     for (var property in userProperties) {
       if (userProperties.hasOwnProperty(property)) {
         identify.set(property, userProperties[property]);
@@ -557,7 +554,7 @@ var _sendUserPropertiesOncePerSession = function _sendUserPropertiesOncePerSessi
     }
 
     if (hasSessionStorage) {
-      sessionStorage.setItem(storageKey, JSON.stringify(userProperties));
+      scope._setInStorage(sessionStorage, storageKey, JSON.stringify(userProperties));
     }
   }
 
@@ -608,16 +605,12 @@ Amplitude.prototype._saveReferrer = function _saveReferrer(referrer) {
  * @private
  */
 Amplitude.prototype.saveEvents = function saveEvents() {
-  if (!this._apiKeySet('saveEvents()')) {
-    return;
-  }
-
   try {
-    localStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
   } catch (e) {}
 
   try {
-    localStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+    this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
   } catch (e) {}
 };
 
@@ -628,7 +621,7 @@ Amplitude.prototype.saveEvents = function saveEvents() {
  * @example amplitude.setDomain('.amplitude.com');
  */
 Amplitude.prototype.setDomain = function setDomain(domain) {
-  if (!this._apiKeySet('setDomain()') || !utils.validateInput(domain, 'domain', 'string')) {
+  if (!utils.validateInput(domain, 'domain', 'string')) {
     return;
   }
 
@@ -651,10 +644,6 @@ Amplitude.prototype.setDomain = function setDomain(domain) {
  * @example amplitude.setUserId('joe@gmail.com');
  */
 Amplitude.prototype.setUserId = function setUserId(userId) {
-  if (!this._apiKeySet('setUserId()')) {
-    return;
-  }
-
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
@@ -670,7 +659,7 @@ Amplitude.prototype.setUserId = function setUserId(userId) {
  * @example: amplitude.setOptOut(true);
  */
 Amplitude.prototype.setOptOut = function setOptOut(enable) {
-  if (!this._apiKeySet('setOptOut()') || !utils.validateInput(enable, 'enable', 'boolean')) {
+  if (!utils.validateInput(enable, 'enable', 'boolean')) {
     return;
   }
 
@@ -691,7 +680,7 @@ Amplitude.prototype.setOptOut = function setOptOut(enable) {
   * @example amplitude.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
   */
 Amplitude.prototype.setDeviceId = function setDeviceId(deviceId) {
-  if (!this._apiKeySet('setDeviceId()') || !utils.validateInput(deviceId, 'deviceId', 'string')) {
+  if (!utils.validateInput(deviceId, 'deviceId', 'string')) {
     return;
   }
 
@@ -1128,7 +1117,7 @@ module.exports = Amplitude;
 3: [function(require, module, exports) {
 module.exports = {
   API_VERSION: 2,
-  MAX_STRING_LENGTH: 1024,
+  MAX_STRING_LENGTH: 4096,
   IDENTIFY_EVENT: '$identify',
 
   // localStorageKeys

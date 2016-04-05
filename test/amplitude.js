@@ -1619,21 +1619,21 @@ describe('Amplitude', function() {
     });
 
     it('should truncate long event property strings', function() {
-      var longString = new Array(2000).join('a');
+      var longString = new Array(5000).join('a');
       amplitude.logEvent('test', {'key': longString});
       var event = JSON.parse(querystring.parse(server.requests[0].requestBody).e)[0];
 
       assert.isTrue('key' in event.event_properties);
-      assert.lengthOf(event.event_properties['key'], 1024);
+      assert.lengthOf(event.event_properties['key'], 4096);
     });
 
     it('should truncate long user property strings', function() {
-      var longString = new Array(2000).join('a');
+      var longString = new Array(5000).join('a');
       amplitude.identify(new Identify().set('key', longString));
       var event = JSON.parse(querystring.parse(server.requests[0].requestBody).e)[0];
 
       assert.isTrue('$set' in event.user_properties);
-      assert.lengthOf(event.user_properties['$set']['key'], 1024);
+      assert.lengthOf(event.user_properties['$set']['key'], 4096);
     });
 
     it('should increment the counters in local storage if cookies disabled', function() {
