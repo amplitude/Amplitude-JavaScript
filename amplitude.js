@@ -2512,7 +2512,7 @@ var Identify = function() {
  * @public
  * @param {string} property - The user property key.
  * @param {number|string} value - The amount by which to increment the user property. Allows numbers as strings (ex: '123').
- * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
+ * @return {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().add('karma', 1).add('friends', 1);
  * amplitude.identify(identify); // send the Identify call
  */
@@ -2535,7 +2535,7 @@ Identify.prototype.add = function(property, value) {
  * @param {string} property - The user property key.
  * @param {number|string|list|object} value - A value or values to append.
  * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
- * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
+ * @return {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().append('ab-tests', 'new-user-tests');
  * identify.append('some_list', [1, 2, 3, 4, 'values']);
  * amplitude.identify(identify); // send the Identify call
@@ -2574,7 +2574,7 @@ Identify.prototype.clearAll = function() {
  * @param {string} property - The user property key.
  * @param {number|string|list|object} value - A value or values to prepend.
  * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
- * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
+ * @return {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().prepend('ab-tests', 'new-user-tests');
  * identify.prepend('some_list', [1, 2, 3, 4, 'values']);
  * amplitude.identify(identify); // send the Identify call
@@ -2590,7 +2590,7 @@ Identify.prototype.prepend = function(property, value) {
  * @param {string} property - The user property key.
  * @param {number|string|list|object} value - A value or values to set.
  * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
- * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
+ * @return {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().set('user_type', 'beta');
  * identify.set('name', {'first': 'John', 'last': 'Doe'}); // dict is flattened and becomes name.first: John, name.last: Doe
  * amplitude.identify(identify); // send the Identify call
@@ -2608,7 +2608,7 @@ Identify.prototype.set = function(property, value) {
  * @param {string} property - The user property key.
  * @param {number|string|list|object} value - A value or values to set once.
  * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
- * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
+ * @return {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().setOnce('sign_up_date', '2016-04-01');
  * amplitude.identify(identify); // send the Identify call
  */
@@ -2621,7 +2621,7 @@ Identify.prototype.setOnce = function(property, value) {
  * Unset and remove a user property. This user property will no longer show up in a user's profile.
  * @public
  * @param {string} property - The user property key.
- * @return {Identify_object} Returns the same Identify object, allowing you to chain multiple method calls together.
+ * @return {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().unset('user_type').unset('age');
  * amplitude.identify(identify); // send the Identify call
  */
