@@ -605,7 +605,7 @@ Amplitude.prototype._saveReferrer = function _saveReferrer(referrer) {
 /**
  * Saves unsent events and identifies to localStorage. JSON stringifies event queues before saving.
  * Note: this is called automatically every time events are logged, unless you explicitly set option saveEvents to false.
- * @public
+ * @private
  */
 Amplitude.prototype.saveEvents = function saveEvents() {
   if (!this._apiKeySet('saveEvents()')) {
@@ -746,8 +746,8 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
  * Send an identify call containing user property operations to Amplitude servers.
  * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
  * for more information on the Identify API and user property operations.
- * @param {Identify_object} identify_obj - the Identify object containing the user property operations to send.
- * @param {function} opt_callback - (optional) callback function to run when the identify event has been sent.
+ * @param {Identify} identify_obj - the Identify object containing the user property operations to send.
+ * @param {Amplitude~eventCallback} opt_callback - (optional) callback function to run when the identify event has been sent.
  * Note: the server response code and response body from the identify event upload are passed to the callback function.
  * @example
  * var identify = new amplitude.Identify().set('colors', ['rose', 'gold']).add('karma', 1).setOnce('sign_up_date', '2016-03-31');
@@ -889,12 +889,20 @@ Amplitude.prototype._limitEventsQueued = function _limitEventsQueued(queue) {
 };
 
 /**
+ * This is the callback for logEvent and identify calls. It gets called after the event/identify is uploaded,
+ * and the server response code and response body from the upload request are passed to the callback function.
+ * @callback Amplitude~eventCallback
+ * @param {number} responseCode - Server response code for the event / identify upload request.
+ * @param {string} responseBody - Server response body for the event / identify upload request.
+ */
+
+/**
  * Log an event with eventType and eventProperties
  * @public
  * @param {string} eventType - name of event
  * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
- * @param {function} opt_callback - (optional) a callback function to run after the event is logged.
- * Note: the server response code and response body from the identify event upload are passed to the callback function.
+ * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
+ * Note: the server response code and response body from the event upload are passed to the callback function.
  * @example amplitude.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
@@ -970,8 +978,8 @@ var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
 /**
  * Send unsent events. Note: this is called automatically after events are logged if option batchEvents is false.
  * If batchEvents is true, then events are only sent when batch criterias are met.
- * @public
- * @param {function} callback - (optional) callback to run after events are sent.
+ * @private
+ * @param {Amplitude~eventCallback} callback - (optional) callback to run after events are sent.
  * Note the server response code and response body are passed to the callback as input arguments.
  */
 Amplitude.prototype.sendEvents = function sendEvents(callback) {
