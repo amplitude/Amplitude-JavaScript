@@ -130,9 +130,14 @@ var _parseConfig = function _parseConfig(options, config) {
   }
 
   // validates config value is defined, is the correct type, and some additional value sanity checks
-  var parseValidateLoad = function parseValidateLoad(key, expectedType) {
+  var parseValidateAndLoad = function parseValidateAndLoad(key) {
+    if (!DEFAULT_OPTIONS.hasOwnProperty(key)) {
+      return;  // skip bogus config values
+    }
+
     var inputValue = config[key];
-    if (inputValue === undefined || !utils.validateInput(inputValue, key + ' option', expectedType)) {
+    var expectedType = type(DEFAULT_OPTIONS[key]);
+    if (!utils.validateInput(inputValue, key + ' option', expectedType)) {
       return;
     }
     if (expectedType === 'boolean') {
@@ -143,11 +148,10 @@ var _parseConfig = function _parseConfig(options, config) {
     }
    };
 
-   // the DEFAULT_OPTIONS object defines all valid keys, and provides expected types for the value
-   for (var key in DEFAULT_OPTIONS) {
-      if (DEFAULT_OPTIONS.hasOwnProperty(key)) {
-        parseValidateLoad(key, type(DEFAULT_OPTIONS[key]));
-      }
+   for (var key in config) {
+    if (config.hasOwnProperty(key)) {
+      parseValidateAndLoad(key);
+    }
    }
 };
 
