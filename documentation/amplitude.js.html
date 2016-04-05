@@ -1,4 +1,32 @@
-var Constants = require('./constants');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: amplitude.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: amplitude.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var Constants = require('./constants');
 var cookieStorage = require('./cookiestorage');
 var getUtmData = require('./utm');
 var Identify = require('./identify');
@@ -71,9 +99,9 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
     _loadCookieData(this);
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
-    this.options.deviceId = (type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' &&
-        !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) || this.options.deviceId || UUID() + 'R';
-    this.options.userId = (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
+    this.options.deviceId = (type(opt_config) === 'object' &amp;&amp; type(opt_config.deviceId) === 'string' &amp;&amp;
+        !utils.isEmptyString(opt_config.deviceId) &amp;&amp; opt_config.deviceId) || this.options.deviceId || UUID() + 'R';
+    this.options.userId = (type(opt_userId) === 'string' &amp;&amp; !utils.isEmptyString(opt_userId) &amp;&amp; opt_userId) ||
         this.options.userId || null;
 
     var now = new Date().getTime();
@@ -89,13 +117,13 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
       this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey);
 
       // validate event properties for unsent events
-      for (var i = 0; i < this._unsentEvents.length; i++) {
+      for (var i = 0; i &lt; this._unsentEvents.length; i++) {
         var eventProperties = this._unsentEvents[i].event_properties;
         this._unsentEvents[i].event_properties = utils.validateProperties(eventProperties);
       }
 
       // validate user properties for unsent identifys
-      for (var j = 0; j < this._unsentIdentifys.length; j++) {
+      for (var j = 0; j &lt; this._unsentIdentifys.length; j++) {
         var userProperties = this._unsentIdentifys[j].user_properties;
         this._unsentIdentifys[j].user_properties = utils.validateProperties(userProperties);
       }
@@ -142,8 +170,8 @@ var _parseConfig = function _parseConfig(options, config) {
     }
     if (expectedType === 'boolean') {
       options[key] = !!inputValue;
-    } else if ((expectedType === 'string' && !utils.isEmptyString(inputValue)) ||
-        (expectedType === 'number' && inputValue > 0)) {
+    } else if ((expectedType === 'string' &amp;&amp; !utils.isEmptyString(inputValue)) ||
+        (expectedType === 'number' &amp;&amp; inputValue > 0)) {
       options[key] = inputValue;
     }
    };
@@ -160,7 +188,7 @@ var _parseConfig = function _parseConfig(options, config) {
  * @private
  */
 Amplitude.prototype.runQueuedFunctions = function () {
-  for (var i = 0; i < this._q.length; i++) {
+  for (var i = 0; i &lt; this._q.length; i++) {
     var fn = this[this._q[i][0]];
     if (type(fn) === 'function') {
       fn.apply(this, this._q[i].slice(1));
@@ -317,7 +345,7 @@ Amplitude.prototype._setInStorage = function _setInStorage(storage, key, value) 
 var _upgradeCookeData = function _upgradeCookeData(scope) {
   // skip if migration already happened
   var cookieData = scope.cookieStorage.get(scope.options.cookieName);
-  if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
+  if (type(cookieData) === 'object' &amp;&amp; cookieData.deviceId &amp;&amp; cookieData.sessionId &amp;&amp; cookieData.lastEventTime) {
     return;
   }
 
@@ -328,11 +356,11 @@ var _upgradeCookeData = function _upgradeCookeData(scope) {
   };
 
   // in v2.6.0, deviceId, userId, optOut was migrated to localStorage with keys + first 6 char of apiKey
-  var apiKeySuffix = (type(scope.options.apiKey) === 'string' && ('_' + scope.options.apiKey.slice(0, 6))) || '';
+  var apiKeySuffix = (type(scope.options.apiKey) === 'string' &amp;&amp; ('_' + scope.options.apiKey.slice(0, 6))) || '';
   var localStorageDeviceId = _getAndRemoveFromLocalStorage(Constants.DEVICE_ID + apiKeySuffix);
   var localStorageUserId = _getAndRemoveFromLocalStorage(Constants.USER_ID + apiKeySuffix);
   var localStorageOptOut = _getAndRemoveFromLocalStorage(Constants.OPT_OUT + apiKeySuffix);
-  if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
+  if (localStorageOptOut !== null &amp;&amp; localStorageOptOut !== undefined) {
     localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
   }
 
@@ -344,7 +372,7 @@ var _upgradeCookeData = function _upgradeCookeData(scope) {
   var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_SEQUENCE_NUMBER));
 
   var _getFromCookie = function _getFromCookie(key) {
-    return type(cookieData) === 'object' && cookieData[key];
+    return type(cookieData) === 'object' &amp;&amp; cookieData[key];
   };
   scope.options.deviceId = _getFromCookie('deviceId') || localStorageDeviceId;
   scope.options.userId = _getFromCookie('userId') || localStorageUserId;
@@ -356,7 +384,7 @@ var _upgradeCookeData = function _upgradeCookeData(scope) {
 
   // optOut is a little trickier since it is a boolean
   scope.options.optOut = localStorageOptOut || false;
-  if (cookieData && cookieData.optOut !== undefined && cookieData.optOut !== null) {
+  if (cookieData &amp;&amp; cookieData.optOut !== undefined &amp;&amp; cookieData.optOut !== null) {
     scope.options.optOut = String(cookieData.optOut) === 'true';
   }
 
@@ -376,7 +404,7 @@ var _loadCookieData = function _loadCookieData(scope) {
     if (cookieData.userId) {
       scope.options.userId = cookieData.userId;
     }
-    if (cookieData.optOut !== null && cookieData.optOut !== undefined) {
+    if (cookieData.optOut !== null &amp;&amp; cookieData.optOut !== undefined) {
       scope.options.optOut = cookieData.optOut;
     }
     if (cookieData.sessionId) {
@@ -444,7 +472,7 @@ var _sendUserPropertiesOncePerSession = function _sendUserPropertiesOncePerSessi
 
   // only save userProperties if not already in sessionStorage under key or if storage disabled
   var hasSessionStorage = utils.sessionStorageEnabled();
-  if ((hasSessionStorage && !(scope._getFromStorage(sessionStorage, storageKey))) || !hasSessionStorage) {
+  if ((hasSessionStorage &amp;&amp; !(scope._getFromStorage(sessionStorage, storageKey))) || !hasSessionStorage) {
     for (var property in userProperties) {
       if (userProperties.hasOwnProperty(property)) {
         identify.set(property, userProperties[property]);
@@ -543,7 +571,7 @@ Amplitude.prototype.setDomain = function setDomain(domain) {
  */
 Amplitude.prototype.setUserId = function setUserId(userId) {
   try {
-    this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
+    this.options.userId = (userId !== undefined &amp;&amp; userId !== null &amp;&amp; ('' + userId)) || null;
     _saveCookieData(this);
   } catch (e) {
     utils.log(e);
@@ -649,9 +677,9 @@ Amplitude.prototype.identify = function(identify_obj, opt_callback) {
   }
 
   // if identify input is a proxied object created by the async loading snippet, convert it into an identify object
-  if (type(identify_obj) === 'object' && identify_obj.hasOwnProperty('_q')) {
+  if (type(identify_obj) === 'object' &amp;&amp; identify_obj.hasOwnProperty('_q')) {
     var instance = new Identify();
-    for (var i = 0; i < identify_obj._q.length; i++) {
+    for (var i = 0; i &lt; identify_obj._q.length; i++) {
         var fn = instance[identify_obj._q[i][0]];
         if (type(fn) === 'function') {
           fn.apply(instance, identify_obj._q[i].slice(1));
@@ -755,7 +783,7 @@ Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, a
       this.saveEvents();
     }
 
-    if (!this._sendEventsIfReady(callback) && type(callback) === 'function') {
+    if (!this._sendEventsIfReady(callback) &amp;&amp; type(callback) === 'function') {
       callback(0, 'No request sent');
     }
 
@@ -808,7 +836,7 @@ Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt
  * @private
  */
 var _isNumber = function _isNumber(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
+  return !isNaN(parseFloat(n)) &amp;&amp; isFinite(n);
 };
 
 /**
@@ -821,7 +849,7 @@ var _isNumber = function _isNumber(n) {
  */
 Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
   // Test that the parameters are of the right type.
-  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || (quantity !== undefined && !_isNumber(quantity))) {
+  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || (quantity !== undefined &amp;&amp; !_isNumber(quantity))) {
     // utils.log('Price and quantity arguments to logRevenue must be numbers');
     return -1;
   }
@@ -849,12 +877,12 @@ Amplitude.prototype.removeEvents = function removeEvents(maxEventId, maxIdentify
  * @private
  */
 var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
-  if (maxId < 0) {
+  if (maxId &lt; 0) {
     return;
   }
 
   var filteredEvents = [];
-  for (var i = 0; i < scope[eventQueue].length || 0; i++) {
+  for (var i = 0; i &lt; scope[eventQueue].length || 0; i++) {
     if (scope[eventQueue][i].event_id > maxId) {
       filteredEvents.push(scope[eventQueue][i]);
     }
@@ -900,7 +928,7 @@ Amplitude.prototype.sendEvents = function sendEvents(callback) {
   new Request(url, data).send(function(status, response) {
     scope._sending = false;
     try {
-      if (status === 200 && response === 'success') {
+      if (status === 200 &amp;&amp; response === 'success') {
         scope.removeEvents(maxEventId, maxIdentifyId);
 
         // Update the event cache after the removal of sent events.
@@ -909,7 +937,7 @@ Amplitude.prototype.sendEvents = function sendEvents(callback) {
         }
 
         // Send more events if any queued during previous send.
-        if (!scope._sendEventsIfReady(callback) && type(callback) === 'function') {
+        if (!scope._sendEventsIfReady(callback) &amp;&amp; type(callback) === 'function') {
           callback(status, response);
         }
 
@@ -946,14 +974,14 @@ Amplitude.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIdentifys
   var identifyIndex = 0;
   var maxIdentifyId = -1;
 
-  while (eventsToSend.length < numEvents) {
+  while (eventsToSend.length &lt; numEvents) {
     var event;
     var noIdentifys = identifyIndex >= this._unsentIdentifys.length;
     var noEvents = eventIndex >= this._unsentEvents.length;
 
     // case 0: no events or identifys left
     // note this should not happen, this means we have less events and identifys than expected
-    if (noEvents && noIdentifys) {
+    if (noEvents &amp;&amp; noIdentifys) {
       utils.log('Merging Events and Identifys, less events and identifys than expected');
       break;
     }
@@ -972,7 +1000,7 @@ Amplitude.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIdentifys
     } else {
       // events logged before v2.5.0 won't have a sequence number, put those first
       if (!('sequence_number' in this._unsentEvents[eventIndex]) ||
-          this._unsentEvents[eventIndex].sequence_number <
+          this._unsentEvents[eventIndex].sequence_number &lt;
           this._unsentIdentifys[identifyIndex].sequence_number) {
         event = this._unsentEvents[eventIndex++];
         maxEventId = event.event_id;
@@ -1010,3 +1038,26 @@ Amplitude.prototype.setGlobalUserProperties = function setGlobalUserProperties(u
 Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Amplitude.html">Amplitude</a></li><li><a href="Identify.html">Identify</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Apr 05 2016 14:28:54 GMT-0700 (PDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
