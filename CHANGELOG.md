@@ -1,9 +1,14 @@
 ## Unreleased
 
-* Add support for passing callback function to identify.
-* Add support for prepend user property operation.
-* Keep sessions and event metadata in sync across multiple windows/tabs.
-* Add support for setting groups for users and events.
+* Add support for setting groups for users and events. See the [Readme](https://github.com/amplitude/Amplitude-Javascript#setting-groups) for more information.
+* Add tracking of each user's initial_utm parameters (which is captured as a set once operation). Utm parameters are now sent only once per user session.
+* Add documentation for SDK functions. You can take a look [here](https://rawgit.com/amplitude/Amplitude-Javascript/defensive_cleanup/documentation/Amplitude.html). A link has also been added to the Readme.
+
+### 2.10.0 (March 30, 2016)
+
+* Identify function now accepts a callback function as an argument. The callback will be run after the identify event is sent.
+* Add support for `prepend` user property operation. This allows you to insert value(s) at the front of a list. See [Readme](https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations) for more details.
+* Keep sessions and event metadata in-sync across multiple windows/tabs.
 
 ### 2.9.1 (March 6, 2016)
 
