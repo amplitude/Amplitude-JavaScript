@@ -627,7 +627,7 @@ describe('Amplitude', function() {
       });
       assert.deepEqual(identify.event_properties, {});
       assert.deepEqual(identify.groups, {
-        'orgId': 15,
+        'orgId': '15',
       });
     });
 
@@ -1804,8 +1804,10 @@ describe('setVersionName', function() {
       };
 
       var groups = {
-        'group1': 'value1',
-        'group2': 'value2',
+        10: 1.23,  // coerce numbers to strings
+        'array': ['test2', false, ['test', 23, null], null],  // should ignore nested array and nulls
+        'dictionary': {160: 'test3'},  // should ignore dictionaries
+        'null': null, // ignore null values
       }
 
       amplitude.logEventWithGroups('Test', eventProperties, groups, callback);
@@ -1819,7 +1821,10 @@ describe('setVersionName', function() {
       assert.equal(event.event_id, 1);
       assert.deepEqual(event.user_properties, {});
       assert.deepEqual(event.event_properties, eventProperties);
-      assert.deepEqual(event.groups, groups);
+      assert.deepEqual(event.groups, {
+        '10': '1.23',
+        'array': ['test2', 'false'],
+      });
 
       // verify callback behavior
       assert.equal(counter, 0);

@@ -93,7 +93,7 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
         var eventProperties = this._unsentEvents[i].event_properties;
         var groups = this._unsentEvents[i].groups;
         this._unsentEvents[i].event_properties = utils.validateProperties(eventProperties);
-        this._unsentEvents[i].groups = utils.validateProperties(groups);
+        this._unsentEvents[i].groups = utils.validateGroups(groups);
       }
 
       // validate user properties for unsent identifys
@@ -101,7 +101,7 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
         var userProperties = this._unsentIdentifys[j].user_properties;
         var identifyGroups = this._unsentIdentifys[j].groups;
         this._unsentIdentifys[j].user_properties = utils.validateProperties(userProperties);
-        this._unsentIdentifys[j].groups = utils.validateProperties(identifyGroups);
+        this._unsentIdentifys[j].groups = utils.validateGroups(identifyGroups);
       }
 
       this._sendEventsIfReady(); // try sending unsent events
@@ -555,15 +555,16 @@ Amplitude.prototype.setUserId = function setUserId(userId) {
 };
 
 /**
- * Designate which groups a user belongs to. Note: this will also set groupType:
- * groupName as a user property. You can call setGroup multiple times with different groupTypes to
- * add a user to different groups. Note: each user is allowed to be in up to 5 groups. Any more
- * than that will be ignored from the Count by Distinct query UI, although they will still appear
- * in the the user properties for that user.
+ * Add user to a group or groups. You need to specify a groupType and groupName(s).
+ * For example you can group people by their organization.
+ * In that case groupType is "orgId" and groupName would be the actual ID(s).
+ * groupName can be a string or an array of strings to indicate a user in multiple gruups.
+ * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
+ * Note: this will also set groupType: groupName as a user property.
  * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information.
  * @public
  * @param {string} groupType - the group type (ex: orgId)
- * @param {number|string|list|object} groupName - the name of the group (ex: 15)
+ * @param {string|list} groupName - the name of the group (ex: 15), or a list of names of the groups
  * @example amplitude.setGroup('orgId', 15); // this adds the current user to orgId 15.
  */
 Amplitude.prototype.setGroup = function(groupType, groupName) {
@@ -574,7 +575,6 @@ Amplitude.prototype.setGroup = function(groupType, groupName) {
 
   var groups = {};
   groups[groupType] = groupName;
-
   var identify = new Identify().set(groupType, groupName);
   this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null);
 };
@@ -772,7 +772,7 @@ Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, a
         version: version
       },
       sequence_number: sequenceNumber, // for ordering events and identifys
-      groups: utils.truncate(utils.validateProperties(groups))
+      groups: utils.truncate(utils.validateGroups(groups))
       // country: null
     };
 
@@ -846,6 +846,7 @@ Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt
  * @param {string} eventType - name of event
  * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
  * @param {object} groups - (optional) an object with string groupType: groupName values for the event being logged.
+ * groupName can be a string or an array of strings.
  * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
  * Note: the server response code and response body from the event upload are passed to the callback function.
  * @example amplitude.logEventWithGroups('Clicked Button', null, {'orgId': 24});
