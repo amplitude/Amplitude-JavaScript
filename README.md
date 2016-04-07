@@ -226,24 +226,24 @@ amplitude.init('YOUR_API_KEY_HERE', null, {
 });
 ```
 
-| option | description | default |
-|------------|----------------------------------------------------------------------------------|-----------|
-| batchEvents | If `true`, events are batched together and uploaded only when the number of unsent events is greater than or equal to `eventUploadThreshold` or after `eventUploadPeriodMillis` milliseconds have passed since the first unsent event was logged. | `false` |
-| cookieExpiration | The number of days after which the Amplitude cookie will expire | 365\*10 (10 years) |
-| cookieName | Custom name for the Amplitude cookie | 'amplitude_id' |
-| deviceId | Custom device ID to set. Note this is not recommended unless you really know what you are doing (like if you have your own system for tracking user devices) | Randomly generated UUID |
-| domain | Custom cookie domain | The top domain of the current page's url |
-| eventUploadPeriodMillis | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
-| eventUploadThreshold | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
-| includeReferrer | If `true`, captures the `referrer` and `referring_domain` for each session, as well as the user's `initial_referrer` and `initial_referring_domain` via a set once operation. | `false` |
-| includeUtm | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
-| language | Custom language to set | Language determined by browser |
-| optOut | Whether to disable tracking for the current user | `false` |
-| platform | Custom platform to set | 'Web' |
-| saveEvents | If `true`, saves events to localStorage and removes them upon successful upload.<br><i>NOTE:</i> Without saving events, events may be lost if the user navigates to another page before events are uploaded. | `true` |
-| savedMaxCount | Maximum number of events to save in localStorage. If more events are logged while offline, old events are removed. | 1000 |
-| sessionTimeout | Time between logged events before a new session starts in milliseconds | 30\*60\*1000 (30 min) |
-| uploadBatchSize | Maximum number of events to send to the server per request. | 100 |
+| option | type | description | default |
+|------------|----------|------------------------------------------------------------------------|-----------|
+| batchEvents | boolean | If `true`, events are batched together and uploaded only when the number of unsent events is greater than or equal to `eventUploadThreshold` or after `eventUploadPeriodMillis` milliseconds have passed since the first unsent event was logged. | `false` |
+| cookieExpiration | number | The number of days after which the Amplitude cookie will expire | 365\*10 (10 years) |
+| cookieName | string | Custom name for the Amplitude cookie | 'amplitude_id' |
+| deviceId | string | Custom device ID to set. Note this is not recommended unless you really know what you are doing (like if you have your own system for tracking user devices) | Randomly generated UUID |
+| domain | string | Custom cookie domain | The top domain of the current page's url |
+| eventUploadPeriodMillis | number | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
+| eventUploadThreshold | number | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
+| includeReferrer | boolean | If `true`, captures the `referrer` and `referring_domain` for each session, as well as the user's `initial_referrer` and `initial_referring_domain` via a set once operation. | `false` |
+| includeUtm | boolean | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
+| language | string | Custom language to set | Language determined by browser |
+| optOut | boolean | Whether to disable tracking for the current user | `false` |
+| platform | string | Custom platform to set | 'Web' |
+| saveEvents | boolean | If `true`, saves events to localStorage and removes them upon successful upload.<br><i>NOTE:</i> Without saving events, events may be lost if the user navigates to another page before events are uploaded. | `true` |
+| savedMaxCount | number | Maximum number of events to save in localStorage. If more events are logged while offline, old events are removed. | 1000 |
+| sessionTimeout | number | Time between logged events before a new session starts in milliseconds | 30\*60\*1000 (30 min) |
+| uploadBatchSize | number | Maximum number of events to send to the server per request. | 100 |
 
 # Advanced #
 This SDK automatically grabs useful data about the browser, including browser type and operating system version.
