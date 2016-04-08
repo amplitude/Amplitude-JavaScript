@@ -10,7 +10,12 @@
   ],
   "repository": "git://github.com/amplitude/amplitude-javascript.git",
   "main": "src/index.js",
-  "dependencies": {},
+  "dependencies": {
+    "blueimp-md5": "^2.3.0",
+    "json": "^9.0.3",
+    "object": "^0.1.1",
+    "ua-parser-js": "^0.7.10"
+  },
   "devDependencies": {
     "duo": "0.8",
     "express": "4.x",
