@@ -2,7 +2,6 @@ var Constants = require('./constants');
 var cookieStorage = require('./cookiestorage');
 var getUtmData = require('./utm');
 var Identify = require('./identify');
-var JSON = require('json'); // jshint ignore:line
 var localStorage = require('./localstorage');  // jshint ignore:line
 var md5 = require('blueimp-md5');
 var objectAssign = require('object-assign');
