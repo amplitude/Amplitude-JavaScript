@@ -1136,7 +1136,9 @@ module.exports = {
   // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
   OPT_OUT: 'amplitude_optOut',
-  USER_ID: 'amplitude_userId'
+  USER_ID: 'amplitude_userId',
+
+  COOKIE_TEST: 'amplitude_cookie_test'
 };
 
 }, {}],
@@ -1148,6 +1150,7 @@ module.exports = {
  * Uses cookie if available, otherwise fallback to localstorage.
  */
 
+var Constants = require('./constants');
 var Cookie = require('./cookie');
 var JSON = require('json'); // jshint ignore:line
 var localStorage = require('./localstorage'); // jshint ignore:line
@@ -1161,9 +1164,9 @@ cookieStorage.prototype._cookiesEnabled = function() {
   var uid = String(new Date());
   var result;
   try {
-    Cookie.set(uid, uid);
-    result = Cookie.get(uid) === uid;
-    Cookie.remove(uid);
+    Cookie.set(Constants.COOKIE_TEST, uid);
+    result = Cookie.get(Constants.COOKIE_TEST) === uid;
+    Cookie.remove(Constants.COOKIE_TEST);
     return result;
   } catch (e) {
     // cookies are not enabled
@@ -1233,7 +1236,7 @@ cookieStorage.prototype.getStorage = function() {
 
 module.exports = cookieStorage;
 
-}, {"./cookie":18,"json":7,"./localstorage":8}],
+}, {"./constants":3,"./cookie":18,"json":7,"./localstorage":8}],
 18: [function(require, module, exports) {
 /*
  * Cookie data

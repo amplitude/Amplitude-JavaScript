@@ -15,5 +15,7 @@ module.exports = {
   // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
   OPT_OUT: 'amplitude_optOut',
-  USER_ID: 'amplitude_userId'
+  USER_ID: 'amplitude_userId',
+
+  COOKIE_TEST: 'amplitude_cookie_test'
 };
