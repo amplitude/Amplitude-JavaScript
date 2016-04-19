@@ -91,7 +91,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line17">line 17</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line18">line 18</a>
     </li></ul></dd>
     
 
@@ -184,7 +184,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line1010">line 1010</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line1048">line 1048</a>
     </li></ul></dd>
     
 
@@ -267,7 +267,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line622">line 622</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line624">line 624</a>
     </li></ul></dd>
     
 
@@ -354,7 +354,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line220">line 220</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line222">line 222</a>
     </li></ul></dd>
     
 
@@ -533,7 +533,7 @@ Note: the server response code and response body from the identify event upload 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line643">line 643</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line645">line 645</a>
     </li></ul></dd>
     
 
@@ -741,7 +741,7 @@ See <a href="https://github.com/amplitude/Amplitude-Javascript#configuration-opt
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line55">line 55</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -828,7 +828,7 @@ See <a href="https://github.com/amplitude/Amplitude-Javascript#configuration-opt
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line211">line 211</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line213">line 213</a>
     </li></ul></dd>
     
 
@@ -1028,7 +1028,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line795">line 795</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line797">line 797</a>
     </li></ul></dd>
     
 
@@ -1071,7 +1071,7 @@ Note: the server response code and response body from the event upload are passe
 
 
 <div class="description">
-    Log revenue event with a price, quantity, and product identifier.
+    Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
 </div>
 
 
@@ -1198,6 +1198,8 @@ Note: the server response code and response body from the event upload are passe
     
 
     
+        <dt class="important tag-deprecated">Deprecated:</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+    
 
     
 
@@ -1210,7 +1212,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line822">line 822</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line860">line 860</a>
     </li></ul></dd>
     
 
@@ -1238,6 +1240,144 @@ Note: the server response code and response body from the event upload are passe
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>amplitude.logRevenue(3.99, 1, 'product_1234');</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="logRevenueV2"><span class="type-signature"></span>logRevenueV2<span class="signature">(revenue_obj)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
+revenueType and event properties.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>revenue_obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Revenue.html">Revenue</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the revenue object containing the revenue data being logged.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line824">line 824</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99);
+amplitude.logRevenueV2(revenue);</code></pre>
 
 
 
@@ -1348,7 +1488,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line580">line 580</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line582">line 582</a>
     </li></ul></dd>
     
 
@@ -1484,7 +1624,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line521">line 521</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line523">line 523</a>
     </li></ul></dd>
     
 
@@ -1573,7 +1713,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line1000">line 1000</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line1038">line 1038</a>
     </li></ul></dd>
     
 
@@ -1704,7 +1844,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line559">line 559</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line561">line 561</a>
     </li></ul></dd>
     
 
@@ -1835,7 +1975,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line544">line 544</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line546">line 546</a>
     </li></ul></dd>
     
 
@@ -1995,7 +2135,7 @@ memory and replace = true would replace the object in memory. Now the properties
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line603">line 603</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line605">line 605</a>
     </li></ul></dd>
     
 
@@ -2131,7 +2271,7 @@ memory and replace = true would replace the object in memory. Now the properties
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line683">line 683</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line685">line 685</a>
     </li></ul></dd>
     
 
@@ -2297,7 +2437,7 @@ and the server response code and response body from the upload request are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line778">line 778</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line780">line 780</a>
     </li></ul></dd>
     
 
@@ -2343,7 +2483,7 @@ and the server response code and response body from the upload request are passe
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Mon Apr 18 2016 22:09:04 GMT-0700 (PDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Mon Apr 18 2016 22:40:49 GMT-0700 (PDT)
 </footer>
 
 <script> prettyPrint(); </script>

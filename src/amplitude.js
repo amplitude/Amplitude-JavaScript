@@ -7,6 +7,7 @@ var localStorage = require('./localstorage');  // jshint ignore:line
 var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
+var Revenue = require('./revenue');
 var type = require('./type');
 var UAParser = require('ua-parser-js');
 var utils = require('./utils');
@@ -40,6 +41,7 @@ var Amplitude = function Amplitude() {
 };
 
 Amplitude.prototype.Identify = Identify;
+Amplitude.prototype.Revenue = Revenue;
 
 /**
  * Initializes the Amplitude Javascript SDK with your apiKey and any optional configurations.
@@ -812,8 +814,44 @@ var _isNumber = function _isNumber(n) {
 };
 
 /**
- * Log revenue event with a price, quantity, and product identifier.
+ * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
+ * revenueType and event properties.
  * @public
+ * @param {Revenue} revenue_obj - the revenue object containing the revenue data being logged.
+ * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99);
+ * amplitude.logRevenueV2(revenue);
+ */
+Amplitude.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
+  if (!this._apiKeySet('logRevenueV2()')) {
+    return;
+  }
+
+  // if revenue input is a proxied object created by the async loading snippet, convert it into an revenue object
+  if (type(revenue_obj) === 'object' && revenue_obj.hasOwnProperty('_q')) {
+    var instance = new Revenue();
+    for (var i = 0; i < revenue_obj._q.length; i++) {
+        var fn = instance[revenue_obj._q[i][0]];
+        if (type(fn) === 'function') {
+          fn.apply(instance, revenue_obj._q[i].slice(1));
+        }
+    }
+    revenue_obj = instance;
+  }
+
+  if (revenue_obj instanceof Revenue) {
+    // only send if revenue is valid
+    if (revenue_obj && revenue_obj._isValidRevenue()) {
+      return this.logEvent(Constants.REVENUE_EVENT, revenue_obj._toJSONObject());
+    }
+  } else {
+    utils.log('Invalid revenue input type. Expected Revenue object but saw ' + type(revenue_obj));
+  }
+};
+
+/**
+ * Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
+ * @public
+ * @deprecated
  * @param {number} price - price of revenue event
  * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
  * @param {string} product - (optional) product identifier
@@ -826,7 +864,7 @@ Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
     return -1;
   }
 
-  return this._logEvent('revenue_amount', {}, {
+  return this._logEvent(Constants.REVENUE_EVENT, {}, {
     productId: product,
     special: 'revenue_amount',
     quantity: quantity || 1,

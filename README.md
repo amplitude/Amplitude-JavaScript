@@ -185,15 +185,44 @@ amplitude.clearUserProperties();
 
 # Tracking Revenue #
 
-To track revenue from a user, call
+The preferred method of tracking revenue for a user now is to use `logRevenueV2()` in conjunction with the provided `Revenue` interface. `Revenue` instances will store each revenue transaction and allow you to define several special revenue properties (such as revenueType, productId, etc) that are used in Amplitude dashboard's Revenue tab. You can now also add event properties to the revenue event, via the revenueProperties field. These `Revenue` instance objects are then passed into `logRevenueV2` to send as revenue events to Amplitude servers. This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 1, 7, 14, 30, 60, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
 
+Each time a user generates revenue, you create a `Revenue` object and fill out the revenue properties:
 ```javascript
-amplitude.logRevenue(9.99, 1, 'product');
+var revenue = new amplitude.Revenue().setProductId('com.company.productId'"').setPrice(3.99).setQuantity(3);
+amplitude.logRevenueV2(revenue);
 ```
 
-The function takes a unit price, a quantity, and a product identifier. Quantity and product identifier are optional parameters.
+`productId`, `price`, and `quantity` are required fields. Each field has a corresponding `set` method (for example `setProductId`, `setQuantity`, etc), as well as a corresponding event property key (see below for how to send revenue properties in event properties). This table describes the different fields available:
 
-This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 7, 30, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
+| Name               | Type       | Description                                                                                              | default | property key |
+|--------------------|------------|----------------------------------------------------------------------------------------------------------|---------|--------------|
+| productId          | String     | Required: an identifier for the product (we recommend something like the Google Play Store product Id)   | null    | $productId   |
+| quantity           | Integer    | Required: the quantity of products purchased. Defaults to 1 if not specified. Revenue = quantity * price | 1       | $quantity    |
+| price              | Double     | Required: the price of the products purchased (can be negative). Revenue = quantity * price              | null    | $price       |
+| revenueType        | String     | Optional: the type of revenue (ex: tax, refund, income)                                                  | null    | $revenueType |
+| revenueProperties  | Object     | Optional: an object of event properties to include in the revenue event                                  | null    | n/a          |
+
+Note: the price can be negative, which might be useful for tracking revenue lost, for example refunds or costs.
+
+### Sending Revenue as Event Properties ###
+
+Instead of sending revenue through Amplitude's special revenue event, you can send revenue properties as event properties on any event you log. The `property key` column in the above table denotes the string key to use when declaring the event property. Note: you still need to set a productId and a price. If quantity is not set, it is assumed to be 1:
+
+```java
+var properties = {
+  'description': 'some event description',
+  'color': 'green',
+  '$productId': 'productIdentifier',
+  '$price': 10.99,
+  '$quantity': 2
+};
+amplitude.logEvent('Completed purchase', properties);
+```
+
+### Backwards compatibility ###
+
+The existing `logRevenue` methods still work but are deprecated. Fields such as `revenueType` will be missing from events logged with the old methods, so Revenue segmentation on those events will be limited in Amplitude dashboards.
 
 # Opting User Out of Logging #
 

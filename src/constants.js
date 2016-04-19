@@ -20,6 +20,7 @@ module.exports = {
   COOKIE_TEST: 'amplitude_cookie_test',
 
   // revenue keys
+  REVENUE_EVENT: 'revenue_amount',
   REVENUE_PRODUCT_ID: '$productId',
   REVENUE_QUANTITY: '$quantity',
   REVENUE_PRICE: '$price',

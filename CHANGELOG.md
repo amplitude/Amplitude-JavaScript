@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add `logRevenueV2` and new `Revenue` class to support logging revenue events with properties, revenue type, and verified. See [Readme](https://github.com/amplitude/Amplitude-Javascript#tracking-revenue) for more info.
+
 ### 2.11.0 (April 14, 2016)
 
 * Add tracking of each user's initial_utm parameters (which is captured as a set once operation). Utm parameters are now sent only once per user session.
