@@ -139,10 +139,19 @@ Revenue.prototype._isValidRevenue = function _isValidRevenue() {
  */
 Revenue.prototype._toJSONObject = function _toJSONObject() {
   var obj = type(this._properties) === 'object' ? this._properties : {};
-  obj[constants.REVENUE_PRODUCT_ID] = this._productId;
-  obj[constants.REVENUE_QUANTITY] = this._quantity;
-  obj[constants.REVENUE_PRICE] = this._price;
-  obj[constants.REVENUE_REVENUE_TYPE] = this._revenueType;
+
+  if (this._productId !== null) {
+    obj[constants.REVENUE_PRODUCT_ID] = this._productId;
+  }
+  if (this._quantity !== null) {
+    obj[constants.REVENUE_QUANTITY] = this._quantity;
+  }
+  if (this._price !== null) {
+    obj[constants.REVENUE_PRICE] = this._price;
+  }
+  if (this._revenueType !== null) {
+    obj[constants.REVENUE_REVENUE_TYPE] = this._revenueType;
+  }
   return obj;
 };
 

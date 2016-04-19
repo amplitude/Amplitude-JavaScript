@@ -68,6 +68,10 @@
     var logRevenue = function() {
         amplitude.logRevenue(9.99, 1, 'productA');
     }
+    var logRevenueV2 = function() {
+        var revenue = new amplitude.Revenue().setProductId('other.productId').setQuantity(15).setPrice(145.99);
+        amplitude.logRevenueV2(revenue);
+    }
 </script>
 <script>
     amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053', null, {includeReferrer: true}, function() {
@@ -97,6 +101,7 @@
     <li><a href="javascript:setOncePhotoCount();">Set photo count once</a></li>
     <li><a href="javascript:setCity();">Set city via setUserProperties</a></li>
     <li><a href="javascript:amplitude.clearUserProperties();">Clear all user properties</a></li>
+    <li><a href="javascript:logRevenueV2();">LogRevenueV2</a></li>
     <br><br>
     <li><a href="/test/browser/amplitudejs2.html">Go to second page</a></li>
 </body>

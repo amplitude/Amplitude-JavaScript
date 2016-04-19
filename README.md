@@ -193,32 +193,17 @@ var revenue = new amplitude.Revenue().setProductId('com.company.productId').setP
 amplitude.logRevenueV2(revenue);
 ```
 
-`productId`, `price`, and `quantity` are required fields. Each field has a corresponding `set` method (for example `setProductId`, `setQuantity`, etc), as well as a corresponding event property key (see below for how to send revenue properties in event properties). This table describes the different fields available:
+`productId` and `price` are required fields. `quantity` defaults to 1 if not specified. Each field has a corresponding `set` method (for example `setProductId`, `setQuantity`, etc). This table describes the different fields available:
 
-| Name               | Type       | Description                                                                                              | default | property key |
-|--------------------|------------|----------------------------------------------------------------------------------------------------------|---------|--------------|
-| productId          | String     | Required: an identifier for the product (we recommend something like the Google Play Store product Id)   | null    | $productId   |
-| quantity           | Integer    | Required: the quantity of products purchased. Defaults to 1 if not specified. Revenue = quantity * price | 1       | $quantity    |
-| price              | Double     | Required: the price of the products purchased (can be negative). Revenue = quantity * price              | null    | $price       |
-| revenueType        | String     | Optional: the type of revenue (ex: tax, refund, income)                                                  | null    | $revenueType |
-| revenueProperties  | Object     | Optional: an object of event properties to include in the revenue event                                  | null    | n/a          |
+| Name               | Type       | Description                                                                                              | default |
+|--------------------|------------|----------------------------------------------------------------------------------------------------------|---------|
+| productId          | String     | Required: an identifier for the product (we recommend something like the Google Play Store product Id)   | null    |
+| quantity           | Integer    | Required: the quantity of products purchased. Defaults to 1 if not specified. Revenue = quantity * price | 1       |
+| price              | Double     | Required: the price of the products purchased (can be negative). Revenue = quantity * price              | null    |
+| revenueType        | String     | Optional: the type of revenue (ex: tax, refund, income)                                                  | null    |
+| revenueProperties  | Object     | Optional: an object of event properties to include in the revenue event                                  | null    |
 
 Note: the price can be negative, which might be useful for tracking revenue lost, for example refunds or costs.
-
-### Sending Revenue as Event Properties ###
-
-Instead of sending revenue through Amplitude's special revenue event, you can send revenue properties as event properties on any event you log. The `property key` column in the above table denotes the string key to use when declaring the event property. Note: you still need to set a productId and a price. If quantity is not set, it is assumed to be 1:
-
-```java
-var properties = {
-  'description': 'some event description',
-  'color': 'green',
-  '$productId': 'productIdentifier',
-  '$price': 10.99,
-  '$quantity': 2
-};
-amplitude.logEvent('Completed purchase', properties);
-```
 
 ### Backwards compatibility ###
 
