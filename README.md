@@ -189,7 +189,7 @@ The preferred method of tracking revenue for a user now is to use `logRevenueV2(
 
 Each time a user generates revenue, you create a `Revenue` object and fill out the revenue properties:
 ```javascript
-var revenue = new amplitude.Revenue().setProductId('com.company.productId'"').setPrice(3.99).setQuantity(3);
+var revenue = new amplitude.Revenue().setProductId('com.company.productId').setPrice(3.99).setQuantity(3);
 amplitude.logRevenueV2(revenue);
 ```
 
