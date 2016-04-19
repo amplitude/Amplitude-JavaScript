@@ -18,7 +18,8 @@
   amplitude.Identify = Identify;
   var funcs = ['init', 'logEvent', 'logRevenue', 'setUserId', 'setUserProperties',
                'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId',
-               'setGlobalUserProperties', 'identify', 'clearUserProperties'];
+               'setGlobalUserProperties', 'identify', 'clearUserProperties',
+               'regenerateDeviceId'];
   function setUpProxy(instance) {
     function proxy(fn) {
       instance[fn] = function() {

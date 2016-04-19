@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add helper method to regenerate a new random deviceId. This can be used to anonymize a user after they log out. Note this is not recommended unless you know what are you doing. See [Readme](https://github.com/amplitude/Amplitude-Javascript#logging-out-and-anonymous-users) for more information.
+
 ### 2.11.0 (April 14, 2016)
 
 * Add tracking of each user's initial_utm parameters (which is captured as a set once operation). Utm parameters are now sent only once per user session.

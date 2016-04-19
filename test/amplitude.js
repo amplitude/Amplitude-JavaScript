@@ -625,6 +625,25 @@ describe('Amplitude', function() {
     });
   });
 
+  describe('regenerateDeviceId', function() {
+    beforeEach(function() {
+      reset();
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should regenerate the deviceId', function() {
+      var deviceId = 'oldDeviceId';
+      amplitude.init(apiKey, null, {'deviceId': deviceId});
+      amplitude.regenerateDeviceId();
+      assert.notEqual(amplitude.options.deviceId, deviceId);
+      assert.lengthOf(amplitude.options.deviceId, 37);
+      assert.equal(amplitude.options.deviceId[36], 'R');
+    });
+  });
+
   describe('setDeviceId', function() {
 
     beforeEach(function() {
