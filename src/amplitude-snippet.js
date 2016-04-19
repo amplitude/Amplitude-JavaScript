@@ -22,7 +22,8 @@
   amplitude.Revenue = Revenue;
   var funcs = ['init', 'logEvent', 'logRevenue', 'setUserId', 'setUserProperties',
                'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId',
-               'setGlobalUserProperties', 'identify', 'clearUserProperties'];
+               'setGlobalUserProperties', 'identify', 'clearUserProperties',
+               'logRevenueV2'];
   function setUpProxy(instance) {
     function proxyMain(fn) {
       instance[fn] = function() {
