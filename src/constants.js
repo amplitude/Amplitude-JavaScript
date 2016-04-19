@@ -17,5 +17,11 @@ module.exports = {
   OPT_OUT: 'amplitude_optOut',
   USER_ID: 'amplitude_userId',
 
-  COOKIE_TEST: 'amplitude_cookie_test'
+  COOKIE_TEST: 'amplitude_cookie_test',
+
+  // revenue keys
+  REVENUE_PRODUCT_ID: '$productId',
+  REVENUE_QUANTITY: '$quantity',
+  REVENUE_PRICE: '$price',
+  REVENUE_REVENUE_TYPE: '$revenueType'
 };
