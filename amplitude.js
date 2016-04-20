@@ -113,6 +113,7 @@ var localStorage = require('./localstorage');  // jshint ignore:line
 var md5 = require('JavaScript-MD5');
 var object = require('object');
 var Request = require('./xhr');
+var Revenue = require('./revenue');
 var type = require('./type');
 var UAParser = require('ua-parser-js');
 var utils = require('./utils');
@@ -146,6 +147,7 @@ var Amplitude = function Amplitude() {
 };
 
 Amplitude.prototype.Identify = Identify;
+Amplitude.prototype.Revenue = Revenue;
 
 /**
  * Initializes the Amplitude Javascript SDK with your apiKey and any optional configurations.
@@ -747,6 +749,21 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
 };
 
 /**
+ * Applies the proxied functions on the proxied object to an instance of the real object.
+ * Used to convert proxied Identify and Revenue objects.
+ * @private
+ */
+var _convertProxyObjectToRealObject = function _convertProxyObjectToRealObject(instance, proxy) {
+  for (var i = 0; i < proxy._q.length; i++) {
+    var fn = instance[proxy._q[i][0]];
+    if (type(fn) === 'function') {
+      fn.apply(instance, proxy._q[i].slice(1));
+    }
+  }
+  return instance;
+};
+
+/**
  * Send an identify call containing user property operations to Amplitude servers.
  * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
  * for more information on the Identify API and user property operations.
@@ -767,14 +784,7 @@ Amplitude.prototype.identify = function(identify_obj, opt_callback) {
 
   // if identify input is a proxied object created by the async loading snippet, convert it into an identify object
   if (type(identify_obj) === 'object' && identify_obj.hasOwnProperty('_q')) {
-    var instance = new Identify();
-    for (var i = 0; i < identify_obj._q.length; i++) {
-        var fn = instance[identify_obj._q[i][0]];
-        if (type(fn) === 'function') {
-          fn.apply(instance, identify_obj._q[i].slice(1));
-        }
-    }
-    identify_obj = instance;
+    identify_obj = _convertProxyObjectToRealObject(new Identify(), identify_obj);
   }
 
   if (identify_obj instanceof Identify) {
@@ -929,8 +939,39 @@ var _isNumber = function _isNumber(n) {
 };
 
 /**
- * Log revenue event with a price, quantity, and product identifier.
+ * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
+ * revenueType and event properties.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue}
+ * for more information on the Revenue interface and logging revenue.
  * @public
+ * @param {Revenue} revenue_obj - the revenue object containing the revenue data being logged.
+ * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99);
+ * amplitude.logRevenueV2(revenue);
+ */
+Amplitude.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
+  if (!this._apiKeySet('logRevenueV2()')) {
+    return;
+  }
+
+  // if revenue input is a proxied object created by the async loading snippet, convert it into an revenue object
+  if (type(revenue_obj) === 'object' && revenue_obj.hasOwnProperty('_q')) {
+    revenue_obj = _convertProxyObjectToRealObject(new Revenue(), revenue_obj);
+  }
+
+  if (revenue_obj instanceof Revenue) {
+    // only send if revenue is valid
+    if (revenue_obj && revenue_obj._isValidRevenue()) {
+      return this.logEvent(Constants.REVENUE_EVENT, revenue_obj._toJSONObject());
+    }
+  } else {
+    utils.log('Invalid revenue input type. Expected Revenue object but saw ' + type(revenue_obj));
+  }
+};
+
+/**
+ * Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
+ * @public
+ * @deprecated
  * @param {number} price - price of revenue event
  * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
  * @param {string} product - (optional) product identifier
@@ -943,7 +984,7 @@ Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
     return -1;
   }
 
-  return this._logEvent('revenue_amount', {}, {
+  return this._logEvent(Constants.REVENUE_EVENT, {}, {
     productId: product,
     special: 'revenue_amount',
     quantity: quantity || 1,
@@ -1128,7 +1169,7 @@ Amplitude.prototype.__VERSION__ = version;
 
 module.exports = Amplitude;
 
-}, {"./constants":3,"./cookiestorage":4,"./utm":5,"./identify":6,"json":7,"./localstorage":8,"JavaScript-MD5":9,"object":10,"./xhr":11,"./type":12,"ua-parser-js":13,"./utils":14,"./uuid":15,"./version":16,"./options":17}],
+}, {"./constants":3,"./cookiestorage":4,"./utm":5,"./identify":6,"json":7,"./localstorage":8,"JavaScript-MD5":9,"object":10,"./xhr":11,"./revenue":12,"./type":13,"ua-parser-js":14,"./utils":15,"./uuid":16,"./version":17,"./options":18}],
 3: [function(require, module, exports) {
 module.exports = {
   API_VERSION: 2,
@@ -1149,7 +1190,14 @@ module.exports = {
   OPT_OUT: 'amplitude_optOut',
   USER_ID: 'amplitude_userId',
 
-  COOKIE_TEST: 'amplitude_cookie_test'
+  COOKIE_TEST: 'amplitude_cookie_test',
+
+  // revenue keys
+  REVENUE_EVENT: 'revenue_amount',
+  REVENUE_PRODUCT_ID: '$productId',
+  REVENUE_QUANTITY: '$quantity',
+  REVENUE_PRICE: '$price',
+  REVENUE_REVENUE_TYPE: '$revenueType'
 };
 
 }, {}],
@@ -1247,8 +1295,8 @@ cookieStorage.prototype.getStorage = function() {
 
 module.exports = cookieStorage;
 
-}, {"./constants":3,"./cookie":18,"json":7,"./localstorage":8}],
-18: [function(require, module, exports) {
+}, {"./constants":3,"./cookie":19,"json":7,"./localstorage":8}],
+19: [function(require, module, exports) {
 /*
  * Cookie data
  */
@@ -1378,8 +1426,8 @@ module.exports = {
 
 };
 
-}, {"./base64":19,"json":7,"top-domain":20,"./utils":14}],
-19: [function(require, module, exports) {
+}, {"./base64":20,"json":7,"top-domain":21,"./utils":15}],
+20: [function(require, module, exports) {
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -1478,8 +1526,8 @@ var Base64 = {
 
 module.exports = Base64;
 
-}, {"./utf8":21}],
-21: [function(require, module, exports) {
+}, {"./utf8":22}],
+22: [function(require, module, exports) {
 /* jshint bitwise: false */
 
 /*
@@ -1549,8 +1597,8 @@ module.exports = parse && stringify
   ? JSON
   : require('json-fallback');
 
-}, {"json-fallback":22}],
-22: [function(require, module, exports) {
+}, {"json-fallback":23}],
+23: [function(require, module, exports) {
 /*
     json2.js
     2014-02-04
@@ -2040,7 +2088,7 @@ module.exports = parse && stringify
 }());
 
 }, {}],
-20: [function(require, module, exports) {
+21: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -2088,8 +2136,8 @@ function domain(url){
   return match ? match[0] : '';
 };
 
-}, {"url":23}],
-23: [function(require, module, exports) {
+}, {"url":24}],
+24: [function(require, module, exports) {
 
 /**
  * Parse the given `url`.
@@ -2174,7 +2222,7 @@ function port (protocol){
 }
 
 }, {}],
-14: [function(require, module, exports) {
+15: [function(require, module, exports) {
 var constants = require('./constants');
 var type = require('./type');
 
@@ -2304,8 +2352,8 @@ module.exports = {
   validateProperties: validateProperties
 };
 
-}, {"./constants":3,"./type":12}],
-12: [function(require, module, exports) {
+}, {"./constants":3,"./type":13}],
+13: [function(require, module, exports) {
 /**
  * toString ref.
  * @private
@@ -2671,7 +2719,7 @@ Identify.prototype._addOperation = function(operation, property, value) {
 
 module.exports = Identify;
 
-}, {"./type":12,"./utils":14}],
+}, {"./type":13,"./utils":15}],
 9: [function(require, module, exports) {
 /*
  * JavaScript MD5 1.0.1
@@ -3092,8 +3140,8 @@ Request.prototype.send = function(callback) {
 
 module.exports = Request;
 
-}, {"querystring":24}],
-24: [function(require, module, exports) {
+}, {"querystring":25}],
+25: [function(require, module, exports) {
 
 /**
  * Module dependencies.
@@ -3168,8 +3216,8 @@ exports.stringify = function(obj){
   return pairs.join('&');
 };
 
-}, {"trim":25,"type":26}],
-25: [function(require, module, exports) {
+}, {"trim":26,"type":27}],
+26: [function(require, module, exports) {
 
 exports = module.exports = trim;
 
@@ -3189,7 +3237,7 @@ exports.right = function(str){
 };
 
 }, {}],
-26: [function(require, module, exports) {
+27: [function(require, module, exports) {
 /**
  * toString ref.
  */
@@ -3238,7 +3286,168 @@ function isBuffer(obj) {
 }
 
 }, {}],
-13: [function(require, module, exports) {
+12: [function(require, module, exports) {
+var constants = require('./constants');
+var type = require('./type');
+var utils = require('./utils');
+
+/*
+ * Wrapper for logging Revenue data. Revenue objects get passed to amplitude.logRevenueV2 to send to Amplitude servers.
+ * Note: productId and price are required fields. If quantity is not specified, then defaults to 1.
+ */
+
+/**
+ * Revenue API - instance constructor. Revenue objects are a wrapper for revenue data.
+ * Each method updates a revenue property in the Revenue object, and returns the same Revenue object,
+ * allowing you to chain multiple method calls together.
+ * Note: productId and price are required fields to log revenue events.
+ * If quantity is not specified then defaults to 1.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue} for more information
+ * about logging Revenue.
+ * @constructor Revenue
+ * @public
+ * @example var revenue = new amplitude.Revenue();
+ */
+var Revenue = function Revenue() {
+  // required fields
+  this._productId = null;
+  this._quantity = 1;
+  this._price = null;
+
+  // optional fields
+  this._revenueType = null;
+  this._properties = null;
+};
+
+/**
+ * Set a value for the product identifer. This field is required for all revenue being logged.
+ * @public
+ * @param {string} productId - The value for the product identifier. Empty and invalid strings are ignored.
+ * @return {Revenue} Returns the same Revenue object, allowing you to chain multiple method calls together.
+ * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99);
+ * amplitude.logRevenueV2(revenue);
+ */
+Revenue.prototype.setProductId = function setProductId(productId) {
+  if (type(productId) !== 'string') {
+    utils.log('Unsupported type for productId: ' + type(productId) + ', expecting string');
+  } else if (utils.isEmptyString(productId)) {
+    utils.log('Invalid empty productId');
+  } else {
+    this._productId = productId;
+  }
+  return this;
+};
+
+/**
+ * Set a value for the quantity. Note revenue amount is calculated as price * quantity.
+ * @public
+ * @param {number} quantity - Integer value for the quantity. If not set, quantity defaults to 1.
+ * @return {Revenue} Returns the same Revenue object, allowing you to chain multiple method calls together.
+ * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99).setQuantity(5);
+ * amplitude.logRevenueV2(revenue);
+ */
+Revenue.prototype.setQuantity = function setQuantity(quantity) {
+  if (type(quantity) !== 'number') {
+    utils.log('Unsupported type for quantity: ' + type(quantity) + ', expecting number');
+  } else {
+    this._quantity = parseInt(quantity);
+  }
+  return this;
+};
+
+/**
+ * Set a value for the price. This field is required for all revenue being logged.
+ * Note revenue amount is calculated as price * quantity.
+ * @public
+ * @param {number} price - Double value for the quantity.
+ * @return {Revenue} Returns the same Revenue object, allowing you to chain multiple method calls together.
+ * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99);
+ * amplitude.logRevenueV2(revenue);
+ */
+Revenue.prototype.setPrice = function setPrice(price) {
+  if (type(price) !== 'number') {
+    utils.log('Unsupported type for price: ' + type(price) + ', expecting number');
+  } else {
+    this._price = price;
+  }
+  return this;
+};
+
+/**
+ * Set a value for the revenueType (for example purchase, cost, tax, refund, etc).
+ * @public
+ * @param {string} revenueType - RevenueType to designate.
+ * @return {Revenue} Returns the same Revenue object, allowing you to chain multiple method calls together.
+ * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99).setRevenueType('purchase');
+ * amplitude.logRevenueV2(revenue);
+ */
+Revenue.prototype.setRevenueType = function setRevenueType(revenueType) {
+  if (type(revenueType) !== 'string') {
+    utils.log('Unsupported type for revenueType: ' + type(revenueType) + ', expecting string');
+  } else {
+    this._revenueType = revenueType;
+  }
+  return this;
+};
+
+/**
+ * Set event properties for the revenue event.
+ * @public
+ * @param {object} eventProperties - Revenue event properties to set.
+ * @return {Revenue} Returns the same Revenue object, allowing you to chain multiple method calls together.
+ * @example var event_properties = {'city': 'San Francisco'};
+ * var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99).setEventProperties(event_properties);
+ * amplitude.logRevenueV2(revenue);
+*/
+Revenue.prototype.setEventProperties = function setEventProperties(eventProperties) {
+  if (type(eventProperties) !== 'object') {
+    utils.log('Unsupported type for eventProperties: ' + type(eventProperties) + ', expecting object');
+  } else {
+    this._properties = utils.validateProperties(eventProperties);
+  }
+  return this;
+};
+
+/**
+ * @private
+ */
+Revenue.prototype._isValidRevenue = function _isValidRevenue() {
+  if (type(this._productId) !== 'string' || utils.isEmptyString(this._productId)) {
+    utils.log('Invalid revenue, need to set productId field');
+    return false;
+  }
+  if (type(this._price) !== 'number') {
+    utils.log('Invalid revenue, need to set price field');
+    return false;
+  }
+  return true;
+};
+
+/**
+ * @private
+ */
+Revenue.prototype._toJSONObject = function _toJSONObject() {
+  var obj = type(this._properties) === 'object' ? this._properties : {};
+
+  if (this._productId !== null) {
+    obj[constants.REVENUE_PRODUCT_ID] = this._productId;
+  }
+  if (this._quantity !== null) {
+    obj[constants.REVENUE_QUANTITY] = this._quantity;
+  }
+  if (this._price !== null) {
+    obj[constants.REVENUE_PRICE] = this._price;
+  }
+  if (this._revenueType !== null) {
+    obj[constants.REVENUE_REVENUE_TYPE] = this._revenueType;
+  }
+  return obj;
+};
+
+module.exports = Revenue;
+
+}, {"./constants":3,"./type":13,"./utils":15}],
+14: [function(require, module, exports) {
 /* jshint eqeqeq: false, forin: false */
 /* global define */
 
@@ -4121,7 +4330,7 @@ function isBuffer(obj) {
 })(this);
 
 }, {}],
-15: [function(require, module, exports) {
+16: [function(require, module, exports) {
 /* jshint bitwise: false, laxbreak: true */
 
 /**
@@ -4155,11 +4364,11 @@ var uuid = function(a) {
 module.exports = uuid;
 
 }, {}],
-16: [function(require, module, exports) {
+17: [function(require, module, exports) {
 module.exports = '2.11.0';
 
 }, {}],
-17: [function(require, module, exports) {
+18: [function(require, module, exports) {
 var language = require('./language');
 
 // default options
@@ -4184,8 +4393,8 @@ module.exports = {
   eventUploadPeriodMillis: 30 * 1000, // 30s
 };
 
-}, {"./language":27}],
-27: [function(require, module, exports) {
+}, {"./language":28}],
+28: [function(require, module, exports) {
 var getLanguage = function() {
     return (navigator && ((navigator.languages && navigator.languages[0]) ||
         navigator.language || navigator.userLanguage)) || undefined;

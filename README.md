@@ -13,13 +13,14 @@ This Readme will guide you through using Amplitude's Javascript SDK to track use
         <script type="text/javascript">
           (function(e,t){var n=e.amplitude||{_q:[]};var r=t.createElement("script");r.type="text/javascript";
           r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.11.0-min.gz.js";
-          r.onload=function(){e.amplitude.runQueuedFunctions()};var i=t.getElementsByTagName("script")[0];
-          i.parentNode.insertBefore(r,i);var s=function(){this._q=[];return this};function o(e){
-          s.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
-          return this}}var a=["add","append","clearAll","prepend","set","setOnce","unset"];for(var c=0;c<a.length;c++){
-          o(a[c])}n.Identify=s;var u=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties","regenerateDeviceId"];
-          function p(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
-          }}for(var n=0;n<u.length;n++){t(u[n])}}p(n);e.amplitude=n})(window,document);
+          r.onload=function(){e.amplitude.runQueuedFunctions()};var s=t.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(r,s);function i(e,t){e.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+          return this}}var o=function(){this._q=[];return this};var a=["add","append","clearAll","prepend","set","setOnce","unset"];
+          for(var u=0;u<a.length;u++){i(o,a[u])}n.Identify=o;var c=function(){this._q=[];return this;
+          };var p=["setProductId","setQuantity","setPrice","setRevenueType","setEventProperties"];
+          for(var l=0;l<p.length;l++){i(c,p[l])}n.Revenue=c;var d=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties","logRevenueV2","regenerateDeviceId"];
+          function v(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+          }}for(var n=0;n<d.length;n++){t(d[n])}}v(n);e.amplitude=n})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
         </script>
@@ -187,15 +188,29 @@ amplitude.clearUserProperties();
 
 # Tracking Revenue #
 
-To track revenue from a user, call
+The preferred method of tracking revenue for a user now is to use `logRevenueV2()` in conjunction with the provided `Revenue` interface. `Revenue` instances will store each revenue transaction and allow you to define several special revenue properties (such as revenueType, productId, etc) that are used in Amplitude dashboard's Revenue tab. You can now also add event properties to the revenue event, via the eventProperties field. These `Revenue` instance objects are then passed into `logRevenueV2` to send as revenue events to Amplitude servers. This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 1, 7, 14, 30, 60, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
 
+Each time a user generates revenue, you create a `Revenue` object and fill out the revenue properties:
 ```javascript
-amplitude.logRevenue(9.99, 1, 'product');
+var revenue = new amplitude.Revenue().setProductId('com.company.productId').setPrice(3.99).setQuantity(3);
+amplitude.logRevenueV2(revenue);
 ```
 
-The function takes a unit price, a quantity, and a product identifier. Quantity and product identifier are optional parameters.
+`productId` and `price` are required fields. `quantity` defaults to 1 if not specified. Each field has a corresponding `set` method (for example `setProductId`, `setQuantity`, etc). This table describes the different fields available:
 
-This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 7, 30, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
+| Name               | Type       | Description                                                                                              | default |
+|--------------------|------------|----------------------------------------------------------------------------------------------------------|---------|
+| productId          | String     | Required: an identifier for the product (we recommend something like the Google Play Store product Id)   | null    |
+| quantity           | Integer    | Required: the quantity of products purchased. Defaults to 1 if not specified. Revenue = quantity * price | 1       |
+| price              | Double     | Required: the price of the products purchased (can be negative). Revenue = quantity * price              | null    |
+| revenueType        | String     | Optional: the type of revenue (ex: tax, refund, income)                                                  | null    |
+| eventProperties    | Object     | Optional: an object of event properties to include in the revenue event                                  | null    |
+
+Note: the price can be negative, which might be useful for tracking revenue lost, for example refunds or costs. Also note, you can set event properties on the revenue event just as you would with logEvent by passing in a object of string key value pairs. These event properties, however, will only appear in the Event Segmentation tab, not in the Revenue tab.
+
+### Backwards compatibility ###
+
+The existing `logRevenue` methods still work but are deprecated. Fields such as `revenueType` will be missing from events logged with the old methods, so Revenue segmentation on those events will be limited in Amplitude dashboards.
 
 # Opting User Out of Logging #
 
