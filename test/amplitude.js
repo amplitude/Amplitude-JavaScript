@@ -10,6 +10,7 @@ describe('Amplitude', function() {
   var querystring = require('querystring');
   var JSON = require('json');
   var Identify = require('../src/identify.js');
+  var Revenue = require('../src/revenue.js');
   var apiKey = '000000';
   var keySuffix = '_' + apiKey.slice(0,6);
   var userId = 'user';
@@ -665,6 +666,25 @@ describe('setVersionName', function() {
       amplitude.setVersionName(15000);
       amplitude.logEvent('testEvent2');
       assert.equal(amplitude._unsentEvents[1].version_name, 'testVersionName1');
+    });
+  });
+
+  describe('regenerateDeviceId', function() {
+    beforeEach(function() {
+      reset();
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should regenerate the deviceId', function() {
+      var deviceId = 'oldDeviceId';
+      amplitude.init(apiKey, null, {'deviceId': deviceId});
+      amplitude.regenerateDeviceId();
+      assert.notEqual(amplitude.options.deviceId, deviceId);
+      assert.lengthOf(amplitude.options.deviceId, 37);
+      assert.equal(amplitude.options.deviceId[36], 'R');
     });
   });
 
@@ -2197,6 +2217,86 @@ describe('setVersionName', function() {
         price: 10.10,
         quantity: 7,
         productId: 'chicken.dinner'
+      });
+    });
+  });
+
+  describe('logRevenueV2', function() {
+    beforeEach(function() {
+      reset();
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should log with the Revenue object', function () {
+      // ignore invalid revenue objects
+      amplitude.logRevenueV2(null);
+      assert.lengthOf(server.requests, 0);
+      amplitude.logRevenueV2({});
+      assert.lengthOf(server.requests, 0);
+      amplitude.logRevenueV2(new amplitude.Revenue());
+
+      // log valid revenue object
+      var productId = 'testProductId';
+      var quantity = 15;
+      var price = 10.99;
+      var revenueType = 'testRevenueType'
+      var properties = {'city': 'San Francisco'};
+
+      var revenue = new amplitude.Revenue().setProductId(productId).setQuantity(quantity).setPrice(price);
+      revenue.setRevenueType(revenueType).setEventProperties(properties);
+
+      amplitude.logRevenueV2(revenue);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events.length, 1);
+      var event = events[0];
+      assert.equal(event.event_type, 'revenue_amount');
+
+      assert.deepEqual(event.event_properties, {
+        '$productId': productId,
+        '$quantity': quantity,
+        '$price': price,
+        '$revenueType': revenueType,
+        'city': 'San Francisco'
+      });
+
+      // verify user properties empty
+      assert.deepEqual(event.user_properties, {});
+
+      // verify no revenue data in api_properties
+      assert.deepEqual(event.api_properties, {});
+    });
+
+    it('should convert proxied Revenue object into real revenue object', function() {
+      var fakeRevenue = {'_q':[
+        ['setProductId', 'questionable'],
+        ['setQuantity', 10],
+        ['setPrice', 'key1']  // invalid price type, this will fail to generate revenue event
+      ]};
+      amplitude.logRevenueV2(fakeRevenue);
+      assert.lengthOf(server.requests, 0);
+
+      var proxyRevenue = {'_q':[
+        ['setProductId', 'questionable'],
+        ['setQuantity', 15],
+        ['setPrice', 10.99],
+        ['setRevenueType', 'purchase']
+      ]};
+      amplitude.logRevenueV2(proxyRevenue);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      var event = events[0];
+      assert.equal(event.event_type, 'revenue_amount');
+
+      assert.deepEqual(event.event_properties, {
+        '$productId': 'questionable',
+        '$quantity': 15,
+        '$price': 10.99,
+        '$revenueType': 'purchase'
       });
     });
   });

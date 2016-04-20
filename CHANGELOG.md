@@ -1,8 +1,14 @@
 ## Unreleased
 
 * Add support for setting groups for users and events. See the [Readme](https://github.com/amplitude/Amplitude-Javascript#setting-groups) for more information.
+* Add `logRevenueV2` and new `Revenue` class to support logging revenue events with properties, and revenue type. See [Readme](https://github.com/amplitude/Amplitude-Javascript#tracking-revenue) for more info.
+* Add helper method to regenerate a new random deviceId. This can be used to anonymize a user after they log out. Note this is not recommended unless you know what are you doing. See [Readme](https://github.com/amplitude/Amplitude-Javascript#logging-out-and-anonymous-users) for more information.
+
+### 2.11.0 (April 14, 2016)
+
 * Add tracking of each user's initial_utm parameters (which is captured as a set once operation). Utm parameters are now sent only once per user session.
-* Add documentation for SDK functions. You can take a look [here](https://rawgit.com/amplitude/Amplitude-Javascript/defensive_cleanup/documentation/Amplitude.html). A link has also been added to the Readme.
+* Add documentation for SDK functions. You can take a look [here](https://rawgit.com/amplitude/Amplitude-Javascript/master/documentation/Amplitude.html). A link has also been added to the Readme.
+* Fix cookie test bug. In rare cases, the cookie test failed to delete the key used in testing. Reloading the page generated new keys, filling up the cookie over time. Fixed test to re-use the same key.
 
 ### 2.10.0 (March 30, 2016)
 

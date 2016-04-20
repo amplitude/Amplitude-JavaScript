@@ -12,14 +12,15 @@ This Readme will guide you through using Amplitude's Javascript SDK to track use
     ```html
         <script type="text/javascript">
           (function(e,t){var n=e.amplitude||{_q:[]};var r=t.createElement("script");r.type="text/javascript";
-          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.10.0-min.gz.js";
-          r.onload=function(){e.amplitude.runQueuedFunctions()};var i=t.getElementsByTagName("script")[0];
-          i.parentNode.insertBefore(r,i);var s=function(){this._q=[];return this};function o(e){
-          s.prototype[e]=function(){this._q.push([e].concat(Array.prototype.slice.call(arguments,0)));
-          return this}}var a=["add","append","clearAll","prepend","set","setOnce","unset"];for(var c=0;c<a.length;c++){
-          o(a[c])}n.Identify=s;var u=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties"];
-          function p(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
-          }}for(var n=0;n<u.length;n++){t(u[n])}}p(n);e.amplitude=n})(window,document);
+          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.11.0-min.gz.js";
+          r.onload=function(){e.amplitude.runQueuedFunctions()};var s=t.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(r,s);function i(e,t){e.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+          return this}}var o=function(){this._q=[];return this};var a=["add","append","clearAll","prepend","set","setOnce","unset"];
+          for(var u=0;u<a.length;u++){i(o,a[u])}n.Identify=o;var c=function(){this._q=[];return this;
+          };var p=["setProductId","setQuantity","setPrice","setRevenueType","setEventProperties"];
+          for(var l=0;l<p.length;l++){i(c,p[l])}n.Revenue=c;var d=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties","setGroup","logRevenueV2","regenerateDeviceId"];
+          function v(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
+          }}for(var n=0;n<d.length;n++){t(d[n])}}v(n);e.amplitude=n})(window,document);
 
           amplitude.init("YOUR_API_KEY_HERE");
         </script>
@@ -59,16 +60,19 @@ If your app has its own login system that you want to track users with, you can 
 amplitude.setUserId('USER_ID_HERE');
 ```
 
-A user's data will be merged on the backend so that any events up to that point from the same browser will be tracked under the same user. Note: if a user logs out, or you want to log the events under an anonymous user, you may set the userId to `null` like so:
-
-```javascript
-amplitude.setUserId(null); // not string 'null'
-```
-
 You can also add the user ID as an argument to the `init` call:
 
 ```javascript
 amplitude.init('YOUR_API_KEY_HERE', 'USER_ID_HERE');
+```
+
+### Logging Out and Anonymous Users ###
+
+A user's data will be merged on the backend so that any events up to that point from the same browser will be tracked under the same user. Note: if a user logs out, or you want to log the events under an anonymous user, you need to do 2 things: 1) set the userId to `null` 2) regenerate a new deviceId. After doing that, events coming from the current user will appear as a brand new user in Amplitude dashboards. Note if you choose to do this, then you won't be able to see that the 2 users were using the same browser/device.
+
+```javascript
+amplitude.setUserId(null); // not string 'null'
+amplitude.regenerateDeviceId();
 ```
 
 # Setting Event Properties #
@@ -184,15 +188,29 @@ amplitude.clearUserProperties();
 
 # Tracking Revenue #
 
-To track revenue from a user, call
+The preferred method of tracking revenue for a user now is to use `logRevenueV2()` in conjunction with the provided `Revenue` interface. `Revenue` instances will store each revenue transaction and allow you to define several special revenue properties (such as revenueType, productId, etc) that are used in Amplitude dashboard's Revenue tab. You can now also add event properties to the revenue event, via the eventProperties field. These `Revenue` instance objects are then passed into `logRevenueV2` to send as revenue events to Amplitude servers. This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 1, 7, 14, 30, 60, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
 
+Each time a user generates revenue, you create a `Revenue` object and fill out the revenue properties:
 ```javascript
-amplitude.logRevenue(9.99, 1, 'product');
+var revenue = new amplitude.Revenue().setProductId('com.company.productId').setPrice(3.99).setQuantity(3);
+amplitude.logRevenueV2(revenue);
 ```
 
-The function takes a unit price, a quantity, and a product identifier. Quantity and product identifier are optional parameters.
+`productId` and `price` are required fields. `quantity` defaults to 1 if not specified. Each field has a corresponding `set` method (for example `setProductId`, `setQuantity`, etc). This table describes the different fields available:
 
-This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 7, 30, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
+| Name               | Type       | Description                                                                                              | default |
+|--------------------|------------|----------------------------------------------------------------------------------------------------------|---------|
+| productId          | String     | Required: an identifier for the product (we recommend something like the Google Play Store product Id)   | null    |
+| quantity           | Integer    | Required: the quantity of products purchased. Defaults to 1 if not specified. Revenue = quantity * price | 1       |
+| price              | Double     | Required: the price of the products purchased (can be negative). Revenue = quantity * price              | null    |
+| revenueType        | String     | Optional: the type of revenue (ex: tax, refund, income)                                                  | null    |
+| eventProperties    | Object     | Optional: an object of event properties to include in the revenue event                                  | null    |
+
+Note: the price can be negative, which might be useful for tracking revenue lost, for example refunds or costs. Also note, you can set event properties on the revenue event just as you would with logEvent by passing in a object of string key value pairs. These event properties, however, will only appear in the Event Segmentation tab, not in the Revenue tab.
+
+### Backwards compatibility ###
+
+The existing `logRevenue` methods still work but are deprecated. Fields such as `revenueType` will be missing from events logged with the old methods, so Revenue segmentation on those events will be limited in Amplitude dashboards.
 
 # Opting User Out of Logging #
 
@@ -227,24 +245,23 @@ amplitude.init('YOUR_API_KEY_HERE', null, {
 ```
 
 | option | type | description | default |
-|------------|----------------------------------------------------------------------------------|-----------|
-| batchEvents | Boolean | If `true`, events are batched together and uploaded only when the number of unsent events is greater than or equal to `eventUploadThreshold` or after `eventUploadPeriodMillis` milliseconds have passed | `false` |
-| cookieExpiration | Number | The number of days after which the Amplitude cookie will expire | 365\*10 (10 years) |
-| cookieName | String | Custom name for the Amplitude cookie | `'amplitude_id'` |
-| deviceId | String | Custom device ID to set. Note this is not recommended unless you really know what you are doing (like if you have your own system for tracking user devices) | Randomly generated UUID |
-| domain | String | Custom cookie domain | The top domain of the current page's url |
-| eventUploadPeriodMillis | Number | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true` | 30\*1000 (30 sec) |
-| eventUploadThreshold | Number | Minimum number of events to batch together per request if `batchEvents` is `true` | 30 |
-| includeReferrer | Boolean | If `true`, captures the `referrer` and `referring_domain` for each session, as well as the user's `initial_referrer` and `initial_referring_domain` via a set once operation | `false` |
-| includeUtm | Boolean | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded | `false` |
-| language | String | Custom language to set | Language determined by browser |
-| optOut | Boolean | Whether to opt the current user out of tracking | `false` |
-| platform | String | Custom platform to set | `'Web'` |
-| savedMaxCount | Number | Maximum number of events to save in localStorage. If more events are logged while offline, old events are removed. | 1000 |
-| saveEvents | Boolean | If `true`, saves events to localStorage and removes them upon successful upload.<br><i>NOTE:</i> Without saving events, events may be lost if the user navigates to another page before events are uploaded. | `true` |
-| sessionTimeout | Number | Time between logged events before a new session starts in milliseconds | 30\*60\*1000 (30 min) |
-| uploadBatchSize | Number | Maximum number of events to send to the server per request. | 100 |
-
+|------------|----------|------------------------------------------------------------------------|-----------|
+| batchEvents | boolean | If `true`, events are batched together and uploaded only when the number of unsent events is greater than or equal to `eventUploadThreshold` or after `eventUploadPeriodMillis` milliseconds have passed since the first unsent event was logged. | `false` |
+| cookieExpiration | number | The number of days after which the Amplitude cookie will expire | 365\*10 (10 years) |
+| cookieName | string | Custom name for the Amplitude cookie | 'amplitude_id' |
+| deviceId | string | Custom device ID to set. Note this is not recommended unless you really know what you are doing (like if you have your own system for tracking user devices) | Randomly generated UUID |
+| domain | string | Custom cookie domain | The top domain of the current page's url |
+| eventUploadPeriodMillis | number | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
+| eventUploadThreshold | number | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
+| includeReferrer | boolean | If `true`, captures the `referrer` and `referring_domain` for each session, as well as the user's `initial_referrer` and `initial_referring_domain` via a set once operation. | `false` |
+| includeUtm | boolean | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
+| language | string | Custom language to set | Language determined by browser |
+| optOut | boolean | Whether to disable tracking for the current user | `false` |
+| platform | string | Custom platform to set | 'Web' |
+| saveEvents | boolean | If `true`, saves events to localStorage and removes them upon successful upload.<br><i>NOTE:</i> Without saving events, events may be lost if the user navigates to another page before events are uploaded. | `true` |
+| savedMaxCount | number | Maximum number of events to save in localStorage. If more events are logged while offline, old events are removed. | 1000 |
+| sessionTimeout | number | Time between logged events before a new session starts in milliseconds | 30\*60\*1000 (30 min) |
+| uploadBatchSize | number | Maximum number of events to send to the server per request. | 100 |
 
 # Advanced #
 This SDK automatically grabs useful data about the browser, including browser type and operating system version.
@@ -344,7 +361,7 @@ If you are using [RequireJS](http://requirejs.org/) to load your Javascript file
 ```html
   <script src='scripts/require.js'></script>  <!-- loading RequireJS -->
   <script>
-    require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.10.0-min.gz.js'], function(amplitude) {
+    require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.11.0-min.gz.js'], function(amplitude) {
       amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
       window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
       amplitude.logEvent('Clicked Link A');
@@ -358,7 +375,7 @@ You can also define the path in your RequireJS configuration like so:
   <script>
     requirejs.config({
       paths: {
-        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.10.0-min.gz'
+        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.11.0-min.gz'
       }
     });
 
