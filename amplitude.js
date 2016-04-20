@@ -4489,7 +4489,7 @@ module.exports = uuid;
 
 }, {}],
 17: [function(require, module, exports) {
-module.exports = '2.11.0';
+module.exports = '2.12.0';
 
 }, {}],
 18: [function(require, module, exports) {
