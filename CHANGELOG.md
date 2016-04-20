@@ -1,6 +1,6 @@
 ## Unreleased
 
-* Add `logRevenueV2` and new `Revenue` class to support logging revenue events with properties, revenue type, and verified. See [Readme](https://github.com/amplitude/Amplitude-Javascript#tracking-revenue) for more info.
+* Add `logRevenueV2` and new `Revenue` class to support logging revenue events with properties, and revenue type. See [Readme](https://github.com/amplitude/Amplitude-Javascript#tracking-revenue) for more info.
 
 ### 2.11.0 (April 14, 2016)
 
