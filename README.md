@@ -18,7 +18,7 @@ This Readme will guide you through using Amplitude's Javascript SDK to track use
           return this}}var o=function(){this._q=[];return this};var a=["add","append","clearAll","prepend","set","setOnce","unset"];
           for(var u=0;u<a.length;u++){i(o,a[u])}n.Identify=o;var c=function(){this._q=[];return this;
           };var p=["setProductId","setQuantity","setPrice","setRevenueType","setEventProperties"];
-          for(var l=0;l<p.length;l++){i(c,p[l])}n.Revenue=c;var d=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties","logRevenueV2"];
+          for(var l=0;l<p.length;l++){i(c,p[l])}n.Revenue=c;var d=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties","logRevenueV2","regenerateDeviceId"];
           function v(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
           }}for(var n=0;n<d.length;n++){t(d[n])}}v(n);e.amplitude=n})(window,document);
 
@@ -60,16 +60,19 @@ If your app has its own login system that you want to track users with, you can 
 amplitude.setUserId('USER_ID_HERE');
 ```
 
-A user's data will be merged on the backend so that any events up to that point from the same browser will be tracked under the same user. Note: if a user logs out, or you want to log the events under an anonymous user, you may set the userId to `null` like so:
-
-```javascript
-amplitude.setUserId(null); // not string 'null'
-```
-
 You can also add the user ID as an argument to the `init` call:
 
 ```javascript
 amplitude.init('YOUR_API_KEY_HERE', 'USER_ID_HERE');
+```
+
+### Logging Out and Anonymous Users ###
+
+A user's data will be merged on the backend so that any events up to that point from the same browser will be tracked under the same user. Note: if a user logs out, or you want to log the events under an anonymous user, you need to do 2 things: 1) set the userId to `null` 2) regenerate a new deviceId. After doing that, events coming from the current user will appear as a brand new user in Amplitude dashboards. Note if you choose to do this, then you won't be able to see that the 2 users were using the same browser/device.
+
+```javascript
+amplitude.setUserId(null); // not string 'null'
+amplitude.regenerateDeviceId();
 ```
 
 # Setting Event Properties #
