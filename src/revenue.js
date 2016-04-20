@@ -104,17 +104,17 @@ Revenue.prototype.setRevenueType = function setRevenueType(revenueType) {
 /**
  * Set event properties for the revenue event.
  * @public
- * @param {object} properties - Revenue event properties to set.
+ * @param {object} eventProperties - Revenue event properties to set.
  * @return {Revenue} Returns the same Revenue object, allowing you to chain multiple method calls together.
  * @example var event_properties = {'city': 'San Francisco'};
- * var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99).setRevenueProperties(event_properties);
+ * var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99).setEventProperties(event_properties);
  * amplitude.logRevenueV2(revenue);
 */
-Revenue.prototype.setRevenueProperties = function setRevenueProperties(revenueProperties) {
-  if (type(revenueProperties) !== 'object') {
-    utils.log('Unsupported type for revenueProperties: ' + type(revenueProperties) + ', expecting object');
+Revenue.prototype.setEventProperties = function setEventProperties(eventProperties) {
+  if (type(eventProperties) !== 'object') {
+    utils.log('Unsupported type for eventProperties: ' + type(eventProperties) + ', expecting object');
   } else {
-    this._properties = utils.validateProperties(revenueProperties);
+    this._properties = utils.validateProperties(eventProperties);
   }
   return this;
 };

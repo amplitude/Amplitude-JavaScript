@@ -2137,7 +2137,7 @@ describe('Amplitude', function() {
       var properties = {'city': 'San Francisco'};
 
       var revenue = new amplitude.Revenue().setProductId(productId).setQuantity(quantity).setPrice(price);
-      revenue.setRevenueType(revenueType).setRevenueProperties(properties);
+      revenue.setRevenueType(revenueType).setEventProperties(properties);
 
       amplitude.logRevenueV2(revenue);
       assert.lengthOf(server.requests, 1);

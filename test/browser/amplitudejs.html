@@ -70,6 +70,7 @@
     }
     var logRevenueV2 = function() {
         var revenue = new amplitude.Revenue().setProductId('other.productId').setQuantity(15).setPrice(145.99);
+        revenue.setEventProperties({'city': 'Boston'});
         amplitude.logRevenueV2(revenue);
     }
 </script>

@@ -71,18 +71,18 @@ describe('Revenue', function() {
     assert.equal(revenue._revenueType, revenueType);
   });
 
-  it('should set revenue properties', function() {
+  it('should set event properties', function() {
     var revenue = new Revenue();
     assert.equal(revenue._properties, null);
 
     var properties = {'city':'Boston'};
-    revenue.setRevenueProperties(properties);
+    revenue.setEventProperties(properties);
     assert.deepEqual(revenue._properties, properties);
 
     // verify that non objects are ignored
-    revenue.setRevenueProperties(null);
+    revenue.setEventProperties(null);
     assert.deepEqual(revenue._properties, properties);
-    revenue.setRevenueProperties('test');
+    revenue.setEventProperties('test');
     assert.deepEqual(revenue._properties, properties);
   });
 
@@ -111,7 +111,7 @@ describe('Revenue', function() {
     var properties = {'city': 'San Francisco'};
 
     var revenue = new Revenue().setProductId(productId).setQuantity(quantity).setPrice(price);
-    revenue.setRevenueType(revenueType).setRevenueProperties(properties);
+    revenue.setRevenueType(revenueType).setEventProperties(properties);
 
     var obj = revenue._toJSONObject();
     assert.deepEqual(obj, {

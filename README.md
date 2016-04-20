@@ -17,7 +17,7 @@ This Readme will guide you through using Amplitude's Javascript SDK to track use
           s.parentNode.insertBefore(r,s);function i(e,t){e.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
           return this}}var o=function(){this._q=[];return this};var a=["add","append","clearAll","prepend","set","setOnce","unset"];
           for(var u=0;u<a.length;u++){i(o,a[u])}n.Identify=o;var c=function(){this._q=[];return this;
-          };var p=["setProductId","setQuantity","setPrice","setRevenueType","setRevenueProperties"];
+          };var p=["setProductId","setQuantity","setPrice","setRevenueType","setEventProperties"];
           for(var l=0;l<p.length;l++){i(c,p[l])}n.Revenue=c;var d=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties","logRevenueV2"];
           function v(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
           }}for(var n=0;n<d.length;n++){t(d[n])}}v(n);e.amplitude=n})(window,document);
@@ -185,7 +185,7 @@ amplitude.clearUserProperties();
 
 # Tracking Revenue #
 
-The preferred method of tracking revenue for a user now is to use `logRevenueV2()` in conjunction with the provided `Revenue` interface. `Revenue` instances will store each revenue transaction and allow you to define several special revenue properties (such as revenueType, productId, etc) that are used in Amplitude dashboard's Revenue tab. You can now also add event properties to the revenue event, via the revenueProperties field. These `Revenue` instance objects are then passed into `logRevenueV2` to send as revenue events to Amplitude servers. This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 1, 7, 14, 30, 60, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
+The preferred method of tracking revenue for a user now is to use `logRevenueV2()` in conjunction with the provided `Revenue` interface. `Revenue` instances will store each revenue transaction and allow you to define several special revenue properties (such as revenueType, productId, etc) that are used in Amplitude dashboard's Revenue tab. You can now also add event properties to the revenue event, via the eventProperties field. These `Revenue` instance objects are then passed into `logRevenueV2` to send as revenue events to Amplitude servers. This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 1, 7, 14, 30, 60, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
 
 Each time a user generates revenue, you create a `Revenue` object and fill out the revenue properties:
 ```javascript
@@ -201,9 +201,9 @@ amplitude.logRevenueV2(revenue);
 | quantity           | Integer    | Required: the quantity of products purchased. Defaults to 1 if not specified. Revenue = quantity * price | 1       |
 | price              | Double     | Required: the price of the products purchased (can be negative). Revenue = quantity * price              | null    |
 | revenueType        | String     | Optional: the type of revenue (ex: tax, refund, income)                                                  | null    |
-| revenueProperties  | Object     | Optional: an object of event properties to include in the revenue event                                  | null    |
+| eventProperties    | Object     | Optional: an object of event properties to include in the revenue event                                  | null    |
 
-Note: the price can be negative, which might be useful for tracking revenue lost, for example refunds or costs.
+Note: the price can be negative, which might be useful for tracking revenue lost, for example refunds or costs. Also note, you can set event properties on the revenue event just as you would with logEvent by passing in a object of string key value pairs. These event properties, however, will only appear in the Event Segmentation tab, not in the Revenue tab.
 
 ### Backwards compatibility ###
 

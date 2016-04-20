@@ -17,7 +17,7 @@
   for (var i = 0; i < identifyFuncs.length; i++) {proxy(Identify,identifyFuncs[i]);}
   amplitude.Identify = Identify;
   var Revenue = function() {this._q = []; return this;};
-  var revenueFuncs = ['setProductId', 'setQuantity', 'setPrice', 'setRevenueType', 'setRevenueProperties'];
+  var revenueFuncs = ['setProductId', 'setQuantity', 'setPrice', 'setRevenueType', 'setEventProperties'];
   for (var j = 0; j < revenueFuncs.length; j++) {proxy(Revenue, revenueFuncs[j]);}
   amplitude.Revenue = Revenue;
   var funcs = ['init', 'logEvent', 'logRevenue', 'setUserId', 'setUserProperties',
