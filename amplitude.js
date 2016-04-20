@@ -738,6 +738,21 @@ Amplitude.prototype.clearUserProperties = function clearUserProperties(){
 };
 
 /**
+ * Applies the proxied functions on the proxied object to an instance of the real object.
+ * Used to convert proxied Identify and Revenue objects.
+ * @private
+ */
+var _convertProxyObjectToRealObject = function _convertProxyObjectToRealObject(instance, proxy) {
+  for (var i = 0; i < proxy._q.length; i++) {
+    var fn = instance[proxy._q[i][0]];
+    if (type(fn) === 'function') {
+      fn.apply(instance, proxy._q[i].slice(1));
+    }
+  }
+  return instance;
+};
+
+/**
  * Send an identify call containing user property operations to Amplitude servers.
  * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
  * for more information on the Identify API and user property operations.
@@ -758,14 +773,7 @@ Amplitude.prototype.identify = function(identify_obj, opt_callback) {
 
   // if identify input is a proxied object created by the async loading snippet, convert it into an identify object
   if (type(identify_obj) === 'object' && identify_obj.hasOwnProperty('_q')) {
-    var instance = new Identify();
-    for (var i = 0; i < identify_obj._q.length; i++) {
-        var fn = instance[identify_obj._q[i][0]];
-        if (type(fn) === 'function') {
-          fn.apply(instance, identify_obj._q[i].slice(1));
-        }
-    }
-    identify_obj = instance;
+    identify_obj = _convertProxyObjectToRealObject(new Identify(), identify_obj);
   }
 
   if (identify_obj instanceof Identify) {
@@ -934,14 +942,7 @@ Amplitude.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
 
   // if revenue input is a proxied object created by the async loading snippet, convert it into an revenue object
   if (type(revenue_obj) === 'object' && revenue_obj.hasOwnProperty('_q')) {
-    var instance = new Revenue();
-    for (var i = 0; i < revenue_obj._q.length; i++) {
-        var fn = instance[revenue_obj._q[i][0]];
-        if (type(fn) === 'function') {
-          fn.apply(instance, revenue_obj._q[i].slice(1));
-        }
-    }
-    revenue_obj = instance;
+    revenue_obj = _convertProxyObjectToRealObject(new Revenue(), revenue_obj);
   }
 
   if (revenue_obj instanceof Revenue) {
