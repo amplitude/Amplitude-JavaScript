@@ -184,7 +184,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line1062">line 1062</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line1121">line 1121</a>
     </li></ul></dd>
     
 
@@ -267,7 +267,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line635">line 635</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line664">line 664</a>
     </li></ul></dd>
     
 
@@ -354,7 +354,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line222">line 222</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line226">line 226</a>
     </li></ul></dd>
     
 
@@ -533,7 +533,7 @@ Note: the server response code and response body from the identify event upload 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line671">line 671</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line700">line 700</a>
     </li></ul></dd>
     
 
@@ -828,7 +828,7 @@ See <a href="https://github.com/amplitude/Amplitude-Javascript#configuration-opt
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line213">line 213</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line217">line 217</a>
     </li></ul></dd>
     
 
@@ -1028,7 +1028,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line816">line 816</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line849">line 849</a>
     </li></ul></dd>
     
 
@@ -1056,6 +1056,217 @@ Note: the server response code and response body from the event upload are passe
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>amplitude.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="logEventWithGroups"><span class="type-signature"></span>logEventWithGroups<span class="signature">(eventType, eventProperties, groups, opt_callback)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Log an event with eventType, eventProperties, and groups. Use this to set event-level groups.
+Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
+(unless you explicitly set it with setGroup).
+See the <a href="https://github.com/amplitude/Amplitude-Javascript#setting-groups">SDK Readme</a> for more information
+about groups and Count by Distinct on the Amplitude platform.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>eventType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">name of event</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>eventProperties</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional) an object with string keys and values for the event properties.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>groups</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional) an object with string groupType: groupName values for the event being logged.
+groupName can be a string or an array of strings.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Amplitude.html#~eventCallback">Amplitude~eventCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional) a callback function to run after the event is logged.
+Note: the server response code and response body from the event upload are passed to the callback function.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line875">line 875</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>amplitude.logEventWithGroups('Clicked Button', null, {'orgId': 24});</code></pre>
 
 
 
@@ -1212,7 +1423,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line874">line 874</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line933">line 933</a>
     </li></ul></dd>
     
 
@@ -1351,7 +1562,7 @@ for more information on the Revenue interface and logging revenue.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line845">line 845</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line904">line 904</a>
     </li></ul></dd>
     
 
@@ -1442,7 +1653,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line581">line 581</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line610">line 610</a>
     </li></ul></dd>
     
 
@@ -1575,7 +1786,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line593">line 593</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line622">line 622</a>
     </li></ul></dd>
     
 
@@ -1711,7 +1922,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line523">line 523</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line527">line 527</a>
     </li></ul></dd>
     
 
@@ -1800,7 +2011,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line1052">line 1052</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line1111">line 1111</a>
     </li></ul></dd>
     
 
@@ -1823,6 +2034,174 @@ This uses src/uuid.js to regenerate the deviceId.
 
 
 
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setGroup"><span class="type-signature"></span>setGroup<span class="signature">(groupType, groupName)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Add user to a group or groups. You need to specify a groupType and groupName(s).
+For example you can group people by their organization.
+In that case groupType is "orgId" and groupName would be the actual ID(s).
+groupName can be a string or an array of strings to indicate a user in multiple gruups.
+You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
+Note: this will also set groupType: groupName as a user property.
+See the <a href="https://github.com/amplitude/Amplitude-Javascript#setting-groups">SDK Readme</a> for more information.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>groupType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the group type (ex: orgId)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>groupName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">list</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the name of the group (ex: 15), or a list of names of the groups</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line572">line 572</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>amplitude.setGroup('orgId', 15); // this adds the current user to orgId 15.</code></pre>
 
 
 
@@ -1931,7 +2310,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line561">line 561</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line590">line 590</a>
     </li></ul></dd>
     
 
@@ -2062,7 +2441,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line546">line 546</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line550">line 550</a>
     </li></ul></dd>
     
 
@@ -2222,7 +2601,7 @@ memory and replace = true would replace the object in memory. Now the properties
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line616">line 616</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line645">line 645</a>
     </li></ul></dd>
     
 
@@ -2317,7 +2696,7 @@ memory and replace = true would replace the object in memory. Now the properties
 
             
 
-            <td class="description last"></td>
+            <td class="description last">The version to set for your application.</td>
         </tr>
 
     
@@ -2358,7 +2737,7 @@ memory and replace = true would replace the object in memory. Now the properties
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line704">line 704</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line735">line 735</a>
     </li></ul></dd>
     
 
@@ -2524,7 +2903,7 @@ and the server response code and response body from the upload request are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line799">line 799</a>
+        <a href="amplitude.js.html">amplitude.js</a>, <a href="amplitude.js.html#line832">line 832</a>
     </li></ul></dd>
     
 
@@ -2570,7 +2949,7 @@ and the server response code and response body from the upload request are passe
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Apr 20 2016 01:07:31 GMT-0700 (PDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Apr 20 2016 01:13:36 GMT-0700 (PDT)
 </footer>
 
 <script> prettyPrint(); </script>

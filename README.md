@@ -18,7 +18,7 @@ This Readme will guide you through using Amplitude's Javascript SDK to track use
           return this}}var o=function(){this._q=[];return this};var a=["add","append","clearAll","prepend","set","setOnce","unset"];
           for(var u=0;u<a.length;u++){i(o,a[u])}n.Identify=o;var c=function(){this._q=[];return this;
           };var p=["setProductId","setQuantity","setPrice","setRevenueType","setEventProperties"];
-          for(var l=0;l<p.length;l++){i(c,p[l])}n.Revenue=c;var d=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties","logRevenueV2","regenerateDeviceId"];
+          for(var l=0;l<p.length;l++){i(c,p[l])}n.Revenue=c;var d=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","setGlobalUserProperties","identify","clearUserProperties","setGroup","logRevenueV2","regenerateDeviceId"];
           function v(e){function t(t){e[t]=function(){e._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
           }}for(var n=0;n<d.length;n++){t(d[n])}}v(n);e.amplitude=n})(window,document);
 
@@ -265,6 +265,29 @@ amplitude.init('YOUR_API_KEY_HERE', null, {
 
 # Advanced #
 This SDK automatically grabs useful data about the browser, including browser type and operating system version.
+
+### Setting Groups ###
+
+Amplitude supports assigning users to groups, and performing queries such as Count by Distinct on those groups. An example would be if you want to group your users based on what organization they are in by using an orgId. You can designate Joe to be in orgId 10, while Sue is in orgId 15. When performing an event segmentation query, you can then select Count by Distinct orgIds to query the number of different orgIds that have performed a specific event. As long as at least one member of that group has performed the specific event, that group will be included in the count. See our help article on [Count By Distinct]() for more information.
+
+When setting groups you need to define a `groupType` and `groupName`(s). In the above example, 'orgId' is a `groupType`, and the value 10 or 15 is the `groupName`. Another example of a `groupType` could be 'sport' with `groupNames` like 'tennis', 'baseball', etc.
+
+You can use `setGroup(groupType, groupName)` to designate which groups a user belongs to. Note: this will also set the `groupType`: `groupName` as a user property. **This will overwrite any existing groupName value set for that user's groupType, as well as the corresponding user property value.** `groupType` is a string, and `groupName` can be either a string or an array of strings to indicate a user being in multiple groups (for example Joe is in orgId 10 and 16, so the `groupName` would be [10, 16]).
+
+```javascript
+amplitude.setGroup('orgId', '15');
+amplitude.setGroup('sport', ['soccer', 'tennis']);
+```
+
+You can also use `logEventWithGroups` to set event-level groups, meaning the group designation only applies for the specific event being logged and does not persist on the user (unless you explicitly set it with `setGroup`).
+
+```javascript
+var eventProperties = {
+  'key': 'value'
+}
+
+amplitude.logEventWithGroups('initialize_game', eventProperties, {'sport': 'soccer'});
+```
 
 ### Setting Version Name ###
 By default, no version name is set. You can specify a version name to distinguish between different versions of your site by calling `setVersionName`:

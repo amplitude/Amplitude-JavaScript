@@ -346,13 +346,13 @@ describe('Amplitude', function() {
         '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
         ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
         '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
-        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130}]';
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130, "groups":{}}]';
       var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
         '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
         ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
         '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
         'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
-        ':131}]';
+        ':131, "groups":{}}]';
       localStorage.setItem('amplitude_unsent', existingEvent);
       localStorage.setItem('amplitude_unsent_identify', existingIdentify);
 
@@ -604,7 +604,50 @@ describe('Amplitude', function() {
     });
   });
 
-  describe('setVersionName', function() {
+  describe('setGroup', function() {
+    beforeEach(function() {
+      reset();
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+    });
+
+    it('should generate an identify event with groups set', function() {
+      amplitude.setGroup('orgId', 15);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+
+      // verify identify event
+      var identify = events[0];
+      assert.equal(identify.event_type, '$identify');
+      assert.deepEqual(identify.user_properties, {
+        '$set': {'orgId': 15},
+      });
+      assert.deepEqual(identify.event_properties, {});
+      assert.deepEqual(identify.groups, {
+        'orgId': '15',
+      });
+    });
+
+    it('should ignore empty string groupTypes', function() {
+      amplitude.setGroup('', 15);
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should ignore non-string groupTypes', function() {
+      amplitude.setGroup(10, 10);
+      amplitude.setGroup([], 15);
+      amplitude.setGroup({}, 20);
+      amplitude.setGroup(true, false);
+      assert.lengthOf(server.requests, 0);
+    });
+  });
+
+
+describe('setVersionName', function() {
     beforeEach(function() {
       reset();
     });
@@ -1764,6 +1807,54 @@ describe('Amplitude', function() {
       var sequenceNumber = amplitude1._unsentEvents[0]['sequence_number'];
       assert.equal(amplitude2._unsentIdentifys[0]['sequence_number'], sequenceNumber + 4);
       assert.equal(amplitude1._unsentEvents[2]['sequence_number'], sequenceNumber +  5);
+    });
+
+    it('should handle groups input', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      };
+
+      var eventProperties = {
+        'key': 'value'
+      };
+
+      var groups = {
+        10: 1.23,  // coerce numbers to strings
+        'array': ['test2', false, ['test', 23, null], null],  // should ignore nested array and nulls
+        'dictionary': {160: 'test3'},  // should ignore dictionaries
+        'null': null, // ignore null values
+      }
+
+      amplitude.logEventWithGroups('Test', eventProperties, groups, callback);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+
+      // verify event is correctly formatted
+      var event = events[0];
+      assert.equal(event.event_type, 'Test');
+      assert.equal(event.event_id, 1);
+      assert.deepEqual(event.user_properties, {});
+      assert.deepEqual(event.event_properties, eventProperties);
+      assert.deepEqual(event.groups, {
+        '10': '1.23',
+        'array': ['test2', 'false'],
+      });
+
+      // verify callback behavior
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
     });
   });
 

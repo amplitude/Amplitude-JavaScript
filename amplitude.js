@@ -199,13 +199,17 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
       // validate event properties for unsent events
       for (var i = 0; i < this._unsentEvents.length; i++) {
         var eventProperties = this._unsentEvents[i].event_properties;
+        var groups = this._unsentEvents[i].groups;
         this._unsentEvents[i].event_properties = utils.validateProperties(eventProperties);
+        this._unsentEvents[i].groups = utils.validateGroups(groups);
       }
 
       // validate user properties for unsent identifys
       for (var j = 0; j < this._unsentIdentifys.length; j++) {
         var userProperties = this._unsentIdentifys[j].user_properties;
+        var identifyGroups = this._unsentIdentifys[j].groups;
         this._unsentIdentifys[j].user_properties = utils.validateProperties(userProperties);
+        this._unsentIdentifys[j].groups = utils.validateGroups(identifyGroups);
       }
 
       this._sendEventsIfReady(); // try sending unsent events
@@ -659,6 +663,31 @@ Amplitude.prototype.setUserId = function setUserId(userId) {
 };
 
 /**
+ * Add user to a group or groups. You need to specify a groupType and groupName(s).
+ * For example you can group people by their organization.
+ * In that case groupType is "orgId" and groupName would be the actual ID(s).
+ * groupName can be a string or an array of strings to indicate a user in multiple gruups.
+ * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
+ * Note: this will also set groupType: groupName as a user property.
+ * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information.
+ * @public
+ * @param {string} groupType - the group type (ex: orgId)
+ * @param {string|list} groupName - the name of the group (ex: 15), or a list of names of the groups
+ * @example amplitude.setGroup('orgId', 15); // this adds the current user to orgId 15.
+ */
+Amplitude.prototype.setGroup = function(groupType, groupName) {
+  if (!this._apiKeySet('setGroup()') || !utils.validateInput(groupType, 'groupType', 'string') ||
+        utils.isEmptyString(groupType)) {
+    return;
+  }
+
+  var groups = {};
+  groups[groupType] = groupName;
+  var identify = new Identify().set(groupType, groupName);
+  this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null);
+};
+
+/**
  * Sets whether to opt current user out of tracking.
  * @public
  * @param {boolean} enable - if true then no events will be logged or sent.
@@ -790,7 +819,9 @@ Amplitude.prototype.identify = function(identify_obj, opt_callback) {
   if (identify_obj instanceof Identify) {
     // only send if there are operations
     if (Object.keys(identify_obj.userPropertiesOperations).length > 0) {
-      return this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, opt_callback);
+      return this._logEvent(
+        Constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, null, opt_callback
+        );
     }
   } else {
     utils.log('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
@@ -804,7 +835,7 @@ Amplitude.prototype.identify = function(identify_obj, opt_callback) {
 /**
  * Set a versionName for your application.
  * @public
- * @param {string} versionName
+ * @param {string} versionName - The version to set for your application.
  * @example amplitude.setVersionName('1.12.3');
  */
 Amplitude.prototype.setVersionName = function setVersionName(versionName) {
@@ -818,7 +849,7 @@ Amplitude.prototype.setVersionName = function setVersionName(versionName) {
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  * @private
  */
-Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, callback) {
+Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, groups, callback) {
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
   if (!eventType || this.options.optOut) {
     if (type(callback) === 'function') {
@@ -845,6 +876,7 @@ Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, a
     userProperties = userProperties || {};
     apiProperties = apiProperties || {};
     eventProperties = eventProperties || {};
+    groups = groups || {};
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId,
@@ -866,7 +898,8 @@ Amplitude.prototype._logEvent = function _logEvent(eventType, eventProperties, a
         name: 'amplitude-js',
         version: version
       },
-      sequence_number: sequenceNumber // for ordering events and identifys
+      sequence_number: sequenceNumber, // for ordering events and identifys
+      groups: utils.truncate(utils.validateGroups(groups))
       // country: null
     };
 
@@ -927,7 +960,33 @@ Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt
     }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, opt_callback);
+  return this._logEvent(eventType, eventProperties, null, null, null, opt_callback);
+};
+
+/**
+ * Log an event with eventType, eventProperties, and groups. Use this to set event-level groups.
+ * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
+ * (unless you explicitly set it with setGroup).
+ * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information
+ * about groups and Count by Distinct on the Amplitude platform.
+ * @public
+ * @param {string} eventType - name of event
+ * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
+ * @param {object} groups - (optional) an object with string groupType: groupName values for the event being logged.
+ * groupName can be a string or an array of strings.
+ * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
+ * Note: the server response code and response body from the event upload are passed to the callback function.
+ * @example amplitude.logEventWithGroups('Clicked Button', null, {'orgId': 24});
+ */
+Amplitude.prototype.logEventWithGroups = function(eventType, eventProperties, groups, opt_callback) {
+  if (!this._apiKeySet('logEventWithGroup()') ||
+        !utils.validateInput(eventType, 'eventType', 'string')) {
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent');
+    }
+    return -1;
+  }
+  return this._logEvent(eventType, eventProperties, null, null, groups, opt_callback);
 };
 
 /**
@@ -989,7 +1048,7 @@ Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
     special: 'revenue_amount',
     quantity: quantity || 1,
     price: price
-  });
+  }, null, null, null);
 };
 
 /**
@@ -2298,8 +2357,8 @@ var validateProperties = function validateProperties(properties) {
     var key = property;
     var keyType = type(key);
     if (keyType !== 'string') {
-      log('WARNING: Non-string property key, received type ' + keyType + ', coercing to string "' + key + '"');
       key = String(key);
+      log('WARNING: Non-string property key, received type ' + keyType + ', coercing to string "' + key + '"');
     }
 
     // validate value
@@ -2343,11 +2402,76 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
   return value;
 };
 
+var validateGroups = function validateGroups(groups) {
+  var groupsType = type(groups);
+  if (groupsType !== 'object') {
+    log('Error: invalid groups format. Expecting Javascript object, received ' + groupsType + ', ignoring');
+    return {};
+  }
+
+  var copy = {}; // create a copy with all of the valid properties
+  for (var group in groups) {
+    if (!groups.hasOwnProperty(group)) {
+      continue;
+    }
+
+    // validate key
+    var key = group;
+    var keyType = type(key);
+    if (keyType !== 'string') {
+      key = String(key);
+      log('WARNING: Non-string groupType, received type ' + keyType + ', coercing to string "' + key + '"');
+    }
+
+    // validate value
+    var value = validateGroupName(key, groups[group]);
+    if (value === null) {
+      continue;
+    }
+    copy[key] = value;
+  }
+  return copy;
+};
+
+var validateGroupName = function validateGroupName(key, groupName) {
+  var groupNameType = type(groupName);
+  if (groupNameType === 'string') {
+    return groupName;
+  }
+  if (groupNameType === 'date' || groupNameType === 'number' || groupNameType === 'boolean') {
+    groupName = String(groupName);
+    log('WARNING: Non-string groupName, received type ' + groupNameType + ', coercing to string "' + groupName + '"');
+    return groupName;
+  }
+  if (groupNameType === 'array') {
+    // check for nested arrays or objects
+    var arrayCopy = [];
+    for (var i = 0; i < groupName.length; i++) {
+      var element = groupName[i];
+      var elemType = type(element);
+      if (elemType === 'array' || elemType === 'object') {
+        log('WARNING: Skipping nested ' + elemType + ' in array groupName');
+        continue;
+      } else if (elemType === 'string') {
+        arrayCopy.push(element);
+      } else if (elemType === 'date' || elemType === 'number' || elemType === 'boolean') {
+        element = String(element);
+        log('WARNING: Non-string groupName, received type ' + elemType + ', coercing to string "' + element + '"');
+        arrayCopy.push(element);
+      }
+    }
+    return arrayCopy;
+  }
+  log('WARNING: Non-string groupName, received type ' + groupNameType +
+        '. Please use strings or array of strings for groupName');
+};
+
 module.exports = {
   log: log,
   isEmptyString: isEmptyString,
   sessionStorageEnabled: sessionStorageEnabled,
   truncate: truncate,
+  validateGroups: validateGroups,
   validateInput: validateInput,
   validateProperties: validateProperties
 };
