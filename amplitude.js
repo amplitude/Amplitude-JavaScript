@@ -930,6 +930,8 @@ var _isNumber = function _isNumber(n) {
 /**
  * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
  * revenueType and event properties.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue}
+ * for more information on the Revenue interface and logging revenue.
  * @public
  * @param {Revenue} revenue_obj - the revenue object containing the revenue data being logged.
  * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99);
