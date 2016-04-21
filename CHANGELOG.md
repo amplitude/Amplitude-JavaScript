@@ -1,5 +1,7 @@
 ## Unreleased
 
+### 2.12.1 (April 21, 2016)
+
 * Silence console warnings for various UTM property keys with undefined values.
 
 ### 2.12.0 (April 20, 2016)
