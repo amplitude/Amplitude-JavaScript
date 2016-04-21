@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Silence console warnings for various UTM property keys with undefined values.
+
 ### 2.12.0 (April 20, 2016)
 
 * Add support for setting groups for users and events. See the [Readme](https://github.com/amplitude/Amplitude-Javascript#setting-groups) for more information.
