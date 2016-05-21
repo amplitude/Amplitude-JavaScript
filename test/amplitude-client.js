@@ -384,7 +384,7 @@ describe('AmplitudeClient', function() {
       localStorage.setItem('amplitude_unsent', existingEvent);
       localStorage.setItem('amplitude_unsent_identify', existingIdentify);
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient('$default_Instance');
       amplitude2.init(apiKey, null, {batchEvents: true});
 
       // check event loaded into memory
@@ -891,7 +891,7 @@ describe('setVersionName', function() {
         message = response;
       }
       var identify = new amplitude.Identify().set('key', 'value');
-      new Amplitude().identify(identify, callback);
+      new AmplitudeClient().identify(identify, callback);
 
       // verify callback fired
       assert.equal(counter, 1);
@@ -1037,7 +1037,7 @@ describe('setVersionName', function() {
       amplitude.logEvent('Event', {index: 2});
       amplitude.logEvent('Event', {index: 3});
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey);
       assert.deepEqual(amplitude2._unsentEvents, amplitude._unsentEvents);
     });
@@ -1048,7 +1048,7 @@ describe('setVersionName', function() {
       amplitude.logEvent('Event', {index: 2});
       amplitude.logEvent('Event', {index: 3});
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey);
       assert.deepEqual(amplitude2._unsentEvents, []);
     });
@@ -1730,7 +1730,7 @@ describe('setVersionName', function() {
     it('should increment the counters in local storage if cookies disabled', function() {
       localStorage.clear();
       var deviceId = 'test_device_id';
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
 
       sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
       amplitude2.init(apiKey, null, {deviceId: deviceId, batchEvents: true, eventUploadThreshold: 5});
@@ -1814,9 +1814,9 @@ describe('setVersionName', function() {
 
     it('should synchronize event data across multiple amplitude instances that share the same cookie', function() {
       // this test fails if logEvent does not reload cookie data every time
-      var amplitude1 = new Amplitude();
+      var amplitude1 = new AmplitudeClient();
       amplitude1.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 5});
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 5});
 
       amplitude1.logEvent('test1');
@@ -1925,13 +1925,13 @@ describe('setVersionName', function() {
     });
 
     it('should have state be persisted in the cookie', function() {
-      var amplitude = new Amplitude();
+      var amplitude = new AmplitudeClient();
       amplitude.init(apiKey);
       assert.strictEqual(amplitude.options.optOut, false);
 
       amplitude.setOptOut(true);
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey);
       assert.strictEqual(amplitude2.options.optOut, true);
     });
@@ -2356,7 +2356,7 @@ describe('setVersionName', function() {
     it('should be fetched correctly by getSessionId', function() {
       var timestamp = 1000;
       clock.tick(timestamp);
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey);
       assert.equal(amplitude2._sessionId, timestamp);
       assert.equal(amplitude2.getSessionId(), timestamp);

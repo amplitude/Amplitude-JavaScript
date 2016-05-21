@@ -8,5 +8,6 @@
   require('./cookiestorage.js');
   require('./utm.js');
   require('./amplitude.js');
+  require('./amplitude-client.js');
   require('./utils.js');
   require('./revenue.js');
