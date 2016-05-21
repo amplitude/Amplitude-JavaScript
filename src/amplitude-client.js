@@ -21,7 +21,9 @@ var DEFAULT_OPTIONS = require('./options');
  * @public
  * @example var amplitude = new Amplitude();
  */
-var AmplitudeClient = function Amplitude() {
+var AmplitudeClient = function Amplitude(instanceName) {
+  this._instanceName = (utils.isEmptyString(instanceName) ? Constants.DEFAULT_INSTANCE : instanceName).toLowerCase();
+  this._storageSuffix = this._instanceName === Constants.DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
@@ -69,7 +71,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    _upgradeCookeData(this);
+    if (this._instanceName === Constants.DEFAULT_INSTANCE) {
+      _upgradeCookeData(this);
+    }
     _loadCookieData(this);
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
@@ -302,7 +306,7 @@ AmplitudeClient.prototype._sendEventsIfReady = function _sendEventsIfReady(callb
  * @private
  */
 AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, key) {
-  return storage.getItem(key);
+  return storage.getItem(key + this._storageSuffix);
 };
 
 /**
@@ -311,7 +315,7 @@ AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, ke
  * @private
  */
 AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, value) {
-  storage.setItem(key, value);
+  storage.setItem(key + this._storageSuffix, value);
 };
 
 /**
@@ -374,7 +378,7 @@ var _upgradeCookeData = function _upgradeCookeData(scope) {
  * @private
  */
 var _loadCookieData = function _loadCookieData(scope) {
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
   if (type(cookieData) === 'object') {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -408,7 +412,7 @@ var _loadCookieData = function _loadCookieData(scope) {
  * @private
  */
 var _saveCookieData = function _saveCookieData(scope) {
-  scope.cookieStorage.set(scope.options.cookieName, {
+  scope.cookieStorage.set(scope.options.cookieName + scope._storageSuffix, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut,
