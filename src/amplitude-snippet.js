@@ -1,5 +1,5 @@
 (function(window, document) {
-  var amplitude = window.amplitude || {'_q':[]};
+  var amplitude = window.amplitude || {'_q':[],'_iq':{}};
   var as = document.createElement('script');
   as.type = 'text/javascript';
   as.async = true;
@@ -33,5 +33,12 @@
     for (var k = 0; k < funcs.length; k++) {proxyMain(funcs[k]);}
   }
   setUpProxy(amplitude);
+  amplitude.getInstance = function(instance) {
+    instance = ((!instance || instance.length===0) ? '$default_instance' : instance).toLowerCase();
+    if (!amplitude._iq.hasOwnProperty(instance)) {
+      amplitude._iq[instance] = {'_q':[]}; setUpProxy(amplitude._iq[instance]);
+    }
+    return amplitude._iq[instance];
+  };
   window.amplitude = amplitude;
 })(window, document);

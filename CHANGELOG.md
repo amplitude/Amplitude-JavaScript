@@ -1,5 +1,8 @@
 ## Unreleased
 
+* Add support for logging events to multiple Amplitude apps. **Note this is a major update, and may break backwards compatability.** See [Readme](https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps) for details.
+* Init callback now passes the Amplitude instance as an argument to the callback function.
+
 ### 2.12.1 (April 21, 2016)
 
 * Silence console warnings for various UTM property keys with undefined values.
