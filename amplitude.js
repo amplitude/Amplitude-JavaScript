@@ -98,7 +98,7 @@ var Amplitude = require('./amplitude');
 var old = window.amplitude || {};
 var newInstance = new Amplitude();
 newInstance._q = old._q || [];
-for (var instance in old._iq) { // migrate eat instance's queue
+for (var instance in old._iq) { // migrate each instance's queue
   if (old._iq.hasOwnProperty(instance)) {
     newInstance.getInstance(instance)._q = old._iq[instance]._q || [];
   }
@@ -127,6 +127,7 @@ var DEFAULT_OPTIONS = require('./options');
  */
 var Amplitude = function Amplitude() {
   this.options = object.merge({}, DEFAULT_OPTIONS);
+  this._q = [];
   this._instances = {}; // mapping of instance names to instances
 };
 
@@ -159,7 +160,7 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
   this.getInstance().init(apiKey, opt_userId, opt_config, function(instance) {
     // make options such as deviceId available for callback functions
     this.options = instance.options;
-    if (opt_callback && type(opt_callback) === 'function') {
+    if (type(opt_callback) === 'function') {
       opt_callback(instance);
     }
   }.bind(this));
@@ -499,7 +500,7 @@ var DEFAULT_OPTIONS = require('./options');
  * @public
  * @example var amplitude = new Amplitude();
  */
-var AmplitudeClient = function Amplitude(instanceName) {
+var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._instanceName = (utils.isEmptyString(instanceName) ? Constants.DEFAULT_INSTANCE : instanceName).toLowerCase();
   this._storageSuffix = this._instanceName === Constants.DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];

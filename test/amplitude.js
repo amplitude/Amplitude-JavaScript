@@ -33,10 +33,10 @@ describe('Amplitude', function() {
   function reset() {
     localStorage.clear();
     sessionStorage.clear();
-    cookie.remove(amplitude.getInstance().options.cookieName);
-    cookie.remove(amplitude.getInstance().options.cookieName + keySuffix);
-    cookie.remove(amplitude.getInstance().options.cookieName + '_app1');
-    cookie.remove(amplitude.getInstance().options.cookieName + '_app2');
+    cookie.remove(amplitude.options.cookieName);
+    cookie.remove(amplitude.options.cookieName + keySuffix);
+    cookie.remove(amplitude.options.cookieName + '_app1');
+    cookie.remove(amplitude.options.cookieName + '_app2');
     cookie.reset();
   }
 
@@ -51,11 +51,11 @@ describe('Amplitude', function() {
 
     it('should map no instance to default instance', function() {
       amplitude.init(apiKey);
-      assert.equal(amplitude.getInstance().options.apiKey, apiKey);
-      assert.equal(amplitude.options, amplitude.getInstance().options);
+      assert.equal(amplitude.options.apiKey, apiKey);
+      assert.equal(amplitude.options, amplitude.options);
       assert.equal(amplitude.getInstance('$default_instance').options.apiKey, apiKey);
       assert.equal(amplitude.getInstance(), amplitude.getInstance('$default_instance'));
-      assert.equal(amplitude.options.deviceId, amplitude.getInstance().options.deviceId);
+      assert.equal(amplitude.options.deviceId, amplitude.options.deviceId);
 
       // test for case insensitivity
       assert.equal(amplitude.getInstance(), amplitude.getInstance('$DEFAULT_INSTANCE'));
@@ -227,28 +227,28 @@ describe('Amplitude', function() {
     });
 
     it('fails on invalid apiKeys', function() {
-      amplitude.getInstance().init(null);
-      assert.equal(amplitude.getInstance().options.apiKey, undefined);
-      assert.equal(amplitude.getInstance().options.deviceId, undefined);
+      amplitude.init(null);
+      assert.equal(amplitude.options.apiKey, undefined);
+      assert.equal(amplitude.options.deviceId, undefined);
 
-      amplitude.getInstance().init('');
-      assert.equal(amplitude.getInstance().options.apiKey, undefined);
-      assert.equal(amplitude.getInstance().options.deviceId, undefined);
+      amplitude.init('');
+      assert.equal(amplitude.options.apiKey, undefined);
+      assert.equal(amplitude.options.deviceId, undefined);
 
-      amplitude.getInstance().init(apiKey);
-      assert.equal(amplitude.getInstance().options.apiKey, apiKey);
-      assert.lengthOf(amplitude.getInstance().options.deviceId, 37);
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.apiKey, apiKey);
+      assert.lengthOf(amplitude.options.deviceId, 37);
     });
 
     it('should accept userId', function() {
-      amplitude.getInstance().init(apiKey, userId);
-      assert.equal(amplitude.getInstance().options.userId, userId);
+      amplitude.init(apiKey, userId);
+      assert.equal(amplitude.options.userId, userId);
     });
 
     it('should generate a random deviceId', function() {
-      amplitude.getInstance().init(apiKey, userId);
-      assert.lengthOf(amplitude.getInstance().options.deviceId, 37); // UUID is length 36, but we append 'R' at end
-      assert.equal(amplitude.getInstance().options.deviceId[36], 'R');
+      amplitude.init(apiKey, userId);
+      assert.lengthOf(amplitude.options.deviceId, 37); // UUID is length 36, but we append 'R' at end
+      assert.equal(amplitude.options.deviceId[36], 'R');
     });
 
     it('should validate config values', function() {
@@ -262,37 +262,37 @@ describe('Amplitude', function() {
           bogusKey: false
       };
 
-      amplitude.getInstance().init(apiKey, userId, config);
-      assert.equal(amplitude.getInstance().options.apiEndpoint, 'api.amplitude.com');
-      assert.equal(amplitude.getInstance().options.batchEvents, false);
-      assert.equal(amplitude.getInstance().options.cookieExpiration, 3650);
-      assert.equal(amplitude.getInstance().options.cookieName, 'amplitude_id');
-      assert.equal(amplitude.getInstance().options.eventUploadPeriodMillis, 30000);
-      assert.equal(amplitude.getInstance().options.eventUploadThreshold, 30);
-      assert.equal(amplitude.getInstance().options.bogusKey, undefined);
+      amplitude.init(apiKey, userId, config);
+      assert.equal(amplitude.options.apiEndpoint, 'api.amplitude.com');
+      assert.equal(amplitude.options.batchEvents, false);
+      assert.equal(amplitude.options.cookieExpiration, 3650);
+      assert.equal(amplitude.options.cookieName, 'amplitude_id');
+      assert.equal(amplitude.options.eventUploadPeriodMillis, 30000);
+      assert.equal(amplitude.options.eventUploadThreshold, 30);
+      assert.equal(amplitude.options.bogusKey, undefined);
     });
 
     it('should set cookie', function() {
-      amplitude.getInstance().init(apiKey, userId);
-      var stored = cookie.get(amplitude.getInstance().options.cookieName);
+      amplitude.init(apiKey, userId);
+      var stored = cookie.get(amplitude.options.cookieName);
       assert.property(stored, 'deviceId');
       assert.propertyVal(stored, 'userId', userId);
       assert.lengthOf(stored.deviceId, 37); // increase deviceId length by 1 for 'R' character
     });
 
     it('should set language', function() {
-       amplitude.getInstance().init(apiKey, userId);
-       assert.property(amplitude.getInstance().options, 'language');
-       assert.isNotNull(amplitude.getInstance().options.language);
+       amplitude.init(apiKey, userId);
+       assert.property(amplitude.options, 'language');
+       assert.isNotNull(amplitude.options.language);
     });
 
     it('should allow language override', function() {
-      amplitude.getInstance().init(apiKey, userId, {language: 'en-GB'});
-      assert.propertyVal(amplitude.getInstance().options, 'language', 'en-GB');
+      amplitude.init(apiKey, userId, {language: 'en-GB'});
+      assert.propertyVal(amplitude.options, 'language', 'en-GB');
     });
 
     it ('should not run callback if invalid callback', function() {
-      amplitude.getInstance().init(apiKey, userId, null, 'invalid callback');
+      amplitude.init(apiKey, userId, null, 'invalid callback');
     });
 
     it ('should run valid callbacks', function() {
@@ -300,7 +300,7 @@ describe('Amplitude', function() {
       var callback = function() {
         counter++;
       };
-      amplitude.getInstance().init(apiKey, userId, null, callback);
+      amplitude.init(apiKey, userId, null, callback);
       assert.equal(counter, 1);
     });
 
@@ -308,17 +308,17 @@ describe('Amplitude', function() {
       var deviceId = 'test_device_id';
       var userId = 'test_user_id';
 
-      assert.isNull(cookie.get(amplitude.getInstance().options.cookieName));
+      assert.isNull(cookie.get(amplitude.options.cookieName));
       localStorage.setItem('amplitude_deviceId' + keySuffix, deviceId);
       localStorage.setItem('amplitude_userId' + keySuffix, userId);
       localStorage.setItem('amplitude_optOut' + keySuffix, true);
 
-      amplitude.getInstance().init(apiKey);
-      assert.equal(amplitude.getInstance().options.deviceId, deviceId);
-      assert.equal(amplitude.getInstance().options.userId, userId);
-      assert.isTrue(amplitude.getInstance().options.optOut);
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.deviceId, deviceId);
+      assert.equal(amplitude.options.userId, userId);
+      assert.isTrue(amplitude.options.optOut);
 
-      var cookieData = cookie.get(amplitude.getInstance().options.cookieName);
+      var cookieData = cookie.get(amplitude.options.cookieName);
       assert.equal(cookieData.deviceId, deviceId);
       assert.equal(cookieData.userId, userId);
       assert.isTrue(cookieData.optOut);
@@ -327,14 +327,14 @@ describe('Amplitude', function() {
     it('should migrate session and event info from localStorage to cookie', function() {
       var now = new Date().getTime();
 
-      assert.isNull(cookie.get(amplitude.getInstance().options.cookieName));
+      assert.isNull(cookie.get(amplitude.options.cookieName));
       localStorage.setItem('amplitude_sessionId', now);
       localStorage.setItem('amplitude_lastEventTime', now);
       localStorage.setItem('amplitude_lastEventId', 3000);
       localStorage.setItem('amplitude_lastIdentifyId', 4000);
       localStorage.setItem('amplitude_lastSequenceNumber', 5000);
 
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
 
       assert.equal(amplitude.getInstance()._sessionId, now);
       assert.isTrue(amplitude.getInstance()._lastEventTime >= now);
@@ -342,7 +342,7 @@ describe('Amplitude', function() {
       assert.equal(amplitude.getInstance()._identifyId, 4000);
       assert.equal(amplitude.getInstance()._sequenceNumber, 5000);
 
-      var cookieData = cookie.get(amplitude.getInstance().options.cookieName);
+      var cookieData = cookie.get(amplitude.options.cookieName);
       assert.equal(cookieData.sessionId, now);
       assert.equal(cookieData.lastEventTime, amplitude.getInstance()._lastEventTime);
       assert.equal(cookieData.eventId, 3000);
@@ -363,7 +363,7 @@ describe('Amplitude', function() {
         identifyId: 60
       }
 
-      cookie.set(amplitude.getInstance().options.cookieName, cookieData);
+      cookie.set(amplitude.options.cookieName, cookieData);
       localStorage.setItem('amplitude_deviceId' + keySuffix, 'old_device_id');
       localStorage.setItem('amplitude_userId' + keySuffix, 'fake_user_id');
       localStorage.setItem('amplitude_optOut' + keySuffix, true);
@@ -373,10 +373,10 @@ describe('Amplitude', function() {
       localStorage.setItem('amplitude_lastIdentifyId', 30);
       localStorage.setItem('amplitude_lastSequenceNumber', 40);
 
-      amplitude.getInstance().init(apiKey);
-      assert.equal(amplitude.getInstance().options.deviceId, 'old_device_id');
-      assert.equal(amplitude.getInstance().options.userId, 'test_user_id');
-      assert.isFalse(amplitude.getInstance().options.optOut);
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.deviceId, 'old_device_id');
+      assert.equal(amplitude.options.userId, 'test_user_id');
+      assert.isFalse(amplitude.options.optOut);
       assert.equal(amplitude.getInstance()._sessionId, now);
       assert.isTrue(amplitude.getInstance()._lastEventTime >= now);
       assert.equal(amplitude.getInstance()._eventId, 50);
@@ -387,7 +387,7 @@ describe('Amplitude', function() {
     it('should skip the migration if the new cookie already has deviceId, sessionId, lastEventTime', function() {
       var now = new Date().getTime();
 
-      cookie.set(amplitude.getInstance().options.cookieName, {
+      cookie.set(amplitude.options.cookieName, {
         deviceId: 'new_device_id',
         sessionId: now,
         lastEventTime: now
@@ -402,10 +402,10 @@ describe('Amplitude', function() {
       localStorage.setItem('amplitude_lastIdentifyId', 30);
       localStorage.setItem('amplitude_lastSequenceNumber', 40);
 
-      amplitude.getInstance().init(apiKey, 'new_user_id');
-      assert.equal(amplitude.getInstance().options.deviceId, 'new_device_id');
-      assert.equal(amplitude.getInstance().options.userId, 'new_user_id');
-      assert.isFalse(amplitude.getInstance().options.optOut);
+      amplitude.init(apiKey, 'new_user_id');
+      assert.equal(amplitude.options.deviceId, 'new_device_id');
+      assert.equal(amplitude.options.userId, 'new_user_id');
+      assert.isFalse(amplitude.options.optOut);
       assert.isTrue(amplitude.getInstance()._sessionId >= now);
       assert.isTrue(amplitude.getInstance()._lastEventTime >= now);
       assert.equal(amplitude.getInstance()._eventId, 0);
@@ -664,7 +664,7 @@ describe('Amplitude', function() {
 
   describe('runQueuedFunctions', function() {
     beforeEach(function() {
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -682,9 +682,9 @@ describe('Amplitude', function() {
       ];
       amplitude.getInstance()._q = functions;
       assert.lengthOf(amplitude.getInstance()._q, 2);
-      amplitude.getInstance().runQueuedFunctions();
+      amplitude.runQueuedFunctions();
 
-      assert.equal(amplitude.getInstance().options.userId, userId);
+      assert.equal(amplitude.options.userId, userId);
       assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -697,7 +697,7 @@ describe('Amplitude', function() {
 
   describe('setUserProperties', function() {
     beforeEach(function() {
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -706,7 +706,7 @@ describe('Amplitude', function() {
 
     it('should log identify call from set user properties', function() {
       assert.equal(amplitude.getInstance()._unsentCount(), 0);
-      amplitude.getInstance().setUserProperties({'prop': true, 'key': 'value'});
+      amplitude.setUserProperties({'prop': true, 'key': 'value'});
 
       assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 1);
@@ -729,7 +729,7 @@ describe('Amplitude', function() {
 
   describe('clearUserProperties', function() {
     beforeEach(function() {
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -738,7 +738,7 @@ describe('Amplitude', function() {
 
     it('should log identify call from clear user properties', function() {
       assert.equal(amplitude.getInstance()._unsentCount(), 0);
-      amplitude.getInstance().clearUserProperties();
+      amplitude.clearUserProperties();
 
       assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 1);
@@ -759,7 +759,7 @@ describe('Amplitude', function() {
   describe('setGroup', function() {
     beforeEach(function() {
       reset();
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -767,7 +767,7 @@ describe('Amplitude', function() {
     });
 
     it('should generate an identify event with groups set', function() {
-      amplitude.getInstance().setGroup('orgId', 15);
+      amplitude.setGroup('orgId', 15);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
@@ -785,15 +785,15 @@ describe('Amplitude', function() {
     });
 
     it('should ignore empty string groupTypes', function() {
-      amplitude.getInstance().setGroup('', 15);
+      amplitude.setGroup('', 15);
       assert.lengthOf(server.requests, 0);
     });
 
     it('should ignore non-string groupTypes', function() {
-      amplitude.getInstance().setGroup(10, 10);
-      amplitude.getInstance().setGroup([], 15);
-      amplitude.getInstance().setGroup({}, 20);
-      amplitude.getInstance().setGroup(true, false);
+      amplitude.setGroup(10, 10);
+      amplitude.setGroup([], 15);
+      amplitude.setGroup({}, 20);
+      amplitude.setGroup(true, false);
       assert.lengthOf(server.requests, 0);
     });
   });
@@ -809,14 +809,14 @@ describe('setVersionName', function() {
     });
 
     it('should set version name', function() {
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true});
-      amplitude.getInstance().setVersionName('testVersionName1');
-      amplitude.getInstance().logEvent('testEvent1');
+      amplitude.init(apiKey, null, {batchEvents: true});
+      amplitude.setVersionName('testVersionName1');
+      amplitude.logEvent('testEvent1');
       assert.equal(amplitude.getInstance()._unsentEvents[0].version_name, 'testVersionName1');
 
       // should ignore non-string values
-      amplitude.getInstance().setVersionName(15000);
-      amplitude.getInstance().logEvent('testEvent2');
+      amplitude.setVersionName(15000);
+      amplitude.logEvent('testEvent2');
       assert.equal(amplitude.getInstance()._unsentEvents[1].version_name, 'testVersionName1');
     });
   });
@@ -832,11 +832,11 @@ describe('setVersionName', function() {
 
     it('should regenerate the deviceId', function() {
       var deviceId = 'oldDeviceId';
-      amplitude.getInstance().init(apiKey, null, {'deviceId': deviceId});
-      amplitude.getInstance().regenerateDeviceId();
-      assert.notEqual(amplitude.getInstance().options.deviceId, deviceId);
-      assert.lengthOf(amplitude.getInstance().options.deviceId, 37);
-      assert.equal(amplitude.getInstance().options.deviceId[36], 'R');
+      amplitude.init(apiKey, null, {'deviceId': deviceId});
+      amplitude.regenerateDeviceId();
+      assert.notEqual(amplitude.options.deviceId, deviceId);
+      assert.lengthOf(amplitude.options.deviceId, 37);
+      assert.equal(amplitude.options.deviceId[36], 'R');
     });
   });
 
@@ -851,29 +851,29 @@ describe('setVersionName', function() {
     });
 
     it('should change device id', function() {
-      amplitude.getInstance().init(apiKey, null, {'deviceId': 'fakeDeviceId'});
-      amplitude.getInstance().setDeviceId('deviceId');
-      assert.equal(amplitude.getInstance().options.deviceId, 'deviceId');
+      amplitude.init(apiKey, null, {'deviceId': 'fakeDeviceId'});
+      amplitude.setDeviceId('deviceId');
+      assert.equal(amplitude.options.deviceId, 'deviceId');
     });
 
     it('should not change device id if empty', function() {
-      amplitude.getInstance().init(apiKey, null, {'deviceId': 'deviceId'});
-      amplitude.getInstance().setDeviceId('');
-      assert.notEqual(amplitude.getInstance().options.deviceId, '');
-      assert.equal(amplitude.getInstance().options.deviceId, 'deviceId');
+      amplitude.init(apiKey, null, {'deviceId': 'deviceId'});
+      amplitude.setDeviceId('');
+      assert.notEqual(amplitude.options.deviceId, '');
+      assert.equal(amplitude.options.deviceId, 'deviceId');
     });
 
     it('should not change device id if null', function() {
-      amplitude.getInstance().init(apiKey, null, {'deviceId': 'deviceId'});
-      amplitude.getInstance().setDeviceId(null);
-      assert.notEqual(amplitude.getInstance().options.deviceId, null);
-      assert.equal(amplitude.getInstance().options.deviceId, 'deviceId');
+      amplitude.init(apiKey, null, {'deviceId': 'deviceId'});
+      amplitude.setDeviceId(null);
+      assert.notEqual(amplitude.options.deviceId, null);
+      assert.equal(amplitude.options.deviceId, 'deviceId');
     });
 
     it('should store device id in cookie', function() {
-      amplitude.getInstance().init(apiKey, null, {'deviceId': 'fakeDeviceId'});
-      amplitude.getInstance().setDeviceId('deviceId');
-      var stored = cookie.get(amplitude.getInstance().options.cookieName);
+      amplitude.init(apiKey, null, {'deviceId': 'fakeDeviceId'});
+      amplitude.setDeviceId('deviceId');
+      var stored = cookie.get(amplitude.options.cookieName);
       assert.propertyVal(stored, 'deviceId', 'deviceId');
     });
   });
@@ -882,7 +882,7 @@ describe('setVersionName', function() {
 
     beforeEach(function() {
       clock = sinon.useFakeTimers();
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -891,26 +891,26 @@ describe('setVersionName', function() {
     });
 
     it('should ignore inputs that are not identify objects', function() {
-      amplitude.getInstance().identify('This is a test');
+      amplitude.identify('This is a test');
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
-      amplitude.getInstance().identify(150);
+      amplitude.identify(150);
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
-      amplitude.getInstance().identify(['test']);
+      amplitude.identify(['test']);
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
-      amplitude.getInstance().identify({'user_prop': true});
+      amplitude.identify({'user_prop': true});
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
     });
 
     it('should generate an event from the identify object', function() {
       var identify = new Identify().set('prop1', 'value1').unset('prop2').add('prop3', 3).setOnce('prop4', true);
-      amplitude.getInstance().identify(identify);
+      amplitude.identify(identify);
 
       assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 1);
@@ -937,17 +937,17 @@ describe('setVersionName', function() {
     });
 
     it('should ignore empty identify objects', function() {
-      amplitude.getInstance().identify(new Identify());
+      amplitude.identify(new Identify());
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
     });
 
     it('should ignore empty proxy identify objects', function() {
-      amplitude.getInstance().identify({'_q': {}});
+      amplitude.identify({'_q': {}});
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
 
-      amplitude.getInstance().identify({});
+      amplitude.identify({});
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 0);
       assert.lengthOf(server.requests, 0);
     });
@@ -961,7 +961,7 @@ describe('setVersionName', function() {
         ['set', 'key4', 'value5'],
         ['prepend', 'key5', 'value6']
       ]};
-      amplitude.getInstance().identify(proxyObject);
+      amplitude.identify(proxyObject);
 
       assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
       assert.lengthOf(amplitude.getInstance()._unsentIdentifys, 1);
@@ -989,7 +989,7 @@ describe('setVersionName', function() {
         message = response;
       }
       var identify = new amplitude.Identify().set('key', 'value');
-      amplitude.getInstance().identify(identify, callback);
+      amplitude.identify(identify, callback);
 
       // before server responds, callback should not fire
       assert.lengthOf(server.requests, 1);
@@ -1032,7 +1032,7 @@ describe('setVersionName', function() {
         value = status;
         message = response;
       }
-      amplitude.getInstance().identify(null, callback);
+      amplitude.identify(null, callback);
 
       // verify callback fired
       assert.equal(counter, 1);
@@ -1047,7 +1047,7 @@ describe('setVersionName', function() {
 
     beforeEach(function() {
       clock = sinon.useFakeTimers();
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -1056,7 +1056,7 @@ describe('setVersionName', function() {
     });
 
     it('should send request', function() {
-      amplitude.getInstance().logEvent('Event Type 1');
+      amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
       assert.equal(server.requests[0].url, 'http://api.amplitude.com/');
       assert.equal(server.requests[0].method, 'POST');
@@ -1064,24 +1064,24 @@ describe('setVersionName', function() {
     });
 
     it('should reject empty event types', function() {
-      amplitude.getInstance().logEvent();
+      amplitude.logEvent();
       assert.lengthOf(server.requests, 0);
     });
 
     it('should send api key', function() {
-      amplitude.getInstance().logEvent('Event Type 2');
+      amplitude.logEvent('Event Type 2');
       assert.lengthOf(server.requests, 1);
       assert.equal(querystring.parse(server.requests[0].requestBody).client, apiKey);
     });
 
     it('should send api version', function() {
-      amplitude.getInstance().logEvent('Event Type 3');
+      amplitude.logEvent('Event Type 3');
       assert.lengthOf(server.requests, 1);
       assert.equal(querystring.parse(server.requests[0].requestBody).v, '2');
     });
 
     it('should send event JSON', function() {
-      amplitude.getInstance().logEvent('Event Type 4');
+      amplitude.logEvent('Event Type 4');
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events.length, 1);
@@ -1089,7 +1089,7 @@ describe('setVersionName', function() {
     });
 
     it('should send language', function() {
-      amplitude.getInstance().logEvent('Event Should Send Language');
+      amplitude.logEvent('Event Should Send Language');
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events.length, 1);
@@ -1097,7 +1097,7 @@ describe('setVersionName', function() {
     });
 
     it('should accept properties', function() {
-      amplitude.getInstance().logEvent('Event Type 5', {prop: true});
+      amplitude.logEvent('Event Type 5', {prop: true});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.deepEqual(events[0].event_properties, {prop: true});
@@ -1105,12 +1105,12 @@ describe('setVersionName', function() {
 
     it('should queue events', function() {
       amplitude.getInstance()._sending = true;
-      amplitude.getInstance().logEvent('Event', {index: 1});
-      amplitude.getInstance().logEvent('Event', {index: 2});
-      amplitude.getInstance().logEvent('Event', {index: 3});
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
+      amplitude.logEvent('Event', {index: 3});
       amplitude.getInstance()._sending = false;
 
-      amplitude.getInstance().logEvent('Event', {index: 100});
+      amplitude.logEvent('Event', {index: 100});
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1120,15 +1120,15 @@ describe('setVersionName', function() {
     });
 
     it('should limit events queued', function() {
-      amplitude.getInstance().init(apiKey, null, {savedMaxCount: 10});
+      amplitude.init(apiKey, null, {savedMaxCount: 10});
 
       amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
-        amplitude.getInstance().logEvent('Event', {index: i});
+        amplitude.logEvent('Event', {index: i});
       }
       amplitude.getInstance()._sending = false;
 
-      amplitude.getInstance().logEvent('Event', {index: 100});
+      amplitude.logEvent('Event', {index: 100});
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1139,15 +1139,15 @@ describe('setVersionName', function() {
 
     it('should remove only sent events', function() {
       amplitude.getInstance()._sending = true;
-      amplitude.getInstance().logEvent('Event', {index: 1});
-      amplitude.getInstance().logEvent('Event', {index: 2});
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
       amplitude.getInstance()._sending = false;
-      amplitude.getInstance().logEvent('Event', {index: 3});
+      amplitude.logEvent('Event', {index: 3});
 
       server.respondWith('success');
       server.respond();
 
-      amplitude.getInstance().logEvent('Event', {index: 4});
+      amplitude.logEvent('Event', {index: 4});
 
       assert.lengthOf(server.requests, 2);
       var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
@@ -1156,10 +1156,10 @@ describe('setVersionName', function() {
     });
 
     it('should save events', function() {
-      amplitude.getInstance().init(apiKey, null, {saveEvents: true});
-      amplitude.getInstance().logEvent('Event', {index: 1});
-      amplitude.getInstance().logEvent('Event', {index: 2});
-      amplitude.getInstance().logEvent('Event', {index: 3});
+      amplitude.init(apiKey, null, {saveEvents: true});
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
+      amplitude.logEvent('Event', {index: 3});
 
       var amplitude2 = new Amplitude();
       amplitude2.init(apiKey);
@@ -1167,10 +1167,10 @@ describe('setVersionName', function() {
     });
 
     it('should not save events', function() {
-      amplitude.getInstance().init(apiKey, null, {saveEvents: false});
-      amplitude.getInstance().logEvent('Event', {index: 1});
-      amplitude.getInstance().logEvent('Event', {index: 2});
-      amplitude.getInstance().logEvent('Event', {index: 3});
+      amplitude.init(apiKey, null, {saveEvents: false});
+      amplitude.logEvent('Event', {index: 1});
+      amplitude.logEvent('Event', {index: 2});
+      amplitude.logEvent('Event', {index: 3});
 
       var amplitude2 = new Amplitude();
       amplitude2.init(apiKey);
@@ -1178,15 +1178,15 @@ describe('setVersionName', function() {
     });
 
     it('should limit events sent', function() {
-      amplitude.getInstance().init(apiKey, null, {uploadBatchSize: 10});
+      amplitude.init(apiKey, null, {uploadBatchSize: 10});
 
       amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
-        amplitude.getInstance().logEvent('Event', {index: i});
+        amplitude.logEvent('Event', {index: i});
       }
       amplitude.getInstance()._sending = false;
 
-      amplitude.getInstance().logEvent('Event', {index: 100});
+      amplitude.logEvent('Event', {index: 100});
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1206,14 +1206,14 @@ describe('setVersionName', function() {
 
     it('should batch events sent', function() {
       var eventUploadPeriodMillis = 10*1000;
-      amplitude.getInstance().init(apiKey, null, {
+      amplitude.init(apiKey, null, {
         batchEvents: true,
         eventUploadThreshold: 10,
         eventUploadPeriodMillis: eventUploadPeriodMillis
       });
 
       for (var i = 0; i < 15; i++) {
-        amplitude.getInstance().logEvent('Event', {index: i});
+        amplitude.logEvent('Event', {index: i});
       }
 
       assert.lengthOf(server.requests, 1);
@@ -1243,12 +1243,12 @@ describe('setVersionName', function() {
 
     it('should send events after a delay', function() {
       var eventUploadPeriodMillis = 10*1000;
-      amplitude.getInstance().init(apiKey, null, {
+      amplitude.init(apiKey, null, {
         batchEvents: true,
         eventUploadThreshold: 2,
         eventUploadPeriodMillis: eventUploadPeriodMillis
       });
-      amplitude.getInstance().logEvent('Event');
+      amplitude.logEvent('Event');
 
       // saveEvent should not have been called yet
       assert.lengthOf(amplitude.getInstance()._unsentEvents, 1);
@@ -1266,13 +1266,13 @@ describe('setVersionName', function() {
 
     it('should not send events after a delay if no events to send', function() {
       var eventUploadPeriodMillis = 10*1000;
-      amplitude.getInstance().init(apiKey, null, {
+      amplitude.init(apiKey, null, {
         batchEvents: true,
         eventUploadThreshold: 2,
         eventUploadPeriodMillis: eventUploadPeriodMillis
       });
-      amplitude.getInstance().logEvent('Event1');
-      amplitude.getInstance().logEvent('Event2');
+      amplitude.logEvent('Event1');
+      amplitude.logEvent('Event2');
 
       // saveEvent triggered by 2 event batch threshold
       assert.lengthOf(amplitude.getInstance()._unsentEvents, 2);
@@ -1291,16 +1291,16 @@ describe('setVersionName', function() {
 
     it('should not schedule more than one upload', function() {
       var eventUploadPeriodMillis = 5*1000; // 5s
-      amplitude.getInstance().init(apiKey, null, {
+      amplitude.init(apiKey, null, {
         batchEvents: true,
         eventUploadThreshold: 30,
         eventUploadPeriodMillis: eventUploadPeriodMillis
       });
 
       // log 2 events, 1 millisecond apart, second event should not schedule upload
-      amplitude.getInstance().logEvent('Event1');
+      amplitude.logEvent('Event1');
       clock.tick(1);
-      amplitude.getInstance().logEvent('Event2');
+      amplitude.logEvent('Event2');
       assert.lengthOf(amplitude.getInstance()._unsentEvents, 2);
       assert.lengthOf(server.requests, 0);
 
@@ -1312,7 +1312,7 @@ describe('setVersionName', function() {
       server.respond();
 
       // log 3rd event, advance 1 more millisecond, verify no 2nd server request
-      amplitude.getInstance().logEvent('Event3');
+      amplitude.logEvent('Event3');
       clock.tick(1);
       assert.lengthOf(server.requests, 1);
 
@@ -1324,15 +1324,15 @@ describe('setVersionName', function() {
     });
 
     it('should back off on 413 status', function() {
-      amplitude.getInstance().init(apiKey, null, {uploadBatchSize: 10});
+      amplitude.init(apiKey, null, {uploadBatchSize: 10});
 
       amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
-        amplitude.getInstance().logEvent('Event', {index: i});
+        amplitude.logEvent('Event', {index: i});
       }
       amplitude.getInstance()._sending = false;
 
-      amplitude.getInstance().logEvent('Event', {index: 100});
+      amplitude.logEvent('Event', {index: 100});
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1351,14 +1351,14 @@ describe('setVersionName', function() {
     });
 
     it('should back off on 413 status all the way to 1 event with drops', function() {
-      amplitude.getInstance().init(apiKey, null, {uploadBatchSize: 9});
+      amplitude.init(apiKey, null, {uploadBatchSize: 9});
 
       amplitude.getInstance()._sending = true;
       for (var i = 0; i < 10; i++) {
-        amplitude.getInstance().logEvent('Event', {index: i});
+        amplitude.logEvent('Event', {index: i});
       }
       amplitude.getInstance()._sending = false;
-      amplitude.getInstance().logEvent('Event', {index: 100});
+      amplitude.logEvent('Event', {index: 100});
 
       for (var i = 0; i < 6; i++) {
         assert.lengthOf(server.requests, i+1);
@@ -1380,14 +1380,14 @@ describe('setVersionName', function() {
         value = status;
         message = response;
       }
-      amplitude.getInstance().logEvent(null, null, callback);
+      amplitude.logEvent(null, null, callback);
       assert.equal(counter, 1);
       assert.equal(value, 0);
       assert.equal(message, 'No request sent');
     });
 
     it ('should run callback if optout', function () {
-      amplitude.getInstance().setOptOut(true);
+      amplitude.setOptOut(true);
       var counter = 0;
       var value = -1;
       var message = '';
@@ -1396,14 +1396,14 @@ describe('setVersionName', function() {
         value = status;
         message = response;
       };
-      amplitude.getInstance().logEvent('test', null, callback);
+      amplitude.logEvent('test', null, callback);
       assert.equal(counter, 1);
       assert.equal(value, 0);
       assert.equal(message, 'No request sent');
     });
 
     it ('should not run callback if invalid callback and no eventType', function () {
-      amplitude.getInstance().logEvent(null, null, 'invalid callback');
+      amplitude.logEvent(null, null, 'invalid callback');
     });
 
     it ('should run callback after logging event', function () {
@@ -1415,7 +1415,7 @@ describe('setVersionName', function() {
         value = status;
         message = response;
       };
-      amplitude.getInstance().logEvent('test', null, callback);
+      amplitude.logEvent('test', null, callback);
 
       // before server responds, callback should not fire
       assert.lengthOf(server.requests, 1);
@@ -1433,7 +1433,7 @@ describe('setVersionName', function() {
 
     it ('should run callback if batchEvents but under threshold', function () {
       var eventUploadPeriodMillis = 5*1000;
-      amplitude.getInstance().init(apiKey, null, {
+      amplitude.init(apiKey, null, {
         batchEvents: true,
         eventUploadThreshold: 2,
         eventUploadPeriodMillis: eventUploadPeriodMillis
@@ -1446,7 +1446,7 @@ describe('setVersionName', function() {
         value = status;
         message = response;
       };
-      amplitude.getInstance().logEvent('test', null, callback);
+      amplitude.logEvent('test', null, callback);
       assert.lengthOf(server.requests, 0);
       assert.equal(counter, 1);
       assert.equal(value, 0);
@@ -1461,7 +1461,7 @@ describe('setVersionName', function() {
     });
 
     it ('should run callback once and only after all events are uploaded', function () {
-      amplitude.getInstance().init(apiKey, null, {uploadBatchSize: 10});
+      amplitude.init(apiKey, null, {uploadBatchSize: 10});
       var counter = 0;
       var value = -1;
       var message = '';
@@ -1474,11 +1474,11 @@ describe('setVersionName', function() {
       // queue up 15 events, since batchsize 10, need to send in 2 batches
       amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
-        amplitude.getInstance().logEvent('Event', {index: i});
+        amplitude.logEvent('Event', {index: i});
       }
       amplitude.getInstance()._sending = false;
 
-      amplitude.getInstance().logEvent('Event', {index: 100}, callback);
+      amplitude.logEvent('Event', {index: 100}, callback);
 
       assert.lengthOf(server.requests, 1);
       server.respondWith('success');
@@ -1512,12 +1512,12 @@ describe('setVersionName', function() {
       // queue up 15 events
       amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
-        amplitude.getInstance().logEvent('Event', {index: i});
+        amplitude.logEvent('Event', {index: i});
       }
       amplitude.getInstance()._sending = false;
 
       // 16th event with 413 will backoff to batches of 8
-      amplitude.getInstance().logEvent('Event', {index: 100}, callback);
+      amplitude.logEvent('Event', {index: 100}, callback);
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -1561,7 +1561,7 @@ describe('setVersionName', function() {
         message = response;
       };
 
-      amplitude.getInstance().logEvent('test', null, callback);
+      amplitude.logEvent('test', null, callback);
       server.respondWith([404, {}, 'Not found']);
       server.respond();
       assert.equal(counter, 1);
@@ -1570,12 +1570,12 @@ describe('setVersionName', function() {
     });
 
     it('should send 3 identify events', function() {
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
       assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
-      amplitude.getInstance().identify(new Identify().add('photoCount', 1));
-      amplitude.getInstance().identify(new Identify().add('photoCount', 1).set('country', 'USA'));
-      amplitude.getInstance().identify(new Identify().add('photoCount', 1));
+      amplitude.identify(new Identify().add('photoCount', 1));
+      amplitude.identify(new Identify().add('photoCount', 1).set('country', 'USA'));
+      amplitude.identify(new Identify().add('photoCount', 1));
 
       // verify some internal counters
       assert.equal(amplitude.getInstance()._eventId, 0);
@@ -1603,12 +1603,12 @@ describe('setVersionName', function() {
     });
 
     it('should send 3 events', function() {
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
       assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
-      amplitude.getInstance().logEvent('test');
-      amplitude.getInstance().logEvent('test');
-      amplitude.getInstance().logEvent('test');
+      amplitude.logEvent('test');
+      amplitude.logEvent('test');
+      amplitude.logEvent('test');
 
       // verify some internal counters
       assert.equal(amplitude.getInstance()._eventId, 3);
@@ -1634,11 +1634,11 @@ describe('setVersionName', function() {
     });
 
     it('should send 1 event and 1 identify event', function() {
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
       assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
-      amplitude.getInstance().logEvent('test');
-      amplitude.getInstance().identify(new Identify().add('photoCount', 1));
+      amplitude.logEvent('test');
+      amplitude.identify(new Identify().add('photoCount', 1));
 
       // verify some internal counters
       assert.equal(amplitude.getInstance()._eventId, 1);
@@ -1671,19 +1671,19 @@ describe('setVersionName', function() {
     });
 
     it('should properly coalesce events and identify events into a request', function() {
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true, eventUploadThreshold: 6});
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 6});
       assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
-      amplitude.getInstance().logEvent('test1');
+      amplitude.logEvent('test1');
       clock.tick(1);
-      amplitude.getInstance().identify(new Identify().add('photoCount', 1));
+      amplitude.identify(new Identify().add('photoCount', 1));
       clock.tick(1);
-      amplitude.getInstance().logEvent('test2');
+      amplitude.logEvent('test2');
       clock.tick(1);
-      amplitude.getInstance().logEvent('test3');
+      amplitude.logEvent('test3');
       clock.tick(1);
-      amplitude.getInstance().logEvent('test4');
-      amplitude.getInstance().identify(new Identify().add('photoCount', 2));
+      amplitude.logEvent('test4');
+      amplitude.identify(new Identify().add('photoCount', 2));
 
       // verify some internal counters
       assert.equal(amplitude.getInstance()._eventId, 4);
@@ -1728,14 +1728,14 @@ describe('setVersionName', function() {
 
     it('should merged events supporting backwards compatability', function() {
       // events logged before v2.5.0 won't have sequence number, should get priority
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 3});
       assert.equal(amplitude.getInstance()._unsentCount(), 0);
 
-      amplitude.getInstance().identify(new Identify().add('photoCount', 1));
-      amplitude.getInstance().logEvent('test');
+      amplitude.identify(new Identify().add('photoCount', 1));
+      amplitude.logEvent('test');
       delete amplitude.getInstance()._unsentEvents[0].sequence_number; // delete sequence number to simulate old event
       amplitude.getInstance()._sequenceNumber = 1; // reset sequence number
-      amplitude.getInstance().identify(new Identify().add('photoCount', 2));
+      amplitude.identify(new Identify().add('photoCount', 2));
 
       // verify some internal counters
       assert.equal(amplitude.getInstance()._eventId, 1);
@@ -1775,10 +1775,10 @@ describe('setVersionName', function() {
     });
 
     it('should drop event and keep identify on 413 response', function() {
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
-      amplitude.getInstance().logEvent('test');
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+      amplitude.logEvent('test');
       clock.tick(1);
-      amplitude.getInstance().identify(new Identify().add('photoCount', 1));
+      amplitude.identify(new Identify().add('photoCount', 1));
 
       assert.equal(amplitude.getInstance()._unsentCount(), 2);
       assert.lengthOf(server.requests, 1);
@@ -1786,14 +1786,14 @@ describe('setVersionName', function() {
       server.respond();
 
       // backoff and retry
-      assert.equal(amplitude.getInstance().options.uploadBatchSize, 1);
+      assert.equal(amplitude.options.uploadBatchSize, 1);
       assert.equal(amplitude.getInstance()._unsentCount(), 2);
       assert.lengthOf(server.requests, 2);
       server.respondWith([413, {}, '']);
       server.respond();
 
       // after dropping massive event, only 1 event left
-      assert.equal(amplitude.getInstance().options.uploadBatchSize, 1);
+      assert.equal(amplitude.options.uploadBatchSize, 1);
       assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 3);
 
@@ -1805,10 +1805,10 @@ describe('setVersionName', function() {
     });
 
     it('should drop identify if 413 and uploadBatchSize is 1', function() {
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
-      amplitude.getInstance().identify(new Identify().add('photoCount', 1));
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+      amplitude.identify(new Identify().add('photoCount', 1));
       clock.tick(1);
-      amplitude.getInstance().logEvent('test');
+      amplitude.logEvent('test');
 
       assert.equal(amplitude.getInstance()._unsentCount(), 2);
       assert.lengthOf(server.requests, 1);
@@ -1816,14 +1816,14 @@ describe('setVersionName', function() {
       server.respond();
 
       // backoff and retry
-      assert.equal(amplitude.getInstance().options.uploadBatchSize, 1);
+      assert.equal(amplitude.options.uploadBatchSize, 1);
       assert.equal(amplitude.getInstance()._unsentCount(), 2);
       assert.lengthOf(server.requests, 2);
       server.respondWith([413, {}, '']);
       server.respond();
 
       // after dropping massive event, only 1 event left
-      assert.equal(amplitude.getInstance().options.uploadBatchSize, 1);
+      assert.equal(amplitude.options.uploadBatchSize, 1);
       assert.equal(amplitude.getInstance()._unsentCount(), 1);
       assert.lengthOf(server.requests, 3);
 
@@ -1835,7 +1835,7 @@ describe('setVersionName', function() {
 
     it('should truncate long event property strings', function() {
       var longString = new Array(5000).join('a');
-      amplitude.getInstance().logEvent('test', {'key': longString});
+      amplitude.logEvent('test', {'key': longString});
       var event = JSON.parse(querystring.parse(server.requests[0].requestBody).e)[0];
 
       assert.isTrue('key' in event.event_properties);
@@ -1844,7 +1844,7 @@ describe('setVersionName', function() {
 
     it('should truncate long user property strings', function() {
       var longString = new Array(5000).join('a');
-      amplitude.getInstance().identify(new Identify().set('key', longString));
+      amplitude.identify(new Identify().set('key', longString));
       var event = JSON.parse(querystring.parse(server.requests[0].requestBody).e)[0];
 
       assert.isTrue('$set' in event.user_properties);
@@ -1882,17 +1882,17 @@ describe('setVersionName', function() {
     it('should validate event properties', function() {
       var e = new Error('oops');
       clock.tick(1);
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true, eventUploadThreshold: 5});
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 5});
       clock.tick(1);
-      amplitude.getInstance().logEvent('String event properties', '{}');
+      amplitude.logEvent('String event properties', '{}');
       clock.tick(1);
-      amplitude.getInstance().logEvent('Bool event properties', true);
+      amplitude.logEvent('Bool event properties', true);
       clock.tick(1);
-      amplitude.getInstance().logEvent('Number event properties', 15);
+      amplitude.logEvent('Number event properties', 15);
       clock.tick(1);
-      amplitude.getInstance().logEvent('Array event properties', [1, 2, 3]);
+      amplitude.logEvent('Array event properties', [1, 2, 3]);
       clock.tick(1);
-      amplitude.getInstance().logEvent('Object event properties', {
+      amplitude.logEvent('Object event properties', {
         10: 'false', // coerce key
         'bool': true,
         'null': null, // should be ignored
@@ -1930,8 +1930,8 @@ describe('setVersionName', function() {
 
     it('should validate user propeorties', function() {
       var identify = new Identify().set(10, 10);
-      amplitude.getInstance().init(apiKey, null, {batchEvents: true});
-      amplitude.getInstance().identify(identify);
+      amplitude.init(apiKey, null, {batchEvents: true});
+      amplitude.identify(identify);
 
       assert.deepEqual(amplitude.getInstance()._unsentIdentifys[0].user_properties, {'$set': {'10': 10}});
     });
@@ -1982,7 +1982,7 @@ describe('setVersionName', function() {
         'null': null, // ignore null values
       }
 
-      amplitude.getInstance().logEventWithGroups('Test', eventProperties, groups, callback);
+      amplitude.logEventWithGroups('Test', eventProperties, groups, callback);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
@@ -2012,7 +2012,7 @@ describe('setVersionName', function() {
 
   describe('optOut', function() {
     beforeEach(function() {
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -2020,28 +2020,28 @@ describe('setVersionName', function() {
     });
 
     it('should not send events while enabled', function() {
-      amplitude.getInstance().setOptOut(true);
-      amplitude.getInstance().logEvent('Event Type 1');
+      amplitude.setOptOut(true);
+      amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 0);
     });
 
     it('should not send saved events while enabled', function() {
-      amplitude.getInstance().logEvent('Event Type 1');
+      amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
 
       amplitude.getInstance()._sending = false;
-      amplitude.getInstance().setOptOut(true);
-      amplitude.getInstance().init(apiKey);
+      amplitude.setOptOut(true);
+      amplitude.init(apiKey);
       assert.lengthOf(server.requests, 1);
     });
 
     it('should start sending events again when disabled', function() {
-      amplitude.getInstance().setOptOut(true);
-      amplitude.getInstance().logEvent('Event Type 1');
+      amplitude.setOptOut(true);
+      amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 0);
 
-      amplitude.getInstance().setOptOut(false);
-      amplitude.getInstance().logEvent('Event Type 1');
+      amplitude.setOptOut(false);
+      amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
 
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -2050,10 +2050,10 @@ describe('setVersionName', function() {
 
     it('should have state be persisted in the cookie', function() {
       var amplitude = new Amplitude();
-      amplitude.getInstance().init(apiKey);
-      assert.strictEqual(amplitude.getInstance().options.optOut, false);
+      amplitude.init(apiKey);
+      assert.strictEqual(amplitude.options.optOut, false);
 
-      amplitude.getInstance().setOptOut(true);
+      amplitude.setOptOut(true);
 
       var amplitude2 = new Amplitude();
       amplitude2.init(apiKey);
@@ -2061,15 +2061,15 @@ describe('setVersionName', function() {
     });
 
     it('should limit identify events queued', function() {
-      amplitude.getInstance().init(apiKey, null, {savedMaxCount: 10});
+      amplitude.init(apiKey, null, {savedMaxCount: 10});
 
       amplitude.getInstance()._sending = true;
       for (var i = 0; i < 15; i++) {
-        amplitude.getInstance().identify(new Identify().add('test', i));
+        amplitude.identify(new Identify().add('test', i));
       }
       amplitude.getInstance()._sending = false;
 
-      amplitude.getInstance().identify(new Identify().add('test', 100));
+      amplitude.identify(new Identify().add('test', 100));
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 10);
@@ -2080,7 +2080,7 @@ describe('setVersionName', function() {
 
   describe('gatherUtm', function() {
     beforeEach(function() {
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -2090,9 +2090,9 @@ describe('setVersionName', function() {
     it('should not send utm data when the includeUtm flag is false', function() {
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       reset();
-      amplitude.getInstance().init(apiKey, undefined, {});
+      amplitude.init(apiKey, undefined, {});
 
-      amplitude.getInstance().setUserProperties({user_prop: true});
+      amplitude.setUserProperties({user_prop: true});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events[0].user_properties.utm_campaign, undefined);
@@ -2105,9 +2105,9 @@ describe('setVersionName', function() {
     it('should send utm data via identify when the includeUtm flag is true', function() {
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       reset();
-      amplitude.getInstance().init(apiKey, undefined, {includeUtm: true, batchEvents: true, eventUploadThreshold: 2});
+      amplitude.init(apiKey, undefined, {includeUtm: true, batchEvents: true, eventUploadThreshold: 2});
 
-      amplitude.getInstance().logEvent('UTM Test Event', {});
+      amplitude.logEvent('UTM Test Event', {});
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
@@ -2157,7 +2157,7 @@ describe('setVersionName', function() {
       server.respondWith('success');
       server.respond();
 
-      amplitude.getInstance().logEvent('UTM Test Event', {});
+      amplitude.logEvent('UTM Test Event', {});
       assert.lengthOf(server.requests, 2);
       var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
       assert.deepEqual(events[0].user_properties, {});
@@ -2204,8 +2204,8 @@ describe('setVersionName', function() {
 
   describe('gatherReferrer', function() {
     beforeEach(function() {
-      amplitude.getInstance().init(apiKey);
-      sinon.stub(amplitude.getInstance(), '_getReferrer').returns('https://amplitude.getInstance().com/contact');
+      amplitude.init(apiKey);
+      sinon.stub(amplitude.getInstance(), '_getReferrer').returns('https://amplitude.com/contact');
     });
 
     afterEach(function() {
@@ -2214,9 +2214,9 @@ describe('setVersionName', function() {
     });
 
     it('should not send referrer data when the includeReferrer flag is false', function() {
-      amplitude.getInstance().init(apiKey, undefined, {});
+      amplitude.init(apiKey, undefined, {});
 
-      amplitude.getInstance().setUserProperties({user_prop: true});
+      amplitude.setUserProperties({user_prop: true});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events[0].user_properties.referrer, undefined);
@@ -2225,15 +2225,15 @@ describe('setVersionName', function() {
 
     it('should only send referrer via identify call when the includeReferrer flag is true', function() {
       reset();
-      amplitude.getInstance().init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
-      amplitude.getInstance().logEvent('Referrer Test Event', {});
+      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
+      amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 2);
 
       var expected = {
-        'referrer': 'https://amplitude.getInstance().com/contact',
-        'referring_domain': 'amplitude.getInstance().com'
+        'referrer': 'https://amplitude.com/contact',
+        'referring_domain': 'amplitude.com'
       };
 
       // first event should be identify with initial_referrer and referrer
@@ -2241,8 +2241,8 @@ describe('setVersionName', function() {
       assert.deepEqual(events[0].user_properties, {
         '$set': expected,
         '$setOnce': {
-          'initial_referrer': 'https://amplitude.getInstance().com/contact',
-          'initial_referring_domain': 'amplitude.getInstance().com'
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
         }
       });
 
@@ -2257,8 +2257,8 @@ describe('setVersionName', function() {
     it('should not set referrer if referrer data already in session storage', function() {
       reset();
       sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
-      amplitude.getInstance().init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
-      amplitude.getInstance().logEvent('Referrer Test Event', {});
+      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
+      amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 2);
@@ -2267,8 +2267,8 @@ describe('setVersionName', function() {
       assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
         '$setOnce': {
-          'initial_referrer': 'https://amplitude.getInstance().com/contact',
-          'initial_referring_domain': 'amplitude.getInstance().com'
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
         }
       });
 
@@ -2280,9 +2280,9 @@ describe('setVersionName', function() {
     it('should not override any existing initial referrer values in session storage', function() {
       reset();
       sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
-      amplitude.getInstance().init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
+      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
       amplitude.getInstance()._saveReferrer('https://facebook.com/contact');
-      amplitude.getInstance().logEvent('Referrer Test Event', {});
+      amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 3);
@@ -2291,8 +2291,8 @@ describe('setVersionName', function() {
       assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
         '$setOnce': {
-          'initial_referrer': 'https://amplitude.getInstance().com/contact',
-          'initial_referring_domain': 'amplitude.getInstance().com'
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
         }
       });
 
@@ -2316,7 +2316,7 @@ describe('setVersionName', function() {
 
   describe('logRevenue', function() {
     beforeEach(function() {
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -2335,7 +2335,7 @@ describe('setVersionName', function() {
     }
 
     it('should log simple amount', function() {
-      amplitude.getInstance().logRevenue(10.10);
+      amplitude.logRevenue(10.10);
       revenueEqual({
         special: 'revenue_amount',
         price: 10.10,
@@ -2344,7 +2344,7 @@ describe('setVersionName', function() {
     });
 
     it('should log complex amount', function() {
-      amplitude.getInstance().logRevenue(10.10, 7);
+      amplitude.logRevenue(10.10, 7);
       revenueEqual({
         special: 'revenue_amount',
         price: 10.10,
@@ -2353,17 +2353,17 @@ describe('setVersionName', function() {
     });
 
     it('shouldn\'t log invalid price', function() {
-      amplitude.getInstance().logRevenue('kitten', 7);
+      amplitude.logRevenue('kitten', 7);
       assert.lengthOf(server.requests, 0);
     });
 
     it('shouldn\'t log invalid quantity', function() {
-      amplitude.getInstance().logRevenue(10.00, 'puppy');
+      amplitude.logRevenue(10.00, 'puppy');
       assert.lengthOf(server.requests, 0);
     });
 
     it('should log complex amount with product id', function() {
-      amplitude.getInstance().logRevenue(10.10, 7, 'chicken.dinner');
+      amplitude.logRevenue(10.10, 7, 'chicken.dinner');
       revenueEqual({
         special: 'revenue_amount',
         price: 10.10,
@@ -2376,7 +2376,7 @@ describe('setVersionName', function() {
   describe('logRevenueV2', function() {
     beforeEach(function() {
       reset();
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -2385,11 +2385,11 @@ describe('setVersionName', function() {
 
     it('should log with the Revenue object', function () {
       // ignore invalid revenue objects
-      amplitude.getInstance().logRevenueV2(null);
+      amplitude.logRevenueV2(null);
       assert.lengthOf(server.requests, 0);
-      amplitude.getInstance().logRevenueV2({});
+      amplitude.logRevenueV2({});
       assert.lengthOf(server.requests, 0);
-      amplitude.getInstance().logRevenueV2(new amplitude.Revenue());
+      amplitude.logRevenueV2(new amplitude.Revenue());
 
       // log valid revenue object
       var productId = 'testProductId';
@@ -2401,7 +2401,7 @@ describe('setVersionName', function() {
       var revenue = new amplitude.Revenue().setProductId(productId).setQuantity(quantity).setPrice(price);
       revenue.setRevenueType(revenueType).setEventProperties(properties);
 
-      amplitude.getInstance().logRevenueV2(revenue);
+      amplitude.logRevenueV2(revenue);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events.length, 1);
@@ -2429,7 +2429,7 @@ describe('setVersionName', function() {
         ['setQuantity', 10],
         ['setPrice', 'key1']  // invalid price type, this will fail to generate revenue event
       ]};
-      amplitude.getInstance().logRevenueV2(fakeRevenue);
+      amplitude.logRevenueV2(fakeRevenue);
       assert.lengthOf(server.requests, 0);
 
       var proxyRevenue = {'_q':[
@@ -2438,7 +2438,7 @@ describe('setVersionName', function() {
         ['setPrice', 10.99],
         ['setRevenueType', 'purchase']
       ]};
-      amplitude.getInstance().logRevenueV2(proxyRevenue);
+      amplitude.logRevenueV2(proxyRevenue);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       var event = events[0];
@@ -2457,7 +2457,7 @@ describe('setVersionName', function() {
     var clock;
     beforeEach(function() {
       clock = sinon.useFakeTimers();
-      amplitude.getInstance().init(apiKey);
+      amplitude.init(apiKey);
     });
 
     afterEach(function() {
@@ -2468,7 +2468,7 @@ describe('setVersionName', function() {
     it('should create new session IDs on timeout', function() {
       var sessionId = amplitude.getInstance()._sessionId;
       clock.tick(30 * 60 * 1000 + 1);
-      amplitude.getInstance().logEvent('Event Type 1');
+      amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events.length, 1);

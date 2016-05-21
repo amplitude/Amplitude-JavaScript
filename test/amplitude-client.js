@@ -18,7 +18,7 @@ describe('AmplitudeClient', function() {
   var server;
 
   beforeEach(function() {
-    amplitude = new Amplitude();
+    amplitude = new AmplitudeClient();
     server = sinon.fakeServer.create();
   });
 
@@ -34,6 +34,8 @@ describe('AmplitudeClient', function() {
     localStorage.clear();
     sessionStorage.clear();
     cookie.remove(amplitude.options.cookieName);
+    cookie.remove(amplitude.options.cookieName + keySuffix);
+    cookie.remove(amplitude.options.cookieName + '_new_app');
     cookie.reset();
   }
 
@@ -44,6 +46,11 @@ describe('AmplitudeClient', function() {
 
     afterEach(function() {
       reset();
+    });
+
+    it('should make instanceName case-insensitive', function() {
+      assert.equal(new AmplitudeClient('APP3')._instanceName, 'app3');
+      assert.equal(new AmplitudeClient('$DEFAULT_INSTANCE')._instanceName, '$default_instance');
     });
 
     it('fails on invalid apiKeys', function() {
@@ -124,7 +131,7 @@ describe('AmplitudeClient', function() {
       assert.equal(counter, 1);
     });
 
-    it ('should migrate deviceId, userId, optOut from localStorage to cookie', function() {
+    it ('should migrate deviceId, userId, optOut from localStorage to cookie on default instance', function() {
       var deviceId = 'test_device_id';
       var userId = 'test_user_id';
 
@@ -142,6 +149,27 @@ describe('AmplitudeClient', function() {
       assert.equal(cookieData.deviceId, deviceId);
       assert.equal(cookieData.userId, userId);
       assert.isTrue(cookieData.optOut);
+    });
+
+    it('should not migrate any cookie or LS data for non-default instances', function() {
+      var deviceId = 'testDeviceId';
+      var userId = 'test_user_id';
+
+      assert.isNull(cookie.get(amplitude.options.cookieName));
+      localStorage.setItem('amplitude_deviceId' + keySuffix, deviceId);
+      localStorage.setItem('amplitude_userId' + keySuffix, userId);
+      localStorage.setItem('amplitude_optOut' + keySuffix, true);
+
+      var amplitude2 = new AmplitudeClient('new_app');
+      amplitude2.init(apiKey);
+      assert.notEqual(amplitude.options.deviceId, deviceId);
+      assert.isNull(amplitude2.options.userId);
+      assert.isFalse(amplitude2.options.optOut);
+
+      var cookieData = cookie.get(amplitude.options.cookieName + '_new_app');
+      assert.equal(cookieData.deviceId, amplitude2.options.deviceId);
+      assert.isNull(cookieData.userId);
+      assert.isFalse(cookieData.optOut);
     });
 
     it('should migrate session and event info from localStorage to cookie', function() {
@@ -241,7 +269,7 @@ describe('AmplitudeClient', function() {
 
       localStorage.clear();
       sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       CookieStorage.prototype._cookiesEnabled.restore();
       amplitude2.init(apiKey, userId, {'deviceId': deviceId});
       clock.restore();
@@ -267,7 +295,7 @@ describe('AmplitudeClient', function() {
       var eventIdKey = 'amplitude_lastEventId';
       var identifyIdKey = 'amplitude_lastIdentifyId';
       var sequenceNumberKey = 'amplitude_lastSequenceNumber';
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
 
       var clock = sinon.useFakeTimers();
       clock.tick(1000);
@@ -310,7 +338,7 @@ describe('AmplitudeClient', function() {
       var eventIdKey = 'amplitude_lastEventId';
       var identifyIdKey = 'amplitude_lastIdentifyId';
       var sequenceNumberKey = 'amplitude_lastSequenceNumber';
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
 
       var cookieData = {
         deviceId: 'test_device_id',
@@ -341,7 +369,7 @@ describe('AmplitudeClient', function() {
       assert.equal(amplitude2._sequenceNumber, 70);
     });
 
-    it('should load saved events from localStorage', function() {
+    it('should load saved events from localStorage for default instance', function() {
       var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
         '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
         ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
@@ -383,7 +411,7 @@ describe('AmplitudeClient', function() {
         '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
       localStorage.setItem('amplitude_unsent', existingEvents);
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient('$default_instance');
       amplitude2.init(apiKey, null, {batchEvents: true});
 
       var expected = {
@@ -412,7 +440,7 @@ describe('AmplitudeClient', function() {
         '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
       localStorage.setItem('amplitude_unsent_identify', existingEvents);
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey, null, {batchEvents: true});
 
       var expected = {
@@ -444,7 +472,7 @@ describe('AmplitudeClient', function() {
       localStorage.setItem('amplitude_unsent', existingEvent);
       localStorage.setItem('amplitude_unsent_identify', existingIdentify);
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
       server.respondWith('success');
       server.respond();
@@ -480,7 +508,7 @@ describe('AmplitudeClient', function() {
           '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]';
       localStorage.setItem('amplitude_unsent', existingEvents);
 
-      var amplitude2 = new Amplitude();
+      var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey, null, {
         batchEvents: true
       });

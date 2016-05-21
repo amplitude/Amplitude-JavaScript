@@ -21,7 +21,7 @@ var DEFAULT_OPTIONS = require('./options');
  * @public
  * @example var amplitude = new Amplitude();
  */
-var AmplitudeClient = function Amplitude(instanceName) {
+var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._instanceName = (utils.isEmptyString(instanceName) ? Constants.DEFAULT_INSTANCE : instanceName).toLowerCase();
   this._storageSuffix = this._instanceName === Constants.DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];

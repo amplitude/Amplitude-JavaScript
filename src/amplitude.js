@@ -16,6 +16,7 @@ var DEFAULT_OPTIONS = require('./options');
  */
 var Amplitude = function Amplitude() {
   this.options = object.merge({}, DEFAULT_OPTIONS);
+  this._q = [];
   this._instances = {}; // mapping of instance names to instances
 };
 
@@ -48,7 +49,7 @@ Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_cal
   this.getInstance().init(apiKey, opt_userId, opt_config, function(instance) {
     // make options such as deviceId available for callback functions
     this.options = instance.options;
-    if (opt_callback && type(opt_callback) === 'function') {
+    if (type(opt_callback) === 'function') {
       opt_callback(instance);
     }
   }.bind(this));
