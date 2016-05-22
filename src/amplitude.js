@@ -1,5 +1,5 @@
 var AmplitudeClient = require('./amplitude-client');
-var constants = require('./constants');
+var Constants = require('./constants');
 var Identify = require('./identify');
 var object = require('object');
 var Revenue = require('./revenue');
@@ -9,7 +9,9 @@ var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
 /**
- * Amplitude SDK API - instance constructor.
+ * Amplitude SDK API - instance manager.
+ * Function calls directly on amplitude have been deprecated. Please call methods on the default shared instance: amplitude.getInstance() instead.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps} for more information about this change.
  * @constructor Amplitude
  * @public
  * @example var amplitude = new Amplitude();
@@ -24,7 +26,7 @@ Amplitude.prototype.Identify = Identify;
 Amplitude.prototype.Revenue = Revenue;
 
 Amplitude.prototype.getInstance = function getInstance(instance) {
-  instance = (utils.isEmptyString(instance) ? constants.DEFAULT_INSTANCE : instance).toLowerCase();
+  instance = utils.isEmptyString(instance) ? Constants.DEFAULT_INSTANCE : instance.toLowerCase();
   var client = this._instances[instance];
   if (client === undefined) {
     client = new AmplitudeClient(instance);
@@ -187,7 +189,7 @@ Amplitude.prototype.setOptOut = function setOptOut(enable) {
   * With a null userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
   * This uses src/uuid.js to regenerate the deviceId.
   * @public
-  * deprecated Please use amplitude.getInstance().regenerateDeviceId();
+  * @deprecated Please use amplitude.getInstance().regenerateDeviceId();
   */
 Amplitude.prototype.regenerateDeviceId = function regenerateDeviceId() {
   this.getInstance().regenerateDeviceId();

@@ -110,7 +110,7 @@ module.exports = newInstance;
 }, {"./amplitude":2}],
 2: [function(require, module, exports) {
 var AmplitudeClient = require('./amplitude-client');
-var constants = require('./constants');
+var Constants = require('./constants');
 var Identify = require('./identify');
 var object = require('object');
 var Revenue = require('./revenue');
@@ -120,10 +120,12 @@ var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
 /**
- * Amplitude SDK API - instance constructor.
+ * Amplitude SDK API - instance manager.
  * @constructor Amplitude
  * @public
  * @example var amplitude = new Amplitude();
+ * Function calls directly on amplitude have been deprecated. Please call methods on the default shared instance: amplitude.getInstance() instead.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps} for more information about this change.
  */
 var Amplitude = function Amplitude() {
   this.options = object.merge({}, DEFAULT_OPTIONS);
@@ -135,7 +137,7 @@ Amplitude.prototype.Identify = Identify;
 Amplitude.prototype.Revenue = Revenue;
 
 Amplitude.prototype.getInstance = function getInstance(instance) {
-  instance = (utils.isEmptyString(instance) ? constants.DEFAULT_INSTANCE : instance).toLowerCase();
+  instance = utils.isEmptyString(instance) ? Constants.DEFAULT_INSTANCE : instance.toLowerCase();
   var client = this._instances[instance];
   if (client === undefined) {
     client = new AmplitudeClient(instance);
@@ -298,7 +300,7 @@ Amplitude.prototype.setOptOut = function setOptOut(enable) {
   * With a null userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
   * This uses src/uuid.js to regenerate the deviceId.
   * @public
-  * deprecated Please use amplitude.getInstance().regenerateDeviceId();
+  * @deprecated Please use amplitude.getInstance().regenerateDeviceId();
   */
 Amplitude.prototype.regenerateDeviceId = function regenerateDeviceId() {
   this.getInstance().regenerateDeviceId();
@@ -495,13 +497,14 @@ var version = require('./version');
 var DEFAULT_OPTIONS = require('./options');
 
 /**
- * Amplitude SDK API - instance constructor.
- * @constructor Amplitude
+ * AmplitudeClient SDK API - instance constructor.
+ * The Amplitude class handles creation of client instances, all you need to do is call amplitude.getInstance()
+ * @constructor AmplitudeClient
  * @public
- * @example var amplitude = new Amplitude();
+ * @example var amplitudeClient = new AmplitudeClient();
  */
 var AmplitudeClient = function AmplitudeClient(instanceName) {
-  this._instanceName = (utils.isEmptyString(instanceName) ? Constants.DEFAULT_INSTANCE : instanceName).toLowerCase();
+  this._instanceName = utils.isEmptyString(instanceName) ? Constants.DEFAULT_INSTANCE : instanceName.toLowerCase();
   this._storageSuffix = this._instanceName === Constants.DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];
   this._unsentIdentifys = [];
@@ -533,7 +536,7 @@ AmplitudeClient.prototype.Revenue = Revenue;
  * @param {object} opt_config - (optional) Configuration options.
  * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#configuration-options} for list of options and default values.
  * @param {function} opt_callback - (optional) Provide a callback function to run after initialization is complete.
- * @example amplitude.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
+ * @example amplitudeClient.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
  */
 AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, opt_callback) {
   if (type(apiKey) !== 'string' || utils.isEmptyString(apiKey)) {
@@ -1005,7 +1008,7 @@ AmplitudeClient.prototype.saveEvents = function saveEvents() {
  * Sets a customer domain for the amplitude cookie. Useful if you want to support cross-subdomain tracking.
  * @public
  * @param {string} domain to set.
- * @example amplitude.setDomain('.amplitude.com');
+ * @example amplitudeClient.setDomain('.amplitude.com');
  */
 AmplitudeClient.prototype.setDomain = function setDomain(domain) {
   if (!utils.validateInput(domain, 'domain', 'string')) {
@@ -1028,7 +1031,7 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
  * Sets an identifier for the current user.
  * @public
  * @param {string} userId - identifier to set. Can be null.
- * @example amplitude.setUserId('joe@gmail.com');
+ * @example amplitudeClient.setUserId('joe@gmail.com');
  */
 AmplitudeClient.prototype.setUserId = function setUserId(userId) {
   try {
@@ -1050,7 +1053,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
  * @public
  * @param {string} groupType - the group type (ex: orgId)
  * @param {string|list} groupName - the name of the group (ex: 15), or a list of names of the groups
- * @example amplitude.setGroup('orgId', 15); // this adds the current user to orgId 15.
+ * @example amplitudeClient.setGroup('orgId', 15); // this adds the current user to orgId 15.
  */
 AmplitudeClient.prototype.setGroup = function(groupType, groupName) {
   if (!this._apiKeySet('setGroup()') || !utils.validateInput(groupType, 'groupType', 'string') ||
@@ -1100,7 +1103,7 @@ AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
   * (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
   * @public
   * @param {string} deviceId - custom deviceId for current user.
-  * @example amplitude.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
+  * @example amplitudeClient.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
   */
 AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
   if (!utils.validateInput(deviceId, 'deviceId', 'string')) {
@@ -1123,7 +1126,7 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
  * @param {object} - object with string keys and values for the user properties to set.
  * @param {boolean} - DEPRECATED opt_replace: in earlier versions of the JS SDK the user properties object was kept in
  * memory and replace = true would replace the object in memory. Now the properties are no longer stored in memory, so replace is deprecated.
- * @example amplitude.setUserProperties({'gender': 'female', 'sign_up_complete': true})
+ * @example amplitudeClient.setUserProperties({'gender': 'female', 'sign_up_complete': true})
  */
 AmplitudeClient.prototype.setUserProperties = function setUserProperties(userProperties) {
   if (!this._apiKeySet('setUserProperties()') || !utils.validateInput(userProperties, 'userProperties', 'object')) {
@@ -1142,7 +1145,7 @@ AmplitudeClient.prototype.setUserProperties = function setUserProperties(userPro
 /**
  * Clear all of the user properties for the current user. Note: clearing user properties is irreversible!
  * @public
- * @example amplitude.clearUserProperties();
+ * @example amplitudeClient.clearUserProperties();
  */
 AmplitudeClient.prototype.clearUserProperties = function clearUserProperties(){
   if (!this._apiKeySet('clearUserProperties()')) {
@@ -1213,7 +1216,7 @@ AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
  * Set a versionName for your application.
  * @public
  * @param {string} versionName - The version to set for your application.
- * @example amplitude.setVersionName('1.12.3');
+ * @example amplitudeClient.setVersionName('1.12.3');
  */
 AmplitudeClient.prototype.setVersionName = function setVersionName(versionName) {
   if (!utils.validateInput(versionName, 'versionName', 'string')) {
@@ -1327,7 +1330,7 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
  * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
  * Note: the server response code and response body from the event upload are passed to the callback function.
- * @example amplitude.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
+ * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
   if (!this._apiKeySet('logEvent()') || !utils.validateInput(eventType, 'eventType', 'string') ||
@@ -1353,7 +1356,7 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
  * groupName can be a string or an array of strings.
  * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
  * Note: the server response code and response body from the event upload are passed to the callback function.
- * @example amplitude.logEventWithGroups('Clicked Button', null, {'orgId': 24});
+ * @example amplitudeClient.logEventWithGroups('Clicked Button', null, {'orgId': 24});
  */
 AmplitudeClient.prototype.logEventWithGroups = function(eventType, eventProperties, groups, opt_callback) {
   if (!this._apiKeySet('logEventWithGroup()') ||
@@ -1411,7 +1414,7 @@ AmplitudeClient.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
  * @param {number} price - price of revenue event
  * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
  * @param {string} product - (optional) product identifier
- * @example amplitude.logRevenue(3.99, 1, 'product_1234');
+ * @example amplitudeClient.logRevenue(3.99, 1, 'product_1234');
  */
 AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, product) {
   // Test that the parameters are of the right type.
