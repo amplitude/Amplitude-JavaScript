@@ -162,7 +162,7 @@ describe('AmplitudeClient', function() {
 
       var amplitude2 = new AmplitudeClient('new_app');
       amplitude2.init(apiKey);
-      assert.notEqual(amplitude.options.deviceId, deviceId);
+      assert.notEqual(amplitude2.options.deviceId, deviceId);
       assert.isNull(amplitude2.options.userId);
       assert.isFalse(amplitude2.options.optOut);
 
@@ -396,6 +396,35 @@ describe('AmplitudeClient', function() {
       assert.equal(localStorage.getItem('amplitude_unsent_identify'), existingIdentify);
     });
 
+    it('should load saved events for non-default instances', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130, "groups":{}}]';
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131, "groups":{}}]';
+      localStorage.setItem('amplitude_unsent_new_app', existingEvent);
+      localStorage.setItem('amplitude_unsent_identify_new_app', existingIdentify);
+      assert.isNull(localStorage.getItem('amplitude_unsent'));
+      assert.isNull(localStorage.getItem('amplitude_unsent_identify'));
+
+      var amplitude2 = new AmplitudeClient('new_app');
+      amplitude2.init(apiKey, null, {batchEvents: true});
+
+      // check event loaded into memory
+      assert.deepEqual(amplitude2._unsentEvents, JSON.parse(existingEvent));
+      assert.deepEqual(amplitude2._unsentIdentifys, JSON.parse(existingIdentify));
+
+      // check local storage keys are still same
+      assert.equal(localStorage.getItem('amplitude_unsent_new_app'), existingEvent);
+      assert.equal(localStorage.getItem('amplitude_unsent_identify_new_app'), existingIdentify);
+    });
+
     it('should validate event properties when loading saved events from localStorage', function() {
       var existingEvents = '[{"device_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d' +
         '-2352191877e6","timestamp":1455744744413,"event_id":2,"session_id":1455744733865,"event_type":"clicked",' +
@@ -457,7 +486,7 @@ describe('AmplitudeClient', function() {
       assert.deepEqual(amplitude2._unsentIdentifys[0].user_properties, {'$set': expected});
     });
 
-    it ('should load saved events from localStorage new keys and send events', function() {
+    it ('should load saved events from localStorage and send events for default instance', function() {
       var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
         '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
         ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
@@ -484,6 +513,42 @@ describe('AmplitudeClient', function() {
       // check local storage keys are still same
       assert.equal(localStorage.getItem('amplitude_unsent'), JSON.stringify([]));
       assert.equal(localStorage.getItem('amplitude_unsent_identify'), JSON.stringify([]));
+
+      // check request
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+      assert.equal(events[0].event_id, 49);
+      assert.equal(events[1].event_type, '$identify');
+    });
+
+it ('should load saved events from localStorage new keys and send events', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130}]';
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131}]';
+      localStorage.setItem('amplitude_unsent_new_app', existingEvent);
+      localStorage.setItem('amplitude_unsent_identify_new_app', existingIdentify);
+
+      var amplitude2 = new AmplitudeClient('new_app');
+      amplitude2.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+      server.respondWith('success');
+      server.respond();
+
+      // check event loaded into memory
+      assert.deepEqual(amplitude2._unsentEvents, []);
+      assert.deepEqual(amplitude2._unsentIdentifys, []);
+
+      // check local storage keys are still same
+      assert.equal(localStorage.getItem('amplitude_unsent_new_app'), JSON.stringify([]));
+      assert.equal(localStorage.getItem('amplitude_unsent_identify_new_app'), JSON.stringify([]));
 
       // check request
       assert.lengthOf(server.requests, 1);
@@ -535,6 +600,40 @@ describe('AmplitudeClient', function() {
       // check that event loaded into memory
       assert.deepEqual(amplitude2._unsentEvents[0].event_properties, {});
       assert.deepEqual(amplitude2._unsentEvents[1].event_properties, expected);
+    });
+
+    it('should not load saved events from another instances\'s localStorage', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130}]';
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131}]';
+      localStorage.setItem('amplitude_unsent', existingEvent);
+      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+      assert.isNull(localStorage.getItem('amplitude_unsent_new_app'));
+      assert.isNull(localStorage.getItem('amplitude_unsent_identify_new_app'));
+
+      var amplitude2 = new AmplitudeClient('new_app');
+      amplitude2.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+
+      // check events not loaded into memory
+      assert.deepEqual(amplitude2._unsentEvents, []);
+      assert.deepEqual(amplitude2._unsentIdentifys, []);
+
+      // check local storage
+      assert.equal(localStorage.getItem('amplitude_unsent'), existingEvent);
+      assert.equal(localStorage.getItem('amplitude_unsent_identify'), existingIdentify);
+      assert.isNull(localStorage.getItem('amplitude_unsent_new_app'));
+      assert.isNull(localStorage.getItem('amplitude_unsent_identify_new_app'));
+
+      // check request
+      assert.lengthOf(server.requests, 0);
     });
   });
 
@@ -2187,6 +2286,46 @@ describe('setVersionName', function() {
 
       // existing value persists
       assert.equal(sessionStorage.getItem('amplitude_referrer'), 'https://www.google.com/search?');
+    });
+
+    it('should not override any existing referrer values in session storage for non-default instances', function() {
+      reset();
+      sessionStorage.setItem('amplitude_referrer_new_app', 'https://www.google.com/search?');
+      var amplitude2 = new AmplitudeClient('new_app');
+      sinon.stub(amplitude2, '_getReferrer').returns('https://amplitude.com/contact');
+      amplitude2.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
+      amplitude2._getReferrer.restore();
+
+      amplitude2._saveReferrer('https://facebook.com/contact');
+      amplitude2.logEvent('Referrer Test Event', {});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 3);
+
+      // first event should be identify with initial_referrer and NO referrer
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
+        }
+      });
+
+      // second event should be another identify but with the new referrer
+      assert.equal(events[1].event_type, '$identify');
+      assert.deepEqual(events[1].user_properties, {
+        '$setOnce': {
+          'initial_referrer': 'https://facebook.com/contact',
+          'initial_referring_domain': 'facebook.com'
+        }
+      });
+
+      // third event should be the test event with no referrer information
+      assert.equal(events[2].event_type, 'Referrer Test Event');
+      assert.deepEqual(events[2].user_properties, {});
+
+      // existing value persists
+      assert.equal(sessionStorage.getItem('amplitude_referrer_new_app'), 'https://www.google.com/search?');
     });
   });
 
