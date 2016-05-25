@@ -9,7 +9,7 @@
     "amplitude"
   ],
   "dependencies": {
-    "amplitude/ua-parser-js": "834c57e",
+    "amplitude/ua-parser-js": "fbdb1dc",
     "amplitude/JavaScript-MD5": "2350ea9",
     "component/object": "0.0.3",
     "component/querystring": "1.3.0",

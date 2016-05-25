@@ -4343,7 +4343,7 @@ module.exports = Revenue;
             /(iphone)(?:.*os\s*([\w]+)*\slike\smac|;\sopera)/i                  // iOS
             ], [[NAME, 'iPhone'], [VERSION, /_/g, '.']], [
 
-            /(ipad)(?:.*os\s*([\w]+)*\slike\smac|;\sopera)/i                  // iOS
+            /(ipad)(?:.*os\s*([\w]+)*\slike\smac|;\sopera)/i                    // iOS
             ], [[NAME, 'iPad'], [VERSION, /_/g, '.']], [
 
             /(ip[honead]+)(?:.*os\s([\w]+)*\slike\smac|;\sopera)/i              // iOS
