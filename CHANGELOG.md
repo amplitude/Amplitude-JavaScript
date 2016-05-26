@@ -1,5 +1,7 @@
 ## Unreleased
 
+### 2.13.0 (May 26, 2016)
+
 * Update our fork of [UAParser.js](https://github.com/faisalman/ua-parser-js) from v0.7.7 to v0.7.10. This will improve the resolution of user agent strings to device and OS information.
 
 ### 2.12.1 (April 21, 2016)

@@ -3,7 +3,7 @@
   "main": "src/index.js",
   "repo": "amplitude/amplitude-javascript",
   "description": "Javascript library for Amplitude Analytics",
-  "version": "2.12.1",
+  "version": "2.13.0",
   "keywords": [
     "analytics",
     "amplitude"
