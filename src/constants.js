@@ -1,4 +1,5 @@
 module.exports = {
+  DEFAULT_INSTANCE: '$default_instance',
   API_VERSION: 2,
   MAX_STRING_LENGTH: 4096,
   IDENTIFY_EVENT: '$identify',

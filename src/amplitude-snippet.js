@@ -1,9 +1,9 @@
 (function(window, document) {
-  var amplitude = window.amplitude || {'_q':[]};
+  var amplitude = window.amplitude || {'_q':[],'_iq':{}};
   var as = document.createElement('script');
   as.type = 'text/javascript';
   as.async = true;
-  as.src = 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-2.13.0-min.gz.js';
+  as.src = 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-3.0.0-min.gz.js';
   as.onload = function() {window.amplitude.runQueuedFunctions();};
   var s = document.getElementsByTagName('script')[0];
   s.parentNode.insertBefore(as, s);
@@ -33,5 +33,12 @@
     for (var k = 0; k < funcs.length; k++) {proxyMain(funcs[k]);}
   }
   setUpProxy(amplitude);
+  amplitude.getInstance = function(instance) {
+    instance = ((!instance || instance.length===0) ? '$default_instance' : instance).toLowerCase();
+    if (!amplitude._iq.hasOwnProperty(instance)) {
+      amplitude._iq[instance] = {'_q':[]}; setUpProxy(amplitude._iq[instance]);
+    }
+    return amplitude._iq[instance];
+  };
   window.amplitude = amplitude;
 })(window, document);

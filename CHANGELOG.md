@@ -1,5 +1,10 @@
 ## Unreleased
 
+### 3.0.0 (May 27, 2016)
+
+* Add support for logging events to multiple Amplitude apps. **Note this is a major update, and may break backwards compatability.** See [Readme](https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps) for details.
+* Init callback now passes the Amplitude instance as an argument to the callback function.
+
 ### 2.13.0 (May 26, 2016)
 
 * Update our fork of [UAParser.js](https://github.com/faisalman/ua-parser-js) from v0.7.7 to v0.7.10. This will improve the resolution of user agent strings to device and OS information.
