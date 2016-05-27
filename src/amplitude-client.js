@@ -606,7 +606,7 @@ AmplitudeClient.prototype.setOptOut = function setOptOut(enable) {
 };
 
 /**
-  * Regenerates a new random deviceId for current user. Note: this is not recommended unless you konw what you
+  * Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you
   * are doing. This can be used in conjunction with `setUserId(null)` to anonymize users after they log out.
   * With a null userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
   * This uses src/uuid.js to regenerate the deviceId.

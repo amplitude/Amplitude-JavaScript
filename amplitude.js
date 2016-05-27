@@ -121,11 +121,11 @@ var DEFAULT_OPTIONS = require('./options');
 
 /**
  * Amplitude SDK API - instance manager.
+ * Function calls directly on amplitude have been deprecated. Please call methods on the default shared instance: amplitude.getInstance() instead.
+ * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps} for more information about this change.
  * @constructor Amplitude
  * @public
  * @example var amplitude = new Amplitude();
- * Function calls directly on amplitude have been deprecated. Please call methods on the default shared instance: amplitude.getInstance() instead.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps} for more information about this change.
  */
 var Amplitude = function Amplitude() {
   this.options = object.merge({}, DEFAULT_OPTIONS);
@@ -258,7 +258,7 @@ Amplitude.prototype.setDomain = function setDomain(domain) {
  * Sets an identifier for the current user.
  * @public
  * @param {string} userId - identifier to set. Can be null.
- * @deprecatedPlease use amplitude.getInstance().setUserId(userId);
+ * @deprecated Please use amplitude.getInstance().setUserId(userId);
  * @example amplitude.setUserId('joe@gmail.com');
  */
 Amplitude.prototype.setUserId = function setUserId(userId) {
@@ -295,7 +295,7 @@ Amplitude.prototype.setOptOut = function setOptOut(enable) {
 };
 
 /**
-  * Regenerates a new random deviceId for current user. Note: this is not recommended unless you konw what you
+  * Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you
   * are doing. This can be used in conjunction with `setUserId(null)` to anonymize users after they log out.
   * With a null userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
   * This uses src/uuid.js to regenerate the deviceId.
@@ -1087,7 +1087,7 @@ AmplitudeClient.prototype.setOptOut = function setOptOut(enable) {
 };
 
 /**
-  * Regenerates a new random deviceId for current user. Note: this is not recommended unless you konw what you
+  * Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you
   * are doing. This can be used in conjunction with `setUserId(null)` to anonymize users after they log out.
   * With a null userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
   * This uses src/uuid.js to regenerate the deviceId.
@@ -3972,7 +3972,7 @@ module.exports = Revenue;
 /* global define */
 
 /**
- * UAParser.js v0.7.7
+ * UAParser.js v0.7.10
  * Lightweight JavaScript-based User-Agent string parser
  * https://github.com/faisalman/ua-parser-js
  *
@@ -3989,7 +3989,7 @@ module.exports = Revenue;
     /////////////
 
 
-    var LIBVERSION  = '0.7.7',
+    var LIBVERSION  = '0.7.10',
         EMPTY       = '',
         UNKNOWN     = '?',
         FUNC_TYPE   = 'function',
@@ -4018,12 +4018,15 @@ module.exports = Revenue;
 
     var util = {
         extend : function (regexes, extensions) {
-            for (var i in extensions) {
-                if ("browser cpu device engine os".indexOf(i) !== -1 && extensions[i].length % 2 === 0) {
-                    regexes[i] = extensions[i].concat(regexes[i]);
+            var margedRegexes = {};
+            for (var i in regexes) {
+                if (extensions[i] && extensions[i].length % 2 === 0) {
+                    margedRegexes[i] = extensions[i].concat(regexes[i]);
+                } else {
+                    margedRegexes[i] = regexes[i];
                 }
             }
-            return regexes;
+            return margedRegexes;
         },
         has : function (str1, str2) {
           if (typeof str1 === "string") {
@@ -4062,11 +4065,13 @@ module.exports = Revenue;
                 if (typeof result === UNDEF_TYPE) {
                     result = {};
                     for (p in props) {
-                        q = props[p];
-                        if (typeof q === OBJ_TYPE) {
-                            result[q[0]] = undefined;
-                        } else {
-                            result[q] = undefined;
+                        if (props.hasOwnProperty(p)){
+                            q = props[p];
+                            if (typeof q === OBJ_TYPE) {
+                                result[q[0]] = undefined;
+                            } else {
+                                result[q] = undefined;
+                            }
                         }
                     }
                 }
@@ -4211,8 +4216,10 @@ module.exports = Revenue;
             /(opera\s[mobiletab]+).+version\/([\w\.-]+)/i,                      // Opera Mobi/Tablet
             /(opera).+version\/([\w\.]+)/i,                                     // Opera > 9.80
             /(opera)[\/\s]+([\w\.]+)/i                                          // Opera < 9.80
+            ], [NAME, VERSION], [
 
-            ], [[NAME, mapper.str, maps.browser.name], VERSION], [
+            /(OPiOS)[\/\s]+([\w\.]+)/i                                          // Opera mini on iphone >= 8.0
+            ], [[NAME, 'Opera Mini'], VERSION], [
 
             /\s(opr)\/([\w\.]+)/i                                               // Opera Webkit
             ], [[NAME, 'Opera'], VERSION], [
@@ -4229,13 +4236,15 @@ module.exports = Revenue;
 
             // Webkit/KHTML based
             /(rekonq)\/([\w\.]+)*/i,                                            // Rekonq
-            /(chromium|flock|rockmelt|midori|epiphany|silk|skyfire|ovibrowser|bolt|iron|vivaldi)\/([\w\.-]+)/i
-                                                                                // Chromium/Flock/RockMelt/Midori/Epiphany/Silk/Skyfire/Bolt/Iron
-            ], [[NAME, mapper.str, maps.browser.name], VERSION], [
+            /(chromium|flock|rockmelt|midori|epiphany|silk|skyfire|ovibrowser|bolt|iron|vivaldi|iridium|phantomjs)\/([\w\.-]+)/i
+                                                                                // Chromium/Flock/RockMelt/Midori/Epiphany/Silk/Skyfire/Bolt/Iron/Iridium/PhantomJS
+            ], [NAME, VERSION], [
 
-            /(trident).+rv[:\s]([\w\.]+).+like\sgecko/i,                        // IE11
-            /(Edge)\/((\d+)?[\w\.]+)/i                                          // IE12
+            /(trident).+rv[:\s]([\w\.]+).+like\sgecko/i                         // IE11
             ], [[NAME, 'IE'], VERSION], [
+
+            /(edge)\/((\d+)?[\w\.]+)/i                                          // Microsoft Edge
+            ], [NAME, VERSION], [
 
             /(yabrowser)\/([\w\.]+)/i                                           // Yandex
             ], [[NAME, 'Yandex'], VERSION], [
@@ -4249,9 +4258,15 @@ module.exports = Revenue;
 
             /(chrome|omniweb|arora|[tizenoka]{5}\s?browser)\/v?([\w\.]+)/i,
                                                                                 // Chrome/OmniWeb/Arora/Tizen/Nokia
-            /(uc\s?browser|qqbrowser)[\/\s]?([\w\.]+)/i
-                                                                                // UCBrowser/QQBrowser
+            /(qqbrowser)[\/\s]?([\w\.]+)/i
+                                                                                // QQBrowser
             ], [NAME, VERSION], [
+
+            /(uc\s?browser)[\/\s]?([\w\.]+)/i,
+            /ucweb.+(ucbrowser)[\/\s]?([\w\.]+)/i,
+            /JUC.+(ucweb)[\/\s]?([\w\.]+)/i
+                                                                                // UCBrowser
+            ], [[NAME, 'UCBrowser'], VERSION], [
 
             /(dolfin)\/([\w\.]+)/i                                              // Dolphin
             ], [[NAME, 'Dolphin'], VERSION], [
@@ -4264,6 +4279,9 @@ module.exports = Revenue;
 
             /FBAV\/([\w\.]+);/i                                                 // Facebook App for iOS
             ], [VERSION, [NAME, 'Facebook']], [
+
+            /fxios\/([\w\.-]+)/i                                                // Firefox for iOS
+            ], [VERSION, [NAME, 'Firefox']], [
 
             /version\/([\w\.]+).+?mobile\/\w+\s(safari)/i                       // Mobile Safari
             ], [VERSION, [NAME, 'Mobile Safari']], [
@@ -4292,8 +4310,8 @@ module.exports = Revenue;
             /(mozilla)\/([\w\.]+).+rv\:.+gecko\/\d+/i,                          // Mozilla
 
             // Other
-            /(polaris|lynx|dillo|icab|doris|amaya|w3m|netsurf)[\/\s]?([\w\.]+)/i,
-                                                                                // Polaris/Lynx/Dillo/iCab/Doris/Amaya/w3m/NetSurf
+            /(polaris|lynx|dillo|icab|doris|amaya|w3m|netsurf|sleipnir)[\/\s]?([\w\.]+)/i,
+                                                                                // Polaris/Lynx/Dillo/iCab/Doris/Amaya/w3m/NetSurf/Sleipnir
             /(links)\s\(([\w\.]+)/i,                                            // Links
             /(gobrowser)\/?([\w\.]+)*/i,                                        // GoBrowser
             /(ice\s?browser)\/v?([\w\._]+)/i,                                   // ICE Browser
@@ -4491,7 +4509,7 @@ module.exports = Revenue;
             /android.+;\s(shield)\sbuild/i                                      // Nvidia
             ], [MODEL, [VENDOR, 'Nvidia'], [TYPE, CONSOLE]], [
 
-            /(playstation\s[3portablevi]+)/i                                    // Playstation
+            /(playstation\s[34portablevi]+)/i                                   // Playstation
             ], [MODEL, [VENDOR, 'Sony'], [TYPE, CONSOLE]], [
 
             /(sprint\s(\w+))/i                                                  // Sprint Phones
@@ -4505,7 +4523,7 @@ module.exports = Revenue;
             /(alcatel|geeksphone|huawei|lenovo|nexian|panasonic|(?=;\s)sony)[_\s-]?([\w-]+)*/i
                                                                                 // Alcatel/GeeksPhone/Huawei/Lenovo/Nexian/Panasonic/Sony
             ], [VENDOR, [MODEL, /_/g, ' '], [TYPE, MOBILE]], [
-                
+
             /(nexus\s9)/i                                                       // HTC Nexus 9
             ], [MODEL, [VENDOR, 'HTC'], [TYPE, TABLET]], [
 
@@ -4517,7 +4535,8 @@ module.exports = Revenue;
                                                                                 // Motorola
             /\s(milestone|droid(?:[2-4x]|\s(?:bionic|x2|pro|razr))?(:?\s4g)?)[\w\s]+build\//i,
             /mot[\s-]?(\w+)*/i,
-            /(XT\d{3,4}) build\//i
+            /(XT\d{3,4}) build\//i,
+            /(nexus\s[6])/i
             ], [MODEL, [VENDOR, 'Motorola'], [TYPE, MOBILE]], [
             /android.+\s(mz60\d|xoom[\s2]{0,2})\sbuild\//i
             ], [MODEL, [VENDOR, 'Motorola'], [TYPE, TABLET]], [
@@ -4569,7 +4588,8 @@ module.exports = Revenue;
             /android.+(mi[\s\-_]*(?:one|one[\s_]plus)?[\s_]*(?:\d\w)?)\s+build/i    // Xiaomi Mi
             ], [[MODEL, /_/g, ' '], [VENDOR, 'Xiaomi'], [TYPE, MOBILE]], [
 
-            /(mobile|tablet);.+rv\:.+gecko\//i                                  // Unidentifiable
+            /\s(tablet)[;\/\s]/i,                                               // Unidentifiable Tablet
+            /\s(mobile)[;\/\s]/i                                                // Unidentifiable Mobile
             ], [[TYPE, util.lowerize], VENDOR, MODEL]
 
             /*//////////////////////////
@@ -4625,7 +4645,7 @@ module.exports = Revenue;
             ], [VENDOR, MODEL, [TYPE, MOBILE]], [
             /(i-STYLE2.1)/i                                                     // i-mobile i-STYLE 2.1
             ], [[MODEL, 'i-STYLE 2.1'], [VENDOR, 'i-mobile'], [TYPE, MOBILE]], [
-            
+
             /(mobiistar touch LAI 512)/i                                        // mobiistar touch LAI 512
             ], [[MODEL, 'Touch LAI 512'], [VENDOR, 'mobiistar'], [TYPE, MOBILE]], [
 
@@ -4636,6 +4656,9 @@ module.exports = Revenue;
         ],
 
         engine : [[
+
+            /windows.+\sedge\/([\w\.]+)/i                                       // EdgeHTML
+            ], [VERSION, [NAME, 'EdgeHTML']], [
 
             /(presto)\/([\w\.]+)/i,                                             // Presto
             /(webkit|trident|netfront|netsurf|amaya|lynx|w3m)\/([\w\.]+)/i,     // WebKit/Trident/NetFront/NetSurf/Amaya/Lynx/w3m
@@ -4663,7 +4686,7 @@ module.exports = Revenue;
             ], [[NAME, 'BlackBerry'], VERSION], [
             /(blackberry)\w*\/?([\w\.]+)*/i,                                    // Blackberry
             /(tizen)[\/\s]([\w\.]+)/i,                                          // Tizen
-            /(android|webos|palm\os|qnx|bada|rim\stablet\sos|meego|contiki)[\/\s-]?([\w\.]+)*/i,
+            /(android|webos|palm\sos|qnx|bada|rim\stablet\sos|meego|contiki)[\/\s-]?([\w\.]+)*/i,
                                                                                 // Android/WebOS/Palm/QNX/Bada/RIM/MeeGo/Contiki
             /linux;.+(sailfish);/i                                              // Sailfish OS
             ], [NAME, VERSION], [
@@ -4675,12 +4698,12 @@ module.exports = Revenue;
             ], [[NAME, 'Firefox OS'], VERSION], [
 
             // Console
-            /(nintendo|playstation)\s([wids3portablevu]+)/i,                    // Nintendo/Playstation
+            /(nintendo|playstation)\s([wids34portablevu]+)/i,                   // Nintendo/Playstation
 
             // GNU/Linux based
             /(mint)[\/\s\(]?(\w+)*/i,                                           // Mint
             /(mageia|vectorlinux)[;\s]/i,                                       // Mageia/VectorLinux
-            /(joli|[kxln]?ubuntu|debian|[open]*suse|gentoo|arch|slackware|fedora|mandriva|centos|pclinuxos|redhat|zenwalk|linpus)[\/\s-]?([\w\.-]+)*/i,
+            /(joli|[kxln]?ubuntu|debian|[open]*suse|gentoo|(?=\s)arch|slackware|fedora|mandriva|centos|pclinuxos|redhat|zenwalk|linpus)[\/\s-]?([\w\.-]+)*/i,
                                                                                 // Joli/Ubuntu/Debian/SUSE/Gentoo/Arch/Slackware
                                                                                 // Fedora/Mandriva/CentOS/PCLinuxOS/RedHat/Zenwalk/Linpus
             /(hurd|linux)\s?([\w\.]+)*/i,                                       // Hurd/Linux
@@ -4703,6 +4726,9 @@ module.exports = Revenue;
 
             /(ipad)(?:.*os\s*([\w]+)*\slike\smac|;\sopera)/i                    // iOS
             ], [[NAME, 'iPad'], [VERSION, /_/g, '.']], [
+
+            /(ip[honead]+)(?:.*os\s([\w]+)*\slike\smac|;\sopera)/i              // iOS
+            ], [[NAME, 'iOS'], [VERSION, /_/g, '.']], [
 
             /(mac\sos\sx)\s?([\w\s\.]+\w)*/i,
             /(macintosh|mac(?=_powerpc)\s)/i                                    // Mac OS
@@ -4768,7 +4794,6 @@ module.exports = Revenue;
             ua = uastring;
             return this;
         };
-        this.setUA(ua);
         return this;
     };
 
@@ -4817,7 +4842,7 @@ module.exports = Revenue;
     } else {
         // requirejs env (optional)
         if (typeof(define) === FUNC_TYPE && define.amd) {
-            define(function () {
+            define("ua-parser-js", [], function () {
                 return UAParser;
             });
         } else {
@@ -4827,7 +4852,7 @@ module.exports = Revenue;
     }
 
     // jQuery/Zepto specific (optional)
-    // Note: 
+    // Note:
     //   In AMD env the global scope should be kept clean, but jQuery is an exception.
     //   jQuery always exports to global scope, unless jQuery.noConflict(true) is used,
     //   and we should catch that.
@@ -4847,7 +4872,7 @@ module.exports = Revenue;
         };
     }
 
-})(this);
+})(typeof window === 'object' ? window : this);
 
 }, {}],
 19: [function(require, module, exports) {
@@ -4885,7 +4910,7 @@ module.exports = uuid;
 
 }, {}],
 10: [function(require, module, exports) {
-module.exports = '2.12.1';
+module.exports = '2.13.0';
 
 }, {}],
 11: [function(require, module, exports) {
