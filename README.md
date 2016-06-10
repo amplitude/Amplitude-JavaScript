@@ -467,11 +467,5 @@ You can also define the path in your RequireJS configuration like so:
 ```
 
 ### Integrating with Google Tag Manager ###
-**Note: we do not officially support Google Tag Manager, but these instructions have been reported to work for people. Proceed at your own risk**
 
-1. Follow the Javascript SDK [Setup Instructions](https://github.com/amplitude/Amplitude-Javascript#setup), steps 1-3.
-2. Call SDK functions in Google Tag Manager using [Custom HTML tags](https://support.google.com/tagmanager/answer/6107167?hl=en) and adding Javascript in this form as the custom tag:
-
-```html
-<script>amplitude.getInstance().logEvent('TAG');</script>
-```
+Amplitude's JS SDK supports integration with Google Tag Manager. Take a look at our [demo application](https://github.com/amplitude/GTM-Web-Demo) for instructions on how to set it up.
