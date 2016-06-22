@@ -2054,17 +2054,21 @@ describe('setVersionName', function() {
   });
 
   describe('gatherUtm', function() {
+    var clock;
     beforeEach(function() {
+      clock = sinon.useFakeTimers(100);
       amplitude.init(apiKey);
     });
 
     afterEach(function() {
       reset();
+      clock.restore();
     });
 
     it('should not send utm data when the includeUtm flag is false', function() {
-      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       reset();
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude.init(apiKey, undefined, {});
 
       amplitude.setUserProperties({user_prop: true});
@@ -2078,8 +2082,9 @@ describe('setVersionName', function() {
     });
 
     it('should send utm data via identify when the includeUtm flag is true', function() {
-      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       reset();
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude.init(apiKey, undefined, {includeUtm: true, batchEvents: true, eventUploadThreshold: 2});
 
       amplitude.logEvent('UTM Test Event', {});
@@ -2103,9 +2108,10 @@ describe('setVersionName', function() {
     });
 
     it('should parse utm params', function() {
+      reset();
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
-
       var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude._initUtmData(utmParams);
 
       var expectedProperties = {
@@ -2154,6 +2160,7 @@ describe('setVersionName', function() {
 
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude._initUtmData(utmParams);
 
       assert.lengthOf(server.requests, 1);
@@ -2175,20 +2182,57 @@ describe('setVersionName', function() {
       // should not override any existing utm properties values in session storage
       assert.equal(sessionStorage.getItem('amplitude_utm_properties'), JSON.stringify(existingProperties));
     });
+
+    it('should only send utm data once per session', function() {
+      reset();
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      amplitude.init(apiKey, undefined, {includeUtm: true});
+
+      // still same session, should not send any identify events
+      assert.lengthOf(server.requests, 0);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+
+      // advance clock to force new session
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude.init(apiKey, undefined, {includeUtm: true, batchEvents: true, eventUploadThreshold: 2});
+      amplitude.logEvent('UTM Test Event', {});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$setOnce': {
+          initial_utm_campaign: 'new',
+          initial_utm_content: 'top'
+        },
+        '$set': {
+          utm_campaign: 'new',
+          utm_content: 'top'
+        }
+      });
+
+      assert.equal(events[1].event_type, 'UTM Test Event');
+      assert.deepEqual(events[1].user_properties, {});
+    });
   });
 
   describe('gatherReferrer', function() {
+    var clock;
     beforeEach(function() {
+      clock = sinon.useFakeTimers(100);
       amplitude.init(apiKey);
       sinon.stub(amplitude, '_getReferrer').returns('https://amplitude.com/contact');
     });
 
     afterEach(function() {
       amplitude._getReferrer.restore();
+      clock.restore();
       reset();
     });
 
     it('should not send referrer data when the includeReferrer flag is false', function() {
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude.init(apiKey, undefined, {});
 
       amplitude.setUserProperties({user_prop: true});
@@ -2200,6 +2244,7 @@ describe('setVersionName', function() {
 
     it('should only send referrer via identify call when the includeReferrer flag is true', function() {
       reset();
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
       amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
@@ -2231,6 +2276,7 @@ describe('setVersionName', function() {
 
     it('should not set referrer if referrer data already in session storage', function() {
       reset();
+      clock.tick(30 * 60 * 1000 + 1);
       sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
       amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
       amplitude.logEvent('Referrer Test Event', {});
@@ -2254,6 +2300,7 @@ describe('setVersionName', function() {
 
     it('should not override any existing initial referrer values in session storage', function() {
       reset();
+      clock.tick(30 * 60 * 1000 + 1);
       sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
       amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
       amplitude._saveReferrer('https://facebook.com/contact');
@@ -2326,6 +2373,46 @@ describe('setVersionName', function() {
 
       // existing value persists
       assert.equal(sessionStorage.getItem('amplitude_referrer_new_app'), 'https://www.google.com/search?');
+    });
+
+    it('should only send referrer once per session', function() {
+      reset();
+      amplitude.init(apiKey, undefined, {includeReferrer: true});
+
+      // still same session, no referrer sent
+      assert.lengthOf(server.requests, 0);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+
+      // advance the clock to force a new session
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
+      amplitude.logEvent('Referrer Test Event', {});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+
+      var expected = {
+        'referrer': 'https://amplitude.com/contact',
+        'referring_domain': 'amplitude.com'
+      };
+
+      // first event should be identify with initial_referrer and referrer
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$set': expected,
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
+        }
+      });
+
+      // second event should be the test event with no referrer information
+      assert.equal(events[1].event_type, 'Referrer Test Event');
+      assert.deepEqual(events[1].user_properties, {});
+
+      // referrer should be propagated to session storage
+      assert.equal(sessionStorage.getItem('amplitude_referrer'), JSON.stringify(expected));
     });
   });
 

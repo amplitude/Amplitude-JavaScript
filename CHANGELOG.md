@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Update README with link to our [Google Tag Manager integration demo app](https://github.com/amplitude/GTM-Web-Demo).
+* Fix bug where referrer and UTM params were being captured more than once per session.
 
 ### 3.0.0 (May 27, 2016)
 
