@@ -2079,17 +2079,21 @@ describe('setVersionName', function() {
   });
 
   describe('gatherUtm', function() {
+    var clock;
     beforeEach(function() {
+      clock = sinon.useFakeTimers();
       amplitude.init(apiKey);
     });
 
     afterEach(function() {
+      clock.restore();
       reset();
     });
 
     it('should not send utm data when the includeUtm flag is false', function() {
-      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       reset();
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude.init(apiKey, undefined, {});
 
       amplitude.setUserProperties({user_prop: true});
@@ -2103,8 +2107,9 @@ describe('setVersionName', function() {
     });
 
     it('should send utm data via identify when the includeUtm flag is true', function() {
-      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       reset();
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude.init(apiKey, undefined, {includeUtm: true, batchEvents: true, eventUploadThreshold: 2});
 
       amplitude.logEvent('UTM Test Event', {});
@@ -2128,9 +2133,10 @@ describe('setVersionName', function() {
     });
 
     it('should parse utm params', function() {
+      reset();
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
-
       var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude.getInstance()._initUtmData(utmParams);
 
       var expectedProperties = {
@@ -2168,6 +2174,7 @@ describe('setVersionName', function() {
 
     it('should not set utmProperties if utmProperties data already in session storage', function() {
       reset();
+      clock.tick(30 * 60 * 1000 + 1);
       var existingProperties = {
         utm_campaign: 'old',
         utm_content: 'bottom',
@@ -2203,17 +2210,21 @@ describe('setVersionName', function() {
   });
 
   describe('gatherReferrer', function() {
+    var clock;
     beforeEach(function() {
+      clock = sinon.useFakeTimers();
       amplitude.init(apiKey);
       sinon.stub(amplitude.getInstance(), '_getReferrer').returns('https://amplitude.com/contact');
     });
 
     afterEach(function() {
+      clock.restore();
       amplitude.getInstance()._getReferrer.restore();
       reset();
     });
 
     it('should not send referrer data when the includeReferrer flag is false', function() {
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude.init(apiKey, undefined, {});
 
       amplitude.setUserProperties({user_prop: true});
@@ -2225,6 +2236,7 @@ describe('setVersionName', function() {
 
     it('should only send referrer via identify call when the includeReferrer flag is true', function() {
       reset();
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
       amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
@@ -2256,6 +2268,7 @@ describe('setVersionName', function() {
 
     it('should not set referrer if referrer data already in session storage', function() {
       reset();
+      clock.tick(30 * 60 * 1000 + 1);
       sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
       amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
       amplitude.logEvent('Referrer Test Event', {});

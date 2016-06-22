@@ -87,6 +87,14 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
       this._sessionId = now;
+
+      // only capture UTM params and referrer if new session
+      if (this.options.includeUtm) {
+        this._initUtmData();
+      }
+      if (this.options.includeReferrer) {
+        this._saveReferrer(this._getReferrer());
+      }
     }
     this._lastEventTime = now;
     _saveCookieData(this);
@@ -112,14 +120,6 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       }
 
       this._sendEventsIfReady(); // try sending unsent events
-    }
-
-    if (this.options.includeUtm) {
-      this._initUtmData();
-    }
-
-    if (this.options.includeReferrer) {
-      this._saveReferrer(this._getReferrer());
     }
   } catch (e) {
     utils.log(e);
