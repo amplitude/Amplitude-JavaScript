@@ -580,9 +580,13 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this._lastEventTime = now;
     _saveCookieData(this);
 
+    // one time migration of unsent events / identifies from old localstorage keys to new apiKey-scoped keys
+    _migrateUnsentEventScope(this);
+
     if (this.options.saveEvents) {
-      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey);
-      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey);
+      // use the apiKey to separate out different event scopes
+      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentEventScopeKey + apiKey);
+      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyScopeKey + apiKey);
 
       // validate event properties for unsent events
       for (var i = 0; i < this._unsentEvents.length; i++) {
@@ -645,6 +649,31 @@ var _parseConfig = function _parseConfig(options, config) {
       parseValidateAndLoad(key);
     }
    }
+};
+
+/**
+ * Migrates unsent events from old localStorage keys to new apiKey-scoped keys
+ * @private
+ */
+var _migrateUnsentEventScope = function _migrateUnsentEventScope(scope) {
+  var _migrateEvents = function _migrateEvents(oldKey) {
+    var newKey = oldKey + scope.options.apiKey;
+    var oldUnsentEvents = scope._loadSavedUnsentEvents(oldKey);
+    if (oldUnsentEvents.length > 0) {  // only migrate if there are still events under the old keys
+      var unsentEvents = scope._loadSavedUnsentEvents(newKey);
+      if (unsentEvents.length > 0) {  // if the new scope already has saved events, insert old events at front
+        unsentEvents = oldUnsentEvents.concat(unsentEvents);
+      } else {
+        unsentEvents = oldUnsentEvents;
+      }
+      try {  // migrate to new key
+        scope._setInStorage(localStorage, newKey, JSON.stringify(unsentEvents));
+      } catch (e) {}
+      scope._removeFromStorage(localStorage, oldKey);  // remove the old keys from localStorage
+    }
+  };
+  _migrateEvents(scope.options.unsentKey);
+  _migrateEvents(scope.options.unsentIdentifyKey);
 };
 
 /**
@@ -798,6 +827,15 @@ AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, ke
  */
 AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, value) {
   storage.setItem(key + this._storageSuffix, value);
+};
+
+/**
+ * Helper function to remove values in storage
+ * Storage argument allows for localStoraoge and sessionStoraoge
+ * @private
+ */
+AmplitudeClient.prototype._removeFromStorage = function _removeFromStorage(storage, key) {
+  storage.removeItem(key + this._storageSuffix);
 };
 
 /**
@@ -996,11 +1034,13 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
  */
 AmplitudeClient.prototype.saveEvents = function saveEvents() {
   try {
-    this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    this._setInStorage(localStorage, this.options.unsentKey + this.options.apiKey, JSON.stringify(this._unsentEvents));
   } catch (e) {}
 
   try {
-    this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+    this._setInStorage(
+      localStorage, this.options.unsentIdentifyKey + this.options.apiKey, JSON.stringify(this._unsentIdentifys)
+    );
   } catch (e) {}
 };
 
