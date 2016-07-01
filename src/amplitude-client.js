@@ -104,8 +104,8 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     if (this.options.saveEvents) {
       // use the apiKey to separate out different event scopes
-      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentEventScopeKey + apiKey);
-      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyScopeKey + apiKey);
+      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey + '_' + apiKey);
+      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey + '_' + apiKey);
 
       // validate event properties for unsent events
       for (var i = 0; i < this._unsentEvents.length; i++) {
@@ -176,7 +176,7 @@ var _parseConfig = function _parseConfig(options, config) {
  */
 var _migrateUnsentEventScope = function _migrateUnsentEventScope(scope) {
   var _migrateEvents = function _migrateEvents(oldKey) {
-    var newKey = oldKey + scope.options.apiKey;
+    var newKey = oldKey + '_' + scope.options.apiKey;
     var oldUnsentEvents = scope._loadSavedUnsentEvents(oldKey);
     if (oldUnsentEvents.length > 0) {  // only migrate if there are still events under the old keys
       var unsentEvents = scope._loadSavedUnsentEvents(newKey);
@@ -553,12 +553,14 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
  */
 AmplitudeClient.prototype.saveEvents = function saveEvents() {
   try {
-    this._setInStorage(localStorage, this.options.unsentKey + this.options.apiKey, JSON.stringify(this._unsentEvents));
+    this._setInStorage(
+      localStorage, this.options.unsentKey + '_' + this.options.apiKey, JSON.stringify(this._unsentEvents)
+    );
   } catch (e) {}
 
   try {
     this._setInStorage(
-      localStorage, this.options.unsentIdentifyKey + this.options.apiKey, JSON.stringify(this._unsentIdentifys)
+      localStorage, this.options.unsentIdentifyKey + '_' + this.options.apiKey, JSON.stringify(this._unsentIdentifys)
     );
   } catch (e) {}
 };

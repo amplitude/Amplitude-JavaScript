@@ -134,20 +134,21 @@ describe('Amplitude', function() {
 
       // verify separate localstorages
       assert.deepEqual(
-        JSON.parse(localStorage.getItem('amplitude_unsent'))[0].event_type, 'amplitude event'
+        JSON.parse(localStorage.getItem('amplitude_unsent_' + apiKey))[0].event_type, 'amplitude event'
       );
       assert.deepEqual(
-        JSON.parse(localStorage.getItem('amplitude_unsent'))[1].event_type, 'amplitude event2'
+        JSON.parse(localStorage.getItem('amplitude_unsent_' + apiKey))[1].event_type, 'amplitude event2'
       );
-      assert.equal(localStorage.getItem('amplitude_unsent_identify'), JSON.stringify([]));
-      assert.equal(localStorage.getItem('amplitude_unsent_app1'), JSON.stringify([]));
+      assert.equal(localStorage.getItem('amplitude_unsent_identify_' + apiKey), JSON.stringify([]));
+      assert.equal(localStorage.getItem('amplitude_unsent_1_app1'), JSON.stringify([]));
       assert.deepEqual(
-        JSON.parse(localStorage.getItem('amplitude_unsent_identify_app1'))[0].user_properties, {'$set':{'key':'value'}}
+        JSON.parse(localStorage.getItem('amplitude_unsent_identify_1_app1'))[0].user_properties,
+        {'$set':{'key':'value'}}
       );
       assert.equal(
-        JSON.parse(localStorage.getItem('amplitude_unsent_app2'))[0].event_type, 'app2 event'
+        JSON.parse(localStorage.getItem('amplitude_unsent_2_app2'))[0].event_type, 'app2 event'
       );
-      assert.equal(localStorage.getItem('amplitude_unsent_identify_app2'), JSON.stringify([]));
+      assert.equal(localStorage.getItem('amplitude_unsent_identify_2_app2'), JSON.stringify([]));
 
       // verify separate apiKeys in server requests
       assert.lengthOf(server.requests, 3);
@@ -505,8 +506,8 @@ describe('Amplitude', function() {
         '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
         'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
         ':131, "groups":{}}]';
-      localStorage.setItem('amplitude_unsent', existingEvent);
-      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvent);
+      localStorage.setItem('amplitude_unsent_identify_' + apiKey, existingIdentify);
 
       var amplitude2 = new Amplitude();
       amplitude2.init(apiKey, null, {batchEvents: true});
@@ -516,8 +517,8 @@ describe('Amplitude', function() {
       assert.deepEqual(amplitude2.getInstance()._unsentIdentifys, JSON.parse(existingIdentify));
 
       // check local storage keys are still same for default instance
-      assert.equal(localStorage.getItem('amplitude_unsent'), existingEvent);
-      assert.equal(localStorage.getItem('amplitude_unsent_identify'), existingIdentify);
+      assert.equal(localStorage.getItem('amplitude_unsent_' + apiKey), existingEvent);
+      assert.equal(localStorage.getItem('amplitude_unsent_identify_' + apiKey), existingIdentify);
     });
 
     it('should validate event properties when loading saved events from localStorage', function() {
@@ -533,7 +534,7 @@ describe('Amplitude', function() {
         '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
         '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}},"user_properties":{},"uuid":"650407a1-d705-' +
         '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
-      localStorage.setItem('amplitude_unsent', existingEvents);
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvents);
 
       var amplitude2 = new Amplitude();
       amplitude2.init(apiKey, null, {batchEvents: true});
@@ -562,7 +563,7 @@ describe('Amplitude', function() {
         '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
         '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}}},"event_properties":{},"uuid":"650407a1-d705-' +
         '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
-      localStorage.setItem('amplitude_unsent_identify', existingEvents);
+      localStorage.setItem('amplitude_unsent_identify_' + apiKey, existingEvents);
 
       var amplitude2 = new Amplitude();
       amplitude2.init(apiKey, null, {batchEvents: true});
@@ -593,8 +594,8 @@ describe('Amplitude', function() {
         '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
         'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
         ':131}]';
-      localStorage.setItem('amplitude_unsent', existingEvent);
-      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvent);
+      localStorage.setItem('amplitude_unsent_identify_' + apiKey, existingIdentify);
 
       var amplitude2 = new Amplitude();
       amplitude2.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
@@ -606,8 +607,8 @@ describe('Amplitude', function() {
       assert.deepEqual(amplitude2.getInstance()._unsentIdentifys, []);
 
       // check local storage keys are still same
-      assert.equal(localStorage.getItem('amplitude_unsent'), JSON.stringify([]));
-      assert.equal(localStorage.getItem('amplitude_unsent_identify'), JSON.stringify([]));
+      assert.equal(localStorage.getItem('amplitude_unsent_' + apiKey), JSON.stringify([]));
+      assert.equal(localStorage.getItem('amplitude_unsent_identify_' + apiKey), JSON.stringify([]));
 
       // check request
       assert.lengthOf(server.requests, 1);
@@ -619,18 +620,18 @@ describe('Amplitude', function() {
 
     it('should validate event properties when loading saved events from localStorage', function() {
       var existingEvents = '[{"device_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d' +
-          '-2352191877e6","timestamp":1455744744413,"event_id":2,"session_id":1455744733865,"event_type":"clicked",' +
-          '"version_name":"Web","platform":"Web","os_name":"Chrome","os_version":"48","device_model":"Mac","language"' +
-          ':"en-US","api_properties":{},"event_properties":"{}","user_properties":{},"uuid":"1b8859d9-e91e-403e-92d4-' +
-          'c600dfb83432","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":4},{"device_id":"15a82a' +
-          'aa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","timestamp":1455744746295,' +
-          '"event_id":3,"session_id":1455744733865,"event_type":"clicked","version_name":"Web","platform":"Web",' +
-          '"os_name":"Chrome","os_version":"48","device_model":"Mac","language":"en-US","api_properties":{},' +
-          '"event_properties":{"10":"false","bool":true,"null":null,"string":"test","array":' +
-          '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
-          '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}},"user_properties":{},"uuid":"650407a1-d705-' +
-          '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]';
-      localStorage.setItem('amplitude_unsent', existingEvents);
+        '-2352191877e6","timestamp":1455744744413,"event_id":2,"session_id":1455744733865,"event_type":"clicked",' +
+        '"version_name":"Web","platform":"Web","os_name":"Chrome","os_version":"48","device_model":"Mac","language"' +
+        ':"en-US","api_properties":{},"event_properties":"{}","user_properties":{},"uuid":"1b8859d9-e91e-403e-92d4-' +
+        'c600dfb83432","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":4},{"device_id":"15a82a' +
+        'aa-0d9e-4083-a32d-2352191877e6","user_id":"15a82aaa-0d9e-4083-a32d-2352191877e6","timestamp":1455744746295,' +
+        '"event_id":3,"session_id":1455744733865,"event_type":"clicked","version_name":"Web","platform":"Web",' +
+        '"os_name":"Chrome","os_version":"48","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{"10":"false","bool":true,"null":null,"string":"test","array":' +
+        '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
+        '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}},"user_properties":{},"uuid":"650407a1-d705-' +
+        '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]';
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvents);
 
       var amplitude2 = new Amplitude();
       amplitude2.init(apiKey, null, {
