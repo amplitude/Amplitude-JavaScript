@@ -635,6 +635,61 @@ it ('should load saved events from localStorage new keys and send events', funct
       // check request
       assert.lengthOf(server.requests, 0);
     });
+
+    it('should migrate saved events from old localstorage keys to new scoped keys', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130,"groups":{}}]';
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131,"groups":{}}]';
+
+      localStorage.setItem('amplitude_unsent', existingIdentify);
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvent);
+
+      var amplitude2 = new AmplitudeClient();
+      amplitude2.init(apiKey, null, {
+        batchEvents: true
+      });
+
+      // verify that events loaded in proper order and that keys were migrated
+      assert.lengthOf(amplitude2._unsentEvents, 2);
+      assert.equal(amplitude2._unsentEvents[0]['event_type'], '$identify');  // loads old one first
+      assert.equal(amplitude2._unsentEvents[1]['event_type'], 'clicked');
+      assert.equal(localStorage.getItem('amplitude_unsent'), undefined);  // old key is deleted
+      assert.deepEqual(
+        JSON.parse(localStorage.getItem('amplitude_unsent_' + apiKey)), amplitude2._unsentEvents
+      );
+    });
+
+    it('should migrate saved identifys from old localstorage keys to new scoped keys', function() {
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131,"groups":{}}]';
+
+      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+
+      var amplitude2 = new AmplitudeClient();
+      amplitude2.init(apiKey, null, {
+        batchEvents: true
+      });
+
+      assert.lengthOf(amplitude2._unsentIdentifys, 1);
+      assert.equal(amplitude2._unsentIdentifys[0]['event_type'], '$identify');
+      assert.equal(localStorage.getItem('amplitude_unsent_identify'), undefined);  // old key is deleted
+      assert.deepEqual(
+        JSON.parse(localStorage.getItem('amplitude_unsent_identify_' + apiKey)),
+        amplitude2._unsentIdentifys
+      );
+    });
   });
 
   describe('runQueuedFunctions', function() {
@@ -1131,7 +1186,7 @@ describe('setVersionName', function() {
     });
 
     it('should save events', function() {
-      amplitude.init(apiKey, null, {saveEvents: true});
+      amplitude.init(apiKey, null, {saveEvents: true, batchEvents: true});
       amplitude.logEvent('Event', {index: 1});
       amplitude.logEvent('Event', {index: 2});
       amplitude.logEvent('Event', {index: 3});
