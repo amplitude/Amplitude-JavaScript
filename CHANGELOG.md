@@ -1,6 +1,6 @@
 ## Unreleased
 
-* Migrate saved unsent events from old localStorage keys to new scoped keys.
+* Migrate saved unsent events from old localStorage keys and meta data in cookies to new scoped keys.
 
 ### 3.0.1 (June 22, 2016)
 

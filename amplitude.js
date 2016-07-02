@@ -514,6 +514,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
   this._updateScheduled = false;
+  this._apiKeySuffix = '';
 
   // event meta data
   this._eventId = 0;
@@ -546,6 +547,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
   try {
     this.options.apiKey = apiKey;
+    this._apiKeySuffix = '_' + this.options.apiKey;
     _parseConfig(this.options, opt_config);
     this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
@@ -553,9 +555,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    if (this._instanceName === Constants.DEFAULT_INSTANCE) {
-      _upgradeCookeData(this);
-    }
+    _upgradeCookeData(this);
     _loadCookieData(this);
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
@@ -585,8 +585,8 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     if (this.options.saveEvents) {
       // use the apiKey to separate out different event scopes
-      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey + '_' + apiKey);
-      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey + '_' + apiKey);
+      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey + this._apiKeySuffix);
+      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey + this._apiKeySuffix);
 
       // validate event properties for unsent events
       for (var i = 0; i < this._unsentEvents.length; i++) {
@@ -657,7 +657,7 @@ var _parseConfig = function _parseConfig(options, config) {
  */
 var _migrateUnsentEventScope = function _migrateUnsentEventScope(scope) {
   var _migrateEvents = function _migrateEvents(oldKey) {
-    var newKey = oldKey + '_' + scope.options.apiKey;
+    var newKey = oldKey + scope._apiKeySuffix;
     var oldUnsentEvents = scope._loadSavedUnsentEvents(oldKey);
     if (oldUnsentEvents.length > 0) {  // only migrate if there are still events under the old keys
       var unsentEvents = scope._loadSavedUnsentEvents(newKey);
@@ -845,9 +845,23 @@ AmplitudeClient.prototype._removeFromStorage = function _removeFromStorage(stora
  * @private
  */
 var _upgradeCookeData = function _upgradeCookeData(scope) {
-  // skip if migration already happened
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+  // check if already migrated to new instance keys with scope
+  var scopedKey = scope.options.cookieName + scope._apiKeySuffix + scope._storageSuffix;
+  var cookieData = scope.cookieStorage.get(scopedKey);
   if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
+    return;
+  }
+
+  // check if old scope exists and needs migration
+  cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
+  if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
+    scope.cookieStorage.set(scopedKey, cookieData);
+    scope.cookieStorage.remove(scope.options.cookieName + scope._storageSuffix);
+    return;
+  }
+
+  // the cookie data consolidation logic only needs to be run for legacy default instance before v3.0.0
+  if (scope._instanceName !== Constants.DEFAULT_INSTANCE) {
     return;
   }
 
@@ -898,7 +912,7 @@ var _upgradeCookeData = function _upgradeCookeData(scope) {
  * @private
  */
 var _loadCookieData = function _loadCookieData(scope) {
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._apiKeySuffix + scope._storageSuffix);
   if (type(cookieData) === 'object') {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -932,7 +946,7 @@ var _loadCookieData = function _loadCookieData(scope) {
  * @private
  */
 var _saveCookieData = function _saveCookieData(scope) {
-  scope.cookieStorage.set(scope.options.cookieName + scope._storageSuffix, {
+  scope.cookieStorage.set(scope.options.cookieName + scope._apiKeySuffix + scope._storageSuffix, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut,
