@@ -1,5 +1,7 @@
 ## Unreleased
 
+* `productId` is no longer a required field for `Revenue` logged via `logRevenueV2`.
+
 ### 3.0.1 (June 22, 2016)
 
 * Update README with link to our [Google Tag Manager integration demo app](https://github.com/amplitude/GTM-Web-Demo).

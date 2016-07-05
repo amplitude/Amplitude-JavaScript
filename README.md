@@ -270,7 +270,7 @@ var revenue = new amplitude.Revenue().setProductId('com.company.productId').setP
 amplitude.getInstance().logRevenueV2(revenue);
 ```
 
-`productId` and `price` are required fields. `quantity` defaults to 1 if not specified. Each field has a corresponding `set` method (for example `setProductId`, `setQuantity`, etc). This table describes the different fields available:
+`price` is a required field. `quantity` defaults to 1 if not specified. Each field has a corresponding `set` method (for example `setProductId`, `setQuantity`, etc). This table describes the different fields available:
 
 | Name               | Type       | Description                                                                                              | default |
 |--------------------|------------|----------------------------------------------------------------------------------------------------------|---------|
