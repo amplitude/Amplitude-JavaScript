@@ -1983,6 +1983,22 @@ describe('setVersionName', function() {
       assert.equal(value, 200);
       assert.equal(message, 'success');
     });
+
+    it('should track the raw user agent string', function() {
+      // Unit test UA is set by phantomJS test environment, should be constant for all tests
+      var phantomJSUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/534.34 (KHTML, like Gecko) ' +
+        'PhantomJS/1.9.7 Safari/534.34';
+      assert.equal(navigator.userAgent, phantomJSUA);
+      assert.equal(amplitude._userAgent, phantomJSUA);
+
+      // log an event and verify UA field is filled out
+      amplitude.logEvent('testEvent');
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, 'testEvent');
+      assert.equal(events[0].user_agent, phantomJSUA);
+    });
   });
 
   describe('optOut', function() {

@@ -522,6 +522,8 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._newSession = false;
   this._sequenceNumber = 0;
   this._sessionId = null;
+
+  this._userAgent = (navigator && navigator.userAgent) || null;
 };
 
 AmplitudeClient.prototype.Identify = Identify;
@@ -1279,7 +1281,8 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
         version: version
       },
       sequence_number: sequenceNumber, // for ordering events and identifys
-      groups: utils.truncate(utils.validateGroups(groups))
+      groups: utils.truncate(utils.validateGroups(groups)),
+      user_agent: this._userAgent
       // country: null
     };
 
