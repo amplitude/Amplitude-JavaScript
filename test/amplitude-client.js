@@ -1986,10 +1986,9 @@ describe('setVersionName', function() {
 
     it('should track the raw user agent string', function() {
       // Unit test UA is set by phantomJS test environment, should be constant for all tests
-      var phantomJSUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/534.34 (KHTML, like Gecko) ' +
-        'PhantomJS/1.9.7 Safari/534.34';
-      assert.equal(navigator.userAgent, phantomJSUA);
-      assert.equal(amplitude._userAgent, phantomJSUA);
+      var phantomJSUA = 'AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34';
+      assert.isTrue(navigator.userAgent.indexOf(phantomJSUA) > -1);
+      assert.isTrue(amplitude._userAgent.indexOf(phantomJSUA) > -1);
 
       // log an event and verify UA field is filled out
       amplitude.logEvent('testEvent');
@@ -1997,7 +1996,7 @@ describe('setVersionName', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
       assert.equal(events[0].event_type, 'testEvent');
-      assert.equal(events[0].user_agent, phantomJSUA);
+      assert.isTrue(events[0].user_agent.indexOf(phantomJSUA) > -1);
     });
   });
 
