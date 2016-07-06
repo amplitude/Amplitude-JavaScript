@@ -74,7 +74,10 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     });
     this.options.domain = this.cookieStorage.options().domain;
 
+    // one time migration of unsent events / identifies from old localstorage keys to new apiKey-scoped keys
+    _migrateUnsentEventScope(this);
     _upgradeCookeData(this);
+
     _loadCookieData(this);
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
@@ -98,9 +101,6 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     }
     this._lastEventTime = now;
     _saveCookieData(this);
-
-    // one time migration of unsent events / identifies from old localstorage keys to new apiKey-scoped keys
-    _migrateUnsentEventScope(this);
 
     if (this.options.saveEvents) {
       // use the apiKey to separate out different event scopes
@@ -332,7 +332,7 @@ AmplitudeClient.prototype._sendEventsIfReady = function _sendEventsIfReady(callb
 
 /**
  * Helper function to fetch values from storage
- * Storage argument allows for localStoraoge and sessionStoraoge
+ * Storage argument allows for localStoraoge and sessionStorage
  * @private
  */
 AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, key) {
@@ -341,7 +341,7 @@ AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, ke
 
 /**
  * Helper function to set values in storage
- * Storage argument allows for localStoraoge and sessionStoraoge
+ * Storage argument allows for localStoraoge and sessionStorage
  * @private
  */
 AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, value) {
@@ -350,7 +350,7 @@ AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, v
 
 /**
  * Helper function to remove values in storage
- * Storage argument allows for localStoraoge and sessionStoraoge
+ * Storage argument allows for localStoraoge and sessionStorage
  * @private
  */
 AmplitudeClient.prototype._removeFromStorage = function _removeFromStorage(storage, key) {
@@ -568,13 +568,13 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
 AmplitudeClient.prototype.saveEvents = function saveEvents() {
   try {
     this._setInStorage(
-      localStorage, this.options.unsentKey + '_' + this.options.apiKey, JSON.stringify(this._unsentEvents)
+      localStorage, this.options.unsentKey + this._apiKeySuffix, JSON.stringify(this._unsentEvents)
     );
   } catch (e) {}
 
   try {
     this._setInStorage(
-      localStorage, this.options.unsentIdentifyKey + '_' + this.options.apiKey, JSON.stringify(this._unsentIdentifys)
+      localStorage, this.options.unsentIdentifyKey + this._apiKeySuffix, JSON.stringify(this._unsentIdentifys)
     );
   } catch (e) {}
 };
