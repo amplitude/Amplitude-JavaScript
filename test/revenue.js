@@ -98,7 +98,7 @@ describe('Revenue', function() {
     assert.isFalse(revenue2._isValidRevenue());
     revenue2.setPrice(10.99);
     revenue2.setQuantity(15);
-    assert.isFalse(revenue2._isValidRevenue());
+    assert.isTrue(revenue2._isValidRevenue());
     revenue2.setProductId('testProductId');
     assert.isTrue(revenue2._isValidRevenue());
   });

@@ -3816,14 +3816,14 @@ var utils = require('./utils');
 
 /*
  * Wrapper for logging Revenue data. Revenue objects get passed to amplitude.logRevenueV2 to send to Amplitude servers.
- * Note: productId and price are required fields. If quantity is not specified, then defaults to 1.
+ * Note: price is the only required field. If quantity is not specified, then defaults to 1.
  */
 
 /**
  * Revenue API - instance constructor. Revenue objects are a wrapper for revenue data.
  * Each method updates a revenue property in the Revenue object, and returns the same Revenue object,
  * allowing you to chain multiple method calls together.
- * Note: productId and price are required fields to log revenue events.
+ * Note: price is a required field to log revenue events.
  * If quantity is not specified then defaults to 1.
  * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue} for more information
  * about logging Revenue.
@@ -3833,17 +3833,17 @@ var utils = require('./utils');
  */
 var Revenue = function Revenue() {
   // required fields
-  this._productId = null;
-  this._quantity = 1;
   this._price = null;
 
   // optional fields
+  this._productId = null;
+  this._quantity = 1;
   this._revenueType = null;
   this._properties = null;
 };
 
 /**
- * Set a value for the product identifer. This field is required for all revenue being logged.
+ * Set a value for the product identifer.
  * @public
  * @param {string} productId - The value for the product identifier. Empty and invalid strings are ignored.
  * @return {Revenue} Returns the same Revenue object, allowing you to chain multiple method calls together.
@@ -3935,10 +3935,6 @@ Revenue.prototype.setEventProperties = function setEventProperties(eventProperti
  * @private
  */
 Revenue.prototype._isValidRevenue = function _isValidRevenue() {
-  if (type(this._productId) !== 'string' || utils.isEmptyString(this._productId)) {
-    utils.log('Invalid revenue, need to set productId field');
-    return false;
-  }
   if (type(this._price) !== 'number') {
     utils.log('Invalid revenue, need to set price field');
     return false;

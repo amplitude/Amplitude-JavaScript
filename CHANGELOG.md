@@ -1,5 +1,6 @@
 ## Unreleased
 
+* `productId` is no longer a required field for `Revenue` logged via `logRevenueV2`.
 * Track raw user agent string for backend filtering.
 
 ### 3.0.1 (June 22, 2016)
