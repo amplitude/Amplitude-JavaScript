@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Migrate saved unsent events from old localStorage keys and meta data in cookies to new scoped keys.
+
 ### 3.0.1 (June 22, 2016)
 
 * Update README with link to our [Google Tag Manager integration demo app](https://github.com/amplitude/GTM-Web-Demo).

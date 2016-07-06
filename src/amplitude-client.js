@@ -33,6 +33,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
   this._updateScheduled = false;
+  this._apiKeySuffix = '';
 
   // event meta data
   this._eventId = 0;
@@ -65,6 +66,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
   try {
     this.options.apiKey = apiKey;
+    this._apiKeySuffix = '_' + this.options.apiKey;
     _parseConfig(this.options, opt_config);
     this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
@@ -72,9 +74,10 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    if (this._instanceName === Constants.DEFAULT_INSTANCE) {
-      _upgradeCookeData(this);
-    }
+    // one time migration of unsent events / identifies from old localstorage keys to new apiKey-scoped keys
+    _migrateUnsentEventScope(this);
+    _upgradeCookeData(this);
+
     _loadCookieData(this);
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
@@ -100,8 +103,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     _saveCookieData(this);
 
     if (this.options.saveEvents) {
-      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey);
-      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey);
+      // use the apiKey to separate out different event scopes
+      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey + this._apiKeySuffix);
+      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey + this._apiKeySuffix);
 
       // validate event properties for unsent events
       for (var i = 0; i < this._unsentEvents.length; i++) {
@@ -164,6 +168,31 @@ var _parseConfig = function _parseConfig(options, config) {
       parseValidateAndLoad(key);
     }
    }
+};
+
+/**
+ * Migrates unsent events from old localStorage keys to new apiKey-scoped keys
+ * @private
+ */
+var _migrateUnsentEventScope = function _migrateUnsentEventScope(scope) {
+  var _migrateEvents = function _migrateEvents(oldKey) {
+    var newKey = oldKey + scope._apiKeySuffix;
+    var oldUnsentEvents = scope._loadSavedUnsentEvents(oldKey);
+    if (oldUnsentEvents.length > 0) {  // only migrate if there are still events under the old keys
+      var unsentEvents = scope._loadSavedUnsentEvents(newKey);
+      if (unsentEvents.length > 0) {  // if the new scope already has saved events, insert old events at front
+        unsentEvents = oldUnsentEvents.concat(unsentEvents);
+      } else {
+        unsentEvents = oldUnsentEvents;
+      }
+      try {  // migrate to new key
+        scope._setInStorage(localStorage, newKey, JSON.stringify(unsentEvents));
+      } catch (e) {}
+      scope._removeFromStorage(localStorage, oldKey);  // remove the old keys from localStorage
+    }
+  };
+  _migrateEvents(scope.options.unsentKey);
+  _migrateEvents(scope.options.unsentIdentifyKey);
 };
 
 /**
@@ -303,7 +332,7 @@ AmplitudeClient.prototype._sendEventsIfReady = function _sendEventsIfReady(callb
 
 /**
  * Helper function to fetch values from storage
- * Storage argument allows for localStoraoge and sessionStoraoge
+ * Storage argument allows for localStoraoge and sessionStorage
  * @private
  */
 AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, key) {
@@ -312,11 +341,20 @@ AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, ke
 
 /**
  * Helper function to set values in storage
- * Storage argument allows for localStoraoge and sessionStoraoge
+ * Storage argument allows for localStoraoge and sessionStorage
  * @private
  */
 AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, value) {
   storage.setItem(key + this._storageSuffix, value);
+};
+
+/**
+ * Helper function to remove values in storage
+ * Storage argument allows for localStoraoge and sessionStorage
+ * @private
+ */
+AmplitudeClient.prototype._removeFromStorage = function _removeFromStorage(storage, key) {
+  storage.removeItem(key + this._storageSuffix);
 };
 
 /**
@@ -326,9 +364,23 @@ AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, v
  * @private
  */
 var _upgradeCookeData = function _upgradeCookeData(scope) {
-  // skip if migration already happened
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+  // check if already migrated to new instance keys with scope
+  var scopedKey = scope.options.cookieName + scope._apiKeySuffix + scope._storageSuffix;
+  var cookieData = scope.cookieStorage.get(scopedKey);
   if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
+    return;
+  }
+
+  // check if old scope exists and needs migration
+  cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
+  if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
+    scope.cookieStorage.set(scopedKey, cookieData);
+    scope.cookieStorage.remove(scope.options.cookieName + scope._storageSuffix);
+    return;
+  }
+
+  // the cookie data consolidation logic only needs to be run for legacy default instance before v3.0.0
+  if (scope._instanceName !== Constants.DEFAULT_INSTANCE) {
     return;
   }
 
@@ -379,7 +431,7 @@ var _upgradeCookeData = function _upgradeCookeData(scope) {
  * @private
  */
 var _loadCookieData = function _loadCookieData(scope) {
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._apiKeySuffix + scope._storageSuffix);
   if (type(cookieData) === 'object') {
     if (cookieData.deviceId) {
       scope.options.deviceId = cookieData.deviceId;
@@ -413,7 +465,7 @@ var _loadCookieData = function _loadCookieData(scope) {
  * @private
  */
 var _saveCookieData = function _saveCookieData(scope) {
-  scope.cookieStorage.set(scope.options.cookieName + scope._storageSuffix, {
+  scope.cookieStorage.set(scope.options.cookieName + scope._apiKeySuffix + scope._storageSuffix, {
     deviceId: scope.options.deviceId,
     userId: scope.options.userId,
     optOut: scope.options.optOut,
@@ -515,11 +567,15 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
  */
 AmplitudeClient.prototype.saveEvents = function saveEvents() {
   try {
-    this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    this._setInStorage(
+      localStorage, this.options.unsentKey + this._apiKeySuffix, JSON.stringify(this._unsentEvents)
+    );
   } catch (e) {}
 
   try {
-    this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+    this._setInStorage(
+      localStorage, this.options.unsentIdentifyKey + this._apiKeySuffix, JSON.stringify(this._unsentIdentifys)
+    );
   } catch (e) {}
 };
 
