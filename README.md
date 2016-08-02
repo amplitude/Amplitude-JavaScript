@@ -104,10 +104,10 @@ amplitude.getInstance().logEvent('Viewed Home Page');
 
 ### Synchronizing Device Ids Between Apps ###
 
-As mentioned before, each instance will have its own deviceId. If you want your apps to share the same deviceId, you can do so *after init* via the `getDeviceId` and `setDeviceId` methods. Here's an example of how to copy the existing deviceId to the `new_app` instance:
+As mentioned before, each instance will have its own deviceId. If you want your apps to share the same deviceId, you can do so *after init* by fetching the deviceId and using `setDeviceId`. Here's an example of how to copy the existing deviceId to the `new_app` instance:
 
 ```javascript
-var deviceId = amplitude.getInstance().getDeviceId(); // existing deviceId
+var deviceId = amplitude.getInstance().options.deviceId; // existing deviceId
 amplitude.getInstance('new_app').setDeviceId(deviceId); // transferring existing deviceId to new_app
 ```
 
@@ -328,7 +328,7 @@ amplitude.getInstance().init('YOUR_API_KEY_HERE', null, {
 | eventUploadPeriodMillis | number | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
 | eventUploadThreshold | number | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
 | includeReferrer | boolean | If `true`, captures the `referrer` and `referring_domain` for each session, as well as the user's `initial_referrer` and `initial_referring_domain` via a set once operation. | `false` |
-| includeUtm | boolean | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. | `false` |
+| includeUtm | boolean | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. Also captures initial utm parameters for each session via a set once operation. | `false` |
 | language | string | Custom language to set | Language determined by browser |
 | optOut | boolean | Whether to disable tracking for the current user | `false` |
 | platform | string | Custom platform to set | 'Web' |
