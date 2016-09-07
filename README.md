@@ -126,7 +126,7 @@ Having large amounts of distinct event types, event properties and user properti
 
 Anything past the above thresholds will not be visualized. **Note that the raw data is not impacted by this in any way, meaning you can still see the values in the raw data, but they will not be visualized on the platform.** We have put in very conservative estimates for the event and property caps which we don’t expect to be exceeded in any practical use case. If you feel that your use case will go above those limits please reach out to support@amplitude.com.
 
-# Settings Custom User IDs #
+# Setting Custom User IDs #
 
 If your app has its own login system that you want to track users with, you can call `setUserId` at any time:
 
