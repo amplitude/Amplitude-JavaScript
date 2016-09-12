@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Event data is now always uploaded to https://api.amplitude.com/, unless the `window.location`'s protocol is `http`, or `useHttp` is set to `true` in SDK configuration options during initialization.
+
 ### 3.0.2 (July 6, 2016)
 
 * `productId` is no longer a required field for `Revenue` logged via `logRevenueV2`.

@@ -336,6 +336,7 @@ amplitude.getInstance().init('YOUR_API_KEY_HERE', null, {
 | savedMaxCount | number | Maximum number of events to save in localStorage. If more events are logged while offline, old events are removed. | 1000 |
 | sessionTimeout | number | Time between logged events before a new session starts in milliseconds | 30\*60\*1000 (30 min) |
 | uploadBatchSize | number | Maximum number of events to send to the server per request. | 100 |
+| useHttp | boolean | If `true`, then events are always uploaded to `http://api.amplitude.com/` instead of `https://api.amplitude.com/`
 
 # Advanced #
 This SDK automatically grabs useful data about the browser, including browser type and operating system version.

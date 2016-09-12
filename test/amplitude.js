@@ -1058,6 +1058,15 @@ describe('setVersionName', function() {
     it('should send request', function() {
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
+      assert.equal(server.requests[0].url, 'https://api.amplitude.com/');
+      assert.equal(server.requests[0].method, 'POST');
+      assert.equal(server.requests[0].async, true);
+    });
+
+    it('should send request to http andpoint', function() {
+      amplitude.options.useHttp = true;
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
       assert.equal(server.requests[0].url, 'http://api.amplitude.com/');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
