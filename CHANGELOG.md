@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add configuration option `forceHttps`, which when set to `true` forces the SDK to always upload to HTTPS endpoint. By default the SDK uses the endpoint that matches the embedding site's protocol (for example if your site is HTTP, it will use the HTTP endpoint).
+
 ### 3.0.2 (July 6, 2016)
 
 * `productId` is no longer a required field for `Revenue` logged via `logRevenueV2`.
