@@ -1478,7 +1478,8 @@ AmplitudeClient.prototype.sendEvents = function sendEvents(callback) {
   }
 
   this._sending = true;
-  var url = ('https:' === window.location.protocol ? 'https' : 'http') + '://' + this.options.apiEndpoint + '/';
+  var protocol = this.options.forceHttps ? 'https' : ('https:' === window.location.protocol ? 'https' : 'http');
+  var url = protocol + '://' + this.options.apiEndpoint + '/';
 
   // fetch events to send
   var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
@@ -4935,6 +4936,7 @@ module.exports = {
   batchEvents: false,
   eventUploadThreshold: 30,
   eventUploadPeriodMillis: 30 * 1000, // 30s
+  forceHttps: false,
 };
 
 }, {"./language":29}],

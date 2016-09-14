@@ -327,6 +327,7 @@ amplitude.getInstance().init('YOUR_API_KEY_HERE', null, {
 | domain | string | Custom cookie domain | The top domain of the current page's url |
 | eventUploadPeriodMillis | number | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
 | eventUploadThreshold | number | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
+| forceHttps | boolean | If `true`, the events will always be uploaded to HTTPS endpoint. Otherwise it will use the embedding site's protocol. | `false` |
 | includeReferrer | boolean | If `true`, captures the `referrer` and `referring_domain` for each session, as well as the user's `initial_referrer` and `initial_referring_domain` via a set once operation. | `false` |
 | includeUtm | boolean | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. Also captures initial utm parameters for each session via a set once operation. | `false` |
 | language | string | Custom language to set | Language determined by browser |
