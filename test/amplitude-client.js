@@ -11,6 +11,7 @@ describe('AmplitudeClient', function() {
   var JSON = require('json');
   var Identify = require('../src/identify.js');
   var Revenue = require('../src/revenue.js');
+  var constants = require('../src/constants.js');
   var apiKey = '000000';
   var keySuffix = '_' + apiKey.slice(0,6);
   var userId = 'user';
@@ -1921,12 +1922,44 @@ describe('setVersionName', function() {
       });
     });
 
-    it('should validate user propeorties', function() {
+    it('should validate user properties', function() {
       var identify = new Identify().set(10, 10);
       amplitude.init(apiKey, null, {batchEvents: true});
       amplitude.identify(identify);
 
       assert.deepEqual(amplitude._unsentIdentifys[0].user_properties, {'$set': {'10': 10}});
+    });
+
+    it('should ignore event and user properties with too many items', function() {
+      amplitude.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
+      var eventProperties = {};
+      var userProperties = {};
+      var identify = new Identify();
+      for (var i = 0; i < constants.MAX_PROPERTY_KEYS + 1; i++) {
+        eventProperties[i] = i;
+        userProperties[i*2] = i*2;
+        identify.set(i, i);
+      }
+
+      // verify that setUserProperties ignores the dict completely
+      amplitude.setUserProperties(userProperties);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+
+      // verify that the event properties and user properties are scrubbed
+      amplitude.logEvent('test event', eventProperties);
+      amplitude.identify(identify);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+
+      assert.equal(events[0].event_type, 'test event');
+      assert.deepEqual(events[0].event_properties, {});
+      assert.deepEqual(events[0].user_properties, {});
+      assert.equal(events[1].event_type, '$identify');
+      assert.deepEqual(events[1].event_properties, {});
+      assert.deepEqual(events[1].user_properties, {'$set': {}});
     });
 
     it('should synchronize event data across multiple amplitude instances that share the same cookie', function() {

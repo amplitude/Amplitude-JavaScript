@@ -1134,11 +1134,17 @@ AmplitudeClient.prototype.setUserProperties = function setUserProperties(userPro
   if (!this._apiKeySet('setUserProperties()') || !utils.validateInput(userProperties, 'userProperties', 'object')) {
     return;
   }
+  // sanitize the userProperties dict before converting into identify
+  var sanitized = utils.truncate(utils.validateProperties(userProperties));
+  if (Object.keys(sanitized).length === 0) {
+    return;
+  }
+
   // convert userProperties into an identify call
   var identify = new Identify();
-  for (var property in userProperties) {
-    if (userProperties.hasOwnProperty(property)) {
-      identify.set(property, userProperties[property]);
+  for (var property in sanitized) {
+    if (sanitized.hasOwnProperty(property)) {
+      identify.set(property, sanitized[property]);
     }
   }
   this.identify(identify);
@@ -1618,6 +1624,7 @@ module.exports = {
   DEFAULT_INSTANCE: '$default_instance',
   API_VERSION: 2,
   MAX_STRING_LENGTH: 4096,
+  MAX_PROPERTY_KEYS: 1000,
   IDENTIFY_EVENT: '$identify',
 
   // localStorageKeys
@@ -2725,10 +2732,16 @@ var validateInput = function validateInput(input, name, expectedType) {
   return true;
 };
 
+// do some basic sanitization and type checking, also catch property dicts with more than 1000 key/value pairs
 var validateProperties = function validateProperties(properties) {
   var propsType = type(properties);
   if (propsType !== 'object') {
-    log('Error: invalid event properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
+    log('Error: invalid properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
+    return {};
+  }
+
+  if (Object.keys(properties).length > constants.MAX_PROPERTY_KEYS) {
+    log('Error: too many properties (more than 1000), ignoring');
     return {};
   }
 

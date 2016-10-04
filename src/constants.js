@@ -2,6 +2,7 @@ module.exports = {
   DEFAULT_INSTANCE: '$default_instance',
   API_VERSION: 2,
   MAX_STRING_LENGTH: 4096,
+  MAX_PROPERTY_KEYS: 1000,
   IDENTIFY_EVENT: '$identify',
 
   // localStorageKeys

@@ -1,5 +1,6 @@
 describe('utils', function() {
   var utils = require('../src/utils.js');
+  var constants = require('../src/constants.js');
 
   describe('isEmptyString', function() {
     it('should detect empty strings', function() {
@@ -122,6 +123,14 @@ describe('utils', function() {
         }
       }
       assert.deepEqual(utils.validateProperties(properties), expected);
+    });
+
+    it('should block properties with too many items', function() {
+      var properties = {};
+      for (var i = 0; i < constants.MAX_PROPERTY_KEYS + 1; i++) {
+        properties[i] = i;
+      }
+      assert.deepEqual(utils.validateProperties(properties), {});
     });
   });
 });

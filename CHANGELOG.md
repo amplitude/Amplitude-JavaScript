@@ -1,5 +1,6 @@
 ## Unreleased
 
+* Block event property and user property dictionaries that have more than 1000 items. This is to block properties that are set unintentionally (for example in a loop). A single call to `logEvent` should not have more than 1000 event properties. Similarly a single call to `setUserProperties` should not have more than 1000 user properties.
 * Add configuration option `forceHttps`, which when set to `true` forces the SDK to always upload to HTTPS endpoint. By default the SDK uses the endpoint that matches the embedding site's protocol (for example if your site is HTTP, it will use the HTTP endpoint).
 
 ### 3.0.2 (July 6, 2016)
