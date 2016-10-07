@@ -56,10 +56,16 @@ var validateInput = function validateInput(input, name, expectedType) {
   return true;
 };
 
+// do some basic sanitization and type checking, also catch property dicts with more than 1000 key/value pairs
 var validateProperties = function validateProperties(properties) {
   var propsType = type(properties);
   if (propsType !== 'object') {
-    log('Error: invalid event properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
+    log('Error: invalid properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
+    return {};
+  }
+
+  if (Object.keys(properties).length > constants.MAX_PROPERTY_KEYS) {
+    log('Error: too many properties (more than 1000), ignoring');
     return {};
   }
 

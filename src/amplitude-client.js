@@ -653,11 +653,17 @@ AmplitudeClient.prototype.setUserProperties = function setUserProperties(userPro
   if (!this._apiKeySet('setUserProperties()') || !utils.validateInput(userProperties, 'userProperties', 'object')) {
     return;
   }
+  // sanitize the userProperties dict before converting into identify
+  var sanitized = utils.truncate(utils.validateProperties(userProperties));
+  if (Object.keys(sanitized).length === 0) {
+    return;
+  }
+
   // convert userProperties into an identify call
   var identify = new Identify();
-  for (var property in userProperties) {
-    if (userProperties.hasOwnProperty(property)) {
-      identify.set(property, userProperties[property]);
+  for (var property in sanitized) {
+    if (sanitized.hasOwnProperty(property)) {
+      identify.set(property, sanitized[property]);
     }
   }
   this.identify(identify);
