@@ -1,5 +1,7 @@
 ## Unreleased
 
+### 3.2.0 (October 7, 2016)
+
 * Block event property and user property dictionaries that have more than 1000 items. This is to block properties that are set unintentionally (for example in a loop). A single call to `logEvent` should not have more than 1000 event properties. Similarly a single call to `setUserProperties` should not have more than 1000 user properties.
 
 ### 3.1.0 (September 14, 2016)
