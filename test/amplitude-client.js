@@ -2208,45 +2208,6 @@ describe('setVersionName', function() {
       assert.lengthOf(server.requests, 2);
       var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
       assert.deepEqual(events[0].user_properties, {});
-
-      // verify session storage set
-      assert.deepEqual(JSON.parse(sessionStorage.getItem('amplitude_utm_properties')), expectedProperties);
-    });
-
-    it('should not set utmProperties if utmProperties data already in session storage', function() {
-      reset();
-      var existingProperties = {
-        utm_campaign: 'old',
-        utm_content: 'bottom',
-        utm_medium: 'texts',
-        utm_source: 'datamonster',
-        utm_term: 'conditions'
-      };
-      sessionStorage.setItem('amplitude_utm_properties', JSON.stringify(existingProperties));
-
-      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
-      var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
-      clock.tick(30 * 60 * 1000 + 1);
-      amplitude._initUtmData(utmParams);
-
-      assert.lengthOf(server.requests, 1);
-      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      assert.lengthOf(events, 1);
-
-      // first event should be identify with initial_utm properties and NO existing utm properties
-      assert.equal(events[0].event_type, '$identify');
-      assert.deepEqual(events[0].user_properties, {
-        '$setOnce': {
-          initial_utm_campaign: 'new',
-          initial_utm_content: 'top',
-          initial_utm_medium: 'email',
-          initial_utm_source: 'amplitude',
-          initial_utm_term: 'terms'
-        }
-      });
-
-      // should not override any existing utm properties values in session storage
-      assert.equal(sessionStorage.getItem('amplitude_utm_properties'), JSON.stringify(existingProperties));
     });
 
     it('should only send utm data once per session', function() {
@@ -2281,6 +2242,27 @@ describe('setVersionName', function() {
       assert.equal(events[1].event_type, 'UTM Test Event');
       assert.deepEqual(events[1].user_properties, {});
     });
+
+    it('should send utm data more than once per session if configured', function() {
+      reset();
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      amplitude.init(apiKey, undefined, {includeUtm: true, saveParamsReferrerOncePerSession: false});
+
+      // even though same session, utm params are sent again
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$setOnce': {
+          initial_utm_campaign: 'new',
+          initial_utm_content: 'top'
+        },
+        '$set': {
+          utm_campaign: 'new',
+          utm_content: 'top'
+        }
+      });
+    });
   });
 
   describe('gatherReferrer', function() {
@@ -2309,23 +2291,20 @@ describe('setVersionName', function() {
     });
 
     it('should only send referrer via identify call when the includeReferrer flag is true', function() {
-      reset();
-      clock.tick(30 * 60 * 1000 + 1);
+      clock.tick(30 * 60 * 1000 + 1);  // force new session
       amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
       amplitude.logEvent('Referrer Test Event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 2);
-
-      var expected = {
-        'referrer': 'https://amplitude.com/contact',
-        'referring_domain': 'amplitude.com'
-      };
 
       // first event should be identify with initial_referrer and referrer
       assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        '$set': expected,
+        '$set': {
+          'referrer': 'https://amplitude.com/contact',
+          'referring_domain': 'amplitude.com'
+        },
         '$setOnce': {
           'initial_referrer': 'https://amplitude.com/contact',
           'initial_referring_domain': 'amplitude.com'
@@ -2335,114 +2314,9 @@ describe('setVersionName', function() {
       // second event should be the test event with no referrer information
       assert.equal(events[1].event_type, 'Referrer Test Event');
       assert.deepEqual(events[1].user_properties, {});
-
-      // referrer should be propagated to session storage
-      assert.equal(sessionStorage.getItem('amplitude_referrer'), JSON.stringify(expected));
-    });
-
-    it('should not set referrer if referrer data already in session storage', function() {
-      reset();
-      clock.tick(30 * 60 * 1000 + 1);
-      sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
-      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 2});
-      amplitude.logEvent('Referrer Test Event', {});
-      assert.lengthOf(server.requests, 1);
-      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      assert.lengthOf(events, 2);
-
-      // first event should be identify with initial_referrer and NO referrer
-      assert.equal(events[0].event_type, '$identify');
-      assert.deepEqual(events[0].user_properties, {
-        '$setOnce': {
-          'initial_referrer': 'https://amplitude.com/contact',
-          'initial_referring_domain': 'amplitude.com'
-        }
-      });
-
-      // second event should be the test event with no referrer information
-      assert.equal(events[1].event_type, 'Referrer Test Event');
-      assert.deepEqual(events[1].user_properties, {});
-    });
-
-    it('should not override any existing initial referrer values in session storage', function() {
-      reset();
-      clock.tick(30 * 60 * 1000 + 1);
-      sessionStorage.setItem('amplitude_referrer', 'https://www.google.com/search?');
-      amplitude.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
-      amplitude._saveReferrer('https://facebook.com/contact');
-      amplitude.logEvent('Referrer Test Event', {});
-      assert.lengthOf(server.requests, 1);
-      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      assert.lengthOf(events, 3);
-
-      // first event should be identify with initial_referrer and NO referrer
-      assert.equal(events[0].event_type, '$identify');
-      assert.deepEqual(events[0].user_properties, {
-        '$setOnce': {
-          'initial_referrer': 'https://amplitude.com/contact',
-          'initial_referring_domain': 'amplitude.com'
-        }
-      });
-
-      // second event should be another identify but with the new referrer
-      assert.equal(events[1].event_type, '$identify');
-      assert.deepEqual(events[1].user_properties, {
-        '$setOnce': {
-          'initial_referrer': 'https://facebook.com/contact',
-          'initial_referring_domain': 'facebook.com'
-        }
-      });
-
-      // third event should be the test event with no referrer information
-      assert.equal(events[2].event_type, 'Referrer Test Event');
-      assert.deepEqual(events[2].user_properties, {});
-
-      // existing value persists
-      assert.equal(sessionStorage.getItem('amplitude_referrer'), 'https://www.google.com/search?');
-    });
-
-    it('should not override any existing referrer values in session storage for non-default instances', function() {
-      reset();
-      sessionStorage.setItem('amplitude_referrer_new_app', 'https://www.google.com/search?');
-      var amplitude2 = new AmplitudeClient('new_app');
-      sinon.stub(amplitude2, '_getReferrer').returns('https://amplitude.com/contact');
-      amplitude2.init(apiKey, undefined, {includeReferrer: true, batchEvents: true, eventUploadThreshold: 3});
-      amplitude2._getReferrer.restore();
-
-      amplitude2._saveReferrer('https://facebook.com/contact');
-      amplitude2.logEvent('Referrer Test Event', {});
-      assert.lengthOf(server.requests, 1);
-      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      assert.lengthOf(events, 3);
-
-      // first event should be identify with initial_referrer and NO referrer
-      assert.equal(events[0].event_type, '$identify');
-      assert.deepEqual(events[0].user_properties, {
-        '$setOnce': {
-          'initial_referrer': 'https://amplitude.com/contact',
-          'initial_referring_domain': 'amplitude.com'
-        }
-      });
-
-      // second event should be another identify but with the new referrer
-      assert.equal(events[1].event_type, '$identify');
-      assert.deepEqual(events[1].user_properties, {
-        '$setOnce': {
-          'initial_referrer': 'https://facebook.com/contact',
-          'initial_referring_domain': 'facebook.com'
-        }
-      });
-
-      // third event should be the test event with no referrer information
-      assert.equal(events[2].event_type, 'Referrer Test Event');
-      assert.deepEqual(events[2].user_properties, {});
-
-      // existing value persists
-      assert.equal(sessionStorage.getItem('amplitude_referrer_new_app'), 'https://www.google.com/search?');
     });
 
     it('should only send referrer once per session', function() {
-      reset();
       amplitude.init(apiKey, undefined, {includeReferrer: true});
 
       // still same session, no referrer sent
@@ -2458,15 +2332,13 @@ describe('setVersionName', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 2);
 
-      var expected = {
-        'referrer': 'https://amplitude.com/contact',
-        'referring_domain': 'amplitude.com'
-      };
-
       // first event should be identify with initial_referrer and referrer
       assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        '$set': expected,
+        '$set': {
+          'referrer': 'https://amplitude.com/contact',
+          'referring_domain': 'amplitude.com'
+        },
         '$setOnce': {
           'initial_referrer': 'https://amplitude.com/contact',
           'initial_referring_domain': 'amplitude.com'
@@ -2476,9 +2348,26 @@ describe('setVersionName', function() {
       // second event should be the test event with no referrer information
       assert.equal(events[1].event_type, 'Referrer Test Event');
       assert.deepEqual(events[1].user_properties, {});
+    });
 
-      // referrer should be propagated to session storage
-      assert.equal(sessionStorage.getItem('amplitude_referrer'), JSON.stringify(expected));
+    it('should send referrer multiple times per session if configured', function() {
+      amplitude.init(apiKey, undefined, {includeReferrer:true, saveParamsReferrerOncePerSession: false});
+
+      // even though session is same, referrer is sent again
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$set': {
+          'referrer': 'https://amplitude.com/contact',
+          'referring_domain': 'amplitude.com'
+        },
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
+        }
+      });
     });
   });
 
@@ -2487,60 +2376,55 @@ describe('setVersionName', function() {
     beforeEach(function() {
       clock = sinon.useFakeTimers(100);
       amplitude.init(apiKey);
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345');
     });
 
     afterEach(function() {
       reset();
+      amplitude._getUrlParams.restore();
       clock.restore();
     });
 
-    it('should parse gclid', function() {
-      reset();
-      var urlParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms&gclid=12345';
+    it('should parse gclid once per session', function() {
+      amplitude.init(apiKey, undefined, {includeGclid: true});
+
+      // still same session, no gclid sent
+      assert.lengthOf(server.requests, 0);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+
+      // advance the clock to force a new session
       clock.tick(30 * 60 * 1000 + 1);
-      amplitude._saveGclid(urlParams);
-
-      var expectedProperties = {
-        gclid: '12345'
-      }
-
+      amplitude.init(apiKey, undefined, {includeGclid: true, batchEvents: true, eventUploadThreshold: 2});
+      amplitude.logEvent('Gclid test event', {});
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+
+      // first event should be identify with gclid
       assert.equal(events[0].event_type, '$identify');
       assert.deepEqual(events[0].user_properties, {
-        '$setOnce': {'initial_gclid': '12345'},
-        '$set': expectedProperties
+        '$set': {'gclid': '12345'},
+        '$setOnce': {'initial_gclid': '12345'}
       });
-      server.respondWith('success');
-      server.respond();
 
-      amplitude.logEvent('Gclid Test Event', {});
-      assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
-      assert.deepEqual(events[0].user_properties, {});
-
-      // verify session storage set
-      assert.deepEqual(JSON.parse(sessionStorage.getItem('amplitude_gclid')), expectedProperties);
+      // second event should be the test event with no gclid information
+      assert.equal(events[1].event_type, 'Gclid test event');
+      assert.deepEqual(events[1].user_properties, {});
     });
 
-    it('should not set gclid if gclid data already in session storage', function() {
-      reset();
-      var existingProperties = {gclid: '67890'};
-      sessionStorage.setItem('amplitude_gclid', JSON.stringify(existingProperties));
-      var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms&gclid=12345';
-      clock.tick(30 * 60 * 1000 + 1);
-      amplitude._saveGclid(utmParams);
+    it('should parse gclid multiple times per session if configured', function() {
+      amplitude.init(apiKey, undefined, {includeGclid: true, saveParamsReferrerOncePerSession: false});
 
+      // even though session is same, gclid is sent again
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
-
-      // first event should be identify with initial_utm properties and NO existing utm properties
       assert.equal(events[0].event_type, '$identify');
-      assert.deepEqual(events[0].user_properties, {'$setOnce': {initial_gclid: '12345'}});
-
-      // should not override any existing gclid values in session storage
-      assert.equal(sessionStorage.getItem('amplitude_gclid'), JSON.stringify(existingProperties));
+      assert.deepEqual(events[0].user_properties, {
+        '$set': {'gclid': '12345'},
+        '$setOnce': {'initial_gclid': '12345'}
+      });
     });
   });
 
