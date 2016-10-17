@@ -578,6 +578,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       if (this.options.includeReferrer) {
         this._saveReferrer(this._getReferrer());
       }
+      if (this.options.includeGclid) {
+        this._saveGclid();
+      }
     }
     this._lastEventTime = now;
     _saveCookieData(this);
@@ -958,6 +961,21 @@ var _sendUserPropertiesOncePerSession = function _sendUserPropertiesOncePerSessi
  */
 AmplitudeClient.prototype._getReferrer = function _getReferrer() {
   return document.referrer;
+};
+
+/**
+ * Try to fetch Google Gclid from url params.
+ * @private
+ */
+AmplitudeClient.prototype._saveGclid = function _saveGclid(queryParams) {
+  queryParams = queryParams || location.search;
+  debugger;
+  var gclid = utils.getQueryParam('gclid', queryParams);
+  if (utils.isEmptyString(gclid)) {
+    return;
+  }
+  var gclidProperties = {'gclid': gclid};
+  _sendUserPropertiesOncePerSession(this, Constants.GCLID, gclidProperties);
 };
 
 /**
@@ -1635,6 +1653,7 @@ module.exports = {
   REFERRER: 'amplitude_referrer',
   SESSION_ID: 'amplitude_sessionId',
   UTM_PROPERTIES: 'amplitude_utm_properties',
+  GCLID: 'amplitude_gclid',
 
   // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
@@ -2561,12 +2580,12 @@ var regexp = /[a-z0-9][a-z0-9\-]*[a-z0-9]\.[a-z\.]{2,6}$/i;
 
 /**
  * Get the top domain.
- * 
+ *
  * Official Grammar: http://tools.ietf.org/html/rfc883#page-56
  * Look for tlds with up to 2-6 characters.
- * 
+ *
  * Example:
- * 
+ *
  *      domain('http://localhost:3000/baz');
  *      // => ''
  *      domain('http://dev:3000/baz');
@@ -2575,7 +2594,7 @@ var regexp = /[a-z0-9][a-z0-9\-]*[a-z0-9]\.[a-z\.]{2,6}$/i;
  *      // => ''
  *      domain('http://segment.io/baz');
  *      // => 'segment.io'
- * 
+ *
  * @param {String} url
  * @return {String}
  * @api public
@@ -2864,9 +2883,18 @@ var validateGroupName = function validateGroupName(key, groupName) {
         '. Please use strings or array of strings for groupName');
 };
 
+// parses the value of a url param (for example ?gclid=1234&...)
+var getQueryParam = function getQueryParam(name, query) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+  var results = regex.exec(query);
+  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
+};
+
 module.exports = {
   log: log,
   isEmptyString: isEmptyString,
+  getQueryParam: getQueryParam,
   sessionStorageEnabled: sessionStorageEnabled,
   truncate: truncate,
   validateGroups: validateGroups,
@@ -3029,20 +3057,13 @@ module.exports = localStorage;
 13: [function(require, module, exports) {
 var utils = require('./utils');
 
-var getUtmParam = function getUtmParam(name, query) {
-  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-  var results = regex.exec(query);
-  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
-};
-
 var getUtmData = function getUtmData(rawCookie, query) {
   // Translate the utmz cookie format into url query string format.
   var cookie = rawCookie ? '?' + rawCookie.split('.').slice(-1)[0].replace(/\|/g, '&') : '';
 
   var fetchParam = function fetchParam(queryName, query, cookieName, cookie) {
-    return getUtmParam(queryName, query) ||
-           getUtmParam(cookieName, cookie);
+    return utils.getQueryParam(queryName, query) ||
+           utils.getQueryParam(cookieName, cookie);
   };
 
   var utmSource = fetchParam('utm_source', query, 'utmcsr', cookie);
@@ -3267,7 +3288,7 @@ module.exports = Identify;
  *
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
- * 
+ *
  * Based on
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -4950,6 +4971,7 @@ module.exports = {
   eventUploadThreshold: 30,
   eventUploadPeriodMillis: 30 * 1000, // 30s
   forceHttps: false,
+  includeGclid: false,
 };
 
 }, {"./language":29}],

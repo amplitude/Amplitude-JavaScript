@@ -97,6 +97,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       if (this.options.includeReferrer) {
         this._saveReferrer(this._getReferrer());
       }
+      if (this.options.includeGclid) {
+        this._saveGclid();
+      }
     }
     this._lastEventTime = now;
     _saveCookieData(this);
@@ -477,6 +480,20 @@ var _sendUserPropertiesOncePerSession = function _sendUserPropertiesOncePerSessi
  */
 AmplitudeClient.prototype._getReferrer = function _getReferrer() {
   return document.referrer;
+};
+
+/**
+ * Try to fetch Google Gclid from url params.
+ * @private
+ */
+AmplitudeClient.prototype._saveGclid = function _saveGclid(queryParams) {
+  queryParams = queryParams || location.search;
+  var gclid = utils.getQueryParam('gclid', queryParams);
+  if (utils.isEmptyString(gclid)) {
+    return;
+  }
+  var gclidProperties = {'gclid': gclid};
+  _sendUserPropertiesOncePerSession(this, Constants.GCLID, gclidProperties);
 };
 
 /**

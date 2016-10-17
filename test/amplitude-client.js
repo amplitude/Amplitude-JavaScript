@@ -2482,6 +2482,68 @@ describe('setVersionName', function() {
     });
   });
 
+  describe('gatherGclid', function() {
+    var clock;
+    beforeEach(function() {
+      clock = sinon.useFakeTimers(100);
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+      clock.restore();
+    });
+
+    it('should parse gclid', function() {
+      reset();
+      var urlParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms&gclid=12345';
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude._saveGclid(urlParams);
+
+      var expectedProperties = {
+        gclid: '12345'
+      }
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$setOnce': {'initial_gclid': '12345'},
+        '$set': expectedProperties
+      });
+      server.respondWith('success');
+      server.respond();
+
+      amplitude.logEvent('Gclid Test Event', {});
+      assert.lengthOf(server.requests, 2);
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      assert.deepEqual(events[0].user_properties, {});
+
+      // verify session storage set
+      assert.deepEqual(JSON.parse(sessionStorage.getItem('amplitude_gclid')), expectedProperties);
+    });
+
+    it('should not set gclid if gclid data already in session storage', function() {
+      reset();
+      var existingProperties = {gclid: '67890'};
+      sessionStorage.setItem('amplitude_gclid', JSON.stringify(existingProperties));
+      var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms&gclid=12345';
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude._saveGclid(utmParams);
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+
+      // first event should be identify with initial_utm properties and NO existing utm properties
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {'$setOnce': {initial_gclid: '12345'}});
+
+      // should not override any existing gclid values in session storage
+      assert.equal(sessionStorage.getItem('amplitude_gclid'), JSON.stringify(existingProperties));
+    });
+  });
+
   describe('logRevenue', function() {
     beforeEach(function() {
       amplitude.init(apiKey);

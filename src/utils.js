@@ -188,9 +188,18 @@ var validateGroupName = function validateGroupName(key, groupName) {
         '. Please use strings or array of strings for groupName');
 };
 
+// parses the value of a url param (for example ?gclid=1234&...)
+var getQueryParam = function getQueryParam(name, query) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+  var results = regex.exec(query);
+  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
+};
+
 module.exports = {
   log: log,
   isEmptyString: isEmptyString,
+  getQueryParam: getQueryParam,
   sessionStorageEnabled: sessionStorageEnabled,
   truncate: truncate,
   validateGroups: validateGroups,

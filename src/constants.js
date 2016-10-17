@@ -13,6 +13,7 @@ module.exports = {
   REFERRER: 'amplitude_referrer',
   SESSION_ID: 'amplitude_sessionId',
   UTM_PROPERTIES: 'amplitude_utm_properties',
+  GCLID: 'amplitude_gclid',
 
   // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
