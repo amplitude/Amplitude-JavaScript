@@ -330,6 +330,7 @@ amplitude.getInstance().init('YOUR_API_KEY_HERE', null, {
 | eventUploadPeriodMillis | number | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
 | eventUploadThreshold | number | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |
 | forceHttps | boolean | If `true`, the events will always be uploaded to HTTPS endpoint. Otherwise it will use the embedding site's protocol. | `false` |
+| includeGclid | boolean | If `true`, captures the `gclid` url parameter as well as the user's `initial_gclid` via a set once operation. | `false` |
 | includeReferrer | boolean | If `true`, captures the `referrer` and `referring_domain` for each session, as well as the user's `initial_referrer` and `initial_referring_domain` via a set once operation. | `false` |
 | includeUtm | boolean | If `true`, finds utm parameters in the query string or the __utmz cookie, parses, and includes them as user propeties on all events uploaded. Also captures initial utm parameters for each session via a set once operation. | `false` |
 | language | string | Custom language to set | Language determined by browser |
@@ -337,11 +338,23 @@ amplitude.getInstance().init('YOUR_API_KEY_HERE', null, {
 | platform | string | Custom platform to set | 'Web' |
 | saveEvents | boolean | If `true`, saves events to localStorage and removes them upon successful upload.<br><i>NOTE:</i> Without saving events, events may be lost if the user navigates to another page before events are uploaded. | `true` |
 | savedMaxCount | number | Maximum number of events to save in localStorage. If more events are logged while offline, old events are removed. | 1000 |
+| saveParamsReferrerOncePerSession | boolean | If `true` then `includeGclid`, `includeReferrer`, and `includeUtm` will only track their respective properties once per session. New values that come in during the middle of the user's session will be ignored. Set to `false` to always capture new values. | `true` |
 | sessionTimeout | number | Time between logged events before a new session starts in milliseconds | 30\*60\*1000 (30 min) |
 | uploadBatchSize | number | Maximum number of events to send to the server per request. | 100 |
 
 # Advanced #
 This SDK automatically grabs useful data about the browser, including browser type and operating system version.
+
+### Tracking UTM Parameters, Referrer, and GCLID ###
+
+Amplitude supports automatically tracking:
+  * Standard UTM parameters from the user's cookie or URL parameters, just set configuration option `includeUtm` to `true` during initialization.
+  * The referring URL, just set configuration option `includeReferrer` to `true` during initialization.
+  * GCLID (Google Click ID) from URL params, just set configuration option `includeGclid` to `true` during initialization.
+
+If tracking is enabled, then the SDK will set the values as user properties, for example `referrer` or `utm_source`, once per session (this is last touch). The SDK will also save the initial values using a `setOnce` operation, for example `initial_referrer` or `initial_utm_source`, and once set that value will never change (this is first touch).
+
+**Note:** By default the SDK will only save the values at the start of the session. For example if a user lands on your site with an initial set of UTM parameters, triggers some flow that causes them to land on your site again with a different set of UTM parameters within the same Amplitude session, that second set will not be saved. You can set configuration option `saveParamsReferrerOncePerSession` to `false` to remove that restriction, so the SDK will always capture any new values from the user.
 
 ### Setting Groups ###
 
