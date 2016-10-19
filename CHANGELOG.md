@@ -1,5 +1,8 @@
 ## Unreleased
 
+* Add option to track GCLID (Google Click ID) as a user property (set `includeGclid` to `true` in the SDK configuration).
+* Add option to track new UTM parameters, referrer, and GCLID values during the same session. By default the SDK only saves the values once at the start of the session. You can remove this restriction by setting `saveParamsReferrerOncePerSession` to `false` in the SDK configuration. See the [Readme](https://github.com/amplitude/Amplitude-Javascript#tracking-utm-parameters-referrer-and-gclid) for more information.
+
 ### 3.2.0 (October 7, 2016)
 
 * Block event property and user property dictionaries that have more than 1000 items. This is to block properties that are set unintentionally (for example in a loop). A single call to `logEvent` should not have more than 1000 event properties. Similarly a single call to `setUserProperties` should not have more than 1000 user properties.

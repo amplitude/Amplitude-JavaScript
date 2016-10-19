@@ -21,4 +21,6 @@ module.exports = {
   eventUploadThreshold: 30,
   eventUploadPeriodMillis: 30 * 1000, // 30s
   forceHttps: false,
+  includeGclid: false,
+  saveParamsReferrerOncePerSession: true
 };

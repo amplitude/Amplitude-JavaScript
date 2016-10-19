@@ -1,19 +1,12 @@
 var utils = require('./utils');
 
-var getUtmParam = function getUtmParam(name, query) {
-  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-  var results = regex.exec(query);
-  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
-};
-
 var getUtmData = function getUtmData(rawCookie, query) {
   // Translate the utmz cookie format into url query string format.
   var cookie = rawCookie ? '?' + rawCookie.split('.').slice(-1)[0].replace(/\|/g, '&') : '';
 
   var fetchParam = function fetchParam(queryName, query, cookieName, cookie) {
-    return getUtmParam(queryName, query) ||
-           getUtmParam(cookieName, cookie);
+    return utils.getQueryParam(queryName, query) ||
+           utils.getQueryParam(cookieName, cookie);
   };
 
   var utmSource = fetchParam('utm_source', query, 'utmcsr', cookie);

@@ -572,13 +572,15 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       this._sessionId = now;
 
       // only capture UTM params and referrer if new session
-      if (this.options.includeUtm) {
-        this._initUtmData();
-      }
-      if (this.options.includeReferrer) {
-        this._saveReferrer(this._getReferrer());
+      if (this.options.saveParamsReferrerOncePerSession) {
+        this._trackParamsAndReferrer();
       }
     }
+
+    if (!this.options.saveParamsReferrerOncePerSession) {
+      this._trackParamsAndReferrer();
+    }
+
     this._lastEventTime = now;
     _saveCookieData(this);
 
@@ -610,6 +612,21 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     if (type(opt_callback) === 'function') {
       opt_callback(this);
     }
+  }
+};
+
+/**
+ * @private
+ */
+AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndReferrer() {
+  if (this.options.includeUtm) {
+    this._initUtmData();
+  }
+  if (this.options.includeReferrer) {
+    this._saveReferrer(this._getReferrer());
+  }
+  if (this.options.includeGclid) {
+    this._saveGclid(this._getUrlParams());
   }
 };
 
@@ -913,17 +930,18 @@ var _saveCookieData = function _saveCookieData(scope) {
  * @private
  */
 AmplitudeClient.prototype._initUtmData = function _initUtmData(queryParams, cookieParams) {
-  queryParams = queryParams || location.search;
+  queryParams = queryParams || this._getUrlParams();
   cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   var utmProperties = getUtmData(cookieParams, queryParams);
-  _sendUserPropertiesOncePerSession(this, Constants.UTM_PROPERTIES, utmProperties);
+  _sendParamsReferrerUserProperties(this, utmProperties);
 };
 
 /**
- * Since user properties are propagated on server, only send once per session, don't need to send with every event
+ * The calling function should determine when it is appropriate to send these user properties. This function
+ * will no longer contain any session storage checking logic.
  * @private
  */
-var _sendUserPropertiesOncePerSession = function _sendUserPropertiesOncePerSession(scope, storageKey, userProperties) {
+var _sendParamsReferrerUserProperties = function _sendParamsReferrerUserProperties(scope, userProperties) {
   if (type(userProperties) !== 'object' || Object.keys(userProperties).length === 0) {
     return;
   }
@@ -933,20 +951,7 @@ var _sendUserPropertiesOncePerSession = function _sendUserPropertiesOncePerSessi
   for (var key in userProperties) {
     if (userProperties.hasOwnProperty(key)) {
       identify.setOnce('initial_' + key, userProperties[key]);
-    }
-  }
-
-  // only save userProperties if not already in sessionStorage under key or if storage disabled
-  var hasSessionStorage = utils.sessionStorageEnabled();
-  if ((hasSessionStorage && !(scope._getFromStorage(sessionStorage, storageKey))) || !hasSessionStorage) {
-    for (var property in userProperties) {
-      if (userProperties.hasOwnProperty(property)) {
-        identify.set(property, userProperties[property]);
-      }
-    }
-
-    if (hasSessionStorage) {
-      scope._setInStorage(sessionStorage, storageKey, JSON.stringify(userProperties));
+      identify.set(key, userProperties[key]);
     }
   }
 
@@ -958,6 +963,26 @@ var _sendUserPropertiesOncePerSession = function _sendUserPropertiesOncePerSessi
  */
 AmplitudeClient.prototype._getReferrer = function _getReferrer() {
   return document.referrer;
+};
+
+/**
+ * @private
+ */
+AmplitudeClient.prototype._getUrlParams = function _getUrlParams() {
+  return location.search;
+};
+
+/**
+ * Try to fetch Google Gclid from url params.
+ * @private
+ */
+AmplitudeClient.prototype._saveGclid = function _saveGclid(urlParams) {
+  var gclid = utils.getQueryParam('gclid', urlParams);
+  if (utils.isEmptyString(gclid)) {
+    return;
+  }
+  var gclidProperties = {'gclid': gclid};
+  _sendParamsReferrerUserProperties(this, gclidProperties);
 };
 
 /**
@@ -988,7 +1013,7 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
     'referrer': referrer,
     'referring_domain': this._getReferringDomain(referrer)
   };
-  _sendUserPropertiesOncePerSession(this, Constants.REFERRER, referrerInfo);
+  _sendParamsReferrerUserProperties(this, referrerInfo);
 };
 
 /**
@@ -1632,9 +1657,7 @@ module.exports = {
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
-  REFERRER: 'amplitude_referrer',
   SESSION_ID: 'amplitude_sessionId',
-  UTM_PROPERTIES: 'amplitude_utm_properties',
 
   // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
@@ -2864,9 +2887,18 @@ var validateGroupName = function validateGroupName(key, groupName) {
         '. Please use strings or array of strings for groupName');
 };
 
+// parses the value of a url param (for example ?gclid=1234&...)
+var getQueryParam = function getQueryParam(name, query) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+  var results = regex.exec(query);
+  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
+};
+
 module.exports = {
   log: log,
   isEmptyString: isEmptyString,
+  getQueryParam: getQueryParam,
   sessionStorageEnabled: sessionStorageEnabled,
   truncate: truncate,
   validateGroups: validateGroups,
@@ -3029,20 +3061,13 @@ module.exports = localStorage;
 13: [function(require, module, exports) {
 var utils = require('./utils');
 
-var getUtmParam = function getUtmParam(name, query) {
-  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-  var results = regex.exec(query);
-  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
-};
-
 var getUtmData = function getUtmData(rawCookie, query) {
   // Translate the utmz cookie format into url query string format.
   var cookie = rawCookie ? '?' + rawCookie.split('.').slice(-1)[0].replace(/\|/g, '&') : '';
 
   var fetchParam = function fetchParam(queryName, query, cookieName, cookie) {
-    return getUtmParam(queryName, query) ||
-           getUtmParam(cookieName, cookie);
+    return utils.getQueryParam(queryName, query) ||
+           utils.getQueryParam(cookieName, cookie);
   };
 
   var utmSource = fetchParam('utm_source', query, 'utmcsr', cookie);
@@ -4950,6 +4975,8 @@ module.exports = {
   eventUploadThreshold: 30,
   eventUploadPeriodMillis: 30 * 1000, // 30s
   forceHttps: false,
+  includeGclid: false,
+  saveParamsReferrerOncePerSession: true
 };
 
 }, {"./language":29}],

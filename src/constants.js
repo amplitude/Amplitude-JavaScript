@@ -10,9 +10,7 @@ module.exports = {
   LAST_EVENT_TIME: 'amplitude_lastEventTime',
   LAST_IDENTIFY_ID: 'amplitude_lastIdentifyId',
   LAST_SEQUENCE_NUMBER: 'amplitude_lastSequenceNumber',
-  REFERRER: 'amplitude_referrer',
   SESSION_ID: 'amplitude_sessionId',
-  UTM_PROPERTIES: 'amplitude_utm_properties',
 
   // Used in cookie as well
   DEVICE_ID: 'amplitude_deviceId',
