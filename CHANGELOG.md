@@ -1,5 +1,7 @@
 ## Unreleased
 
+### 3.3.1 (October 26, 2016)
+
 * Fix bug where tracking UTM params and referrer drops unsent events that have been saved to localStorage.
 
 ### 3.3.0 (October 19, 2016)
