@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Fix bug where tracking UTM params and referrer drops unsent events that have been saved to localStorage.
+
 ### 3.3.0 (October 19, 2016)
 
 * Add option to track GCLID (Google Click ID) as a user property (set `includeGclid` to `true` in the SDK configuration).

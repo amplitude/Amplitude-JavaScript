@@ -2369,6 +2369,48 @@ describe('setVersionName', function() {
         }
       });
     });
+
+    it('should not delete unsent events saved to localStorage', function() {
+      var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
+        '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{},"uuid":"3c508faa-a5c9-45fa-9da7-9f4f3b992fb0","library"' +
+        ':{"name":"amplitude-js","version":"2.9.0"},"sequence_number":130, "groups":{}}]';
+      var existingIdentify = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769338995,' +
+        '"event_id":82,"session_id":1453763315544,"event_type":"$identify","version_name":"Web","platform":"Web"' +
+        ',"os_name":"Chrome","os_version":"47","device_model":"Mac","language":"en-US","api_properties":{},' +
+        '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
+        'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
+        ':131, "groups":{}}]';
+      localStorage.setItem('amplitude_unsent', existingEvent);
+      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+
+      clock.tick(30 * 60 * 1000 + 1);  // force new session
+      amplitude.init(apiKey, undefined, {
+        includeReferrer: true, batchEvents: true, eventUploadThreshold: 3, saveParamsReferrerOncePerSession: false
+      });
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 3);
+
+      // validate the events
+      assert.equal(events[0].event_type, 'clicked');
+      assert.equal(events[1].event_type, '$identify');
+      assert.equal(events[2].event_type, '$identify');
+
+      assert.deepEqual(events[1].user_properties, {'$set': {'age': 30, 'city': 'San Francisco, CA'}});
+      assert.deepEqual(events[2].user_properties, {
+        '$set': {
+          'referrer': 'https://amplitude.com/contact',
+          'referring_domain': 'amplitude.com'
+        },
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
+        }
+      });
+    });
   });
 
   describe('gatherGclid', function() {

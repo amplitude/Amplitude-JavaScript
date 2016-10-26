@@ -85,24 +85,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this.options.userId = (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         this.options.userId || null;
 
-    var now = new Date().getTime();
-    if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
-      this._newSession = true;
-      this._sessionId = now;
-
-      // only capture UTM params and referrer if new session
-      if (this.options.saveParamsReferrerOncePerSession) {
-        this._trackParamsAndReferrer();
-      }
-    }
-
-    if (!this.options.saveParamsReferrerOncePerSession) {
-      this._trackParamsAndReferrer();
-    }
-
-    this._lastEventTime = now;
-    _saveCookieData(this);
-
+    // load unsent events and identifies before any attempt to log new ones
     if (this.options.saveEvents) {
       this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey);
       this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey);
@@ -122,9 +105,27 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
         this._unsentIdentifys[j].user_properties = utils.validateProperties(userProperties);
         this._unsentIdentifys[j].groups = utils.validateGroups(identifyGroups);
       }
-
-      this._sendEventsIfReady(); // try sending unsent events
     }
+
+    var now = new Date().getTime();
+    if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
+      this._newSession = true;
+      this._sessionId = now;
+
+      // only capture UTM params and referrer if new session
+      if (this.options.saveParamsReferrerOncePerSession) {
+        this._trackParamsAndReferrer();
+      }
+    }
+
+    if (!this.options.saveParamsReferrerOncePerSession) {
+      this._trackParamsAndReferrer();
+    }
+
+    this._lastEventTime = now;
+    _saveCookieData(this);
+
+    this._sendEventsIfReady(); // try sending unsent events
   } catch (e) {
     utils.log(e);
   } finally {
