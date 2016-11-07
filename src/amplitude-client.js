@@ -611,7 +611,7 @@ AmplitudeClient.prototype.setGroup = function(groupType, groupName) {
   var groups = {};
   groups[groupType] = groupName;
   var identify = new Identify().set(groupType, groupName);
-  this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null);
+  this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null, null);
 };
 
 /**
@@ -753,7 +753,7 @@ AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
     // only send if there are operations
     if (Object.keys(identify_obj.userPropertiesOperations).length > 0) {
       return this._logEvent(
-        Constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, null, opt_callback
+        Constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, null, null, opt_callback
         );
     }
   } else {
@@ -782,7 +782,7 @@ AmplitudeClient.prototype.setVersionName = function setVersionName(versionName) 
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  * @private
  */
-AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, groups, callback) {
+AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, groups, timestamp, callback) {
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
   if (!eventType || this.options.optOut) {
     if (type(callback) === 'function') {
@@ -799,7 +799,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       eventId = this.nextEventId();
     }
     var sequenceNumber = this.nextSequenceNumber();
-    var eventTime = new Date().getTime();
+    var eventTime = timestamp || new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
     }
@@ -894,7 +894,7 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
     }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, null, opt_callback);
+  return this._logEvent(eventType, eventProperties, null, null, null, null, opt_callback);
 };
 
 /**
@@ -920,7 +920,7 @@ AmplitudeClient.prototype.logEventWithGroups = function(eventType, eventProperti
     }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, groups, opt_callback);
+  return this._logEvent(eventType, eventProperties, null, null, groups, null, opt_callback);
 };
 
 /**
@@ -982,7 +982,7 @@ AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, prod
     special: 'revenue_amount',
     quantity: quantity || 1,
     price: price
-  }, null, null, null);
+  }, null, null, null, null);
 };
 
 /**
