@@ -328,6 +328,7 @@ amplitude.getInstance().init('YOUR_API_KEY_HERE', null, {
 | cookieExpiration | number | The number of days after which the Amplitude cookie will expire | 365\*10 (10 years) |
 | cookieName | string | Custom name for the Amplitude cookie | 'amplitude_id' |
 | deviceId | string | Custom device ID to set. Note this is not recommended unless you really know what you are doing (like if you have your own system for tracking user devices) | Randomly generated UUID |
+| deviceIdFromUrlParam | boolean | If `true`, the SDK will parse device ID values from url parameter `amp_device_id` if available. Device IDs defined in the configuration options during init will take priority over device IDs from url parameters.
 | domain | string | Custom cookie domain | The top domain of the current page's url |
 | eventUploadPeriodMillis | number | Amount of time in milliseconds that the SDK waits before uploading events if `batchEvents` is `true`. | 30\*1000 (30 sec) |
 | eventUploadThreshold | number | Minimum number of events to batch together per request if `batchEvents` is `true`. | 30 |

@@ -132,6 +132,42 @@ describe('AmplitudeClient', function() {
       assert.equal(counter, 1);
     });
 
+    it ('should load the device id from url params if configured', function() {
+      var deviceId = 'aa_bb_cc_dd';
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
+      amplitude.init(apiKey, userId, {deviceIdFromUrlParam: true});
+      assert.equal(amplitude.options.deviceId, deviceId);
+
+      var cookieData = cookie.get(amplitude.options.cookieName);
+      assert.equal(cookieData.deviceId, deviceId);
+
+      amplitude._getUrlParams.restore();
+    });
+
+    it ('should not load device id from url params if not configured', function() {
+      var deviceId = 'aa_bb_cc_dd';
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
+      amplitude.init(apiKey, userId, {deviceIdFromUrlParam: false});
+      assert.notEqual(amplitude.options.deviceId, deviceId);
+
+      var cookieData = cookie.get(amplitude.options.cookieName);
+      assert.notEqual(cookieData.deviceId, deviceId);
+
+      amplitude._getUrlParams.restore();
+    });
+
+    it ('should prefer the device id in the config over the url params', function() {
+      var deviceId = 'dd_cc_bb_aa';
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
+      amplitude.init(apiKey, userId, {deviceId: deviceId, deviceIdFromUrlParam: true});
+      assert.equal(amplitude.options.deviceId, deviceId);
+
+      var cookieData = cookie.get(amplitude.options.cookieName);
+      assert.equal(cookieData.deviceId, deviceId);
+
+      amplitude._getUrlParams.restore();
+    });
+
     it ('should migrate deviceId, userId, optOut from localStorage to cookie on default instance', function() {
       var deviceId = 'test_device_id';
       var userId = 'test_user_id';
@@ -2048,6 +2084,50 @@ describe('setVersionName', function() {
       assert.lengthOf(events, 1);
       assert.equal(events[0].event_type, 'testEvent');
       assert.isTrue(events[0].user_agent.indexOf(phantomJSUA) > -1);
+    });
+
+    it('should allow logging event with custom timestamp', function() {
+      var timestamp = 2000;
+      amplitude.logEventWithTimestamp('test', null, timestamp, null);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+
+      // verify the event is correct
+      var event = events[0];
+      assert.equal(event.event_type, 'test');
+      assert.equal(event.event_id, 1);
+      assert.equal(event.timestamp, timestamp);
+    });
+
+    it('should use current time if timestamp is null', function() {
+      var timestamp = 5000;
+      clock.tick(timestamp);
+      amplitude.logEventWithTimestamp('test', null, null, null);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+
+      // verify the event is correct
+      var event = events[0];
+      assert.equal(event.event_type, 'test');
+      assert.equal(event.event_id, 1);
+      assert.isTrue(event.timestamp >= timestamp);
+    });
+
+    it('should use current time if timestamp is not valid form', function() {
+      var timestamp = 6000;
+      clock.tick(timestamp);
+      amplitude.logEventWithTimestamp('test', null, 'invalid', null);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+
+      // verify the event is correct
+      var event = events[0];
+      assert.equal(event.event_type, 'test');
+      assert.equal(event.event_id, 1);
+      assert.isTrue(event.timestamp >= timestamp);
     });
   });
 

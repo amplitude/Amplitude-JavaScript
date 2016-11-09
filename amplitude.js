@@ -562,7 +562,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
     this.options.deviceId = (type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' &&
-        !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) || this.options.deviceId || UUID() + 'R';
+        !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) ||
+        (this.options.deviceIdFromUrlParam && this._getDeviceIdFromUrlParam(this._getUrlParams())) ||
+        this.options.deviceId || UUID() + 'R';
     this.options.userId = (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         this.options.userId || null;
 
@@ -987,6 +989,14 @@ AmplitudeClient.prototype._saveGclid = function _saveGclid(urlParams) {
 };
 
 /**
+ * Try to fetch Amplitude device id from url params.
+ * @private
+ */
+AmplitudeClient.prototype._getDeviceIdFromUrlParam = function _getDeviceIdFromUrlParam(urlParams) {
+  return utils.getQueryParam(Constants.AMP_DEVICE_ID_PARAM, urlParams);
+};
+
+/**
  * Parse the domain from referrer info
  * @private
  */
@@ -1092,7 +1102,7 @@ AmplitudeClient.prototype.setGroup = function(groupType, groupName) {
   var groups = {};
   groups[groupType] = groupName;
   var identify = new Identify().set(groupType, groupName);
-  this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null);
+  this._logEvent(Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null, null);
 };
 
 /**
@@ -1234,7 +1244,7 @@ AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
     // only send if there are operations
     if (Object.keys(identify_obj.userPropertiesOperations).length > 0) {
       return this._logEvent(
-        Constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, null, opt_callback
+        Constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, null, null, opt_callback
         );
     }
   } else {
@@ -1263,7 +1273,7 @@ AmplitudeClient.prototype.setVersionName = function setVersionName(versionName) 
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  * @private
  */
-AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, groups, callback) {
+AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, groups, timestamp, callback) {
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
   if (!eventType || this.options.optOut) {
     if (type(callback) === 'function') {
@@ -1280,7 +1290,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       eventId = this.nextEventId();
     }
     var sequenceNumber = this.nextSequenceNumber();
-    var eventTime = new Date().getTime();
+    var eventTime = (type(timestamp) === 'number') ? timestamp : new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
     }
@@ -1368,6 +1378,20 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
+  return this.logEventWithTimestamp(eventType, eventProperties, null, opt_callback);
+};
+
+/**
+ * Log an event with eventType and eventProperties and a custom timestamp
+ * @public
+ * @param {string} eventType - name of event
+ * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
+ * @param {number} timesatmp - (optional) the custom timestamp as milliseconds since epoch.
+ * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
+ * Note: the server response code and response body from the event upload are passed to the callback function.
+ * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
+ */
+AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, eventProperties, timestamp, opt_callback) {
   if (!this._apiKeySet('logEvent()') || !utils.validateInput(eventType, 'eventType', 'string') ||
         utils.isEmptyString(eventType)) {
     if (type(opt_callback) === 'function') {
@@ -1375,7 +1399,7 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
     }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, null, opt_callback);
+  return this._logEvent(eventType, eventProperties, null, null, null, timestamp, opt_callback);
 };
 
 /**
@@ -1401,7 +1425,7 @@ AmplitudeClient.prototype.logEventWithGroups = function(eventType, eventProperti
     }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, groups, opt_callback);
+  return this._logEvent(eventType, eventProperties, null, null, groups, null, opt_callback);
 };
 
 /**
@@ -1463,7 +1487,7 @@ AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, prod
     special: 'revenue_amount',
     quantity: quantity || 1,
     price: price
-  }, null, null, null);
+  }, null, null, null, null);
 };
 
 /**
@@ -1672,7 +1696,9 @@ module.exports = {
   REVENUE_PRODUCT_ID: '$productId',
   REVENUE_QUANTITY: '$quantity',
   REVENUE_PRICE: '$price',
-  REVENUE_REVENUE_TYPE: '$revenueType'
+  REVENUE_REVENUE_TYPE: '$revenueType',
+
+  AMP_DEVICE_ID_PARAM: 'amp_device_id'  // url param
 };
 
 }, {}],
@@ -4977,7 +5003,8 @@ module.exports = {
   eventUploadPeriodMillis: 30 * 1000, // 30s
   forceHttps: false,
   includeGclid: false,
-  saveParamsReferrerOncePerSession: true
+  saveParamsReferrerOncePerSession: true,
+  deviceIdFromUrlParam: false,
 };
 
 }, {"./language":29}],
