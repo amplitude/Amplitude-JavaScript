@@ -185,7 +185,7 @@ The Amplitude class handles creation of client instances, all you need to do is 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line1162">line 1162</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line1186">line 1186</a>
     </li></ul></dd>
     
 
@@ -268,7 +268,7 @@ The Amplitude class handles creation of client instances, all you need to do is 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line703">line 703</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line713">line 713</a>
     </li></ul></dd>
     
 
@@ -355,7 +355,7 @@ The Amplitude class handles creation of client instances, all you need to do is 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line251">line 251</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line253">line 253</a>
     </li></ul></dd>
     
 
@@ -534,7 +534,7 @@ Note: the server response code and response body from the identify event upload 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line739">line 739</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line749">line 749</a>
     </li></ul></dd>
     
 
@@ -829,7 +829,7 @@ See <a href="https://github.com/amplitude/Amplitude-Javascript#configuration-opt
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line242">line 242</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line244">line 244</a>
     </li></ul></dd>
     
 
@@ -1029,7 +1029,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line889">line 889</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line899">line 899</a>
     </li></ul></dd>
     
 
@@ -1240,7 +1240,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line915">line 915</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line939">line 939</a>
     </li></ul></dd>
     
 
@@ -1268,6 +1268,212 @@ Note: the server response code and response body from the event upload are passe
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>amplitudeClient.logEventWithGroups('Clicked Button', null, {'orgId': 24});</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="logEventWithTimestamp"><span class="type-signature"></span>logEventWithTimestamp<span class="signature">(eventType, eventProperties, timesatmp, opt_callback)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Log an event with eventType and eventProperties and a custom timestamp
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>eventType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">name of event</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>eventProperties</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional) an object with string keys and values for the event properties.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>timesatmp</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional) the custom timestamp as milliseconds since epoch.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Amplitude.html#~eventCallback">Amplitude~eventCallback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">(optional) a callback function to run after the event is logged.
+Note: the server response code and response body from the event upload are passed to the callback function.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line913">line 913</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});</code></pre>
 
 
 
@@ -1424,7 +1630,7 @@ Note: the server response code and response body from the event upload are passe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line973">line 973</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line997">line 997</a>
     </li></ul></dd>
     
 
@@ -1563,7 +1769,7 @@ for more information on the Revenue interface and logging revenue.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line944">line 944</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line968">line 968</a>
     </li></ul></dd>
     
 
@@ -1654,7 +1860,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line643">line 643</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line653">line 653</a>
     </li></ul></dd>
     
 
@@ -1787,7 +1993,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line655">line 655</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line665">line 665</a>
     </li></ul></dd>
     
 
@@ -1923,7 +2129,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line560">line 560</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line570">line 570</a>
     </li></ul></dd>
     
 
@@ -2012,7 +2218,7 @@ This uses src/uuid.js to regenerate the deviceId.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line1152">line 1152</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line1176">line 1176</a>
     </li></ul></dd>
     
 
@@ -2175,7 +2381,7 @@ See the <a href="https://github.com/amplitude/Amplitude-Javascript#setting-group
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line605">line 605</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line615">line 615</a>
     </li></ul></dd>
     
 
@@ -2311,7 +2517,7 @@ See the <a href="https://github.com/amplitude/Amplitude-Javascript#setting-group
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line623">line 623</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line633">line 633</a>
     </li></ul></dd>
     
 
@@ -2442,7 +2648,7 @@ See the <a href="https://github.com/amplitude/Amplitude-Javascript#setting-group
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line583">line 583</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line593">line 593</a>
     </li></ul></dd>
     
 
@@ -2602,7 +2808,7 @@ memory and replace = true would replace the object in memory. Now the properties
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line678">line 678</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line688">line 688</a>
     </li></ul></dd>
     
 
@@ -2738,7 +2944,7 @@ memory and replace = true would replace the object in memory. Now the properties
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line774">line 774</a>
+        <a href="amplitude-client.js.html">amplitude-client.js</a>, <a href="amplitude-client.js.html#line784">line 784</a>
     </li></ul></dd>
     
 
@@ -2791,7 +2997,7 @@ memory and replace = true would replace the object in memory. Now the properties
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Oct 26 2016 12:13:53 GMT-0700 (PDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Nov 08 2016 18:11:38 GMT-0800 (PST)
 </footer>
 
 <script> prettyPrint(); </script>
