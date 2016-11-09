@@ -1,5 +1,9 @@
 ## Unreleased
 
+* Add `logEventWithTimestamp` to allow logging events with a custom timestamp. The timestamp should a number representing the time in milliseconds since epoch. See [documentation](https://rawgit.com/amplitude/Amplitude-Javascript/master/documentation/AmplitudeClient.html) for more details.
+
+### 3.3.2 (October 28, 2016)
+
 * Updated our [UA-parser-js](https://github.com/amplitude/ua-parser-js) fork to properly parse the version number for Chrome Mobile browsers.
 
 ### 3.3.1 (October 26, 2016)

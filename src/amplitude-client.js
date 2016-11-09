@@ -799,7 +799,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       eventId = this.nextEventId();
     }
     var sequenceNumber = this.nextSequenceNumber();
-    var eventTime = timestamp || new Date().getTime();
+    var eventTime = (type(timestamp) === 'number') ? timestamp : new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
       this._sessionId = eventTime;
     }
@@ -887,6 +887,20 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
+  return this.logEventWithTimestamp(eventType, eventProperties, null, opt_callback);
+};
+
+/**
+ * Log an event with eventType and eventProperties and a custom timestamp
+ * @public
+ * @param {string} eventType - name of event
+ * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
+ * @param {number} timesatmp - (optional) the custom timestamp as milliseconds since epoch.
+ * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
+ * Note: the server response code and response body from the event upload are passed to the callback function.
+ * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
+ */
+AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, eventProperties, timestamp, opt_callback) {
   if (!this._apiKeySet('logEvent()') || !utils.validateInput(eventType, 'eventType', 'string') ||
         utils.isEmptyString(eventType)) {
     if (type(opt_callback) === 'function') {
@@ -894,7 +908,7 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
     }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, null, null, opt_callback);
+  return this._logEvent(eventType, eventProperties, null, null, null, timestamp, opt_callback);
 };
 
 /**
