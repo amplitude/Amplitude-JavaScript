@@ -24,5 +24,7 @@ module.exports = {
   REVENUE_PRODUCT_ID: '$productId',
   REVENUE_QUANTITY: '$quantity',
   REVENUE_PRICE: '$price',
-  REVENUE_REVENUE_TYPE: '$revenueType'
+  REVENUE_REVENUE_TYPE: '$revenueType',
+
+  AMP_DEVICE_ID_PARAM: 'amp_device_id'  // url param
 };

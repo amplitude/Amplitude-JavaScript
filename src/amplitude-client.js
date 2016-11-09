@@ -81,7 +81,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
     this.options.deviceId = (type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' &&
-        !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) || this.options.deviceId || UUID() + 'R';
+        !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) ||
+        (this.options.deviceIdFromUrlParam && this._getDeviceIdFromUrlParam(this._getUrlParams())) ||
+        this.options.deviceId || UUID() + 'R';
     this.options.userId = (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         this.options.userId || null;
 
@@ -503,6 +505,14 @@ AmplitudeClient.prototype._saveGclid = function _saveGclid(urlParams) {
   }
   var gclidProperties = {'gclid': gclid};
   _sendParamsReferrerUserProperties(this, gclidProperties);
+};
+
+/**
+ * Try to fetch Amplitude device id from url params.
+ * @private
+ */
+AmplitudeClient.prototype._getDeviceIdFromUrlParam = function _getDeviceIdFromUrlParam(urlParams) {
+  return utils.getQueryParam(Constants.AMP_DEVICE_ID_PARAM, urlParams);
 };
 
 /**

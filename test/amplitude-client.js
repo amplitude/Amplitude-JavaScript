@@ -132,6 +132,42 @@ describe('AmplitudeClient', function() {
       assert.equal(counter, 1);
     });
 
+    it ('should load the device id from url params if configured', function() {
+      var deviceId = 'aa_bb_cc_dd';
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
+      amplitude.init(apiKey, userId, {deviceIdFromUrlParam: true});
+      assert.equal(amplitude.options.deviceId, deviceId);
+
+      var cookieData = cookie.get(amplitude.options.cookieName);
+      assert.equal(cookieData.deviceId, deviceId);
+
+      amplitude._getUrlParams.restore();
+    });
+
+    it ('should not load device id from url params if not configured', function() {
+      var deviceId = 'aa_bb_cc_dd';
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
+      amplitude.init(apiKey, userId, {deviceIdFromUrlParam: false});
+      assert.notEqual(amplitude.options.deviceId, deviceId);
+
+      var cookieData = cookie.get(amplitude.options.cookieName);
+      assert.notEqual(cookieData.deviceId, deviceId);
+
+      amplitude._getUrlParams.restore();
+    });
+
+    it ('should prefer the device id in the config over the url params', function() {
+      var deviceId = 'dd_cc_bb_aa';
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
+      amplitude.init(apiKey, userId, {deviceId: deviceId, deviceIdFromUrlParam: true});
+      assert.equal(amplitude.options.deviceId, deviceId);
+
+      var cookieData = cookie.get(amplitude.options.cookieName);
+      assert.equal(cookieData.deviceId, deviceId);
+
+      amplitude._getUrlParams.restore();
+    });
+
     it ('should migrate deviceId, userId, optOut from localStorage to cookie on default instance', function() {
       var deviceId = 'test_device_id';
       var userId = 'test_user_id';
