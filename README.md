@@ -12,7 +12,7 @@ This Readme will guide you through using Amplitude's Javascript SDK to track use
     ```html
         <script type="text/javascript">
           (function(e,t){var n=e.amplitude||{_q:[],_iq:{}};var r=t.createElement("script");r.type="text/javascript";
-          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-3.3.2-min.gz.js";
+          r.async=true;r.src="https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-3.4.0-min.gz.js";
           r.onload=function(){e.amplitude.runQueuedFunctions()};var i=t.getElementsByTagName("script")[0];
           i.parentNode.insertBefore(r,i);function s(e,t){e.prototype[t]=function(){this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));
           return this}}var o=function(){this._q=[];return this};var a=["add","append","clearAll","prepend","set","setOnce","unset"];
@@ -454,7 +454,7 @@ If you are using [RequireJS](http://requirejs.org/) to load your Javascript file
 ```html
   <script src='scripts/require.js'></script>  <!-- loading RequireJS -->
   <script>
-    require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-3.3.2-min.gz.js'], function(amplitude) {
+    require(['https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-3.4.0-min.gz.js'], function(amplitude) {
       amplitude.init('YOUR_API_KEY_HERE'); // replace YOUR_API_KEY_HERE with your Amplitude api key.
       window.amplitude = amplitude;  // You can bind the amplitude object to window if you want to use it directly.
       amplitude.getInstance().logEvent('Clicked Link A');
@@ -468,7 +468,7 @@ You can also define the path in your RequireJS configuration like so:
   <script>
     requirejs.config({
       paths: {
-        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-3.3.2-min.gz'
+        'amplitude': 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-3.4.0-min.gz'
       }
     });
 

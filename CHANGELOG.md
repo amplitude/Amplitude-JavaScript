@@ -1,5 +1,7 @@
 ## Unreleased
 
+### 3.4.0 (November 8, 2016)
+
 * Add `logEventWithTimestamp` to allow logging events with a custom timestamp. The timestamp should a number representing the time in milliseconds since epoch. See [documentation](https://rawgit.com/amplitude/Amplitude-Javascript/master/documentation/AmplitudeClient.html) for more details.
 * Add configuration option `deviceIdFromUrlParam`, which when set to `true` will have the SDK parse device IDs from url parameter `amp_device_id` if available. Device IDs defined in the configuration options during init will take priority over device IDs from url parameters.
 
