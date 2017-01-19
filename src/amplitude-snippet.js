@@ -23,7 +23,8 @@
   var funcs = ['init', 'logEvent', 'logRevenue', 'setUserId', 'setUserProperties',
                'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId',
                'setGlobalUserProperties', 'identify', 'clearUserProperties',
-               'setGroup', 'logRevenueV2', 'regenerateDeviceId'];
+               'setGroup', 'logRevenueV2', 'regenerateDeviceId',
+               'logEventWithTimestamp', 'logEventWithGroups'];
   function setUpProxy(instance) {
     function proxyMain(fn) {
       instance[fn] = function() {
