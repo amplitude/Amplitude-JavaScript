@@ -16,6 +16,7 @@ See our [Javascript SDK Reference](https://amplitude.zendesk.com/hc/en-us/articl
 # Demo Pages #
 * A [demo page](https://github.com/amplitude/Amplitude-Javascript/blob/master/test/browser/amplitudejs.html) showing a simple integration on a web page.
 * A [demo page](https://github.com/amplitude/Amplitude-Javascript/blob/master/test/browser/amplitudejs-requirejs.html) showing an integration using RequireJS.
+* A [demo page](https://github.com/amplitude/GTM-Web-Demo) demonstrating a potential integration with Google Tag Manager.
 
 # Changelog #
 Click [here](https://github.com/amplitude/Amplitude-Javascript/blob/master/CHANGELOG.md) to view the Javascript SDK Changelog.
