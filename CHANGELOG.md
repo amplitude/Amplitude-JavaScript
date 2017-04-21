@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Migrating setup instructions and SDK documentation in the README file to Zendesk articles.
+
 ### 3.4.0 (November 8, 2016)
 
 * Add `logEventWithTimestamp` to allow logging events with a custom timestamp. The timestamp should a number representing the time in milliseconds since epoch. See [documentation](https://rawgit.com/amplitude/Amplitude-Javascript/master/documentation/AmplitudeClient.html) for more details.
