@@ -4,7 +4,7 @@
   as.type = 'text/javascript';
   as.async = true;
   as.src = 'https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-3.4.0-min.gz.js';
-  as.onload = function() {window.amplitude.runQueuedFunctions();};
+  as.onload = function() {if(window.amplitude.runQueuedFunctions) {window.amplitude.runQueuedFunctions();} else {console.log('[Amplitude] Error: could not load SDK');}};
   var s = document.getElementsByTagName('script')[0];
   s.parentNode.insertBefore(as, s);
   function proxy(obj, fn) {
