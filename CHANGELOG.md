@@ -42,7 +42,7 @@
 
 ### 3.0.0 (May 27, 2016)
 
-* Add support for logging events to multiple Amplitude apps. **Note this is a major update, and may break backwards compatability.** See [Readme](https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps) for details.
+* Add support for logging events to multiple Amplitude apps. **Note this is a major update, and may break backwards compatability.** See [Readme](https://amplitude.zendesk.com/hc/en-us/articles/115001361248-JavaScript-SDK-Installation#backwards-compatibility) for details.
 * Init callback now passes the Amplitude instance as an argument to the callback function.
 
 ### 2.13.0 (May 26, 2016)
