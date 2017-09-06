@@ -24,4 +24,5 @@ module.exports = {
   includeGclid: false,
   saveParamsReferrerOncePerSession: true,
   deviceIdFromUrlParam: false,
+  sessionId: 0,
 };

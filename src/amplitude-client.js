@@ -87,6 +87,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this.options.userId = (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         this.options.userId || null;
 
+    // if custom session id specified in config, override what is stored in cookie
+    this._sessionId = this.options.sessionId > 0 ? this.options.sessionId : this._sessionId;
+
     // load unsent events and identifies before any attempt to log new ones
     if (this.options.saveEvents) {
       this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey);
@@ -578,6 +581,19 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
     });
     this.options.domain = this.cookieStorage.options().domain;
     _loadCookieData(this);
+    _saveCookieData(this);
+  } catch (e) {
+    utils.log(e);
+  }
+};
+
+AmplitudeClient.prototype.setSessionId = function setSessionId(sessionId) {
+  if (!utils.validateInput(sessionId, 'sessionId', 'number')) {
+    return;
+  }
+
+  try {
+    this._sessionId = sessionId;
     _saveCookieData(this);
   } catch (e) {
     utils.log(e);
