@@ -878,6 +878,7 @@ describe('setVersionName', function() {
   });
 
   describe('identify', function() {
+    var clock;
 
     beforeEach(function() {
       clock = sinon.useFakeTimers();

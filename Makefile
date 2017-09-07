@@ -34,8 +34,11 @@ clean:
 # Test.
 #
 
-test: build test/browser/index.html
-	@./node_modules/.bin/karma start --single-run --browsers ChromeHeadless karma.conf.js
+test: build
+	@./node_modules/.bin/karma start karma.conf.js
+
+test-sauce: build
+	@./node_modules/.bin/karma start karma.conf.js --browsers sauce_chrome_windows
 
 
 #
