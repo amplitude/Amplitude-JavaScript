@@ -1,7 +1,5 @@
 ## Unreleased
 
-* Add setSessionId method.
-
 ### 3.4.1 (June 29, 2017)
 * Handle SDK loading errors in the load snippet. Please update the load snippets on your website to [the latest version](https://amplitude.zendesk.com/hc/en-us/articles/115001361248-JavaScript-SDK-Installation#installation).
 * Migrating setup instructions and SDK documentation in the README file to Zendesk articles.
