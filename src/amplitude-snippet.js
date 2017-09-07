@@ -24,7 +24,7 @@
                'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId',
                'setGlobalUserProperties', 'identify', 'clearUserProperties',
                'setGroup', 'logRevenueV2', 'regenerateDeviceId',
-               'logEventWithTimestamp', 'logEventWithGroups', 'setSessionId'];
+               'logEventWithTimestamp', 'logEventWithGroups'];
   function setUpProxy(instance) {
     function proxyMain(fn) {
       instance[fn] = function() {
