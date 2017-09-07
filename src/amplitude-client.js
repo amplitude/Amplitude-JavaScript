@@ -584,6 +584,19 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
   }
 };
 
+AmplitudeClient.prototype.setSessionId = function setSessionId(sessionId) {
+  if (!utils.validateInput(sessionId, 'sessionId', 'number')) {
+    return;
+  }
+
+  try {
+    this._sessionId = sessionId;
+    _saveCookieData(this);
+  } catch (e) {
+    utils.log(e);
+  }
+};
+
 /**
  * Sets an identifier for the current user.
  * @public

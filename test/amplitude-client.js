@@ -2692,6 +2692,7 @@ describe('setVersionName', function() {
   describe('sessionId', function() {
     var clock;
     beforeEach(function() {
+      reset();
       clock = sinon.useFakeTimers();
       amplitude.init(apiKey);
     });
@@ -2721,6 +2722,25 @@ describe('setVersionName', function() {
       assert.equal(amplitude2._sessionId, timestamp);
       assert.equal(amplitude2.getSessionId(), timestamp);
       assert.equal(amplitude2.getSessionId(), amplitude2._sessionId);
+    });
+
+    it('should let user override sessionId with setSessionId', function() {
+      var amplitude2 = new AmplitudeClient();
+      var cookieStorage = new CookieStorage().getStorage();
+
+      // set up initial session
+      var sessionId = 1000;
+      clock.tick(sessionId);
+      amplitude2.init(apiKey);
+      assert.equal(amplitude2._sessionId, sessionId);
+      assert.equal(cookieStorage.get(amplitude2.options.cookieName).sessionId, sessionId);
+
+      // override sessionId with setSessionId
+      var newSessionId = 10000;
+      amplitude2.setSessionId(newSessionId);
+      assert.equal(amplitude2._sessionId, newSessionId);
+      // verify saved to cookie
+      assert.equal(cookieStorage.get(amplitude2.options.cookieName).sessionId, newSessionId);
     });
   });
 });
