@@ -1,7 +1,7 @@
 var AmplitudeClient = require('./amplitude-client');
 var Constants = require('./constants');
 var Identify = require('./identify');
-var object = require('object');
+var assign = require('lodash/assign');
 var Revenue = require('./revenue');
 var type = require('./type');
 var utils = require('./utils');
@@ -17,7 +17,7 @@ var DEFAULT_OPTIONS = require('./options');
  * @example var amplitude = new Amplitude();
  */
 var Amplitude = function Amplitude() {
-  this.options = object.merge({}, DEFAULT_OPTIONS);
+  this.options = assign({}, DEFAULT_OPTIONS);
   this._q = [];
   this._instances = {}; // mapping of instance names to instances
 };

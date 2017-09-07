@@ -3,8 +3,7 @@
  */
 
 var Base64 = require('./base64');
-var JSON = require('json'); // jshint ignore:line
-var topDomain = require('top-domain');
+var topDomain = require('@segment/top-domain');
 var utils = require('./utils');
 
 

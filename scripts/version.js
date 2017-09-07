@@ -1,7 +1,6 @@
 var fs = require('fs');
 var path = require('path');
 var package = require('../package');
-var component = require('../component');
 var previous = require('../src/version');
 
 var version = package.version;
@@ -15,10 +14,6 @@ function replaceVersion(filepath) {
 }
 
 console.log('Updating to version ' + version);
-
-component.version = version;
-fs.writeFileSync(path.join(cwd, 'component.json'), JSON.stringify(component, null, 2) + '\n');
-console.log('Updated component.json');
 
 var files = [
   'README.md',

@@ -8,7 +8,6 @@ describe('AmplitudeClient', function() {
   var cookie = require('../src/cookie.js');
   var utils = require('../src/utils.js');
   var querystring = require('querystring');
-  var JSON = require('json');
   var Identify = require('../src/identify.js');
   var Revenue = require('../src/revenue.js');
   var constants = require('../src/constants.js');
@@ -2073,9 +2072,8 @@ describe('setVersionName', function() {
 
     it('should track the raw user agent string', function() {
       // Unit test UA is set by phantomJS test environment, should be constant for all tests
-      var phantomJSUA = 'AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34';
-      assert.isTrue(navigator.userAgent.indexOf(phantomJSUA) > -1);
-      assert.isTrue(amplitude._userAgent.indexOf(phantomJSUA) > -1);
+      var userAgentString = navigator.userAgent;
+      assert.isTrue(amplitude._userAgent.indexOf(userAgentString) > -1);
 
       // log an event and verify UA field is filled out
       amplitude.logEvent('testEvent');
@@ -2083,7 +2081,7 @@ describe('setVersionName', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
       assert.equal(events[0].event_type, 'testEvent');
-      assert.isTrue(events[0].user_agent.indexOf(phantomJSUA) > -1);
+      assert.isTrue(events[0].user_agent.indexOf(userAgentString) > -1);
     });
 
     it('should allow logging event with custom timestamp', function() {
