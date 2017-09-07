@@ -7,7 +7,6 @@
 
 var Constants = require('./constants');
 var Cookie = require('./cookie');
-var JSON = require('json'); // jshint ignore:line
 var localStorage = require('./localstorage'); // jshint ignore:line
 
 var cookieStorage = function() {

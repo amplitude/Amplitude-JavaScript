@@ -1,7 +1,8 @@
+require('../amplitude-snippet.min.js');
+
 describe('Snippet', function() {
 
   it('amplitude object should exist', function() {
-    assert.isObject(window);
     assert.isObject(window.amplitude);
     assert.isFunction(window.amplitude.init);
     assert.isFunction(window.amplitude.logEvent);

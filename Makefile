@@ -3,6 +3,7 @@ SNIPPET = src/amplitude-snippet.js
 TESTS = $(wildcard test/*.js)
 BINS = node_modules/.bin
 DUO = $(BINS)/duo
+WEBPACK = $(BINS)/webpack
 MINIFY = $(BINS)/uglifyjs
 JSDOC = $(BINS)/jsdoc
 JSHINT = $(BINS)/jshint
@@ -25,7 +26,6 @@ default: test
 #
 
 clean:
-	@-rm -rf components
 	@-rm -f amplitude.js amplitude.min.js
 	@-rm -rf node_modules npm-debug.log
 
@@ -34,9 +34,11 @@ clean:
 # Test.
 #
 
-test: build test/browser/index.html
-	@$(MOCHA) test/browser/index.html
-	@$(MOCHA) test/browser/snippet.html
+test: build
+	@./node_modules/.bin/karma start karma.conf.js
+
+test-sauce: build
+	@./node_modules/.bin/karma start karma.conf.js --browsers sauce_chrome_windows
 
 
 #
@@ -49,7 +51,7 @@ node_modules: package.json
 #
 # Target for updating version.
 
-version: component.json package.json src/version.js
+version: package.json src/version.js
 	node scripts/version
 
 #
@@ -64,8 +66,8 @@ README.md: $(SNIPPET_OUT) version
 
 $(OUT): node_modules $(SRC) version
 	@$(JSHINT) --verbose $(SRC)
-	@$(DUO) --standalone amplitude src/index.js > $(OUT)
-	@$(MINIFY) $(OUT) --output $(MIN_OUT)
+	@$(WEBPACK) --config webpack.build.js
+	@NODE_ENV=production $(WEBPACK) --config webpack.build.js
 
 #
 # Target for minified `amplitude-snippet.js` file.
@@ -83,8 +85,7 @@ $(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET) version
 #
 
 build: $(TESTS) $(OUT) $(SNIPPET_OUT) $(SEGMENT_SNIPPET_OUT) README.md
-	@-mkdir -p build
-	@$(DUO) --development test/tests.js > build/tests.js
+	@$(WEBPACK) --config webpack.test.js
 	@$(DUO) --development test/snippet-tests.js > build/snippet-tests.js
 
 docs:

@@ -1,5 +1,5 @@
 /* jshint expr:true */
-
+require('json3');
 var Amplitude = require('./amplitude');
 
 var old = window.amplitude || {};

@@ -8,7 +8,6 @@ describe('Amplitude', function() {
   var cookie = require('../src/cookie.js');
   var utils = require('../src/utils.js');
   var querystring = require('querystring');
-  var JSON = require('json');
   var Identify = require('../src/identify.js');
   var Revenue = require('../src/revenue.js');
   var apiKey = '000000';
@@ -879,6 +878,7 @@ describe('setVersionName', function() {
   });
 
   describe('identify', function() {
+    var clock;
 
     beforeEach(function() {
       clock = sinon.useFakeTimers();
