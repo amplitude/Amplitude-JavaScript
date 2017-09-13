@@ -1,4 +1,14 @@
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["amplitude"] = factory();
+	else
+		root["amplitude"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -66,6 +76,9 @@
 /******/ ([
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var constants = __webpack_require__(1);
 var type = __webpack_require__(2);
@@ -275,7 +288,10 @@ module.exports = {
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 module.exports = {
   DEFAULT_INSTANCE: '$default_instance',
@@ -312,7 +328,12 @@ module.exports = {
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {/**
+"use strict";
+/* WEBPACK VAR INJECTION */(function(Buffer) {
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+/**
  * toString ref.
  * @private
  */
@@ -359,7 +380,7 @@ module.exports = function (val) {
   }
 
   val = val.valueOf ? val.valueOf() : Object.prototype.valueOf.apply(val);
-  return typeof val;
+  return typeof val === 'undefined' ? 'undefined' : _typeof(val);
 };
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43).Buffer))
 
@@ -589,7 +610,10 @@ module.exports = __webpack_amd_options__;
 
 /***/ }),
 /* 11 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
@@ -634,7 +658,7 @@ if (windowLocalStorageAvailable()) {
     div.addBehavior('#default#userdata');
     localStorage = {
       length: 0,
-      setItem: function (k, v) {
+      setItem: function setItem(k, v) {
         div.load(attrKey);
         if (!div.getAttribute(k)) {
           this.length++;
@@ -642,11 +666,11 @@ if (windowLocalStorageAvailable()) {
         div.setAttribute(k, v);
         div.save(attrKey);
       },
-      getItem: function (k) {
+      getItem: function getItem(k) {
         div.load(attrKey);
         return div.getAttribute(k);
       },
-      removeItem: function (k) {
+      removeItem: function removeItem(k) {
         div.load(attrKey);
         if (div.getAttribute(k)) {
           this.length--;
@@ -654,7 +678,7 @@ if (windowLocalStorageAvailable()) {
         div.removeAttribute(k);
         div.save(attrKey);
       },
-      clear: function () {
+      clear: function clear() {
         div.load(attrKey);
         var i = 0;
         var attr;
@@ -664,7 +688,7 @@ if (windowLocalStorageAvailable()) {
         div.save(attrKey);
         this.length = 0;
       },
-      key: function (k) {
+      key: function key(k) {
         div.load(attrKey);
         return div.XMLDocument.documentElement.attributes[k];
       }
@@ -678,11 +702,11 @@ if (windowLocalStorageAvailable()) {
 if (!localStorage) {
   localStorage = {
     length: 0,
-    setItem: function (k, v) {},
-    getItem: function (k) {},
-    removeItem: function (k) {},
-    clear: function () {},
-    key: function (k) {}
+    setItem: function setItem(k, v) {},
+    getItem: function getItem(k) {},
+    removeItem: function removeItem(k) {},
+    clear: function clear() {},
+    key: function key(k) {}
   };
 }
 
@@ -691,6 +715,9 @@ module.exports = localStorage;
 /***/ }),
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var type = __webpack_require__(2);
 var utils = __webpack_require__(0);
@@ -721,7 +748,7 @@ var AMP_OP_UNSET = '$unset';
  * @public
  * @example var identify = new amplitude.Identify();
  */
-var Identify = function () {
+var Identify = function Identify() {
   this.userPropertiesOperations = {};
   this.properties = []; // keep track of keys that have been added
 };
@@ -1256,6 +1283,9 @@ module.exports = isPrototype;
 /* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 var constants = __webpack_require__(1);
 var type = __webpack_require__(2);
 var utils = __webpack_require__(0);
@@ -1413,13 +1443,19 @@ module.exports = Revenue;
 
 /***/ }),
 /* 26 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 module.exports = '3.4.1';
 
 /***/ }),
 /* 27 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var language = __webpack_require__(88);
 
@@ -1452,6 +1488,9 @@ module.exports = {
 /***/ }),
 /* 28 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 /* jshint expr:true */
 __webpack_require__(29);
@@ -2384,6 +2423,9 @@ module.exports = newInstance;
 /* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 var AmplitudeClient = __webpack_require__(31);
 var Constants = __webpack_require__(1);
 var Identify = __webpack_require__(12);
@@ -2755,6 +2797,9 @@ module.exports = Amplitude;
 /***/ }),
 /* 31 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var Constants = __webpack_require__(1);
 var cookieStorage = __webpack_require__(32);
@@ -3937,6 +3982,9 @@ module.exports = AmplitudeClient;
 /* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
 /*
@@ -3948,7 +3996,7 @@ var Constants = __webpack_require__(1);
 var Cookie = __webpack_require__(33);
 var localStorage = __webpack_require__(11); // jshint ignore:line
 
-var cookieStorage = function () {
+var cookieStorage = function cookieStorage() {
   this.storage = null;
 };
 
@@ -3983,13 +4031,13 @@ cookieStorage.prototype.getStorage = function () {
         expirationDays: undefined,
         domain: undefined
       },
-      reset: function () {
+      reset: function reset() {
         this._options = {
           expirationDays: undefined,
           domain: undefined
         };
       },
-      options: function (opts) {
+      options: function options(opts) {
         if (arguments.length === 0) {
           return this._options;
         }
@@ -3999,20 +4047,20 @@ cookieStorage.prototype.getStorage = function () {
         this._options.domain = opts.domain || this._options.domain || window.location.hostname;
         return this._options;
       },
-      get: function (name) {
+      get: function get(name) {
         try {
           return JSON.parse(localStorage.getItem(keyPrefix + name));
         } catch (e) {}
         return null;
       },
-      set: function (name, value) {
+      set: function set(name, value) {
         try {
           localStorage.setItem(keyPrefix + name, JSON.stringify(value));
           return true;
         } catch (e) {}
         return false;
       },
-      remove: function (name) {
+      remove: function remove(name) {
         try {
           localStorage.removeItem(keyPrefix + name);
         } catch (e) {
@@ -4031,6 +4079,9 @@ module.exports = cookieStorage;
 /* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 /*
  * Cookie data
  */
@@ -4044,14 +4095,14 @@ var _options = {
   domain: undefined
 };
 
-var reset = function () {
+var reset = function reset() {
   _options = {
     expirationDays: undefined,
     domain: undefined
   };
 };
 
-var options = function (opts) {
+var options = function options(opts) {
   if (arguments.length === 0) {
     return _options;
   }
@@ -4072,7 +4123,7 @@ var options = function (opts) {
   _options.domain = domain;
 };
 
-var _domainSpecific = function (name) {
+var _domainSpecific = function _domainSpecific(name) {
   // differentiate between cookies on different domains
   var suffix = '';
   if (_options.domain) {
@@ -4081,7 +4132,7 @@ var _domainSpecific = function (name) {
   return name + suffix;
 };
 
-var get = function (name) {
+var get = function get(name) {
   try {
     var nameEq = _domainSpecific(name) + '=';
     var ca = document.cookie.split(';');
@@ -4106,7 +4157,7 @@ var get = function (name) {
   }
 };
 
-var set = function (name, value) {
+var set = function set(name, value) {
   try {
     _set(_domainSpecific(name), Base64.encode(JSON.stringify(value)), _options);
     return true;
@@ -4115,7 +4166,7 @@ var set = function (name, value) {
   }
 };
 
-var _set = function (name, value, opts) {
+var _set = function _set(name, value, opts) {
   var expires = value !== null ? opts.expirationDays : -1;
   if (expires) {
     var date = new Date();
@@ -4133,7 +4184,7 @@ var _set = function (name, value, opts) {
   document.cookie = str;
 };
 
-var remove = function (name) {
+var remove = function remove(name) {
   try {
     _set(_domainSpecific(name), null, _options);
     return true;
@@ -4155,6 +4206,9 @@ module.exports = {
 /* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 /* jshint bitwise: false */
 /* global escape, unescape */
 
@@ -4167,7 +4221,7 @@ var UTF8 = __webpack_require__(35);
 var Base64 = {
     _keyStr: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',
 
-    encode: function (input) {
+    encode: function encode(input) {
         try {
             if (window.btoa && window.atob) {
                 return window.btoa(unescape(encodeURIComponent(input)));
@@ -4178,7 +4232,7 @@ var Base64 = {
         return Base64._encode(input);
     },
 
-    _encode: function (input) {
+    _encode: function _encode(input) {
         var output = '';
         var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
         var i = 0;
@@ -4206,7 +4260,7 @@ var Base64 = {
         return output;
     },
 
-    decode: function (input) {
+    decode: function decode(input) {
         try {
             if (window.btoa && window.atob) {
                 return decodeURIComponent(escape(window.atob(input)));
@@ -4217,7 +4271,7 @@ var Base64 = {
         return Base64._decode(input);
     },
 
-    _decode: function (input) {
+    _decode: function _decode(input) {
         var output = '';
         var chr1, chr2, chr3;
         var enc1, enc2, enc3, enc4;
@@ -4253,7 +4307,10 @@ module.exports = Base64;
 
 /***/ }),
 /* 35 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 /* jshint bitwise: false */
 
@@ -4262,7 +4319,7 @@ module.exports = Base64;
  * http://www.webtoolkit.info/
  */
 var UTF8 = {
-    encode: function (s) {
+    encode: function encode(s) {
         var utftext = '';
 
         for (var n = 0; n < s.length; n++) {
@@ -4282,7 +4339,7 @@ var UTF8 = {
         return utftext;
     },
 
-    decode: function (utftext) {
+    decode: function decode(utftext) {
         var s = '';
         var i = 0;
         var c = 0,
@@ -7445,6 +7502,9 @@ module.exports = Array.isArray || function (arr) {
 /* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 var utils = __webpack_require__(0);
 
 var getUtmData = function getUtmData(rawCookie, query) {
@@ -8863,12 +8923,15 @@ module.exports = overArg;
 /* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 var querystring = __webpack_require__(83);
 
 /*
  * Simple AJAX request object
  */
-var Request = function (url, data) {
+var Request = function Request(url, data) {
   this.url = url;
   this.data = data || {};
 };
@@ -10016,7 +10079,10 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* jshint eqeqeq
 
 /***/ }),
 /* 87 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 /* jshint bitwise: false, laxbreak: true */
 
@@ -10028,7 +10094,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* jshint eqeqeq
  * Used to generate UUIDs for deviceIds.
  * @private
  */
-var uuid = function (a) {
+var uuid = function uuid(a) {
     return a // if the placeholder was passed, return
     ? ( // a random number from 0 to 15
     a ^ // unless b is 8,
@@ -10052,9 +10118,12 @@ module.exports = uuid;
 
 /***/ }),
 /* 88 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-var getLanguage = function () {
+"use strict";
+
+
+var getLanguage = function getLanguage() {
     return navigator && (navigator.languages && navigator.languages[0] || navigator.language || navigator.userLanguage) || undefined;
 };
 
@@ -10064,3 +10133,4 @@ module.exports = {
 
 /***/ })
 /******/ ]);
+});
