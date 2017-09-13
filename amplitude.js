@@ -1448,7 +1448,7 @@ module.exports = Revenue;
 "use strict";
 
 
-module.exports = '3.4.1';
+module.exports = '3.6.0';
 
 /***/ }),
 /* 27 */
