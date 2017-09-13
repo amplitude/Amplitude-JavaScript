@@ -1,5 +1,11 @@
 ## Unreleased
 
+### 3.6.0 (September 13, 2017)
+
+* Supports clean NPM module loading eg: `const amplitude = require('amplitude');` or `import 'amplitude' from 'amplitude-js';`
+* SDK is now a proper UMD module. Supports RequireJS with r.js builds now.
+* Updated build process to use webpack
+
 ### 3.4.1 (June 29, 2017)
 * Handle SDK loading errors in the load snippet. Please update the load snippets on your website to [the latest version](https://amplitude.zendesk.com/hc/en-us/articles/115001361248-JavaScript-SDK-Installation#installation).
 * Migrating setup instructions and SDK documentation in the README file to Zendesk articles.
