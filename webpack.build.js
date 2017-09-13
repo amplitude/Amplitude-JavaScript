@@ -7,6 +7,8 @@ module.exports = {
   output: {
     path: `${__dirname}`,
     filename: isProduction ? 'amplitude.min.js' : 'amplitude.js',
+    library: 'amplitude',
+    libraryTarget: 'umd',
   },
   module: {
     loaders: [
