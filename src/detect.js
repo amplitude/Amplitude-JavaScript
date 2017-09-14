@@ -520,4 +520,4 @@ var detect = (function(root, undefined) {
     return detect;
 })(window);
 
-module.exports = detect;
+export default detect;

@@ -1,8 +1,9 @@
+import localStorage from '../src/localstorage.js';
+import CookieStorage from '../src/cookiestorage.js';
+import cookie from '../src/cookie.js';
+import Amplitude from '../src/amplitude.js';
+
 describe('cookieStorage', function() {
-  var localStorage = require('../src/localstorage.js');
-  var CookieStorage = require('../src/cookiestorage.js');
-  var cookie = require('../src/cookie.js');
-  var Amplitude = require('../src/amplitude.js');
   var amplitude = new Amplitude();
   var keyPrefix = 'amp_cookiestore_';
 

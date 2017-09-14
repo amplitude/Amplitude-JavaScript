@@ -1,18 +1,18 @@
-var Constants = require('./constants');
-var cookieStorage = require('./cookiestorage');
-var getUtmData = require('./utm');
-var Identify = require('./identify');
-var localStorage = require('./localstorage');  // jshint ignore:line
-var md5 = require('blueimp-md5');
-var assign = require('lodash/assign');
-var Request = require('./xhr');
-var Revenue = require('./revenue');
-var type = require('./type');
-var UAParser = require('ua-parser-js');
-var utils = require('./utils');
-var UUID = require('./uuid');
-var version = require('./version');
-var DEFAULT_OPTIONS = require('./options');
+import Constants from './constants';
+import cookieStorage from './cookiestorage';
+import getUtmData from './utm';
+import Identify from './identify';
+import localStorage from './localstorage';  // jshint ignore:line
+import md5 from 'blueimp-md5';
+import assign from 'lodash/assign';
+import Request from './xhr';
+import Revenue from './revenue';
+import type from './type';
+import UAParser from 'ua-parser-js';
+import utils from './utils';
+import UUID from './uuid';
+import version from './version';
+import DEFAULT_OPTIONS from './options';
 
 /**
  * AmplitudeClient SDK API - instance constructor.
@@ -1184,4 +1184,4 @@ AmplitudeClient.prototype.setGlobalUserProperties = function setGlobalUserProper
  */
 AmplitudeClient.prototype.__VERSION__ = version;
 
-module.exports = AmplitudeClient;
+export default AmplitudeClient;

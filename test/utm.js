@@ -1,5 +1,6 @@
+import getUtmData from '../src/utm.js';
+
 describe('getUtmData', function() {
-  var getUtmData = require('../src/utm.js');
 
   it('should get utm params from the query string', function() {
     var query = '?utm_source=amplitude&utm_medium=email&utm_term=terms' +

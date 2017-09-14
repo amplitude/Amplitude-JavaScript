@@ -1,6 +1,6 @@
 /* jshint expr:true */
-require('json3');
-var Amplitude = require('./amplitude');
+import 'json3';
+import Amplitude from  './amplitude';
 
 var old = window.amplitude || {};
 var newInstance = new Amplitude();
@@ -12,4 +12,4 @@ for (var instance in old._iq) { // migrate each instance's queue
 }
 
 // export the instance
-module.exports = newInstance;
+export default newInstance;

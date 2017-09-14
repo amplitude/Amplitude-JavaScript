@@ -1,7 +1,7 @@
-describe('utils', function() {
-  var utils = require('../src/utils.js');
-  var constants = require('../src/constants.js');
+import utils from '../src/utils.js';
+import constants from '../src/constants.js';
 
+describe('utils', function() {
   describe('isEmptyString', function() {
     it('should detect empty strings', function() {
       assert.isTrue(utils.isEmptyString(null));

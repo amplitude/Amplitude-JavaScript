@@ -67,6 +67,7 @@
     "browserify"    : false,    // Browserify (node.js code in the browser)
     "couch"         : false,    // CouchDB
     "devel"         : true,     // Development/debugging (alert, confirm, etc)
+    "esversion"     : 6,        // Support ES version 6 syntax
     "dojo"          : false,    // Dojo Toolkit
     "jasmine"       : false,    // Jasmine
     "jquery"        : false,    // jQuery

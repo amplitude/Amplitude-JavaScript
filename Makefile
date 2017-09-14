@@ -3,7 +3,6 @@ SNIPPET = src/amplitude-snippet.js
 TESTS = $(wildcard test/*.js)
 BINS = node_modules/.bin
 DUO = $(BINS)/duo
-WEBPACK = $(BINS)/webpack
 MINIFY = $(BINS)/uglifyjs
 JSDOC = $(BINS)/jsdoc
 JSHINT = $(BINS)/jshint
@@ -14,6 +13,8 @@ SNIPPET_OUT = $(PROJECT)-snippet.min.js
 SEGMENT_SNIPPET_OUT = $(PROJECT)-segment-snippet.min.js
 MIN_OUT = $(PROJECT).min.js
 MOCHA = $(BINS)/mocha-phantomjs
+KARMA = $(BINS)/karma
+ROLLUP = $(BINS)/rollup
 
 #
 # Default target.
@@ -35,10 +36,10 @@ clean:
 #
 
 test: build
-	@./node_modules/.bin/karma start karma.conf.js
+	@$(KARMA) start karma.conf.js
 
 test-sauce: build
-	@./node_modules/.bin/karma start karma.conf.js --browsers sauce_chrome_windows
+	@$(KARMA) start karma.conf.js --browsers sauce_chrome_windows
 
 
 #
@@ -52,6 +53,7 @@ node_modules: package.json
 # Target for updating version.
 
 version: package.json src/version.js
+	@$(ROLLUP) src/version.js -o build/version.js -f cjs
 	node scripts/version
 
 #
@@ -64,10 +66,10 @@ README.md: $(SNIPPET_OUT) version
 # Target for `amplitude.js` file.
 #
 
-$(OUT): node_modules $(SRC) version
+$(OUT): node_modules $(SRC) version rollup.config.js rollup.min.js
 	@$(JSHINT) --verbose $(SRC)
-	@$(WEBPACK) --config webpack.build.js
-	@NODE_ENV=production $(WEBPACK) --config webpack.build.js
+	@NODE_ENV=production $(ROLLUP) --config rollup.config.js
+	@NODE_ENV=production $(ROLLUP) --config rollup.min.js
 
 #
 # Target for minified `amplitude-snippet.js` file.
@@ -85,7 +87,7 @@ $(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET) version
 #
 
 build: $(TESTS) $(OUT) $(SNIPPET_OUT) $(SEGMENT_SNIPPET_OUT) README.md
-	@$(WEBPACK) --config webpack.test.js
+	@$(ROLLUP) --config rollup.test.js
 	@$(DUO) --development test/snippet-tests.js > build/snippet-tests.js
 
 docs:

@@ -1,6 +1,6 @@
-var constants = require('./constants');
-var type = require('./type');
-var utils = require('./utils');
+import constants from './constants';
+import type from './type';
+import utils from './utils';
 
 /*
  * Wrapper for logging Revenue data. Revenue objects get passed to amplitude.logRevenueV2 to send to Amplitude servers.
@@ -151,4 +151,4 @@ Revenue.prototype._toJSONObject = function _toJSONObject() {
   return obj;
 };
 
-module.exports = Revenue;
+export default Revenue;

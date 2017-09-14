@@ -2,9 +2,9 @@
  * Cookie data
  */
 
-var Base64 = require('./base64');
-var topDomain = require('@segment/top-domain');
-var utils = require('./utils');
+import Base64 from './base64';
+import topDomain from '@segment/top-domain';
+import utils from './utils';
 
 
 var _options = {
@@ -117,7 +117,7 @@ var remove = function(name) {
 };
 
 
-module.exports = {
+export default {
   reset: reset,
   options: options,
   get: get,

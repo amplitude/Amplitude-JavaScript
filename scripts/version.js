@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var package = require('../package');
-var previous = require('../src/version');
+var previous = require('../build/version');
 
 var version = package.version;
 

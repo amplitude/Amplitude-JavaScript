@@ -28,4 +28,4 @@ var uuid = function(a) {
   );
 };
 
-module.exports = uuid;
+export default uuid;
