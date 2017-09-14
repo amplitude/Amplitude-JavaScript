@@ -1,6 +1,8 @@
 ## Unreleased
 
 * Add `setSessionId(sesionId)` method. Note this is not recommended unless you know what are you doing.
+* Added support for Bower. Install using `bower install amplitude-js`.
+* Switched from webpack to Rollup for building the SDK.
 
 ### 3.6.0 (September 13, 2017)
 
