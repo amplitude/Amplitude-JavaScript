@@ -1,0 +1,17 @@
+components
+documentation
+npm-debug.log
+build
+dist
+.DS_Store
+rollup.*
+circle.yml
+dist
+Makefile
+bower.json
+test
+build
+karma.conf.js
+scripts
+.npmignore
+.jshintrc
