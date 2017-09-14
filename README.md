@@ -1,28 +1,28 @@
-Amplitude-Javascript
+Amplitude-JavaScript
 ====================
 
-A Javascript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
+A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
 
 # Setup #
-Please see our [installation guide](https://amplitude.zendesk.com/hc/en-us/articles/115001361248-JavaScript-SDK-Installation) for instructions on installing and using our Javascript SDK.
+Please see our [installation guide](https://amplitude.zendesk.com/hc/en-us/articles/115001361248-JavaScript-SDK-Installation) for instructions on installing and using our JavaScript SDK.
 
 # Latest Version #
-[3.6.0 - Released on September 13, 2017](https://github.com/amplitude/Amplitude-Javascript/releases/latest)
-[![Circle CI](https://circleci.com/gh/amplitude/Amplitude-Javascript.svg?style=badge&circle-token=80de0dbb7632b2db13f76ccb20a79bbdfc50c215)](https://circleci.com/gh/amplitude/Amplitude-Javascript)
+[3.6.0 - Released on September 13, 2017](https://github.com/amplitude/Amplitude-JavaScript/releases/latest)
+[![Circle CI](https://circleci.com/gh/amplitude/Amplitude-JavaScript.svg?style=badge&circle-token=80de0dbb7632b2db13f76ccb20a79bbdfc50c215)](https://circleci.com/gh/amplitude/Amplitude-JavaScript)
 
-# Javascript SDK Reference #
-See our [Javascript SDK Reference](https://amplitude.zendesk.com/hc/en-us/articles/115002889587-JavaScript-SDK-Reference) for a list and description of all available SDK methods.
+# JavaScript SDK Reference #
+See our [JavaScript SDK Reference](https://amplitude.zendesk.com/hc/en-us/articles/115002889587-JavaScript-SDK-Reference) for a list and description of all available SDK methods.
 
 # Demo Pages #
-* A [demo page](https://github.com/amplitude/Amplitude-Javascript/blob/master/test/browser/amplitudejs.html) showing a simple integration on a web page.
-* A [demo page](https://github.com/amplitude/Amplitude-Javascript/blob/master/test/browser/amplitudejs-requirejs.html) showing an integration using RequireJS.
+* A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/master/test/browser/amplitudejs.html) showing a simple integration on a web page.
+* A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/master/test/browser/amplitudejs-requirejs.html) showing an integration using RequireJS.
 * A [demo page](https://github.com/amplitude/GTM-Web-Demo) demonstrating a potential integration with Google Tag Manager.
 
 # Changelog #
-Click [here](https://github.com/amplitude/Amplitude-Javascript/blob/master/CHANGELOG.md) to view the Javascript SDK Changelog.
+Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
 
 # Questions? #
-If you have questions about using or installing our Javascript SDK, you can send an email to [Amplitude Support](mailto:platform@amplitude.com).
+If you have questions about using or installing our JavaScript SDK, you can send an email to [Amplitude Support](mailto:platform@amplitude.com).
 
 # License #
 ```text
