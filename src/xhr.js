@@ -1,4 +1,4 @@
-var querystring = require('querystring');
+import querystring from 'querystring';
 
 /*
  * Simple AJAX request object
@@ -41,4 +41,4 @@ Request.prototype.send = function(callback) {
   //log('sent request to ' + this.url + ' with data ' + decodeURIComponent(queryString(this.data)));
 };
 
-module.exports = Request;
+export default Request;

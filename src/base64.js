@@ -1,7 +1,7 @@
 /* jshint bitwise: false */
 /* global escape, unescape */
 
-var UTF8 = require('./utf8');
+import UTF8 from './utf8';
 
 /*
  * Base64 encoder/decoder
@@ -94,4 +94,4 @@ var Base64 = {
     }
 };
 
-module.exports = Base64;
+export default Base64;

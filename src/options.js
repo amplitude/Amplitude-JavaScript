@@ -1,7 +1,7 @@
-var language = require('./language');
+import language from './language';
 
 // default options
-module.exports = {
+export default {
   apiEndpoint: 'api.amplitude.com',
   cookieExpiration: 365 * 10,
   cookieName: 'amplitude_id',

@@ -1,4 +1,4 @@
-var Base64 = require('../src/base64.js');
+import Base64 from '../src/base64.js';
 
 describe('Base64', function() {
   var encodeCases = [

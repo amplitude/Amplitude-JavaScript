@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   DEFAULT_INSTANCE: '$default_instance',
   API_VERSION: 2,
   MAX_STRING_LENGTH: 4096,

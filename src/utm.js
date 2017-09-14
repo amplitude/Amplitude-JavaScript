@@ -1,4 +1,4 @@
-var utils = require('./utils');
+import utils from './utils';
 
 var getUtmData = function getUtmData(rawCookie, query) {
   // Translate the utmz cookie format into url query string format.
@@ -31,4 +31,4 @@ var getUtmData = function getUtmData(rawCookie, query) {
   return utmData;
 };
 
-module.exports = getUtmData;
+export default getUtmData;
