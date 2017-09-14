@@ -642,6 +642,19 @@ AmplitudeClient.prototype.setOptOut = function setOptOut(enable) {
   }
 };
 
+AmplitudeClient.prototype.setSessionId = function setSessionId(sessionId) {
+  if (!utils.validateInput(sessionId, 'sessionId', 'number')) {
+    return;
+  }
+
+  try {
+    this._sessionId = sessionId;
+    _saveCookieData(this);
+  } catch (e) {
+    utils.log(e);
+  }
+};
+
 /**
   * Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you
   * are doing. This can be used in conjunction with `setUserId(null)` to anonymize users after they log out.
