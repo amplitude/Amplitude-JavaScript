@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add `setSessionId(sesionId)` method. Note this is not recommended unless you know what are you doing.
+
 ### 3.6.0 (September 13, 2017)
 
 * Supports clean NPM module loading eg: `const amplitude = require('amplitude');` or `import 'amplitude' from 'amplitude-js';`
