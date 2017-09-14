@@ -1,0 +1,27 @@
+{
+  "name": "amplitude-js",
+  "description": "Javascript library for Amplitude Analytics",
+  "main": "amplitude.js",
+  "version": "3.6.1",
+  "authors": [
+    "Amplitude <support@amplitude.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "analytics",
+    "amplitude"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "Makefile",
+    "circle.yml",
+    "build",
+    "components",
+    "dist",
+    "karma.conf.js",
+    "node_modules",
+    "bower_components",
+    "test"
+  ]
+}
