@@ -7,6 +7,9 @@ A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.ampl
 Please see our [installation guide](https://amplitude.zendesk.com/hc/en-us/articles/115001361248-JavaScript-SDK-Installation) for instructions on installing and using our JavaScript SDK.
 
 # Latest Version #
+[![npm version](https://badge.fury.io/js/amplitude-js.svg)](https://badge.fury.io/js/amplitude-js)
+[![Bower version](https://badge.fury.io/bo/amplitude-js.svg)](https://badge.fury.io/bo/amplitude-js)
+
 [3.7.0 - Released on September 14, 2017](https://github.com/amplitude/Amplitude-JavaScript/releases/latest)
 [![Circle CI](https://circleci.com/gh/amplitude/Amplitude-JavaScript.svg?style=badge&circle-token=80de0dbb7632b2db13f76ccb20a79bbdfc50c215)](https://circleci.com/gh/amplitude/Amplitude-JavaScript)
 
