@@ -98,4 +98,4 @@ if (!localStorage) {
   };
 }
 
-module.exports = localStorage;
+export default localStorage;

@@ -1,12 +1,12 @@
-var AmplitudeClient = require('./amplitude-client');
-var Constants = require('./constants');
-var Identify = require('./identify');
-var assign = require('lodash/assign');
-var Revenue = require('./revenue');
-var type = require('./type');
-var utils = require('./utils');
-var version = require('./version');
-var DEFAULT_OPTIONS = require('./options');
+import AmplitudeClient from './amplitude-client';
+import Constants from './constants';
+import Identify from './identify';
+import assign from 'lodash/assign';
+import Revenue from './revenue';
+import type from './type';
+import utils from './utils';
+import version from './version';
+import DEFAULT_OPTIONS from './options';
 
 /**
  * Amplitude SDK API - instance manager.
@@ -364,4 +364,4 @@ Amplitude.prototype.setGlobalUserProperties = function setGlobalUserProperties(u
  */
 Amplitude.prototype.__VERSION__ = version;
 
-module.exports = Amplitude;
+export default Amplitude;

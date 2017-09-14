@@ -1,5 +1,5 @@
 
-var UAParser = require('ua-parser-js');
+import UAParser from 'ua-parser-js';
 
 describe('ua-parser', function() {
   it('should find an os and device for all agents', function () {

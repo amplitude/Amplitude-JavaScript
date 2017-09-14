@@ -1,4 +1,4 @@
-var Revenue = require('../src/revenue.js');
+import Revenue from '../src/revenue.js';
 
 describe('Revenue', function() {
 

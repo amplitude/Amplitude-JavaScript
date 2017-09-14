@@ -1,4 +1,4 @@
-var UUID = require('../src/uuid.js');
+import UUID from '../src/uuid.js';
 
 describe('UUID', function() {
   var encodeCases = [

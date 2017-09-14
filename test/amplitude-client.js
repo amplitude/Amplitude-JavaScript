@@ -1,16 +1,17 @@
+import AmplitudeClient from '../src/amplitude-client.js';
+import getUtmData from '../src/utm.js';
+import localStorage from '../src/localstorage.js';
+import CookieStorage from '../src/cookiestorage.js';
+import Base64 from '../src/base64.js';
+import cookie from '../src/cookie.js';
+import utils from '../src/utils.js';
+import querystring from 'querystring';
+import Identify from '../src/identify.js';
+import Revenue from '../src/revenue.js';
+import constants from '../src/constants.js';
+
 // maintain for testing backwards compatability
 describe('AmplitudeClient', function() {
-  var AmplitudeClient = require('../src/amplitude-client.js');
-  var getUtmData = require('../src/utm.js');
-  var localStorage = require('../src/localstorage.js');
-  var CookieStorage = require('../src/cookiestorage.js');
-  var Base64 = require('../src/base64.js');
-  var cookie = require('../src/cookie.js');
-  var utils = require('../src/utils.js');
-  var querystring = require('querystring');
-  var Identify = require('../src/identify.js');
-  var Revenue = require('../src/revenue.js');
-  var constants = require('../src/constants.js');
   var apiKey = '000000';
   var keySuffix = '_' + apiKey.slice(0,6);
   var userId = 'user';

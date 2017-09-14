@@ -3,6 +3,6 @@ var getLanguage = function() {
         navigator.language || navigator.userLanguage)) || undefined;
 };
 
-module.exports = {
+export default {
     language: getLanguage()
 };

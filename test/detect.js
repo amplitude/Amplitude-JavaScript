@@ -1,4 +1,4 @@
-var detect = require('../src/detect');
+import detect from '../src/detect';
 
 describe('detect', function() {
   it('should find an os and device for all agents', function () {

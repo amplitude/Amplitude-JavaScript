@@ -5,9 +5,9 @@
  * Uses cookie if available, otherwise fallback to localstorage.
  */
 
-var Constants = require('./constants');
-var Cookie = require('./cookie');
-var localStorage = require('./localstorage'); // jshint ignore:line
+import Constants from './constants';
+import Cookie from './cookie';
+import localStorage from './localstorage'; // jshint ignore:line
 
 var cookieStorage = function() {
   this.storage = null;
@@ -88,4 +88,4 @@ cookieStorage.prototype.getStorage = function() {
   return this.storage;
 };
 
-module.exports = cookieStorage;
+export default cookieStorage;

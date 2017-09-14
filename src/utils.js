@@ -1,5 +1,5 @@
-var constants = require('./constants');
-var type = require('./type');
+import constants from './constants';
+import type from './type';
 
 var log = function log(s) {
   try {
@@ -196,7 +196,7 @@ var getQueryParam = function getQueryParam(name, query) {
   return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
 };
 
-module.exports = {
+export default {
   log: log,
   isEmptyString: isEmptyString,
   getQueryParam: getQueryParam,

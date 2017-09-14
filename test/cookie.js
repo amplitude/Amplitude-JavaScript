@@ -1,6 +1,6 @@
-describe('Cookie', function() {
+import cookie from '../src/cookie.js';
 
-  var cookie = require('../src/cookie.js');
+describe('Cookie', function() {
 
   before(function() {
     cookie.reset();

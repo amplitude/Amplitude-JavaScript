@@ -1,4 +1,4 @@
-var Identify = require('../src/identify.js');
+import Identify from '../src/identify.js';
 
 describe('Identify', function() {
 

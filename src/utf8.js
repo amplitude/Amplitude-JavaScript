@@ -54,4 +54,4 @@ var UTF8 = {
     }
 };
 
-module.exports = UTF8;
+export default UTF8;

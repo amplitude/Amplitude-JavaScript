@@ -1,5 +1,5 @@
-var type = require('./type');
-var utils = require('./utils');
+import type from './type';
+import utils from './utils';
 
 /*
  * Wrapper for a user properties JSON object that supports operations.
@@ -181,4 +181,4 @@ Identify.prototype._addOperation = function(operation, property, value) {
   this.properties.push(property);
 };
 
-module.exports = Identify;
+export default Identify;
