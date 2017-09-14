@@ -10,7 +10,7 @@
     "analytics",
     "amplitude"
   ],
-  "homepage": "",
+  "homepage": "https://github.com/amplitude/Amplitude-JavaScript",
   "ignore": [
     "**/.*",
     "Makefile",
