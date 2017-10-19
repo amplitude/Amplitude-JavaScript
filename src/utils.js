@@ -1,7 +1,40 @@
 import constants from './constants';
 import type from './type';
 
-var log = function log(s) {
+let logLevel = 'INFO';
+
+var logLevels = {
+  DISABLE: 0,
+  ERROR: 1,
+  WARN: 2,
+  INFO: 3,
+};
+
+const setLogLevel = function setLogLevel(logLevelName) {
+  logLevel = logLevels[logLevelName];
+};
+
+const log = {
+  error: (s) => {
+    if (logLevel >= logLevels.ERROR) {
+      _log(s);
+    }
+  },
+
+  warn: (s) => {
+    if (logLevel >= logLevels.WARN) {
+      _log(s);
+    }
+  },
+
+  info: (s) => {
+    if (logLevel >= logLevels.INFO) {
+      _log(s);
+    }
+  },
+};
+
+var _log = function _log(s) {
   try {
     console.log('[Amplitude] ' + s);
   } catch (e) {
@@ -50,7 +83,7 @@ var _truncateValue = function _truncateValue(value) {
 
 var validateInput = function validateInput(input, name, expectedType) {
   if (type(input) !== expectedType) {
-    log('Invalid ' + name + ' input type. Expected ' + expectedType + ' but received ' + type(input));
+    log.error('Invalid ' + name + ' input type. Expected ' + expectedType + ' but received ' + type(input));
     return false;
   }
   return true;
@@ -60,12 +93,12 @@ var validateInput = function validateInput(input, name, expectedType) {
 var validateProperties = function validateProperties(properties) {
   var propsType = type(properties);
   if (propsType !== 'object') {
-    log('Error: invalid properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
+    log.error('Error: invalid properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
     return {};
   }
 
   if (Object.keys(properties).length > constants.MAX_PROPERTY_KEYS) {
-    log('Error: too many properties (more than 1000), ignoring');
+    log.error('Error: too many properties (more than 1000), ignoring');
     return {};
   }
 
@@ -80,7 +113,7 @@ var validateProperties = function validateProperties(properties) {
     var keyType = type(key);
     if (keyType !== 'string') {
       key = String(key);
-      log('WARNING: Non-string property key, received type ' + keyType + ', coercing to string "' + key + '"');
+      log.warn('WARNING: Non-string property key, received type ' + keyType + ', coercing to string "' + key + '"');
     }
 
     // validate value
@@ -100,11 +133,11 @@ var invalidValueTypes = [
 var validatePropertyValue = function validatePropertyValue(key, value) {
   var valueType = type(value);
   if (invalidValueTypes.indexOf(valueType) !== -1) {
-    log('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
+    log.warn('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
     value = null;
   } else if (valueType === 'error') {
     value = String(value);
-    log('WARNING: Property key "' + key + '" with value type error, coercing to ' + value);
+    log.warn('WARNING: Property key "' + key + '" with value type error, coercing to ' + value);
   } else if (valueType === 'array') {
     // check for nested arrays or objects
     var arrayCopy = [];
@@ -112,7 +145,7 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
       var element = value[i];
       var elemType = type(element);
       if (elemType === 'array' || elemType === 'object') {
-        log('WARNING: Cannot have ' + elemType + ' nested in an array property value, skipping');
+        log.warn('WARNING: Cannot have ' + elemType + ' nested in an array property value, skipping');
         continue;
       }
       arrayCopy.push(validatePropertyValue(key, element));
@@ -127,7 +160,7 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
 var validateGroups = function validateGroups(groups) {
   var groupsType = type(groups);
   if (groupsType !== 'object') {
-    log('Error: invalid groups format. Expecting Javascript object, received ' + groupsType + ', ignoring');
+    log.error('Error: invalid groups format. Expecting Javascript object, received ' + groupsType + ', ignoring');
     return {};
   }
 
@@ -142,7 +175,7 @@ var validateGroups = function validateGroups(groups) {
     var keyType = type(key);
     if (keyType !== 'string') {
       key = String(key);
-      log('WARNING: Non-string groupType, received type ' + keyType + ', coercing to string "' + key + '"');
+      log.warn('WARNING: Non-string groupType, received type ' + keyType + ', coercing to string "' + key + '"');
     }
 
     // validate value
@@ -162,7 +195,7 @@ var validateGroupName = function validateGroupName(key, groupName) {
   }
   if (groupNameType === 'date' || groupNameType === 'number' || groupNameType === 'boolean') {
     groupName = String(groupName);
-    log('WARNING: Non-string groupName, received type ' + groupNameType + ', coercing to string "' + groupName + '"');
+    log.warn('WARNING: Non-string groupName, received type ' + groupNameType + ', coercing to string "' + groupName + '"');
     return groupName;
   }
   if (groupNameType === 'array') {
@@ -172,19 +205,19 @@ var validateGroupName = function validateGroupName(key, groupName) {
       var element = groupName[i];
       var elemType = type(element);
       if (elemType === 'array' || elemType === 'object') {
-        log('WARNING: Skipping nested ' + elemType + ' in array groupName');
+        log.warn('WARNING: Skipping nested ' + elemType + ' in array groupName');
         continue;
       } else if (elemType === 'string') {
         arrayCopy.push(element);
       } else if (elemType === 'date' || elemType === 'number' || elemType === 'boolean') {
         element = String(element);
-        log('WARNING: Non-string groupName, received type ' + elemType + ', coercing to string "' + element + '"');
+        log.warn('WARNING: Non-string groupName, received type ' + elemType + ', coercing to string "' + element + '"');
         arrayCopy.push(element);
       }
     }
     return arrayCopy;
   }
-  log('WARNING: Non-string groupName, received type ' + groupNameType +
+  log.warn('WARNING: Non-string groupName, received type ' + groupNameType +
         '. Please use strings or array of strings for groupName');
 };
 
@@ -197,12 +230,13 @@ var getQueryParam = function getQueryParam(name, query) {
 };
 
 export default {
-  log: log,
-  isEmptyString: isEmptyString,
-  getQueryParam: getQueryParam,
-  sessionStorageEnabled: sessionStorageEnabled,
-  truncate: truncate,
-  validateGroups: validateGroups,
-  validateInput: validateInput,
-  validateProperties: validateProperties
+  setLogLevel,
+  log,
+  isEmptyString,
+  getQueryParam,
+  sessionStorageEnabled,
+  truncate,
+  validateGroups,
+  validateInput,
+  validateProperties,
 };

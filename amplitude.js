@@ -2042,7 +2042,40 @@ var type = function (val) {
   return typeof val === 'undefined' ? 'undefined' : _typeof(val);
 };
 
-var log = function log(s) {
+var logLevel = 'INFO';
+
+var logLevels = {
+  DISABLE: 0,
+  ERROR: 1,
+  WARN: 2,
+  INFO: 3
+};
+
+var setLogLevel = function setLogLevel(logLevelName) {
+  logLevel = logLevels[logLevelName];
+};
+
+var log = {
+  error: function error(s) {
+    if (logLevel >= logLevels.ERROR) {
+      _log(s);
+    }
+  },
+
+  warn: function warn(s) {
+    if (logLevel >= logLevels.WARN) {
+      _log(s);
+    }
+  },
+
+  info: function info(s) {
+    if (logLevel >= logLevels.INFO) {
+      _log(s);
+    }
+  }
+};
+
+var _log = function _log(s) {
   try {
     console.log('[Amplitude] ' + s);
   } catch (e) {
@@ -2091,7 +2124,7 @@ var _truncateValue = function _truncateValue(value) {
 
 var validateInput = function validateInput(input, name, expectedType) {
   if (type(input) !== expectedType) {
-    log('Invalid ' + name + ' input type. Expected ' + expectedType + ' but received ' + type(input));
+    log.error('Invalid ' + name + ' input type. Expected ' + expectedType + ' but received ' + type(input));
     return false;
   }
   return true;
@@ -2101,12 +2134,12 @@ var validateInput = function validateInput(input, name, expectedType) {
 var validateProperties = function validateProperties(properties) {
   var propsType = type(properties);
   if (propsType !== 'object') {
-    log('Error: invalid properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
+    log.error('Error: invalid properties format. Expecting Javascript object, received ' + propsType + ', ignoring');
     return {};
   }
 
   if (Object.keys(properties).length > constants.MAX_PROPERTY_KEYS) {
-    log('Error: too many properties (more than 1000), ignoring');
+    log.error('Error: too many properties (more than 1000), ignoring');
     return {};
   }
 
@@ -2121,7 +2154,7 @@ var validateProperties = function validateProperties(properties) {
     var keyType = type(key);
     if (keyType !== 'string') {
       key = String(key);
-      log('WARNING: Non-string property key, received type ' + keyType + ', coercing to string "' + key + '"');
+      log.warn('WARNING: Non-string property key, received type ' + keyType + ', coercing to string "' + key + '"');
     }
 
     // validate value
@@ -2139,11 +2172,11 @@ var invalidValueTypes = ['null', 'nan', 'undefined', 'function', 'arguments', 'r
 var validatePropertyValue = function validatePropertyValue(key, value) {
   var valueType = type(value);
   if (invalidValueTypes.indexOf(valueType) !== -1) {
-    log('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
+    log.warn('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
     value = null;
   } else if (valueType === 'error') {
     value = String(value);
-    log('WARNING: Property key "' + key + '" with value type error, coercing to ' + value);
+    log.warn('WARNING: Property key "' + key + '" with value type error, coercing to ' + value);
   } else if (valueType === 'array') {
     // check for nested arrays or objects
     var arrayCopy = [];
@@ -2151,7 +2184,7 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
       var element = value[i];
       var elemType = type(element);
       if (elemType === 'array' || elemType === 'object') {
-        log('WARNING: Cannot have ' + elemType + ' nested in an array property value, skipping');
+        log.warn('WARNING: Cannot have ' + elemType + ' nested in an array property value, skipping');
         continue;
       }
       arrayCopy.push(validatePropertyValue(key, element));
@@ -2166,7 +2199,7 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
 var validateGroups = function validateGroups(groups) {
   var groupsType = type(groups);
   if (groupsType !== 'object') {
-    log('Error: invalid groups format. Expecting Javascript object, received ' + groupsType + ', ignoring');
+    log.error('Error: invalid groups format. Expecting Javascript object, received ' + groupsType + ', ignoring');
     return {};
   }
 
@@ -2181,7 +2214,7 @@ var validateGroups = function validateGroups(groups) {
     var keyType = type(key);
     if (keyType !== 'string') {
       key = String(key);
-      log('WARNING: Non-string groupType, received type ' + keyType + ', coercing to string "' + key + '"');
+      log.warn('WARNING: Non-string groupType, received type ' + keyType + ', coercing to string "' + key + '"');
     }
 
     // validate value
@@ -2201,7 +2234,7 @@ var validateGroupName = function validateGroupName(key, groupName) {
   }
   if (groupNameType === 'date' || groupNameType === 'number' || groupNameType === 'boolean') {
     groupName = String(groupName);
-    log('WARNING: Non-string groupName, received type ' + groupNameType + ', coercing to string "' + groupName + '"');
+    log.warn('WARNING: Non-string groupName, received type ' + groupNameType + ', coercing to string "' + groupName + '"');
     return groupName;
   }
   if (groupNameType === 'array') {
@@ -2211,19 +2244,19 @@ var validateGroupName = function validateGroupName(key, groupName) {
       var element = groupName[i];
       var elemType = type(element);
       if (elemType === 'array' || elemType === 'object') {
-        log('WARNING: Skipping nested ' + elemType + ' in array groupName');
+        log.warn('WARNING: Skipping nested ' + elemType + ' in array groupName');
         continue;
       } else if (elemType === 'string') {
         arrayCopy.push(element);
       } else if (elemType === 'date' || elemType === 'number' || elemType === 'boolean') {
         element = String(element);
-        log('WARNING: Non-string groupName, received type ' + elemType + ', coercing to string "' + element + '"');
+        log.warn('WARNING: Non-string groupName, received type ' + elemType + ', coercing to string "' + element + '"');
         arrayCopy.push(element);
       }
     }
     return arrayCopy;
   }
-  log('WARNING: Non-string groupName, received type ' + groupNameType + '. Please use strings or array of strings for groupName');
+  log.warn('WARNING: Non-string groupName, received type ' + groupNameType + '. Please use strings or array of strings for groupName');
 };
 
 // parses the value of a url param (for example ?gclid=1234&...)
@@ -2235,6 +2268,7 @@ var getQueryParam = function getQueryParam(name, query) {
 };
 
 var utils = {
+  setLogLevel: setLogLevel,
   log: log,
   isEmptyString: isEmptyString,
   getQueryParam: getQueryParam,
@@ -2617,7 +2651,7 @@ Identify.prototype.add = function (property, value) {
   if (type(value) === 'number' || type(value) === 'string') {
     this._addOperation(AMP_OP_ADD, property, value);
   } else {
-    utils.log('Unsupported type for value: ' + type(value) + ', expecting number or string');
+    utils.log.error('Unsupported type for value: ' + type(value) + ', expecting number or string');
   }
   return this;
 };
@@ -2652,7 +2686,7 @@ Identify.prototype.append = function (property, value) {
 Identify.prototype.clearAll = function () {
   if (Object.keys(this.userPropertiesOperations).length > 0) {
     if (!this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
-      utils.log('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
+      utils.log.error('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
     }
     return this;
   }
@@ -2735,13 +2769,13 @@ Identify.prototype.unset = function (property) {
 Identify.prototype._addOperation = function (operation, property, value) {
   // check that the identify doesn't already contain a clearAll
   if (this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
-    utils.log('This identify already contains a $clearAll operation, skipping operation ' + operation);
+    utils.log.error('This identify already contains a $clearAll operation, skipping operation ' + operation);
     return;
   }
 
   // check that property wasn't already used in this Identify
   if (this.properties.indexOf(property) !== -1) {
-    utils.log('User property "' + property + '" already used in this identify, skipping operation ' + operation);
+    utils.log.error('User property "' + property + '" already used in this identify, skipping operation ' + operation);
     return;
   }
 
@@ -4539,9 +4573,9 @@ var Revenue = function Revenue() {
  */
 Revenue.prototype.setProductId = function setProductId(productId) {
   if (type(productId) !== 'string') {
-    utils.log('Unsupported type for productId: ' + type(productId) + ', expecting string');
+    utils.log.error('Unsupported type for productId: ' + type(productId) + ', expecting string');
   } else if (utils.isEmptyString(productId)) {
-    utils.log('Invalid empty productId');
+    utils.log.error('Invalid empty productId');
   } else {
     this._productId = productId;
   }
@@ -4558,7 +4592,7 @@ Revenue.prototype.setProductId = function setProductId(productId) {
  */
 Revenue.prototype.setQuantity = function setQuantity(quantity) {
   if (type(quantity) !== 'number') {
-    utils.log('Unsupported type for quantity: ' + type(quantity) + ', expecting number');
+    utils.log.error('Unsupported type for quantity: ' + type(quantity) + ', expecting number');
   } else {
     this._quantity = parseInt(quantity);
   }
@@ -4576,7 +4610,7 @@ Revenue.prototype.setQuantity = function setQuantity(quantity) {
  */
 Revenue.prototype.setPrice = function setPrice(price) {
   if (type(price) !== 'number') {
-    utils.log('Unsupported type for price: ' + type(price) + ', expecting number');
+    utils.log.error('Unsupported type for price: ' + type(price) + ', expecting number');
   } else {
     this._price = price;
   }
@@ -4593,7 +4627,7 @@ Revenue.prototype.setPrice = function setPrice(price) {
  */
 Revenue.prototype.setRevenueType = function setRevenueType(revenueType) {
   if (type(revenueType) !== 'string') {
-    utils.log('Unsupported type for revenueType: ' + type(revenueType) + ', expecting string');
+    utils.log.error('Unsupported type for revenueType: ' + type(revenueType) + ', expecting string');
   } else {
     this._revenueType = revenueType;
   }
@@ -4611,7 +4645,7 @@ Revenue.prototype.setRevenueType = function setRevenueType(revenueType) {
 */
 Revenue.prototype.setEventProperties = function setEventProperties(eventProperties) {
   if (type(eventProperties) !== 'object') {
-    utils.log('Unsupported type for eventProperties: ' + type(eventProperties) + ', expecting object');
+    utils.log.error('Unsupported type for eventProperties: ' + type(eventProperties) + ', expecting object');
   } else {
     this._properties = utils.validateProperties(eventProperties);
   }
@@ -4623,7 +4657,7 @@ Revenue.prototype.setEventProperties = function setEventProperties(eventProperti
  */
 Revenue.prototype._isValidRevenue = function _isValidRevenue() {
   if (type(this._price) !== 'number') {
-    utils.log('Invalid revenue, need to set price field');
+    utils.log.error('Invalid revenue, need to set price field');
     return false;
   }
   return true;
@@ -5670,7 +5704,7 @@ AmplitudeClient.prototype.Revenue = Revenue;
  */
 AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, opt_callback) {
   if (type(apiKey) !== 'string' || utils.isEmptyString(apiKey)) {
-    utils.log('Invalid apiKey. Please re-initialize with a valid apiKey');
+    utils.log.error('Invalid apiKey. Please re-initialize with a valid apiKey');
     return;
   }
 
@@ -5714,6 +5748,10 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       }
     }
 
+    if (type(this.options.logLevel) === 'string') {
+      utils.setLogLevel(this.options.logLevel);
+    }
+
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;
@@ -5734,7 +5772,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     this._sendEventsIfReady(); // try sending unsent events
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   } finally {
     if (type(opt_callback) === 'function') {
       opt_callback(this);
@@ -5812,7 +5850,7 @@ AmplitudeClient.prototype.runQueuedFunctions = function () {
  */
 AmplitudeClient.prototype._apiKeySet = function _apiKeySet(methodName) {
   if (utils.isEmptyString(this.options.apiKey)) {
-    utils.log('Invalid apiKey. Please set a valid apiKey with init() before calling ' + methodName);
+    utils.log.error('Invalid apiKey. Please set a valid apiKey with init() before calling ' + methodName);
     return false;
   }
   return true;
@@ -5837,7 +5875,7 @@ AmplitudeClient.prototype._loadSavedUnsentEvents = function _loadSavedUnsentEven
       }
     } catch (e) {}
   }
-  utils.log('Unable to load ' + unsentKey + ' events. Restart with a new empty queue.');
+  utils.log.error('Unable to load ' + unsentKey + ' events. Restart with a new empty queue.');
   return [];
 };
 
@@ -6185,7 +6223,7 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
     _loadCookieData(this);
     _saveCookieData(this);
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -6200,7 +6238,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
     this.options.userId = userId !== undefined && userId !== null && '' + userId || null;
     _saveCookieData(this);
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -6243,7 +6281,7 @@ AmplitudeClient.prototype.setOptOut = function setOptOut(enable) {
     this.options.optOut = enable;
     _saveCookieData(this);
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -6256,7 +6294,7 @@ AmplitudeClient.prototype.setSessionId = function setSessionId(sessionId) {
     this._sessionId = sessionId;
     _saveCookieData(this);
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -6290,7 +6328,7 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
       _saveCookieData(this);
     }
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -6382,7 +6420,7 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback) {
       return this._logEvent(constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, null, null, opt_callback);
     }
   } else {
-    utils.log('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
+    utils.log.error('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
   }
 
   if (type(opt_callback) === 'function') {
@@ -6480,7 +6518,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
 
     return eventId;
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -6594,7 +6632,7 @@ AmplitudeClient.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
       return this.logEvent(constants.REVENUE_EVENT, revenue_obj._toJSONObject());
     }
   } else {
-    utils.log('Invalid revenue input type. Expected Revenue object but saw ' + type(revenue_obj));
+    utils.log.error('Invalid revenue input type. Expected Revenue object but saw ' + type(revenue_obj));
   }
 };
 
@@ -6743,7 +6781,7 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIde
     // case 0: no events or identifys left
     // note this should not happen, this means we have less events and identifys than expected
     if (noEvents && noIdentifys) {
-      utils.log('Merging Events and Identifys, less events and identifys than expected');
+      utils.log.error('Merging Events and Identifys, less events and identifys than expected');
       break;
     }
 

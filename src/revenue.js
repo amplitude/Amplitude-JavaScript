@@ -40,9 +40,9 @@ var Revenue = function Revenue() {
  */
 Revenue.prototype.setProductId = function setProductId(productId) {
   if (type(productId) !== 'string') {
-    utils.log('Unsupported type for productId: ' + type(productId) + ', expecting string');
+    utils.log.error('Unsupported type for productId: ' + type(productId) + ', expecting string');
   } else if (utils.isEmptyString(productId)) {
-    utils.log('Invalid empty productId');
+    utils.log.error('Invalid empty productId');
   } else {
     this._productId = productId;
   }
@@ -59,7 +59,7 @@ Revenue.prototype.setProductId = function setProductId(productId) {
  */
 Revenue.prototype.setQuantity = function setQuantity(quantity) {
   if (type(quantity) !== 'number') {
-    utils.log('Unsupported type for quantity: ' + type(quantity) + ', expecting number');
+    utils.log.error('Unsupported type for quantity: ' + type(quantity) + ', expecting number');
   } else {
     this._quantity = parseInt(quantity);
   }
@@ -77,7 +77,7 @@ Revenue.prototype.setQuantity = function setQuantity(quantity) {
  */
 Revenue.prototype.setPrice = function setPrice(price) {
   if (type(price) !== 'number') {
-    utils.log('Unsupported type for price: ' + type(price) + ', expecting number');
+    utils.log.error('Unsupported type for price: ' + type(price) + ', expecting number');
   } else {
     this._price = price;
   }
@@ -94,7 +94,7 @@ Revenue.prototype.setPrice = function setPrice(price) {
  */
 Revenue.prototype.setRevenueType = function setRevenueType(revenueType) {
   if (type(revenueType) !== 'string') {
-    utils.log('Unsupported type for revenueType: ' + type(revenueType) + ', expecting string');
+    utils.log.error('Unsupported type for revenueType: ' + type(revenueType) + ', expecting string');
   } else {
     this._revenueType = revenueType;
   }
@@ -112,7 +112,7 @@ Revenue.prototype.setRevenueType = function setRevenueType(revenueType) {
 */
 Revenue.prototype.setEventProperties = function setEventProperties(eventProperties) {
   if (type(eventProperties) !== 'object') {
-    utils.log('Unsupported type for eventProperties: ' + type(eventProperties) + ', expecting object');
+    utils.log.error('Unsupported type for eventProperties: ' + type(eventProperties) + ', expecting object');
   } else {
     this._properties = utils.validateProperties(eventProperties);
   }
@@ -124,7 +124,7 @@ Revenue.prototype.setEventProperties = function setEventProperties(eventProperti
  */
 Revenue.prototype._isValidRevenue = function _isValidRevenue() {
   if (type(this._price) !== 'number') {
-    utils.log('Invalid revenue, need to set price field');
+    utils.log.error('Invalid revenue, need to set price field');
     return false;
   }
   return true;
