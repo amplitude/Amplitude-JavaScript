@@ -1,7 +1,7 @@
 import constants from './constants';
 import type from './type';
 
-let logLevel = 'INFO';
+let logLevel = 'WARN';
 
 var logLevels = {
   DISABLE: 0,
@@ -11,7 +11,11 @@ var logLevels = {
 };
 
 const setLogLevel = function setLogLevel(logLevelName) {
-  logLevel = logLevels[logLevelName];
+  logLevel = logLevels[logLevelName] || logLevel;
+};
+
+const getLogLevel = function getLogLevel() {
+  return logLevel;
 };
 
 const log = {
@@ -231,6 +235,7 @@ var getQueryParam = function getQueryParam(name, query) {
 
 export default {
   setLogLevel,
+  getLogLevel,
   log,
   isEmptyString,
   getQueryParam,

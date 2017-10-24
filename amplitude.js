@@ -2042,7 +2042,7 @@ var type = function (val) {
   return typeof val === 'undefined' ? 'undefined' : _typeof(val);
 };
 
-var logLevel = 'INFO';
+var logLevel = 'WARN';
 
 var logLevels = {
   DISABLE: 0,
@@ -2052,7 +2052,11 @@ var logLevels = {
 };
 
 var setLogLevel = function setLogLevel(logLevelName) {
-  logLevel = logLevels[logLevelName];
+  logLevel = logLevels[logLevelName] || logLevel;
+};
+
+var getLogLevel = function getLogLevel() {
+  return logLevel;
 };
 
 var log = {
@@ -2269,6 +2273,7 @@ var getQueryParam = function getQueryParam(name, query) {
 
 var utils = {
   setLogLevel: setLogLevel,
+  getLogLevel: getLogLevel,
   log: log,
   isEmptyString: isEmptyString,
   getQueryParam: getQueryParam,

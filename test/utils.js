@@ -24,6 +24,11 @@ describe('utils', function() {
       console.log.restore();
     });
 
+    describe('setLogLevelShould ignore invalid log levels', function() {
+      utils.setLogLevel('INVALID_LOGLEVEL');
+      assert.strictEqual(utils.getLogLevel(), 'WARN');
+    });
+
     describe('logLevel is ERROR', function() {
       beforeEach(function() {
         utils.setLogLevel('ERROR');
