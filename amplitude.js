@@ -5646,6 +5646,7 @@ var DEFAULT_OPTIONS = {
   includeReferrer: false,
   includeUtm: false,
   language: language.language,
+  logLevel: 'WARN',
   optOut: false,
   platform: 'Web',
   savedMaxCount: 1000,
@@ -5751,10 +5752,6 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
         this._unsentIdentifys[j].user_properties = utils.validateProperties(userProperties);
         this._unsentIdentifys[j].groups = utils.validateGroups(identifyGroups);
       }
-    }
-
-    if (type(this.options.logLevel) === 'string') {
-      utils.setLogLevel(this.options.logLevel);
     }
 
     var now = new Date().getTime();

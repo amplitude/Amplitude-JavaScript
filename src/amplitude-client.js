@@ -108,10 +108,6 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       }
     }
 
-    if (type(this.options.logLevel) === 'string') {
-      utils.setLogLevel(this.options.logLevel);
-    }
-
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       this._newSession = true;

@@ -9,6 +9,7 @@ export default {
   includeReferrer: false,
   includeUtm: false,
   language: language.language,
+  logLevel: 'WARN',
   optOut: false,
   platform: 'Web',
   savedMaxCount: 1000,
