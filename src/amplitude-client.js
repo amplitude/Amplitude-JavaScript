@@ -60,7 +60,7 @@ AmplitudeClient.prototype.Revenue = Revenue;
  */
 AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, opt_callback) {
   if (type(apiKey) !== 'string' || utils.isEmptyString(apiKey)) {
-    utils.log('Invalid apiKey. Please re-initialize with a valid apiKey');
+    utils.log.error('Invalid apiKey. Please re-initialize with a valid apiKey');
     return;
   }
 
@@ -128,7 +128,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     this._sendEventsIfReady(); // try sending unsent events
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   } finally {
     if (type(opt_callback) === 'function') {
       opt_callback(this);
@@ -207,7 +207,7 @@ AmplitudeClient.prototype.runQueuedFunctions = function () {
  */
 AmplitudeClient.prototype._apiKeySet = function _apiKeySet(methodName) {
   if (utils.isEmptyString(this.options.apiKey)) {
-    utils.log('Invalid apiKey. Please set a valid apiKey with init() before calling ' + methodName);
+    utils.log.error('Invalid apiKey. Please set a valid apiKey with init() before calling ' + methodName);
     return false;
   }
   return true;
@@ -231,7 +231,7 @@ AmplitudeClient.prototype._loadSavedUnsentEvents = function _loadSavedUnsentEven
       }
     } catch (e) {}
   }
-  utils.log('Unable to load ' + unsentKey + ' events. Restart with a new empty queue.');
+  utils.log.error('Unable to load ' + unsentKey + ' events. Restart with a new empty queue.');
   return [];
 };
 
@@ -579,7 +579,7 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
     _loadCookieData(this);
     _saveCookieData(this);
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -594,7 +594,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -638,7 +638,7 @@ AmplitudeClient.prototype.setOptOut = function setOptOut(enable) {
     this.options.optOut = enable;
     _saveCookieData(this);
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -651,7 +651,7 @@ AmplitudeClient.prototype.setSessionId = function setSessionId(sessionId) {
     this._sessionId = sessionId;
     _saveCookieData(this);
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -685,7 +685,7 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
       _saveCookieData(this);
     }
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -779,7 +779,7 @@ AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
         );
     }
   } else {
-    utils.log('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
+    utils.log.error('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
   }
 
   if (type(opt_callback) === 'function') {
@@ -877,7 +877,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
 
     return eventId;
   } catch (e) {
-    utils.log(e);
+    utils.log.error(e);
   }
 };
 
@@ -993,7 +993,7 @@ AmplitudeClient.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
       return this.logEvent(Constants.REVENUE_EVENT, revenue_obj._toJSONObject());
     }
   } else {
-    utils.log('Invalid revenue input type. Expected Revenue object but saw ' + type(revenue_obj));
+    utils.log.error('Invalid revenue input type. Expected Revenue object but saw ' + type(revenue_obj));
   }
 };
 
@@ -1142,7 +1142,7 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIde
     // case 0: no events or identifys left
     // note this should not happen, this means we have less events and identifys than expected
     if (noEvents && noIdentifys) {
-      utils.log('Merging Events and Identifys, less events and identifys than expected');
+      utils.log.error('Merging Events and Identifys, less events and identifys than expected');
       break;
     }
 

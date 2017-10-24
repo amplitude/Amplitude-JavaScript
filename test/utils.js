@@ -14,6 +14,85 @@ describe('utils', function() {
     });
   });
 
+  describe('log', function() {
+    beforeEach(function() {
+      utils.setLogLevel('INFO');
+      sinon.spy(console, 'log');
+    });
+
+    afterEach(function() {
+      console.log.restore();
+    });
+
+    describe('setLogLevelShould ignore invalid log levels', function() {
+      utils.setLogLevel('INVALID_LOGLEVEL');
+      assert.strictEqual(utils.getLogLevel(), 'WARN');
+    });
+
+    describe('logLevel is ERROR', function() {
+      beforeEach(function() {
+        utils.setLogLevel('ERROR');
+      });
+
+      it('should not log warnings', function() {
+        utils.log.warn('warning');
+        assert.isFalse(console.log.called);
+      });
+
+      it('should not log info', function() {
+        utils.log.info('info');
+        assert.isFalse(console.log.called);
+      });
+
+      it('should log errors', function() {
+        utils.log.error('error');
+        assert.isTrue(console.log.calledOnce);
+      });
+    });
+
+    describe('logLevel is WARN', function() {
+      beforeEach(function() {
+        utils.setLogLevel('WARN');
+      });
+
+      it('should log warnings', function() {
+        utils.log.warn('warning');
+        assert.isTrue(console.log.calledOnce);
+      });
+
+      it('should log errors', function() {
+        utils.log.error('errors');
+        assert.isTrue(console.log.calledOnce);
+      });
+
+      it('should not log info', function() {
+        utils.log.info('info');
+        assert.isFalse(console.log.called);
+      });
+    });
+
+    describe('logLevel is INFO', function() {
+      beforeEach(function() {
+        utils.setLogLevel('INFO');
+      });
+
+      it('should log errors', function() {
+        utils.log.error('error');
+        assert.isTrue(console.log.calledOnce);
+      });
+
+      it('should log warnings', function() {
+        utils.log.warn('warn');
+        assert.isTrue(console.log.calledOnce);
+      });
+
+      it('should log info', function() {
+        utils.log.info('info');
+        assert.isTrue(console.log.calledOnce);
+      });
+    });
+  })
+
   describe('validateProperties', function() {
     it('should detect invalid event property formats', function() {
       assert.deepEqual({}, utils.validateProperties('string'));
@@ -59,7 +138,7 @@ describe('utils', function() {
         'null': null,
         'undefined': undefined,
         'NaN': NaN,
-        'function': utils.log
+        'function': utils.log.warn
       }
       assert.deepEqual({}, utils.validateProperties(properties));
     });
