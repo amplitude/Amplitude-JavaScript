@@ -1,5 +1,9 @@
 ## Unreleased
 
+### 3.8.0 (October 27, 2017)
+
+* Add `logLevel` config option
+
 ### 3.7.0 (September 14, 2017)
 
 * Add `setSessionId(sesionId)` method. Note this is not recommended unless you know what are you doing.
