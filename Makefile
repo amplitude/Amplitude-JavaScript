@@ -46,7 +46,7 @@ test-sauce: build
 #
 
 node_modules: package.json
-	@npm install
+	@yarn
 
 #
 # Target for updating version.
