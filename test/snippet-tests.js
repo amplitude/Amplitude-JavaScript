@@ -1,4 +1,4 @@
-require('../amplitude-snippet.min.js');
+import '../amplitude-snippet.min.js';
 
 describe('Snippet', function() {
 
