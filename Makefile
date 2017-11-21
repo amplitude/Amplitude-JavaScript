@@ -2,7 +2,6 @@ SRC = $(wildcard src/*.js)
 SNIPPET = src/amplitude-snippet.js
 TESTS = $(wildcard test/*.js)
 BINS = node_modules/.bin
-DUO = $(BINS)/duo
 MINIFY = $(BINS)/uglifyjs
 JSDOC = $(BINS)/jsdoc
 JSHINT = $(BINS)/jshint
@@ -47,7 +46,7 @@ test-sauce: build
 #
 
 node_modules: package.json
-	@npm install
+	@yarn
 
 #
 # Target for updating version.
@@ -88,7 +87,7 @@ $(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET) version
 
 build: $(TESTS) $(OUT) $(SNIPPET_OUT) $(SEGMENT_SNIPPET_OUT) README.md
 	@$(ROLLUP) --config rollup.test.js
-	@$(DUO) --development test/snippet-tests.js > build/snippet-tests.js
+	@$(ROLLUP) --config rollup.snippet-tests.js
 
 docs:
 	@$(JSDOC) -d ./documentation/ src/*.js
