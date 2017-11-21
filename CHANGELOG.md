@@ -1,5 +1,9 @@
 ## Unreleased
 
+### 4.0.0 (November 20, 2017)
+
+* Default `forceHttps` option to `true`.
+
 ### 3.8.0 (October 27, 2017)
 
 * Add `logLevel` config option

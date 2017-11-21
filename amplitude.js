@@ -5627,7 +5627,7 @@ var uuid$1 = function uuid(a) {
     );
 };
 
-var version = '3.8.0';
+var version = '4.0.0';
 
 var getLanguage = function getLanguage() {
     return navigator && (navigator.languages && navigator.languages[0] || navigator.language || navigator.userLanguage) || undefined;
@@ -5658,7 +5658,7 @@ var DEFAULT_OPTIONS = {
   batchEvents: false,
   eventUploadThreshold: 30,
   eventUploadPeriodMillis: 30 * 1000, // 30s
-  forceHttps: false,
+  forceHttps: true,
   includeGclid: false,
   saveParamsReferrerOncePerSession: true,
   deviceIdFromUrlParam: false
