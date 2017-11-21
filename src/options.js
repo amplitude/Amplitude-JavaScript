@@ -21,7 +21,7 @@ export default {
   batchEvents: false,
   eventUploadThreshold: 30,
   eventUploadPeriodMillis: 30 * 1000, // 30s
-  forceHttps: false,
+  forceHttps: true,
   includeGclid: false,
   saveParamsReferrerOncePerSession: true,
   deviceIdFromUrlParam: false,
