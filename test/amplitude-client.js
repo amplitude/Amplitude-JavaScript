@@ -73,6 +73,12 @@ describe('AmplitudeClient', function() {
       assert.equal(amplitude.options.userId, userId);
     });
 
+    it('should accept numerical userIds', function() {
+      const userId = 5;
+      amplitude.init(apiKey, 5);
+      assert.equal(amplitude.options.userId, '5');
+    });
+
     it('should generate a random deviceId', function() {
       amplitude.init(apiKey, userId);
       assert.lengthOf(amplitude.options.deviceId, 37); // UUID is length 36, but we append 'R' at end
