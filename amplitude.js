@@ -5730,7 +5730,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
     this.options.deviceId = type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' && !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId || this.options.deviceIdFromUrlParam && this._getDeviceIdFromUrlParam(this._getUrlParams()) || this.options.deviceId || uuid$1() + 'R';
-    this.options.userId = type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId || this.options.userId || null;
+    this.options.userId = type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId || type(opt_userId) === 'number' && opt_userId.toString() || this.options.userId || null;
 
     // load unsent events and identifies before any attempt to log new ones
     if (this.options.saveEvents) {
