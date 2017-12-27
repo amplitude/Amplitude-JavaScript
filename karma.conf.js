@@ -33,6 +33,9 @@ module.exports = function(config) {
     sauceLabs: {
       testName: 'Amplitude JavaScript SDK',
     },
+    preprocessors: {
+      '**/*.js': ['sourcemap']
+    },
     frameworks: ['mocha', 'chai', 'sinon'],
     files: ['amplitude-snippet.min.js', 'build/snippet-tests.js', 'build/tests.js'],
     reporters: ['mocha', 'saucelabs'],
