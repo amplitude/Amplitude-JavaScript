@@ -5673,7 +5673,7 @@ var DEFAULT_OPTIONS = {
  */
 var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._instanceName = utils.isEmptyString(instanceName) ? constants.DEFAULT_INSTANCE : instanceName.toLowerCase();
-  this._storageSuffix = this._instanceName === constants.DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
+  this._legacyStorageSuffix = this._instanceName === constants.DEFAULT_INSTANCE ? '' : '_' + this._instanceName;
   this._unsentEvents = [];
   this._unsentIdentifys = [];
   this._ua = new uaParser(navigator.userAgent).getResult();
@@ -5716,6 +5716,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
   try {
     this.options.apiKey = apiKey;
+    this._storageSuffix = '_' + apiKey + this._legacyStorageSuffix;
     _parseConfig(this.options, opt_config);
     this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
@@ -5864,6 +5865,29 @@ AmplitudeClient.prototype._apiKeySet = function _apiKeySet(methodName) {
  */
 AmplitudeClient.prototype._loadSavedUnsentEvents = function _loadSavedUnsentEvents(unsentKey) {
   var savedUnsentEventsString = this._getFromStorage(localStorage$1, unsentKey);
+  var events = this._parseSavedUnsentEventsString(savedUnsentEventsString, unsentKey);
+
+  var savedUnsentEventsStringLegacy = this._getFromStorageLegacy(localStorage$1, unsentKey);
+  var legacyEvents = this._parseSavedUnsentEventsString(savedUnsentEventsStringLegacy, unsentKey);
+
+  var unsentEvents = legacyEvents.concat(events);
+
+  // Migrate legacy events out of storage
+  this._removeFromLegacyStorage(localStorage$1, unsentKey);
+  this._setInStorage(localStorage$1, unsentKey, JSON.stringify(unsentEvents));
+
+  return unsentEvents;
+};
+
+AmplitudeClient.prototype._removeFromLegacyStorage = function _removeFromLegacyStorage(storage, key) {
+  storage.removeItem(key + this._legacyStorageSuffix);
+};
+
+/**
+ * Load saved events from localStorage. JSON deserializes event array. Handles case where string is corrupted.
+ * @private
+ */
+AmplitudeClient.prototype._parseSavedUnsentEventsString = function _parseSavedUnsentEventsString(savedUnsentEventsString, unsentKey) {
   if (utils.isEmptyString(savedUnsentEventsString)) {
     return []; // new app, does not have any saved events
   }
@@ -5978,6 +6002,15 @@ AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, ke
 };
 
 /**
+ * Helper function to fetch values from storage
+ * Storage argument allows for localStoraoge and sessionStoraoge
+ * @private
+ */
+AmplitudeClient.prototype._getFromStorageLegacy = function _getFromStorageLegacy(storage, key) {
+  return storage.getItem(key + this._legacyStorageSuffix);
+};
+
+/**
  * Helper function to set values in storage
  * Storage argument allows for localStoraoge and sessionStoraoge
  * @private
@@ -5994,7 +6027,7 @@ AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, v
  */
 var _upgradeCookeData = function _upgradeCookeData(scope) {
   // skip if migration already happened
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName);
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
   if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
     return;
   }
@@ -6047,31 +6080,42 @@ var _upgradeCookeData = function _upgradeCookeData(scope) {
  */
 var _loadCookieData = function _loadCookieData(scope) {
   var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
+
   if (type(cookieData) === 'object') {
-    if (cookieData.deviceId) {
-      scope.options.deviceId = cookieData.deviceId;
+    _loadCookieDataProps(scope, cookieData);
+  } else {
+    var legacyCookieData = scope.cookieStorage.get(scope.options.cookieName + scope._legacyStorageSuffix);
+    if (type(legacyCookieData) === 'object') {
+      scope.cookieStorage.remove(scope.options.cookieName + scope._legacyStorageSuffix);
+      _loadCookieDataProps(scope, legacyCookieData);
     }
-    if (cookieData.userId) {
-      scope.options.userId = cookieData.userId;
-    }
-    if (cookieData.optOut !== null && cookieData.optOut !== undefined) {
-      scope.options.optOut = cookieData.optOut;
-    }
-    if (cookieData.sessionId) {
-      scope._sessionId = parseInt(cookieData.sessionId);
-    }
-    if (cookieData.lastEventTime) {
-      scope._lastEventTime = parseInt(cookieData.lastEventTime);
-    }
-    if (cookieData.eventId) {
-      scope._eventId = parseInt(cookieData.eventId);
-    }
-    if (cookieData.identifyId) {
-      scope._identifyId = parseInt(cookieData.identifyId);
-    }
-    if (cookieData.sequenceNumber) {
-      scope._sequenceNumber = parseInt(cookieData.sequenceNumber);
-    }
+  }
+};
+
+var _loadCookieDataProps = function _loadCookieDataProps(scope, cookieData) {
+  if (cookieData.deviceId) {
+    scope.options.deviceId = cookieData.deviceId;
+  }
+  if (cookieData.userId) {
+    scope.options.userId = cookieData.userId;
+  }
+  if (cookieData.optOut !== null && cookieData.optOut !== undefined) {
+    scope.options.optOut = cookieData.optOut;
+  }
+  if (cookieData.sessionId) {
+    scope._sessionId = parseInt(cookieData.sessionId);
+  }
+  if (cookieData.lastEventTime) {
+    scope._lastEventTime = parseInt(cookieData.lastEventTime);
+  }
+  if (cookieData.eventId) {
+    scope._eventId = parseInt(cookieData.eventId);
+  }
+  if (cookieData.identifyId) {
+    scope._identifyId = parseInt(cookieData.identifyId);
+  }
+  if (cookieData.sequenceNumber) {
+    scope._sequenceNumber = parseInt(cookieData.sequenceNumber);
   }
 };
 
