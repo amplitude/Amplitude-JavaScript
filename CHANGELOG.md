@@ -1,5 +1,11 @@
 ## Unreleased
 
+### 4.1.0 (January 18, 2017)
+
+* Allow for numeric user ids
+
+* Namespace local storage with api key to prevent cross domain contamination
+
 ### 4.0.0 (November 20, 2017)
 
 * Default `forceHttps` option to `true`.
