@@ -227,7 +227,7 @@ AmplitudeClient.prototype._loadSavedUnsentEvents = function _loadSavedUnsentEven
   var savedUnsentEventsStringLegacy = this._getFromStorageLegacy(localStorage, unsentKey);
   var legacyEvents = this._parseSavedUnsentEventsString(savedUnsentEventsStringLegacy, unsentKey);
 
-  var unsentEvents = events.concat(legacyEvents);
+  var unsentEvents = legacyEvents.concat(events);
 
   // Migrate legacy events out of storage
   this._removeFromLegacyStorage(localStorage, unsentKey);
@@ -443,6 +443,7 @@ var _loadCookieData = function _loadCookieData(scope) {
   } else {
     var legacyCookieData = scope.cookieStorage.get(scope.options.cookieName + scope._legacyStorageSuffix);
     if (type(legacyCookieData) === 'object') {
+      scope.cookieStorage.remove(scope.options.cookieName + scope._legacyStorageSuffix);
       _loadCookieDataProps(scope, legacyCookieData);
     }
   }
