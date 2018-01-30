@@ -1007,6 +1007,43 @@ AmplitudeClient.prototype.logEventWithGroups = function(eventType, eventProperti
 };
 
 /**
+ * Log an event with eventType, eventProperties, and userProperties. Use this to set userProperties with your events.
+ * @public
+ * @param {string} eventType - name of event
+ * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
+ * @param {object} userProperties - (optional) an object with string keys and values for the user properties.
+ * groupName can be a string or an array of strings.
+ * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
+ * Note: the server response code and response body from the event upload are passed to the callback function.
+ * @example amplitudeClient.logEventWithUserProperties(‘Clicked Button’, null, {‘orgId’: 24});
+ */
+AmplitudeClient.prototype.logEventWithUserProperties = function(
+  eventType,
+  eventProperties,
+  userProperties,
+  opt_callback
+) {
+  if (
+    !this._apiKeySet('logEventWithUserProperties()') ||
+    !utils.validateInput(eventType, 'eventType', 'string')
+  ) {
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent');
+    }
+    return -1;
+  }
+  return this._logEvent(
+    eventType,
+    eventProperties,
+    null,
+    userProperties,
+    null,
+    null,
+    opt_callback
+  );
+};
+
+/**
  * Test that n is a number or a numeric value.
  * @private
  */
