@@ -2079,6 +2079,48 @@ describe('setVersionName', function() {
       assert.equal(message, 'success');
     });
 
+    it('should handle userProperties input', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      };
+
+      var eventProperties = {
+        'key': 'value'
+      };
+
+      var userProperties = {
+        'key': 'value'
+      };
+
+      amplitude.logEventWithUserProperties('Test', eventProperties, userProperties, callback);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+
+      // verify event is correctly formatted
+      var event = events[0];
+      assert.equal(event.event_type, 'Test');
+      assert.equal(event.event_id, 1);
+      console.log(event.user_properties)
+      assert.deepEqual(event.user_properties, userProperties);
+      assert.deepEqual(event.event_properties, eventProperties);
+
+      // verify callback behavior
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
     it('should track the raw user agent string', function() {
       // Unit test UA is set by phantomJS test environment, should be constant for all tests
       var userAgentString = navigator.userAgent;
