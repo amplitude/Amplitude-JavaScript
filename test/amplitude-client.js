@@ -241,10 +241,41 @@ describe('AmplitudeClient', function() {
       assert.equal(cookieData.sequenceNumber, 5000);
     });
 
-    it('should migrate cookie data from old cookie name and ignore local storage values', function(){
+    it('should load device id from the cookie', function(){
       var now = new Date().getTime();
 
       // deviceId and sequenceNumber not set, init should load value from localStorage
+      var cookieData = {
+        deviceId: 'current_device_id',
+      }
+
+      cookie.set(amplitude.options.cookieName + '_' + apiKey, cookieData);
+
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.deviceId, 'current_device_id');
+    });
+
+    it('should migrate device id from old non name spaced cookie name (pre 4.10)', function(){
+      var now = new Date().getTime();
+
+      var cookieData = {
+        deviceId: 'old_device_id',
+        optOut: false,
+        sessionId: now,
+        lastEventTime: now,
+        eventId: 50,
+        identifyId: 60
+      }
+
+      cookie.set(amplitude.options.cookieName, cookieData);
+
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.deviceId, 'old_device_id');
+    });
+
+    it('should migrate cookie data from old cookie name and ignore local storage values', function(){
+      var now = new Date().getTime();
+
       var cookieData = {
         userId: 'test_user_id',
         optOut: false,
@@ -254,7 +285,7 @@ describe('AmplitudeClient', function() {
         identifyId: 60
       }
 
-      cookie.set(amplitude.options.cookieName + '_' + apiKey, cookieData);
+      cookie.set(amplitude.options.cookieName, cookieData);
       localStorage.setItem('amplitude_deviceId' + keySuffix, 'old_device_id');
       localStorage.setItem('amplitude_userId' + keySuffix, 'fake_user_id');
       localStorage.setItem('amplitude_optOut' + keySuffix, true);
@@ -278,7 +309,7 @@ describe('AmplitudeClient', function() {
     it('should skip the migration if the new cookie already has deviceId, sessionId, lastEventTime', function() {
       var now = new Date().getTime();
 
-      cookie.set(amplitude.options.cookieName + '_' + apiKey, {
+      cookie.set(amplitude.options.cookieName, {
         deviceId: 'new_device_id',
         sessionId: now,
         lastEventTime: now

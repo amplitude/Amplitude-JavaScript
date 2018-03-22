@@ -1,6 +1,10 @@
 ## Unreleased
 
-### 4.1.0 (January 18, 2017)
+### 4.1.1 (March 22, 2018)
+
+* Fix bug where cookie data such as device id from older releases were not updated
+
+### 4.1.0 (January 18, 2018)
 
 * Allow for numeric user ids
 

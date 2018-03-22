@@ -383,8 +383,13 @@ AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, v
  * @private
  */
 var _upgradeCookeData = function _upgradeCookeData(scope) {
-  // skip if migration already happened
+  // skip if already migrated to 4.10+
   var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
+  if (type(cookieData) === 'object') {
+    return;
+  }
+  // skip if already migrated to 2.70+
+  cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._legacyStorageSuffix);
   if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
     return;
   }

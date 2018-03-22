@@ -5627,7 +5627,7 @@ var uuid$1 = function uuid(a) {
     );
 };
 
-var version = '4.1.0';
+var version = '4.1.1';
 
 var getLanguage = function getLanguage() {
     return navigator && (navigator.languages && navigator.languages[0] || navigator.language || navigator.userLanguage) || undefined;
@@ -6026,8 +6026,13 @@ AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, v
  * @private
  */
 var _upgradeCookeData = function _upgradeCookeData(scope) {
-  // skip if migration already happened
+  // skip if already migrated to 4.10+
   var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
+  if (type(cookieData) === 'object') {
+    return;
+  }
+  // skip if already migrated to 2.70+
+  cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._legacyStorageSuffix);
   if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
     return;
   }
