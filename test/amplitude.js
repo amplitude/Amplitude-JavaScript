@@ -363,7 +363,7 @@ describe('Amplitude', function() {
         identifyId: 60
       }
 
-      cookie.set(amplitude.options.cookieName + '_' + apiKey, cookieData);
+      cookie.set(amplitude.options.cookieName, cookieData);
       localStorage.setItem('amplitude_deviceId' + keySuffix, 'old_device_id');
       localStorage.setItem('amplitude_userId' + keySuffix, 'fake_user_id');
       localStorage.setItem('amplitude_optOut' + keySuffix, true);
