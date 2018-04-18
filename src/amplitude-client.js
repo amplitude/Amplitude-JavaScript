@@ -643,6 +643,12 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
  */
 AmplitudeClient.prototype.setUserId = function setUserId(userId) {
   try {
+    // update sessionId if setting new user id
+    // do not update sessionId if anonymous user logging in, or if resetting same user id
+    if (this.options.userId !== undefined && this.options.userId !== null && this.options.userId !== userId){
+      this._sessionId = new Date().getTime();
+    }
+
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
   } catch (e) {
