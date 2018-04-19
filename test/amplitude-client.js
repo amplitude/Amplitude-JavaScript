@@ -927,6 +927,31 @@ describe('setVersionName', function() {
     });
   });
 
+  describe('resetSessionId', function() {
+    let clock;
+
+    beforeEach(function() {
+      clock = sinon.useFakeTimers();
+    });
+
+    afterEach(function() {
+      reset();
+      clock.restore();
+    });
+
+    it('should reset the session Id', function() {
+      clock.tick(10);
+      amplitude.init(apiKey);
+
+      clock.tick(100);
+      amplitude.resetSessionId();
+
+      clock.tick(200);
+
+      assert.equal(amplitude._sessionId, 110);
+    });
+  });
+
   describe('identify', function() {
     let clock;
 

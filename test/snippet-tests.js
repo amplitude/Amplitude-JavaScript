@@ -53,4 +53,10 @@ describe('Snippet', function() {
     assert.deepEqual(amplitude._iq['instance2']._q[0], ['init', 'API_KEY2']);
     assert.deepEqual(amplitude._iq['instance2']._q[1], ['logEvent', 'Event']);
   });
+
+  it('amplitude object should proxy resetSessionId', function() {
+    amplitude.getInstance('reset_session_id_instance').init('API_KEY');
+    amplitude.getInstance('reset_session_id_instance').resetSessionId();
+    assert.deepEqual(amplitude._iq['reset_session_id_instance']._q[1], ['resetSessionId']);
+  });
 });
