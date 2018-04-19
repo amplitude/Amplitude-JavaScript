@@ -707,6 +707,10 @@ AmplitudeClient.prototype.setSessionId = function setSessionId(sessionId) {
   }
 };
 
+AmplitudeClient.prototype.resetSessionId = function resetSessionId() {
+  this.setSessionId(new Date().getTime());
+};
+
 /**
   * Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you
   * are doing. This can be used in conjunction with `setUserId(null)` to anonymize users after they log out.
