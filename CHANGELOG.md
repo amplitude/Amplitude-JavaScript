@@ -1,4 +1,4 @@
-## Unreleased
+### 4.2.1 (April 19, 2018)
 
 * Add `resetSessionId` method that sets the sessionId to the current time.
 
