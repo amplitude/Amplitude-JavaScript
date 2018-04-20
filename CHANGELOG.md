@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Add `resetSessionId` method that sets the sessionId to the current time.
+
 ### 4.1.1 (March 22, 2018)
 
 * Fix bug where cookie data such as device id from older releases were not migrated
