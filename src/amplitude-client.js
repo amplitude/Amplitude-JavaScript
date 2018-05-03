@@ -75,7 +75,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this.options.domain = this.cookieStorage.options().domain;
 
     if (this._instanceName === Constants.DEFAULT_INSTANCE) {
-      _upgradeCookeData(this);
+      _upgradeCookieData(this);
     }
     _loadCookieData(this);
 
@@ -382,7 +382,7 @@ AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, v
  * Need to unify all sources into one place with a one-time upgrade/migration.
  * @private
  */
-var _upgradeCookeData = function _upgradeCookeData(scope) {
+var _upgradeCookieData = function _upgradeCookieData(scope) {
   // skip if already migrated to 4.10+
   var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
   if (type(cookieData) === 'object') {
