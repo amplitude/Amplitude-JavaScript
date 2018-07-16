@@ -817,7 +817,7 @@ var _convertProxyObjectToRealObject = function _convertProxyObjectToRealObject(i
 AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
   if (!this._apiKeySet('identify()')) {
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', 'API key is not set');
+      opt_callback(0, 'No request sent', {reason: 'API key is not set'});
     }
     return;
   }
@@ -835,13 +835,13 @@ AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
         );
     } else {
       if (type(opt_callback) === 'function') {
-        opt_callback(0, 'No request sent', 'No user property operations');
+        opt_callback(0, 'No request sent', {reason: 'No user property operations'});
       }
     }
   } else {
     utils.log.error('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', 'Invalid identify input type');
+      opt_callback(0, 'No request sent', {reason: 'Invalid identify input type'});
     }
   }
 };
@@ -867,13 +867,13 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
   if (!eventType) {
     if (type(callback) === 'function') {
-      callback(0, 'No request sent', 'Missing eventType');
+      callback(0, 'No request sent', {reason: 'Missing eventType'});
     }
     return;
   }
   if (this.options.optOut) {
     if (type(callback) === 'function') {
-      callback(0, 'No request sent', 'optOut is set to true');
+      callback(0, 'No request sent', {reason: 'optOut is set to true'});
     }
     return;
   }
@@ -937,7 +937,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     }
 
     if (!this._sendEventsIfReady(callback) && type(callback) === 'function') {
-      callback(0, 'No request sent', 'No events to send or upload queued');
+      callback(0, 'No request sent', {reason: 'No events to send or upload queued'});
     }
 
     return eventId;
@@ -990,19 +990,19 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
 AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, eventProperties, timestamp, opt_callback) {
   if (!this._apiKeySet('logEvent()')) {
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', 'API key not set');
+      opt_callback(0, 'No request sent', {reason: 'API key not set'});
     }
     return -1;
   }
   if (!utils.validateInput(eventType, 'eventType', 'string')) {
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', 'Invalid type for eventType');
+      opt_callback(0, 'No request sent', {reason: 'Invalid type for eventType'});
     }
     return -1;
   }
   if (utils.isEmptyString(eventType)) {
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', 'Missing eventType');
+      opt_callback(0, 'No request sent', {reason: 'Missing eventType'});
     }
     return -1;
   }
@@ -1025,15 +1025,15 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, e
  * @example amplitudeClient.logEventWithGroups('Clicked Button', null, {'orgId': 24});
  */
 AmplitudeClient.prototype.logEventWithGroups = function(eventType, eventProperties, groups, opt_callback) {
-  if (!this._apiKeySet('logEventWithGroup()')) {
+  if (!this._apiKeySet('logEventWithGroups()')) {
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', 'API key not set');
+      opt_callback(0, 'No request sent', {reason: 'API key not set'});
     }
     return -1;
   }
   if (!utils.validateInput(eventType, 'eventType', 'string')) {
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', 'Invalid type for eventType');
+      opt_callback(0, 'No request sent', {reason: 'Invalid type for eventType'});
     }
     return -1;
   }
@@ -1140,25 +1140,25 @@ var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
 AmplitudeClient.prototype.sendEvents = function sendEvents(callback) {
   if (!this._apiKeySet('sendEvents()')) {
     if (type(callback) === 'function') {
-      callback(0, 'No request sent', 'API key not set');
+      callback(0, 'No request sent', {reason: 'API key not set'});
     }
     return;
   }
   if (this.options.optOut) {
     if (type(callback) === 'function') {
-      callback(0, 'No request sent', 'optOut is set to true');
+      callback(0, 'No request sent', {reason: 'optOut is set to true'});
     }
     return;
   }
   if (this._unsentCount() === 0) {
     if (type(callback) === 'function') {
-      callback(0, 'No request sent', 'No events to send');
+      callback(0, 'No request sent', {reason: 'No events to send'});
     }
     return;
   }
   if (this._sending) {
     if (type(callback) === 'function') {
-      callback(0, 'No request sent', 'Request already in progress');
+      callback(0, 'No request sent', {reason: 'Request already in progress'});
     }
     return;
   }
