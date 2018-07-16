@@ -1,3 +1,7 @@
+### 4.3.0 (July 16, 2018)
+
+* Add more context to the 'No request sent' responses
+
 ### 4.2.1 (April 19, 2018)
 
 * Add `resetSessionId` method that sets the sessionId to the current time.

@@ -5627,7 +5627,7 @@ var uuid$1 = function uuid(a) {
     );
 };
 
-var version = '4.2.1';
+var version = '4.3.0';
 
 var getLanguage = function getLanguage() {
     return navigator && (navigator.languages && navigator.languages[0] || navigator.language || navigator.userLanguage) || undefined;
@@ -5725,7 +5725,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this.options.domain = this.cookieStorage.options().domain;
 
     if (this._instanceName === constants.DEFAULT_INSTANCE) {
-      _upgradeCookeData(this);
+      _upgradeCookieData(this);
     }
     _loadCookieData(this);
 
@@ -6025,7 +6025,7 @@ AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, v
  * Need to unify all sources into one place with a one-time upgrade/migration.
  * @private
  */
-var _upgradeCookeData = function _upgradeCookeData(scope) {
+var _upgradeCookieData = function _upgradeCookieData(scope) {
   // skip if already migrated to 4.10+
   var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
   if (type(cookieData) === 'object') {
@@ -6459,7 +6459,7 @@ var _convertProxyObjectToRealObject = function _convertProxyObjectToRealObject(i
 AmplitudeClient.prototype.identify = function (identify_obj, opt_callback) {
   if (!this._apiKeySet('identify()')) {
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent');
+      opt_callback(0, 'No request sent', { reason: 'API key is not set' });
     }
     return;
   }
@@ -6473,13 +6473,16 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback) {
     // only send if there are operations
     if (Object.keys(identify_obj.userPropertiesOperations).length > 0) {
       return this._logEvent(constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, null, null, opt_callback);
+    } else {
+      if (type(opt_callback) === 'function') {
+        opt_callback(0, 'No request sent', { reason: 'No user property operations' });
+      }
     }
   } else {
     utils.log.error('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
-  }
-
-  if (type(opt_callback) === 'function') {
-    opt_callback(0, 'No request sent');
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent', { reason: 'Invalid identify input type' });
+    }
   }
 };
 
@@ -6502,9 +6505,15 @@ AmplitudeClient.prototype.setVersionName = function setVersionName(versionName) 
  */
 AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, groups, timestamp, callback) {
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
-  if (!eventType || this.options.optOut) {
+  if (!eventType) {
     if (type(callback) === 'function') {
-      callback(0, 'No request sent');
+      callback(0, 'No request sent', { reason: 'Missing eventType' });
+    }
+    return;
+  }
+  if (this.options.optOut) {
+    if (type(callback) === 'function') {
+      callback(0, 'No request sent', { reason: 'optOut is set to true' });
     }
     return;
   }
@@ -6568,7 +6577,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     }
 
     if (!this._sendEventsIfReady(callback) && type(callback) === 'function') {
-      callback(0, 'No request sent');
+      callback(0, 'No request sent', { reason: 'No events to send or upload queued' });
     }
 
     return eventId;
@@ -6619,9 +6628,21 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, eventProperties, timestamp, opt_callback) {
-  if (!this._apiKeySet('logEvent()') || !utils.validateInput(eventType, 'eventType', 'string') || utils.isEmptyString(eventType)) {
+  if (!this._apiKeySet('logEvent()')) {
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent');
+      opt_callback(0, 'No request sent', { reason: 'API key not set' });
+    }
+    return -1;
+  }
+  if (!utils.validateInput(eventType, 'eventType', 'string')) {
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
+    }
+    return -1;
+  }
+  if (utils.isEmptyString(eventType)) {
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent', { reason: 'Missing eventType' });
     }
     return -1;
   }
@@ -6644,9 +6665,15 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, e
  * @example amplitudeClient.logEventWithGroups('Clicked Button', null, {'orgId': 24});
  */
 AmplitudeClient.prototype.logEventWithGroups = function (eventType, eventProperties, groups, opt_callback) {
-  if (!this._apiKeySet('logEventWithGroup()') || !utils.validateInput(eventType, 'eventType', 'string')) {
+  if (!this._apiKeySet('logEventWithGroups()')) {
     if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent');
+      opt_callback(0, 'No request sent', { reason: 'API key not set' });
+    }
+    return -1;
+  }
+  if (!utils.validateInput(eventType, 'eventType', 'string')) {
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
     }
     return -1;
   }
@@ -6751,9 +6778,27 @@ var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
  * Note the server response code and response body are passed to the callback as input arguments.
  */
 AmplitudeClient.prototype.sendEvents = function sendEvents(callback) {
-  if (!this._apiKeySet('sendEvents()') || this._sending || this.options.optOut || this._unsentCount() === 0) {
+  if (!this._apiKeySet('sendEvents()')) {
     if (type(callback) === 'function') {
-      callback(0, 'No request sent');
+      callback(0, 'No request sent', { reason: 'API key not set' });
+    }
+    return;
+  }
+  if (this.options.optOut) {
+    if (type(callback) === 'function') {
+      callback(0, 'No request sent', { reason: 'optOut is set to true' });
+    }
+    return;
+  }
+  if (this._unsentCount() === 0) {
+    if (type(callback) === 'function') {
+      callback(0, 'No request sent', { reason: 'No events to send' });
+    }
+    return;
+  }
+  if (this._sending) {
+    if (type(callback) === 'function') {
+      callback(0, 'No request sent', { reason: 'Request already in progress' });
     }
     return;
   }
