@@ -1142,6 +1142,37 @@ describe('setVersionName', function() {
     });
   });
 
+  describe('logEvent with tracking options', function() {
+
+    var clock;
+
+    beforeEach(function() {
+      clock = sinon.useFakeTimers();
+      var trackingOptions = {
+        city: false,
+        ip_address: false,
+        language: false,
+        platform: false,
+        region: true
+      };
+      amplitude.init(apiKey, null, {trackingOptions: trackingOptions});
+    });
+
+    afterEach(function() {
+      reset();
+      clock.restore();
+    });
+
+    it('should not track language or platform', function() {
+      assert.equal(amplitude.options.trackingOptions.language, false);
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events[0].language, null);
+      assert.equal(events[0].platform, null);
+    });
+  });
+
   describe('logEvent', function() {
 
     var clock;
@@ -1214,6 +1245,14 @@ describe('setVersionName', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events.length, 1);
       assert.isNotNull(events[0].language);
+    });
+
+    it('should send platform', function() {
+      amplitude.logEvent('Event Should Send Platform');
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events.length, 1);
+      assert.equal(events[0].platform, 'Web');
     });
 
     it('should accept properties', function() {
