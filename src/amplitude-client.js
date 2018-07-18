@@ -4,7 +4,7 @@ import getUtmData from './utm';
 import Identify from './identify';
 import localStorage from './localstorage';  // jshint ignore:line
 import md5 from 'blueimp-md5';
-import assign from 'lodash/assign';
+import merge from 'lodash/merge';
 import Request from './xhr';
 import Revenue from './revenue';
 import type from './type';
@@ -27,7 +27,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._unsentEvents = [];
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
-  this.options = assign({}, DEFAULT_OPTIONS);
+  this.options = merge({}, DEFAULT_OPTIONS);
   this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
@@ -896,7 +896,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     _saveCookieData(this);
 
     userProperties = userProperties || {};
-    apiProperties = apiProperties || {};
+    apiProperties = merge(apiProperties || {});
     eventProperties = eventProperties || {};
     groups = groups || {};
     var event = {
@@ -906,12 +906,12 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       event_id: eventId,
       session_id: this._sessionId || -1,
       event_type: eventType,
-      version_name: this.options.versionName || null,
-      platform: this.options.platform,
-      os_name: this._ua.browser.name || null,
-      os_version: this._ua.browser.major || null,
-      device_model: this._ua.os.name || null,
-      language: this.options.language,
+      version_name: _shouldTrackField(this, 'version_name') ? (this.options.versionName || null) : null,
+      platform: _shouldTrackField(this, 'platform') ? this.options.platform : null,
+      os_name: _shouldTrackField(this, 'os_name') ? (this._ua.browser.name || null) : null,
+      os_version: _shouldTrackField(this, 'os_version') ? (this._ua.browser.major || null) : null,
+      device_model: _shouldTrackField(this, 'device_model') ? (this._ua.os.name || null) : null,
+      language: _shouldTrackField(this, 'language') ? this.options.language : null,
       api_properties: apiProperties,
       event_properties: utils.truncate(utils.validateProperties(eventProperties)),
       user_properties: utils.truncate(utils.validateProperties(userProperties)),
@@ -945,6 +945,10 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
   } catch (e) {
     utils.log.error(e);
   }
+};
+
+var _shouldTrackField = function _shouldTrackField(scope, field) {
+  return !!scope.options.trackingOptions[field];
 };
 
 /**
