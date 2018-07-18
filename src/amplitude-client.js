@@ -166,12 +166,12 @@ var _parseConfig = function _parseConfig(options, config) {
 
   // validates config value is defined, is the correct type, and some additional value sanity checks
   var parseValidateAndLoad = function parseValidateAndLoad(key) {
-    if (!DEFAULT_OPTIONS.hasOwnProperty(key)) {
+    if (!options.hasOwnProperty(key)) {
       return;  // skip bogus config values
     }
 
     var inputValue = config[key];
-    var expectedType = type(DEFAULT_OPTIONS[key]);
+    var expectedType = type(options[key]);
     if (!utils.validateInput(inputValue, key + ' option', expectedType)) {
       return;
     }
@@ -180,14 +180,16 @@ var _parseConfig = function _parseConfig(options, config) {
     } else if ((expectedType === 'string' && !utils.isEmptyString(inputValue)) ||
         (expectedType === 'number' && inputValue > 0)) {
       options[key] = inputValue;
+    } else if (expectedType === 'object') {
+      _parseConfig(options[key], inputValue);
     }
-   };
+  };
 
-   for (var key in config) {
+  for (var key in config) {
     if (config.hasOwnProperty(key)) {
       parseValidateAndLoad(key);
     }
-   }
+  }
 };
 
 /**
@@ -921,7 +923,6 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       sequence_number: sequenceNumber, // for ordering events and identifys
       groups: utils.truncate(utils.validateGroups(groups)),
       user_agent: this._userAgent
-      // country: null
     };
 
     if (eventType === Constants.IDENTIFY_EVENT) {

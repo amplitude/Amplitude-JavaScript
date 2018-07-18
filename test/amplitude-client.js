@@ -709,6 +709,32 @@ it ('should load saved events from localStorage new keys and send events', funct
       // check request
       assert.lengthOf(server.requests, 0);
     });
+
+    it('should merge tracking options during parseConfig', function() {
+      var trackingOptions = {
+        city: false,
+        ip_address: false,
+        language: false,
+        region: true,
+      };
+
+      var amplitude2 = new AmplitudeClient('new_app');
+      amplitude2.init(apiKey, null, {trackingOptions: trackingOptions});
+
+      // check config loaded correctly
+      assert.deepEqual(amplitude2.options.trackingOptions, {
+        city: false,
+        device_model: true,
+        dma: true,
+        ip_address: false,
+        language: false,
+        os_name: true,
+        os_version: true,
+        platform: true,
+        region: true,
+        version_name: true
+      });
+    });
   });
 
   describe('runQueuedFunctions', function() {
