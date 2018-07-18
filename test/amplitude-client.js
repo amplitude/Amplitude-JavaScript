@@ -1182,7 +1182,7 @@ describe('setVersionName', function() {
 
       // verify country is not sent since it matches the default value of true
       assert.deepEqual(events[0].api_properties, {
-        trackingOptions: {
+        tracking_options: {
           city: false,
           ip_address: false,
         }

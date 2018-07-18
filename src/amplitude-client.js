@@ -897,7 +897,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
 
     userProperties = userProperties || {};
     var trackingOptions = _generateApiPropertiesTrackingConfig(this);
-    trackingOptions = Object.keys(trackingOptions).length > 0 ? {trackingOptions: trackingOptions} : {};
+    trackingOptions = Object.keys(trackingOptions).length > 0 ? {tracking_options: trackingOptions} : {};
     apiProperties = merge(trackingOptions, (apiProperties || {}));
     eventProperties = eventProperties || {};
     groups = groups || {};
