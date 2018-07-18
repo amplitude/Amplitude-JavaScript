@@ -896,7 +896,9 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     _saveCookieData(this);
 
     userProperties = userProperties || {};
-    apiProperties = merge(apiProperties || {});
+    var trackingOptions = _generateApiPropertiesTrackingConfig(this);
+    trackingOptions = Object.keys(trackingOptions).length > 0 ? {trackingOptions: trackingOptions} : {};
+    apiProperties = merge(trackingOptions, (apiProperties || {}));
     eventProperties = eventProperties || {};
     groups = groups || {};
     var event = {
@@ -949,6 +951,19 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
 
 var _shouldTrackField = function _shouldTrackField(scope, field) {
   return !!scope.options.trackingOptions[field];
+};
+
+var _generateApiPropertiesTrackingConfig = function _generateApiPropertiesTrackingConfig(scope) {
+  // to limit size of config payload, only send fields that have been disabled
+  var fields = ['city', 'country', 'dma', 'ip_address', 'region'];
+  var config = {};
+  for (var i = 0; i < fields.length; i++) {
+    var field = fields[i];
+    if (!_shouldTrackField(scope, field)) {
+      config[field] = false;
+    }
+  }
+  return config;
 };
 
 /**

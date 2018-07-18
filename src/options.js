@@ -24,6 +24,7 @@ export default {
   sessionTimeout: 30 * 60 * 1000,
   trackingOptions: {
     city: true,
+    country: true,
     device_model: true,
     dma: true,
     ip_address: true,

@@ -724,6 +724,7 @@ it ('should load saved events from localStorage new keys and send events', funct
       // check config loaded correctly
       assert.deepEqual(amplitude2.options.trackingOptions, {
         city: false,
+        country: true,
         device_model: true,
         dma: true,
         ip_address: false,
@@ -1150,6 +1151,7 @@ describe('setVersionName', function() {
       clock = sinon.useFakeTimers();
       var trackingOptions = {
         city: false,
+        country: true,
         ip_address: false,
         language: false,
         platform: false,
@@ -1165,11 +1167,26 @@ describe('setVersionName', function() {
 
     it('should not track language or platform', function() {
       assert.equal(amplitude.options.trackingOptions.language, false);
+      assert.equal(amplitude.options.trackingOptions.platform, false);
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events[0].language, null);
       assert.equal(events[0].platform, null);
+    });
+
+    it('should send trackingOptions in api properties', function() {
+      amplitude.logEvent('Event Type 2');
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+
+      // verify country is not sent since it matches the default value of true
+      assert.deepEqual(events[0].api_properties, {
+        trackingOptions: {
+          city: false,
+          ip_address: false,
+        }
+      });
     });
   });
 
@@ -1245,6 +1262,14 @@ describe('setVersionName', function() {
       var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
       assert.equal(events.length, 1);
       assert.isNotNull(events[0].language);
+    });
+
+    it('should not send trackingOptions in api properties', function() {
+      amplitude.logEvent('Event Should Not Send Tracking Properties');
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.equal(events.length, 1);
+      assert.deepEqual(events[0].api_properties, {});
     });
 
     it('should send platform', function() {
