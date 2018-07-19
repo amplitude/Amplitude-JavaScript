@@ -67,7 +67,11 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
   try {
     this.options.apiKey = apiKey;
     this._storageSuffix = '_' + apiKey + this._legacyStorageSuffix;
+
     _parseConfig(this.options, opt_config);
+    var trackingOptions = _generateApiPropertiesTrackingConfig(this);
+    this._apiPropertiesTrackingOptions = Object.keys(trackingOptions).length > 0 ? {tracking_options: trackingOptions} : {};
+
     this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain
@@ -896,8 +900,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     _saveCookieData(this);
 
     userProperties = userProperties || {};
-    var trackingOptions = _generateApiPropertiesTrackingConfig(this);
-    trackingOptions = Object.keys(trackingOptions).length > 0 ? {tracking_options: trackingOptions} : {};
+    var trackingOptions = merge({}, this._apiPropertiesTrackingOptions);
     apiProperties = merge(trackingOptions, (apiProperties || {}));
     eventProperties = eventProperties || {};
     groups = groups || {};

@@ -736,6 +736,23 @@ it ('should load saved events from localStorage new keys and send events', funct
         version_name: true
       });
     });
+
+    it('should pregenerate tracking options for api properties', function() {
+      var trackingOptions = {
+        city: false,
+        ip_address: false,
+        language: false,
+        region: true,
+      };
+
+      var amplitude2 = new AmplitudeClient('new_app');
+      amplitude2.init(apiKey, null, {trackingOptions: trackingOptions});
+
+      assert.deepEqual(amplitude2._apiPropertiesTrackingOptions, {tracking_options: {
+        city: false,
+        ip_address: false
+      }});
+    });
   });
 
   describe('runQueuedFunctions', function() {
