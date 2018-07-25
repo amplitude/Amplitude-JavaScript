@@ -1,6 +1,6 @@
 ### 4.4.0 (July 25, 2018)
 
-* Add options to disable automatic tracking of fields like platform, language, os_version, ip_address, city, etc
+* Added `trackingOptions` as a configuration option. This allows you to disable the automatic tracking of specific user properties such as ip_address, city, country, etc. See the [Help Center Documentation](https://amplitude.zendesk.com/hc/en-us/articles/115001361248#settings-configuration-options) for instructions on setting up th is configuration.
 
 ### 4.3.0 (July 16, 2018)
 
