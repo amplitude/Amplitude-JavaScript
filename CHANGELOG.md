@@ -1,3 +1,7 @@
+### 4.4.0 (July 25, 2018)
+
+* Add options to disable automatic tracking of fields like platform, language, os_version, ip_address, city, etc
+
 ### 4.3.0 (July 16, 2018)
 
 * Add more context to the 'No request sent' responses
