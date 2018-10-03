@@ -1160,6 +1160,178 @@ describe('setVersionName', function() {
     });
   });
 
+  describe('groupIdentify', function() {
+    let clock;
+    let group_type;
+    let group_name;
+
+    beforeEach(function() {
+      clock = sinon.useFakeTimers();
+      group_type = 'test group type';
+      group_name = 'test group name';
+      amplitude.init(apiKey);
+    });
+
+    afterEach(function() {
+      reset();
+      clock.restore();
+    });
+
+    it('should ignore inputs that are not identify objects', function() {
+      amplitude.groupIdentify(group_type, group_name, 'This is a test');
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.groupIdentify(group_type, group_name, 150);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.groupIdentify(group_type, group_name, ['test']);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.groupIdentify(group_type, group_name, {'user_prop': true});
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should generate an event from the identify object', function() {
+      var identify = new Identify().set('prop1', 'value1').unset('prop2').add('prop3', 3).setOnce('prop4', true);
+      amplitude.groupIdentify(group_type, group_name, identify);
+
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 1);
+      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$groupidentify');
+      assert.deepEqual(events[0].event_properties, {});
+      assert.deepEqual(events[0].user_properties, {});
+      assert.deepEqual(events[0].group_properties, {
+        '$set': {
+          'prop1': 'value1'
+        },
+        '$unset': {
+          'prop2': '-'
+        },
+        '$add': {
+          'prop3': 3
+        },
+        '$setOnce': {
+          'prop4': true
+        }
+      });
+      assert.deepEqual(events[0].groups, {'test group type': 'test group name'});
+    });
+
+    it('should ignore empty identify objects', function() {
+      amplitude.groupIdentify(group_type, group_name, new Identify());
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should ignore empty proxy identify objects', function() {
+      amplitude.groupIdentify(group_type, group_name, {'_q': {}});
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+
+      amplitude.groupIdentify(group_type, group_name, {});
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+      assert.lengthOf(server.requests, 0);
+    });
+
+    it('should generate an event from a proxy identify object', function() {
+      var proxyObject = {'_q':[
+        ['setOnce', 'key2', 'value4'],
+        ['unset', 'key1'],
+        ['add', 'key1', 'value1'],
+        ['set', 'key2', 'value3'],
+        ['set', 'key4', 'value5'],
+        ['prepend', 'key5', 'value6']
+      ]};
+      amplitude.groupIdentify(group_type, group_name, proxyObject);
+
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 1);
+      assert.equal(amplitude._unsentCount(), 1);
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$groupidentify');
+      assert.deepEqual(events[0].event_properties, {});
+      assert.deepEqual(events[0].user_properties, {});
+      assert.deepEqual(events[0].group_properties, {
+        '$setOnce': {'key2': 'value4'},
+        '$unset': {'key1': '-'},
+        '$set': {'key4': 'value5'},
+        '$prepend': {'key5': 'value6'}
+      });
+      assert.deepEqual(events[0].groups, {'test group type': 'test group name'});
+    });
+
+    it('should run the callback after making the identify call', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      var identify = new amplitude.Identify().set('key', 'value');
+      amplitude.groupIdentify(group_type, group_name, identify, callback);
+
+      // before server responds, callback should not fire
+      assert.lengthOf(server.requests, 1);
+      assert.equal(counter, 0);
+      assert.equal(value, -1);
+      assert.equal(message, '');
+
+      // after server response, fire callback
+      server.respondWith('success');
+      server.respond();
+      assert.equal(counter, 1);
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
+    });
+
+    it('should run the callback even if client not initialized with apiKey', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      var identify = new amplitude.Identify().set('key', 'value');
+      new AmplitudeClient().groupIdentify(group_type, group_name, identify, callback);
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+    });
+
+    it('should run the callback even with an invalid identify object', function() {
+      var counter = 0;
+      var value = -1;
+      var message = '';
+      var callback = function (status, response) {
+        counter++;
+        value = status;
+        message = response;
+      }
+      amplitude.groupIdentify(group_type, group_name, null, callback);
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+    });
+  });
+
   describe('logEvent with tracking options', function() {
 
     var clock;

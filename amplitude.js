@@ -925,6 +925,7 @@ var constants = {
   MAX_STRING_LENGTH: 4096,
   MAX_PROPERTY_KEYS: 1000,
   IDENTIFY_EVENT: '$identify',
+  GROUP_IDENTIFY_EVENT: '$groupidentify',
 
   // localStorageKeys
   LAST_EVENT_ID: 'amplitude_lastEventId',
@@ -3977,7 +3978,7 @@ var defineProperty = (function() {
   } catch (e) {}
 }());
 
-var _defineProperty = defineProperty;
+var _defineProperty$1 = defineProperty;
 
 /**
  * The base implementation of `assignValue` and `assignMergeValue` without
@@ -3989,8 +3990,8 @@ var _defineProperty = defineProperty;
  * @param {*} value The value to assign.
  */
 function baseAssignValue(object, key, value) {
-  if (key == '__proto__' && _defineProperty) {
-    _defineProperty(object, key, {
+  if (key == '__proto__' && _defineProperty$1) {
+    _defineProperty$1(object, key, {
       'configurable': true,
       'enumerable': true,
       'value': value,
@@ -5167,8 +5168,8 @@ var constant_1 = constant;
  * @param {Function} string The `toString` result.
  * @returns {Function} Returns `func`.
  */
-var baseSetToString = !_defineProperty ? identity_1 : function(func, string) {
-  return _defineProperty(func, 'toString', {
+var baseSetToString = !_defineProperty$1 ? identity_1 : function(func, string) {
+  return _defineProperty$1(func, 'toString', {
     'configurable': true,
     'enumerable': false,
     'value': constant_1(string),
@@ -6665,6 +6666,8 @@ var DEFAULT_OPTIONS = {
   uploadBatchSize: 100
 };
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 /**
  * AmplitudeClient SDK API - instance constructor.
  * The Amplitude class handles creation of client instances, all you need to do is call amplitude.getInstance()
@@ -7321,7 +7324,7 @@ AmplitudeClient.prototype.setGroup = function (groupType, groupName) {
   var groups = {};
   groups[groupType] = groupName;
   var identify = new Identify().set(groupType, groupName);
-  this._logEvent(constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null, null);
+  this._logEvent(constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations, groups, null, null, null);
 };
 
 /**
@@ -7479,10 +7482,54 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback) {
   if (identify_obj instanceof Identify) {
     // only send if there are operations
     if (Object.keys(identify_obj.userPropertiesOperations).length > 0) {
-      return this._logEvent(constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, null, null, opt_callback);
+      return this._logEvent(constants.IDENTIFY_EVENT, null, null, identify_obj.userPropertiesOperations, null, null, null, opt_callback);
     } else {
       if (type(opt_callback) === 'function') {
         opt_callback(0, 'No request sent', { reason: 'No user property operations' });
+      }
+    }
+  } else {
+    utils.log.error('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent', { reason: 'Invalid identify input type' });
+    }
+  }
+};
+
+AmplitudeClient.prototype.groupIdentify = function (group_type, group_name, identify_obj, opt_callback) {
+  if (!this._apiKeySet('groupIdentify()')) {
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent', { reason: 'API key is not set' });
+    }
+    return;
+  }
+
+  if (!utils.validateInput(group_type, 'group_type', 'string') || utils.isEmptyString(group_type)) {
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent', { reason: 'Invalid group type' });
+    }
+    return;
+  }
+
+  if (group_name === null || group_name === undefined) {
+    if (type(opt_callback) === 'function') {
+      opt_callback(0, 'No request sent', { reason: 'Invalid group name' });
+    }
+    return;
+  }
+
+  // if identify input is a proxied object created by the async loading snippet, convert it into an identify object
+  if (type(identify_obj) === 'object' && identify_obj.hasOwnProperty('_q')) {
+    identify_obj = _convertProxyObjectToRealObject(new Identify(), identify_obj);
+  }
+
+  if (identify_obj instanceof Identify) {
+    // only send if there are operations
+    if (Object.keys(identify_obj.userPropertiesOperations).length > 0) {
+      return this._logEvent(constants.GROUP_IDENTIFY_EVENT, null, null, null, _defineProperty({}, group_type, group_name), identify_obj.userPropertiesOperations, null, opt_callback);
+    } else {
+      if (type(opt_callback) === 'function') {
+        opt_callback(0, 'No request sent', { reason: 'No group property operations' });
       }
     }
   } else {
@@ -7510,7 +7557,7 @@ AmplitudeClient.prototype.setVersionName = function setVersionName(versionName) 
  * Private logEvent method. Keeps apiProperties from being publicly exposed.
  * @private
  */
-AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, groups, timestamp, callback) {
+AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, groups, groupProperties, timestamp, callback) {
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
   if (!eventType) {
     if (type(callback) === 'function') {
@@ -7527,7 +7574,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
 
   try {
     var eventId;
-    if (eventType === constants.IDENTIFY_EVENT) {
+    if (eventType === constants.IDENTIFY_EVENT || eventType === constants.GROUP_IDENTIFY_EVENT) {
       eventId = this.nextIdentifyId();
     } else {
       eventId = this.nextEventId();
@@ -7568,10 +7615,11 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       },
       sequence_number: sequenceNumber, // for ordering events and identifys
       groups: utils.truncate(utils.validateGroups(groups)),
+      group_properties: utils.truncate(utils.validateProperties(groupProperties)),
       user_agent: this._userAgent
     };
 
-    if (eventType === constants.IDENTIFY_EVENT) {
+    if (eventType === constants.IDENTIFY_EVENT || eventType === constants.GROUP_IDENTIFY_EVENT) {
       this._unsentIdentifys.push(event);
       this._limitEventsQueued(this._unsentIdentifys);
     } else {
@@ -7670,7 +7718,7 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, e
     }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, null, timestamp, opt_callback);
+  return this._logEvent(eventType, eventProperties, null, null, null, null, timestamp, opt_callback);
 };
 
 /**
@@ -7701,7 +7749,7 @@ AmplitudeClient.prototype.logEventWithGroups = function (eventType, eventPropert
     }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, groups, null, opt_callback);
+  return this._logEvent(eventType, eventProperties, null, null, groups, null, null, opt_callback);
 };
 
 /**
@@ -7763,7 +7811,7 @@ AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, prod
     special: 'revenue_amount',
     quantity: quantity || 1,
     price: price
-  }, null, null, null, null);
+  }, null, null, null, null, null);
 };
 
 /**
