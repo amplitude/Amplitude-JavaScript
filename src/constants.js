@@ -4,6 +4,7 @@ export default {
   MAX_STRING_LENGTH: 4096,
   MAX_PROPERTY_KEYS: 1000,
   IDENTIFY_EVENT: '$identify',
+  GROUP_IDENTIFY_EVENT: '$groupidentify',
 
   // localStorageKeys
   LAST_EVENT_ID: 'amplitude_lastEventId',
