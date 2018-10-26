@@ -35,7 +35,7 @@ export default function(val) {
     return 'element';
   }
 
-  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(val)) {
+  if (typeof Buffer !== 'undefined' && typeof Buffer.isBuffer === 'function' && Buffer.isBuffer(val)) {
     return 'buffer';
   }
 
