@@ -69,6 +69,11 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this._storageSuffix = '_' + apiKey + this._legacyStorageSuffix;
 
     _parseConfig(this.options, opt_config);
+
+    if (type(this.options.logLevel) === 'string') {
+      utils.setLogLevel(this.options.logLevel);
+    }
+
     var trackingOptions = _generateApiPropertiesTrackingConfig(this);
     this._apiPropertiesTrackingOptions = Object.keys(trackingOptions).length > 0 ? {tracking_options: trackingOptions} : {};
 

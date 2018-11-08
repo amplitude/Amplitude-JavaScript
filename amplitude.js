@@ -2035,7 +2035,7 @@ var type = function (val) {
     return 'element';
   }
 
-  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(val)) {
+  if (typeof Buffer !== 'undefined' && typeof Buffer.isBuffer === 'function' && Buffer.isBuffer(val)) {
     return 'buffer';
   }
 
@@ -2043,14 +2043,14 @@ var type = function (val) {
   return typeof val === 'undefined' ? 'undefined' : _typeof(val);
 };
 
-var logLevel = 'WARN';
-
 var logLevels = {
   DISABLE: 0,
   ERROR: 1,
   WARN: 2,
   INFO: 3
 };
+
+var logLevel = logLevels.WARN;
 
 var setLogLevel = function setLogLevel(logLevelName) {
   logLevel = logLevels[logLevelName] || logLevel;
@@ -6616,7 +6616,7 @@ var uuid$1 = function uuid(a) {
     );
 };
 
-var version = '4.5.0';
+var version = '4.5.1';
 
 var getLanguage = function getLanguage() {
     return navigator && (navigator.languages && navigator.languages[0] || navigator.language || navigator.userLanguage) || undefined;
@@ -6723,6 +6723,11 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this._storageSuffix = '_' + apiKey + this._legacyStorageSuffix;
 
     _parseConfig(this.options, opt_config);
+
+    if (type(this.options.logLevel) === 'string') {
+      utils.setLogLevel(this.options.logLevel);
+    }
+
     var trackingOptions = _generateApiPropertiesTrackingConfig(this);
     this._apiPropertiesTrackingOptions = Object.keys(trackingOptions).length > 0 ? { tracking_options: trackingOptions } : {};
 

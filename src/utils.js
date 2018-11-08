@@ -1,14 +1,14 @@
 import constants from './constants';
 import type from './type';
 
-let logLevel = 'WARN';
-
 var logLevels = {
   DISABLE: 0,
   ERROR: 1,
   WARN: 2,
   INFO: 3,
 };
+
+let logLevel = logLevels.WARN;
 
 const setLogLevel = function setLogLevel(logLevelName) {
   logLevel = logLevels[logLevelName] || logLevel;

@@ -106,6 +106,22 @@ describe('AmplitudeClient', function() {
       assert.equal(amplitude.options.bogusKey, undefined);
     });
 
+    it('should set the default log level', function() {
+      const config = {};
+
+      amplitude.init(apiKey, userId, config);
+      assert.equal(utils.getLogLevel(), 2);
+    });
+
+    it('should set log levels', function() {
+      const config = {
+          logLevel: 'INFO',
+      };
+
+      amplitude.init(apiKey, userId, config);
+      assert.equal(utils.getLogLevel(), 3);
+    });
+
     it('should set cookie', function() {
       amplitude.init(apiKey, userId);
       var stored = cookie.get(amplitude.options.cookieName + '_' + apiKey);

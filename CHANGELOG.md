@@ -1,3 +1,9 @@
+### 4.5.1 (November 7, 2018)
+
+* Fix error that might occur if another party defines a global variable named `Buffer` that is not actually a `Buffer`.
+
+* Fix bug where the log level was not initialized correctly
+
 ### 4.5.0 (October 24, 2018)
 
 * Add support for groupIdentify calls

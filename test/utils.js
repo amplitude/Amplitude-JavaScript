@@ -26,7 +26,7 @@ describe('utils', function() {
 
     describe('setLogLevelShould ignore invalid log levels', function() {
       utils.setLogLevel('INVALID_LOGLEVEL');
-      assert.strictEqual(utils.getLogLevel(), 'WARN');
+      assert.strictEqual(utils.getLogLevel(), 2);
     });
 
     describe('logLevel is ERROR', function() {
