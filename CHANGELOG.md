@@ -1,3 +1,6 @@
+
+* Default groupProperties to empty object in logEvent.
+
 ### 4.5.1 (November 7, 2018)
 
 * Fix error that might occur if another party defines a global variable named `Buffer` that is not actually a `Buffer`.
