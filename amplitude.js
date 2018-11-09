@@ -7597,6 +7597,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     apiProperties = merge_1$1(trackingOptions, apiProperties || {});
     eventProperties = eventProperties || {};
     groups = groups || {};
+    groupProperties = groupProperties || {};
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId,
