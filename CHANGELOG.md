@@ -1,5 +1,6 @@
+### 4.5.2 (November 10, 2018)
 
-* Default groupProperties to empty object in logEvent.
+* Bugfix: Default groupProperties to empty object in logEvent.
 
 ### 4.5.1 (November 7, 2018)
 
