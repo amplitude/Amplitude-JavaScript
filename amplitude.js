@@ -6616,7 +6616,7 @@ var uuid$1 = function uuid(a) {
     );
 };
 
-var version = '4.5.1';
+var version = '4.5.2';
 
 var getLanguage = function getLanguage() {
     return navigator && (navigator.languages && navigator.languages[0] || navigator.language || navigator.userLanguage) || undefined;
