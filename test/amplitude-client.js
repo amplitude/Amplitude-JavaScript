@@ -2566,6 +2566,8 @@ describe('setVersionName', function() {
 
     afterEach(function() {
       reset();
+      cookie.remove('__utmz');
+      cookie.reset();
       clock.restore();
     });
 
@@ -2700,6 +2702,61 @@ describe('setVersionName', function() {
           utm_content: 'top'
         }
       });
+    });
+
+    it('should allow utm parameters to unset upon instantiating a new session', function() {
+      reset();
+      // send first $identify call with UTM params
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=google&utm_campaign=(organic)&utm_medium=organic&utm_term=(none)&utm_content=link');
+      amplitude.init(apiKey, undefined, {includeUtm: true, saveParamsReferrerOncePerSession: false, unsetParamsReferrerOnNewSession: true});
+
+      // advance clock to force new session
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude._getUrlParams.restore();
+
+      // send new session events
+      amplitude.init(apiKey, undefined, {includeUtm: true, saveParamsReferrerOncePerSession: false, unsetParamsReferrerOnNewSession: true});
+      amplitude.logEvent('UTM Test Event', {});
+
+      // ensure the server has responded
+      server.respondWith('success');
+      server.respond();
+
+      var firstSessionEvents = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
+      var secondSessionEvents = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      var firstSessionInit = firstSessionEvents[0];
+      var secondSessionInit = secondSessionEvents[0];
+      var secondSessionEvent = secondSessionEvents[1];
+
+      assert.equal(firstSessionInit.event_type, '$identify', 'should correctly called $identify');
+      assert.deepEqual(firstSessionInit.user_properties, {
+        $setOnce: {
+            initial_utm_source: "google",
+            initial_utm_medium: "organic",
+            initial_utm_campaign: "(organic)",
+            initial_utm_term: "(none)",
+            initial_utm_content: "link"
+        },
+        $set: {
+            utm_source: "google",
+            utm_medium: "organic",
+            utm_campaign: "(organic)",
+            utm_term: "(none)",
+            utm_content: "link"
+        }
+      }, 'should call $identify to set the correct UTM params');
+      assert.equal(secondSessionInit.event_type, '$identify', 'should have re-called $identify to unset utm params upon a new session');
+      assert.deepEqual(secondSessionInit.user_properties, {
+        '$unset': {
+          referrer: "-",
+          utm_source:"-",
+          utm_medium:"-",
+          utm_campaign:"-",
+          utm_term:"-",
+          utm_content:"-"
+        }
+      }, 'should correctly unset UTM params');
+      assert.deepEqual(secondSessionEvent.user_properties, {}, 'should correctly unset UTM params upon a new session');
     });
   });
 

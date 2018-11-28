@@ -1,4 +1,5 @@
 import utils from './utils';
+import Constants from './constants';
 
 var getUtmData = function getUtmData(rawCookie, query) {
   // Translate the utmz cookie format into url query string format.
@@ -9,11 +10,11 @@ var getUtmData = function getUtmData(rawCookie, query) {
            utils.getQueryParam(cookieName, cookie);
   };
 
-  var utmSource = fetchParam('utm_source', query, 'utmcsr', cookie);
-  var utmMedium = fetchParam('utm_medium', query, 'utmcmd', cookie);
-  var utmCampaign = fetchParam('utm_campaign', query, 'utmccn', cookie);
-  var utmTerm = fetchParam('utm_term', query, 'utmctr', cookie);
-  var utmContent = fetchParam('utm_content', query, 'utmcct', cookie);
+  var utmSource = fetchParam(Constants.UTM_SOURCE, query, 'utmcsr', cookie);
+  var utmMedium = fetchParam(Constants.UTM_MEDIUM, query, 'utmcmd', cookie);
+  var utmCampaign = fetchParam(Constants.UTM_CAMPAIGN, query, 'utmccn', cookie);
+  var utmTerm = fetchParam(Constants.UTM_TERM, query, 'utmctr', cookie);
+  var utmContent = fetchParam(Constants.UTM_CONTENT, query, 'utmcct', cookie);
 
   var utmData = {};
   var addIfNotNull = function addIfNotNull(key, value) {
@@ -22,11 +23,11 @@ var getUtmData = function getUtmData(rawCookie, query) {
     }
   };
 
-  addIfNotNull('utm_source', utmSource);
-  addIfNotNull('utm_medium', utmMedium);
-  addIfNotNull('utm_campaign', utmCampaign);
-  addIfNotNull('utm_term', utmTerm);
-  addIfNotNull('utm_content', utmContent);
+  addIfNotNull(Constants.UTM_SOURCE, utmSource);
+  addIfNotNull(Constants.UTM_MEDIUM, utmMedium);
+  addIfNotNull(Constants.UTM_CAMPAIGN, utmCampaign);
+  addIfNotNull(Constants.UTM_TERM, utmTerm);
+  addIfNotNull(Constants.UTM_CONTENT, utmContent);
 
   return utmData;
 };

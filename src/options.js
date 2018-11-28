@@ -35,6 +35,7 @@ export default {
     region: true,
     version_name: true
   },
+  unsetParamsReferrerOnNewSession: false,
   unsentKey: 'amplitude_unsent',
   unsentIdentifyKey: 'amplitude_unsent_identify',
   uploadBatchSize: 100,

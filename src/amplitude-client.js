@@ -122,6 +122,16 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
+      if (this.options.unsetParamsReferrerOnNewSession) {
+        var identify = new Identify();
+        identify.unset('referrer');
+        identify.unset(Constants.UTM_SOURCE);
+        identify.unset(Constants.UTM_MEDIUM);
+        identify.unset(Constants.UTM_CAMPAIGN);
+        identify.unset(Constants.UTM_TERM);
+        identify.unset(Constants.UTM_CONTENT);
+        this.identify(identify);
+      }
       this._newSession = true;
       this._sessionId = now;
 
@@ -980,7 +990,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       },
       sequence_number: sequenceNumber, // for ordering events and identifys
       groups: utils.truncate(utils.validateGroups(groups)),
-      group_properties: utils.truncate(utils.validateProperties(groupProperties)), 
+      group_properties: utils.truncate(utils.validateProperties(groupProperties)),
       user_agent: this._userAgent
     };
 
