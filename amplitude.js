@@ -950,6 +950,8 @@ var constants = {
 
   AMP_DEVICE_ID_PARAM: 'amp_device_id', // url param
 
+  REFERRER: 'referrer',
+
   // UTM Params
   UTM_SOURCE: 'utm_source',
   UTM_MEDIUM: 'utm_medium',
@@ -6779,14 +6781,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
       if (this.options.unsetParamsReferrerOnNewSession) {
-        var identify = new Identify();
-        identify.unset('referrer');
-        identify.unset(constants.UTM_SOURCE);
-        identify.unset(constants.UTM_MEDIUM);
-        identify.unset(constants.UTM_CAMPAIGN);
-        identify.unset(constants.UTM_TERM);
-        identify.unset(constants.UTM_CONTENT);
-        this.identify(identify);
+        this._unsetUTMParams();
       }
       this._newSession = true;
       this._sessionId = now;
@@ -7183,6 +7178,21 @@ AmplitudeClient.prototype._initUtmData = function _initUtmData(queryParams, cook
   cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   var utmProperties = getUtmData(cookieParams, queryParams);
   _sendParamsReferrerUserProperties(this, utmProperties);
+};
+
+/**
+ * Unset the utm params from the Amplitude instance and update the identify.
+ * @private
+ */
+AmplitudeClient.prototype._unsetUTMParams = function _unsetUTMParams() {
+  var identify = new Identify();
+  identify.unset(constants.REFERRER);
+  identify.unset(constants.UTM_SOURCE);
+  identify.unset(constants.UTM_MEDIUM);
+  identify.unset(constants.UTM_CAMPAIGN);
+  identify.unset(constants.UTM_TERM);
+  identify.unset(constants.UTM_CONTENT);
+  this.identify(identify);
 };
 
 /**

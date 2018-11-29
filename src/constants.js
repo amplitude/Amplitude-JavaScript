@@ -29,6 +29,8 @@ export default {
 
   AMP_DEVICE_ID_PARAM: 'amp_device_id',  // url param
 
+  REFERRER: 'referrer',
+
   // UTM Params
   UTM_SOURCE: 'utm_source',
   UTM_MEDIUM: 'utm_medium',
