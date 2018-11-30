@@ -27,5 +27,14 @@ export default {
   REVENUE_PRICE: '$price',
   REVENUE_REVENUE_TYPE: '$revenueType',
 
-  AMP_DEVICE_ID_PARAM: 'amp_device_id'  // url param
+  AMP_DEVICE_ID_PARAM: 'amp_device_id',  // url param
+
+  REFERRER: 'referrer',
+
+  // UTM Params
+  UTM_SOURCE: 'utm_source',
+  UTM_MEDIUM: 'utm_medium',
+  UTM_CAMPAIGN: 'utm_campaign',
+  UTM_TERM: 'utm_term',
+  UTM_CONTENT: 'utm_content'
 };

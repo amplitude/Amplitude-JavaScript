@@ -948,7 +948,16 @@ var constants = {
   REVENUE_PRICE: '$price',
   REVENUE_REVENUE_TYPE: '$revenueType',
 
-  AMP_DEVICE_ID_PARAM: 'amp_device_id' // url param
+  AMP_DEVICE_ID_PARAM: 'amp_device_id', // url param
+
+  REFERRER: 'referrer',
+
+  // UTM Params
+  UTM_SOURCE: 'utm_source',
+  UTM_MEDIUM: 'utm_medium',
+  UTM_CAMPAIGN: 'utm_campaign',
+  UTM_TERM: 'utm_term',
+  UTM_CONTENT: 'utm_content'
 };
 
 /* jshint bitwise: false */
@@ -2590,11 +2599,11 @@ var getUtmData = function getUtmData(rawCookie, query) {
     return utils.getQueryParam(queryName, query) || utils.getQueryParam(cookieName, cookie);
   };
 
-  var utmSource = fetchParam('utm_source', query, 'utmcsr', cookie);
-  var utmMedium = fetchParam('utm_medium', query, 'utmcmd', cookie);
-  var utmCampaign = fetchParam('utm_campaign', query, 'utmccn', cookie);
-  var utmTerm = fetchParam('utm_term', query, 'utmctr', cookie);
-  var utmContent = fetchParam('utm_content', query, 'utmcct', cookie);
+  var utmSource = fetchParam(constants.UTM_SOURCE, query, 'utmcsr', cookie);
+  var utmMedium = fetchParam(constants.UTM_MEDIUM, query, 'utmcmd', cookie);
+  var utmCampaign = fetchParam(constants.UTM_CAMPAIGN, query, 'utmccn', cookie);
+  var utmTerm = fetchParam(constants.UTM_TERM, query, 'utmctr', cookie);
+  var utmContent = fetchParam(constants.UTM_CONTENT, query, 'utmcct', cookie);
 
   var utmData = {};
   var addIfNotNull = function addIfNotNull(key, value) {
@@ -2603,11 +2612,11 @@ var getUtmData = function getUtmData(rawCookie, query) {
     }
   };
 
-  addIfNotNull('utm_source', utmSource);
-  addIfNotNull('utm_medium', utmMedium);
-  addIfNotNull('utm_campaign', utmCampaign);
-  addIfNotNull('utm_term', utmTerm);
-  addIfNotNull('utm_content', utmContent);
+  addIfNotNull(constants.UTM_SOURCE, utmSource);
+  addIfNotNull(constants.UTM_MEDIUM, utmMedium);
+  addIfNotNull(constants.UTM_CAMPAIGN, utmCampaign);
+  addIfNotNull(constants.UTM_TERM, utmTerm);
+  addIfNotNull(constants.UTM_CONTENT, utmContent);
 
   return utmData;
 };
@@ -6661,6 +6670,7 @@ var DEFAULT_OPTIONS = {
     region: true,
     version_name: true
   },
+  unsetParamsReferrerOnNewSession: false,
   unsentKey: 'amplitude_unsent',
   unsentIdentifyKey: 'amplitude_unsent_identify',
   uploadBatchSize: 100
@@ -6770,6 +6780,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     var now = new Date().getTime();
     if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
+      if (this.options.unsetParamsReferrerOnNewSession) {
+        this._unsetUTMParams();
+      }
       this._newSession = true;
       this._sessionId = now;
 
@@ -7165,6 +7178,21 @@ AmplitudeClient.prototype._initUtmData = function _initUtmData(queryParams, cook
   cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   var utmProperties = getUtmData(cookieParams, queryParams);
   _sendParamsReferrerUserProperties(this, utmProperties);
+};
+
+/**
+ * Unset the utm params from the Amplitude instance and update the identify.
+ * @private
+ */
+AmplitudeClient.prototype._unsetUTMParams = function _unsetUTMParams() {
+  var identify = new Identify();
+  identify.unset(constants.REFERRER);
+  identify.unset(constants.UTM_SOURCE);
+  identify.unset(constants.UTM_MEDIUM);
+  identify.unset(constants.UTM_CAMPAIGN);
+  identify.unset(constants.UTM_TERM);
+  identify.unset(constants.UTM_CONTENT);
+  this.identify(identify);
 };
 
 /**
