@@ -2706,6 +2706,7 @@ describe('setVersionName', function() {
 
     it('should allow utm parameters to unset upon instantiating a new session', function(done) {
       reset();
+      amplitude = new AmplitudeClient();
       // send first $identify call with UTM params
       sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=google&utm_campaign=(organic)&utm_medium=organic&utm_term=(none)&utm_content=link');
       amplitude.init(apiKey, undefined, {includeUtm: true, saveParamsReferrerOncePerSession: false, unsetParamsReferrerOnNewSession: true});
@@ -2722,11 +2723,10 @@ describe('setVersionName', function() {
       server.respondWith('success');
       server.respond();
 
-      var firstSessionEvents = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      var secondSessionEvents = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
-      var firstSessionInit = firstSessionEvents[0];
-      var secondSessionInit = secondSessionEvents[0];
-      var secondSessionEvent = secondSessionEvents[1];
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      var firstSessionInit = events[0];
+      var secondSessionInit = events[1];
+      var secondSessionEvent = events[2];
 
       assert.equal(firstSessionInit.event_type, '$identify', 'should correctly called $identify');
       assert.deepEqual(firstSessionInit.user_properties, {
@@ -2757,11 +2757,12 @@ describe('setVersionName', function() {
         }
       }, 'should correctly unset UTM params');
       assert.deepEqual(secondSessionEvent.user_properties, {}, 'should correctly unset UTM params upon a new session');
-      done()
+      done();
     });
 
     it('should reset utm parameters if it has changed during a new session', function(done) {
       reset();
+      amplitude = new AmplitudeClient();
       // send first $identify call with UTM params
       sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=google&utm_campaign=(organic)&utm_medium=organic&utm_term=(none)&utm_content=link');
       amplitude.init(apiKey, undefined, {includeUtm: true, saveParamsReferrerOncePerSession: false, unsetParamsReferrerOnNewSession: true});
@@ -2781,11 +2782,10 @@ describe('setVersionName', function() {
       server.respond();
 
       amplitude._getUrlParams.restore();
-      var firstSessionEvents = JSON.parse(querystring.parse(server.requests[0].requestBody).e);
-      var secondSessionEvents = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
-      var firstSessionInit = firstSessionEvents[0];
-      var secondSessionInit = secondSessionEvents[0];
-      var secondSessionEvent = secondSessionEvents[1];
+      var events = JSON.parse(querystring.parse(server.requests[1].requestBody).e);
+      var firstSessionInit = events[0];
+      var secondSessionInit = events[1];
+      var secondSessionEvent = events[2];
 
       assert.equal(firstSessionInit.event_type, '$identify', 'should correctly called $identify');
       assert.deepEqual(firstSessionInit.user_properties, {
@@ -2831,7 +2831,7 @@ describe('setVersionName', function() {
           "utm_content": "click"
         }
       }, 'should correctly set new UTM params upon a new session');
-      done()
+      done();
     });
   });
 
