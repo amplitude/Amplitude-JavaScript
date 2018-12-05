@@ -2652,6 +2652,7 @@ describe('setVersionName', function() {
 
     it('should only send utm data once per session', function() {
       reset();
+      const sessionTimeout = 100;
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       amplitude.init(apiKey, undefined, {includeUtm: true});
 
@@ -2661,8 +2662,8 @@ describe('setVersionName', function() {
       assert.lengthOf(amplitude._unsentIdentifys, 0);
 
       // advance clock to force new session
-      clock.tick(30 * 60 * 1000 + 1);
-      amplitude.init(apiKey, undefined, {includeUtm: true, batchEvents: true, eventUploadThreshold: 2});
+      clock.tick(sessionTimeout + 1);
+      amplitude.init(apiKey, undefined, {includeUtm: true, sessionTimeout, batchEvents: true, eventUploadThreshold: 2});
       amplitude.logEvent('UTM Test Event', {});
 
       assert.lengthOf(server.requests, 1);
@@ -2706,12 +2707,13 @@ describe('setVersionName', function() {
 
     it('should allow utm parameters to unset upon instantiating a new session', function(done) {
       reset();
+      const sessionTimeout = 100;
       // send first $identify call with UTM params
       sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=google&utm_campaign=(organic)&utm_medium=organic&utm_term=(none)&utm_content=link');
-      amplitude.init(apiKey, undefined, {includeUtm: true, saveParamsReferrerOncePerSession: false, unsetParamsReferrerOnNewSession: true});
+      amplitude.init(apiKey, undefined, {includeUtm: true, sessionTimeout, saveParamsReferrerOncePerSession: false, unsetParamsReferrerOnNewSession: true});
 
       // advance clock to force new session
-      clock.tick(30 * 60 * 1000 + 1);
+      clock.tick(sessionTimeout + 1);
       amplitude._getUrlParams.restore();
 
       // send new session events
@@ -2762,12 +2764,13 @@ describe('setVersionName', function() {
 
     it('should reset utm parameters if it has changed during a new session', function(done) {
       reset();
+      const sessionTimeout = 100;
       // send first $identify call with UTM params
       sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=google&utm_campaign=(organic)&utm_medium=organic&utm_term=(none)&utm_content=link');
-      amplitude.init(apiKey, undefined, {includeUtm: true, saveParamsReferrerOncePerSession: false, unsetParamsReferrerOnNewSession: true});
+      amplitude.init(apiKey, undefined, {includeUtm: true, sessionTimeout, saveParamsReferrerOncePerSession: false, unsetParamsReferrerOnNewSession: true});
 
       // advance clock to force new session, enter through a different campaign
-      clock.tick(30 * 60 * 1000 + 1);
+      clock.tick(sessionTimeout + 1);
       amplitude._getUrlParams.restore();
       sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=google&utm_campaign=(mail_promotion)&utm_medium=email&utm_term=(none)&utm_content=click');
       amplitude.init(apiKey, undefined, {includeUtm: true, saveParamsReferrerOncePerSession: false, unsetParamsReferrerOnNewSession: true});
