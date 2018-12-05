@@ -14,6 +14,33 @@ describe('utils', function() {
     });
   });
 
+  describe('setLogLevel', function() {
+    afterEach(() => {
+      utils.setLogLevel('WARN');
+    });
+
+    it('can set log level to DISABLE', function() {
+      utils.setLogLevel('DISABLE');
+      assert.strictEqual(utils.getLogLevel(), utils.logLevels.DISABLE);
+    });
+
+    it('can set log level to ERROR', () => {
+      utils.setLogLevel('ERROR');
+      assert.strictEqual(utils.getLogLevel(), utils.logLevels.ERROR);
+    });
+
+    it('can set log level to WARN', () => {
+      utils.setLogLevel('DISABLE');
+      utils.setLogLevel('WARN');
+      assert.strictEqual(utils.getLogLevel(), utils.logLevels.WARN);
+    });
+
+    it('can set log level to INFO', () => {
+      utils.setLogLevel('INFO');
+      assert.strictEqual(utils.getLogLevel(), utils.logLevels.INFO);
+    });
+  });
+
   describe('log', function() {
     beforeEach(function() {
       utils.setLogLevel('INFO');
