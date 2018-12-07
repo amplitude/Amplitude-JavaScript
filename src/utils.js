@@ -11,7 +11,9 @@ var logLevels = {
 let logLevel = logLevels.WARN;
 
 const setLogLevel = function setLogLevel(logLevelName) {
-  logLevel = logLevels[logLevelName] || logLevel;
+  if (logLevels.hasOwnProperty(logLevelName)) {
+    logLevel = logLevels[logLevelName];
+  }
 };
 
 const getLogLevel = function getLogLevel() {
@@ -236,6 +238,7 @@ var getQueryParam = function getQueryParam(name, query) {
 export default {
   setLogLevel,
   getLogLevel,
+  logLevels,
   log,
   isEmptyString,
   getQueryParam,
