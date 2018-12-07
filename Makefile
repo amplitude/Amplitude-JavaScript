@@ -68,7 +68,9 @@ README.md: $(SNIPPET_OUT) version
 $(OUT): node_modules $(SRC) version rollup.config.js rollup.min.js
 	@$(JSHINT) --verbose $(SRC)
 	@NODE_ENV=production $(ROLLUP) --config rollup.config.js
+	@NODE_ENV=production $(ROLLUP) --config rollup.nocompat.js
 	@NODE_ENV=production $(ROLLUP) --config rollup.min.js
+	@NODE_ENV=production $(ROLLUP) --config rollup.nocompat.min.js
 
 #
 # Target for minified `amplitude-snippet.js` file.

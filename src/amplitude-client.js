@@ -4,11 +4,10 @@ import getUtmData from './utm';
 import Identify from './identify';
 import localStorage from './localstorage';  // jshint ignore:line
 import md5 from 'blueimp-md5';
-import merge from 'lodash/merge';
 import Request from './xhr';
 import Revenue from './revenue';
 import type from './type';
-import UAParser from 'ua-parser-js';
+import UAParser from '@amplitude/ua-parser-js';
 import utils from './utils';
 import UUID from './uuid';
 import version from './version';
@@ -27,7 +26,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._unsentEvents = [];
   this._unsentIdentifys = [];
   this._ua = new UAParser(navigator.userAgent).getResult();
-  this.options = merge({}, DEFAULT_OPTIONS);
+  this.options = {...DEFAULT_OPTIONS, trackingOptions: {...DEFAULT_OPTIONS.trackingOptions}};
   this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
@@ -79,7 +78,8 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
-      domain: this.options.domain
+      domain: this.options.domain,
+      secure: this.options.secureCookie,
     });
     this.options.domain = this.cookieStorage.options().domain;
 
@@ -970,8 +970,8 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     _saveCookieData(this);
 
     userProperties = userProperties || {};
-    var trackingOptions = merge({}, this._apiPropertiesTrackingOptions);
-    apiProperties = merge(trackingOptions, (apiProperties || {}));
+    var trackingOptions = {...this._apiPropertiesTrackingOptions};
+    apiProperties = {...(apiProperties || {}), ...trackingOptions};
     eventProperties = eventProperties || {};
     groups = groups || {};
     groupProperties = groupProperties || {};
@@ -1173,29 +1173,31 @@ AmplitudeClient.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
   }
 };
 
-/**
- * Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
- * @public
- * @deprecated
- * @param {number} price - price of revenue event
- * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
- * @param {string} product - (optional) product identifier
- * @example amplitudeClient.logRevenue(3.99, 1, 'product_1234');
- */
-AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, product) {
-  // Test that the parameters are of the right type.
-  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || (quantity !== undefined && !_isNumber(quantity))) {
-    // utils.log('Price and quantity arguments to logRevenue must be numbers');
-    return -1;
-  }
+if (BUILD_COMPAT_2_0) {
+  /**
+   * Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
+   * @public
+   * @deprecated
+   * @param {number} price - price of revenue event
+   * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
+   * @param {string} product - (optional) product identifier
+   * @example amplitudeClient.logRevenue(3.99, 1, 'product_1234');
+   */
+  AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, product) {
+    // Test that the parameters are of the right type.
+    if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || (quantity !== undefined && !_isNumber(quantity))) {
+      // utils.log('Price and quantity arguments to logRevenue must be numbers');
+      return -1;
+    }
 
-  return this._logEvent(Constants.REVENUE_EVENT, {}, {
-    productId: product,
-    special: 'revenue_amount',
-    quantity: quantity || 1,
-    price: price
-  }, null, null, null, null, null);
-};
+    return this._logEvent(Constants.REVENUE_EVENT, {}, {
+      productId: product,
+      special: 'revenue_amount',
+      quantity: quantity || 1,
+      price: price
+    }, null, null, null, null, null);
+  };
+}
 
 /**
  * Remove events in storage with event ids up to and including maxEventId.
@@ -1374,14 +1376,16 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIde
   };
 };
 
-/**
- * Set global user properties. Note this is deprecated, and we recommend using setUserProperties
- * @public
- * @deprecated
- */
-AmplitudeClient.prototype.setGlobalUserProperties = function setGlobalUserProperties(userProperties) {
-  this.setUserProperties(userProperties);
-};
+if (BUILD_COMPAT_2_0) {
+  /**
+   * Set global user properties. Note this is deprecated, and we recommend using setUserProperties
+   * @public
+   * @deprecated
+   */
+  AmplitudeClient.prototype.setGlobalUserProperties = function setGlobalUserProperties(userProperties) {
+    this.setUserProperties(userProperties);
+  };
+}
 
 /**
  * Get the current version of Amplitude's Javascript SDK.

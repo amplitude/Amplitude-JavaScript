@@ -1,4 +1,6 @@
 import cookie from '../src/cookie.js';
+import baseCookie from '../src/base-cookie';
+import getLocation from '../src/get-location';
 
 describe('Cookie', function() {
 
@@ -43,12 +45,6 @@ describe('Cookie', function() {
     it('should save options', function() {
       cookie.options({ expirationDays: 365 });
       assert.equal(cookie.options().expirationDays, 365);
-    });
-
-    it('should fallback to no domain when it cant set the test cookie', function(){
-      cookie.options({ domain: 'xyz.com' });
-      assert.isNull(cookie.options().domain);
-      assert.isNull(cookie.get('amplitude_test'));
     });
   });
 });

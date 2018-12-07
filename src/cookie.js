@@ -3,8 +3,9 @@
  */
 
 import Base64 from './base64';
-import topDomain from '@segment/top-domain';
 import utils from './utils';
+import getLocation from './get-location';
+import baseCookie from './base-cookie';
 
 
 var _options = {
@@ -20,6 +21,45 @@ var reset = function() {
   };
 };
 
+const getHost = (url) => {
+  const a = document.createElement('a');
+  a.href = url;
+  return a.hostname || location.hostname; 
+};
+
+const topDomain = (url) => {
+  const host = getHost(url);
+  const parts = host.split('.');
+  const last = parts[parts.length - 1];
+  const levels = [];
+
+  if (parts.length === 4 && last === parseInt(last, 10)) {
+    return levels;
+  }
+
+  if (parts.length <= 1) {
+    return levels;
+  }
+
+  for (let i = parts.length - 2; i >= 0; --i) {
+    levels.push(parts.slice(i).join('.'));
+  }
+
+  for (let i = 0; i < levels.length; ++i) {
+    const cname = '__tld_test__';
+    const domain = levels[i];
+    const opts = { domain: '.' + domain };
+
+    baseCookie.set(cname, 1, opts);
+    if (baseCookie.get(cname)) {
+      baseCookie.set(cname, null, opts);
+      return domain;
+    }
+  }
+
+  return '';
+};
+
 
 var options = function(opts) {
   if (arguments.length === 0) {
@@ -29,8 +69,9 @@ var options = function(opts) {
   opts = opts || {};
 
   _options.expirationDays = opts.expirationDays;
+  _options.secure = opts.secure;
 
-  var domain = (!utils.isEmptyString(opts.domain)) ? opts.domain : '.' + topDomain(window.location.href);
+  var domain = (!utils.isEmptyString(opts.domain)) ? opts.domain : '.' + topDomain(getLocation().href);
   var token = Math.random();
   _options.domain = domain;
   set('amplitude_test', token);
@@ -40,6 +81,8 @@ var options = function(opts) {
   }
   remove('amplitude_test');
   _options.domain = domain;
+
+  return _options;
 };
 
 var _domainSpecific = function(name) {
@@ -53,34 +96,24 @@ var _domainSpecific = function(name) {
 
 
 var get = function(name) {
-  try {
-    var nameEq = _domainSpecific(name) + '=';
-    var ca = document.cookie.split(';');
-    var value = null;
-    for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) === ' ') {
-        c = c.substring(1, c.length);
-      }
-      if (c.indexOf(nameEq) === 0) {
-        value = c.substring(nameEq.length, c.length);
-        break;
-      }
-    }
+  var nameEq = _domainSpecific(name) + '=';
+  const value = baseCookie.get(nameEq);
 
+  try {
     if (value) {
       return JSON.parse(Base64.decode(value));
     }
-    return null;
   } catch (e) {
     return null;
   }
+
+  return null;
 };
 
 
 var set = function(name, value) {
   try {
-    _set(_domainSpecific(name), Base64.encode(JSON.stringify(value)), _options);
+    baseCookie.set(_domainSpecific(name), Base64.encode(JSON.stringify(value)), _options);
     return true;
   } catch (e) {
     return false;
@@ -88,28 +121,9 @@ var set = function(name, value) {
 };
 
 
-var _set = function(name, value, opts) {
-  var expires = value !== null ? opts.expirationDays : -1 ;
-  if (expires) {
-    var date = new Date();
-    date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
-    expires = date;
-  }
-  var str = name + '=' + value;
-  if (expires) {
-    str += '; expires=' + expires.toUTCString();
-  }
-  str += '; path=/';
-  if (opts.domain) {
-    str += '; domain=' + opts.domain;
-  }
-  document.cookie = str;
-};
-
-
 var remove = function(name) {
   try {
-    _set(_domainSpecific(name), null, _options);
+    baseCookie.set(_domainSpecific(name), null, _options);
     return true;
   } catch (e) {
     return false;
@@ -123,5 +137,4 @@ export default {
   get: get,
   set: set,
   remove: remove
-
 };

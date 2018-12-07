@@ -4,10 +4,10 @@ import replace from 'rollup-plugin-replace';
 import babel from 'rollup-plugin-babel';
 
 export default {
-  input: 'src/index.compat.js',
+  input: 'src/index.js',
   output: {
     name: 'amplitude',
-    file: 'amplitude.js',
+    file: 'amplitude.nocompat.js',
     format: 'umd',
   },
   plugins: [
@@ -20,9 +20,9 @@ export default {
       browser: true,
     }),
     replace({
-      BUILD_COMPAT_SNIPPET: 'true',
-      BUILD_COMPAT_2_0: 'true',
-      BUILD_COMPAT_LOCAL_STORAGE: 'true',
+      BUILD_COMPAT_SNIPPET: 'false',
+      BUILD_COMPAT_2_0: 'false',
+      BUILD_COMPAT_LOCAL_STORAGE: 'false',
     }),
     commonjs(),
   ],

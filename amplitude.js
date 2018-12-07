@@ -6,16 +6,11 @@
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
-
-
-
-
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
 
 var json3 = createCommonjsModule(function (module, exports) {
-/*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 (function () {
   // Detect the `define` function exposed by asynchronous module loaders. The
   // strict `define` check is necessary for compatibility with `r.js`.
@@ -538,7 +533,7 @@ var json3 = createCommonjsModule(function (module, exports) {
             } else if (className == arrayClass) {
               // Convert the property names array into a makeshift set.
               properties = {};
-              for (var index = 0, length = filter.length, value; index < length; value = filter[index++], ((className = getClass.call(value)), className == stringClass || className == numberClass) && (properties[value] = 1));
+              for (var index = 0, length = filter.length, value; index < length; value = filter[index++], (className = getClass.call(value), className == stringClass || className == numberClass) && (properties[value] = 1));
             }
           }
           if (width) {
@@ -681,19 +676,19 @@ var json3 = createCommonjsModule(function (module, exports) {
                 // Parse an integer or floating-point value.
                 if (charCode >= 48 && charCode <= 57) {
                   // Leading zeroes are interpreted as octal literals.
-                  if (charCode == 48 && ((charCode = source.charCodeAt(Index + 1)), charCode >= 48 && charCode <= 57)) {
+                  if (charCode == 48 && (charCode = source.charCodeAt(Index + 1), charCode >= 48 && charCode <= 57)) {
                     // Illegal octal literal.
                     abort();
                   }
                   isSigned = false;
                   // Parse the integer component.
-                  for (; Index < length && ((charCode = source.charCodeAt(Index)), charCode >= 48 && charCode <= 57); Index++);
+                  for (; Index < length && (charCode = source.charCodeAt(Index), charCode >= 48 && charCode <= 57); Index++);
                   // Floats cannot contain a leading decimal point; however, this
                   // case is already accounted for by the parser.
                   if (source.charCodeAt(Index) == 46) {
                     position = ++Index;
                     // Parse the decimal component.
-                    for (; position < length && ((charCode = source.charCodeAt(position)), charCode >= 48 && charCode <= 57); position++);
+                    for (; position < length && (charCode = source.charCodeAt(position), charCode >= 48 && charCode <= 57); position++);
                     if (position == Index) {
                       // Illegal trailing decimal.
                       abort();
@@ -711,7 +706,7 @@ var json3 = createCommonjsModule(function (module, exports) {
                       Index++;
                     }
                     // Parse the exponential component.
-                    for (position = Index; position < length && ((charCode = source.charCodeAt(position)), charCode >= 48 && charCode <= 57); position++);
+                    for (position = Index; position < length && (charCode = source.charCodeAt(position), charCode >= 48 && charCode <= 57); position++);
                     if (position == Index) {
                       // Illegal empty exponent.
                       abort();
@@ -1015,7 +1010,6 @@ var UTF8 = {
 };
 
 /* jshint bitwise: false */
-/* global escape, unescape */
 
 /*
  * Base64 encoder/decoder
@@ -1106,901 +1100,40 @@ var Base64 = {
     }
 };
 
-var componentUrl = createCommonjsModule(function (module, exports) {
-/**
- * Parse the given `url`.
- *
- * @param {String} str
- * @return {Object}
- * @api public
- */
-
-exports.parse = function(url){
-  var a = document.createElement('a');
-  a.href = url;
-  return {
-    href: a.href,
-    host: a.host || location.host,
-    port: ('0' === a.port || '' === a.port) ? port(a.protocol) : a.port,
-    hash: a.hash,
-    hostname: a.hostname || location.hostname,
-    pathname: a.pathname.charAt(0) != '/' ? '/' + a.pathname : a.pathname,
-    protocol: !a.protocol || ':' == a.protocol ? location.protocol : a.protocol,
-    search: a.search,
-    query: a.search.slice(1)
-  };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
 
-/**
- * Check if `url` is absolute.
- *
- * @param {String} url
- * @return {Boolean}
- * @api public
- */
-
-exports.isAbsolute = function(url){
-  return 0 == url.indexOf('//') || !!~url.indexOf('://');
-};
-
-/**
- * Check if `url` is relative.
- *
- * @param {String} url
- * @return {Boolean}
- * @api public
- */
-
-exports.isRelative = function(url){
-  return !exports.isAbsolute(url);
-};
-
-/**
- * Check if `url` is cross domain.
- *
- * @param {String} url
- * @return {Boolean}
- * @api public
- */
-
-exports.isCrossDomain = function(url){
-  url = exports.parse(url);
-  var location = exports.parse(window.location.href);
-  return url.hostname !== location.hostname
-    || url.port !== location.port
-    || url.protocol !== location.protocol;
-};
-
-/**
- * Return default port for `protocol`.
- *
- * @param  {String} protocol
- * @return {String}
- * @api private
- */
-function port (protocol){
-  switch (protocol) {
-    case 'http:':
-      return 80;
-    case 'https:':
-      return 443;
-    default:
-      return location.port;
-  }
-}
-});
-
-/**
- * Helpers.
- */
-
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var y = d * 365.25;
-
-/**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} [options]
- * @throws {Error} throw an error if val is not a non-empty string or a number
- * @return {String|Number}
- * @api public
- */
-
-var ms = function(val, options) {
-  options = options || {};
-  var type = typeof val;
-  if (type === 'string' && val.length > 0) {
-    return parse$1(val);
-  } else if (type === 'number' && isNaN(val) === false) {
-    return options.long ? fmtLong(val) : fmtShort(val);
-  }
-  throw new Error(
-    'val is not a non-empty string or a valid number. val=' +
-      JSON.stringify(val)
-  );
-};
-
-/**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
- */
-
-function parse$1(str) {
-  str = String(str);
-  if (str.length > 100) {
-    return;
-  }
-  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(
-    str
-  );
-  if (!match) {
-    return;
-  }
-  var n = parseFloat(match[1]);
-  var type = (match[2] || 'ms').toLowerCase();
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'yrs':
-    case 'yr':
-    case 'y':
-      return n * y;
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d;
-    case 'hours':
-    case 'hour':
-    case 'hrs':
-    case 'hr':
-    case 'h':
-      return n * h;
-    case 'minutes':
-    case 'minute':
-    case 'mins':
-    case 'min':
-    case 'm':
-      return n * m;
-    case 'seconds':
-    case 'second':
-    case 'secs':
-    case 'sec':
-    case 's':
-      return n * s;
-    case 'milliseconds':
-    case 'millisecond':
-    case 'msecs':
-    case 'msec':
-    case 'ms':
-      return n;
-    default:
-      return undefined;
-  }
-}
-
-/**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function fmtShort(ms) {
-  if (ms >= d) {
-    return Math.round(ms / d) + 'd';
-  }
-  if (ms >= h) {
-    return Math.round(ms / h) + 'h';
-  }
-  if (ms >= m) {
-    return Math.round(ms / m) + 'm';
-  }
-  if (ms >= s) {
-    return Math.round(ms / s) + 's';
-  }
-  return ms + 'ms';
-}
-
-/**
- * Long format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function fmtLong(ms) {
-  return plural(ms, d, 'day') ||
-    plural(ms, h, 'hour') ||
-    plural(ms, m, 'minute') ||
-    plural(ms, s, 'second') ||
-    ms + ' ms';
-}
-
-/**
- * Pluralization helper.
- */
-
-function plural(ms, n, name) {
-  if (ms < n) {
-    return;
-  }
-  if (ms < n * 1.5) {
-    return Math.floor(ms / n) + ' ' + name;
-  }
-  return Math.ceil(ms / n) + ' ' + name + 's';
-}
-
-var debug$1 = createCommonjsModule(function (module, exports) {
-/**
- * This is the common logic for both the Node.js and web browser
- * implementations of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = createDebug.debug = createDebug['default'] = createDebug;
-exports.coerce = coerce;
-exports.disable = disable;
-exports.enable = enable;
-exports.enabled = enabled;
-exports.humanize = ms;
-
-/**
- * Active `debug` instances.
- */
-exports.instances = [];
-
-/**
- * The currently active debug mode names, and names to skip.
- */
-
-exports.names = [];
-exports.skips = [];
-
-/**
- * Map of special "%n" handling functions, for the debug "format" argument.
- *
- * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
- */
-
-exports.formatters = {};
-
-/**
- * Select a color.
- * @param {String} namespace
- * @return {Number}
- * @api private
- */
-
-function selectColor(namespace) {
-  var hash = 0, i;
-
-  for (i in namespace) {
-    hash  = ((hash << 5) - hash) + namespace.charCodeAt(i);
-    hash |= 0; // Convert to 32bit integer
-  }
-
-  return exports.colors[Math.abs(hash) % exports.colors.length];
-}
-
-/**
- * Create a debugger with the given `namespace`.
- *
- * @param {String} namespace
- * @return {Function}
- * @api public
- */
-
-function createDebug(namespace) {
-
-  var prevTime;
-
-  function debug() {
-    // disabled?
-    if (!debug.enabled) return;
-
-    var self = debug;
-
-    // set `diff` timestamp
-    var curr = +new Date();
-    var ms$$1 = curr - (prevTime || curr);
-    self.diff = ms$$1;
-    self.prev = prevTime;
-    self.curr = curr;
-    prevTime = curr;
-
-    // turn the `arguments` into a proper Array
-    var args = new Array(arguments.length);
-    for (var i = 0; i < args.length; i++) {
-      args[i] = arguments[i];
-    }
-
-    args[0] = exports.coerce(args[0]);
-
-    if ('string' !== typeof args[0]) {
-      // anything else let's inspect with %O
-      args.unshift('%O');
-    }
-
-    // apply any `formatters` transformations
-    var index = 0;
-    args[0] = args[0].replace(/%([a-zA-Z%])/g, function(match, format) {
-      // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
-      index++;
-      var formatter = exports.formatters[format];
-      if ('function' === typeof formatter) {
-        var val = args[index];
-        match = formatter.call(self, val);
-
-        // now we need to remove `args[index]` since it's inlined in the `format`
-        args.splice(index, 1);
-        index--;
-      }
-      return match;
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
     });
-
-    // apply env-specific formatting (colors, etc.)
-    exports.formatArgs.call(self, args);
-
-    var logFn = debug.log || exports.log || console.log.bind(console);
-    logFn.apply(self, args);
-  }
-
-  debug.namespace = namespace;
-  debug.enabled = exports.enabled(namespace);
-  debug.useColors = exports.useColors();
-  debug.color = selectColor(namespace);
-  debug.destroy = destroy;
-
-  // env-specific initialization logic for debug instances
-  if ('function' === typeof exports.init) {
-    exports.init(debug);
-  }
-
-  exports.instances.push(debug);
-
-  return debug;
-}
-
-function destroy () {
-  var index = exports.instances.indexOf(this);
-  if (index !== -1) {
-    exports.instances.splice(index, 1);
-    return true;
   } else {
-    return false;
-  }
-}
-
-/**
- * Enables a debug mode by namespaces. This can include modes
- * separated by a colon and wildcards.
- *
- * @param {String} namespaces
- * @api public
- */
-
-function enable(namespaces) {
-  exports.save(namespaces);
-
-  exports.names = [];
-  exports.skips = [];
-
-  var i;
-  var split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-  var len = split.length;
-
-  for (i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
-    namespaces = split[i].replace(/\*/g, '.*?');
-    if (namespaces[0] === '-') {
-      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-    } else {
-      exports.names.push(new RegExp('^' + namespaces + '$'));
-    }
+    obj[key] = value;
   }
 
-  for (i = 0; i < exports.instances.length; i++) {
-    var instance = exports.instances[i];
-    instance.enabled = exports.enabled(instance.namespace);
-  }
-}
-
-/**
- * Disable debug output.
- *
- * @api public
- */
-
-function disable() {
-  exports.enable('');
-}
-
-/**
- * Returns true if the given mode name is enabled, false otherwise.
- *
- * @param {String} name
- * @return {Boolean}
- * @api public
- */
-
-function enabled(name) {
-  if (name[name.length - 1] === '*') {
-    return true;
-  }
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
-    if (exports.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (i = 0, len = exports.names.length; i < len; i++) {
-    if (exports.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Coerce `val`.
- *
- * @param {Mixed} val
- * @return {Mixed}
- * @api private
- */
-
-function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
-  return val;
-}
-});
-
-var browser = createCommonjsModule(function (module, exports) {
-/**
- * This is the web browser implementation of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = debug$1;
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-exports.storage = 'undefined' != typeof chrome
-               && 'undefined' != typeof chrome.storage
-                  ? chrome.storage.local
-                  : localstorage();
-
-/**
- * Colors.
- */
-
-exports.colors = [
-  '#0000CC', '#0000FF', '#0033CC', '#0033FF', '#0066CC', '#0066FF', '#0099CC',
-  '#0099FF', '#00CC00', '#00CC33', '#00CC66', '#00CC99', '#00CCCC', '#00CCFF',
-  '#3300CC', '#3300FF', '#3333CC', '#3333FF', '#3366CC', '#3366FF', '#3399CC',
-  '#3399FF', '#33CC00', '#33CC33', '#33CC66', '#33CC99', '#33CCCC', '#33CCFF',
-  '#6600CC', '#6600FF', '#6633CC', '#6633FF', '#66CC00', '#66CC33', '#9900CC',
-  '#9900FF', '#9933CC', '#9933FF', '#99CC00', '#99CC33', '#CC0000', '#CC0033',
-  '#CC0066', '#CC0099', '#CC00CC', '#CC00FF', '#CC3300', '#CC3333', '#CC3366',
-  '#CC3399', '#CC33CC', '#CC33FF', '#CC6600', '#CC6633', '#CC9900', '#CC9933',
-  '#CCCC00', '#CCCC33', '#FF0000', '#FF0033', '#FF0066', '#FF0099', '#FF00CC',
-  '#FF00FF', '#FF3300', '#FF3333', '#FF3366', '#FF3399', '#FF33CC', '#FF33FF',
-  '#FF6600', '#FF6633', '#FF9900', '#FF9933', '#FFCC00', '#FFCC33'
-];
-
-/**
- * Currently only WebKit-based Web Inspectors, Firefox >= v31,
- * and the Firebug extension (any Firefox version) are known
- * to support "%c" CSS customizations.
- *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
- */
-
-function useColors() {
-  // NB: In an Electron preload script, document will be defined but not fully
-  // initialized. Since we know we're in Chrome, we'll just detect this case
-  // explicitly
-  if (typeof window !== 'undefined' && window.process && window.process.type === 'renderer') {
-    return true;
-  }
-
-  // Internet Explorer and Edge do not support colors.
-  if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
-    return false;
-  }
-
-  // is webkit? http://stackoverflow.com/a/16459606/376773
-  // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-  return (typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance) ||
-    // is firebug? http://stackoverflow.com/a/398120/376773
-    (typeof window !== 'undefined' && window.console && (window.console.firebug || (window.console.exception && window.console.table))) ||
-    // is firefox >= v31?
-    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-    (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31) ||
-    // double check webkit in userAgent just in case we are in a worker
-    (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/));
-}
-
-/**
- * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
- */
-
-exports.formatters.j = function(v) {
-  try {
-    return JSON.stringify(v);
-  } catch (err) {
-    return '[UnexpectedJSONParseError]: ' + err.message;
-  }
-};
-
-
-/**
- * Colorize log arguments if enabled.
- *
- * @api public
- */
-
-function formatArgs(args) {
-  var useColors = this.useColors;
-
-  args[0] = (useColors ? '%c' : '')
-    + this.namespace
-    + (useColors ? ' %c' : ' ')
-    + args[0]
-    + (useColors ? '%c ' : ' ')
-    + '+' + exports.humanize(this.diff);
-
-  if (!useColors) return;
-
-  var c = 'color: ' + this.color;
-  args.splice(1, 0, c, 'color: inherit');
-
-  // the final "%c" is somewhat tricky, because there could be other
-  // arguments passed either before or after the %c, so we need to
-  // figure out the correct index to insert the CSS into
-  var index = 0;
-  var lastC = 0;
-  args[0].replace(/%[a-zA-Z%]/g, function(match) {
-    if ('%%' === match) return;
-    index++;
-    if ('%c' === match) {
-      // we only are interested in the *last* %c
-      // (the user may have provided their own)
-      lastC = index;
-    }
-  });
-
-  args.splice(lastC, 0, c);
-}
-
-/**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
- *
- * @api public
- */
-
-function log() {
-  // this hackery is required for IE8/9, where
-  // the `console.log` function doesn't have 'apply'
-  return 'object' === typeof console
-    && console.log
-    && Function.prototype.apply.call(console.log, console, arguments);
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-
-function save(namespaces) {
-  try {
-    if (null == namespaces) {
-      exports.storage.removeItem('debug');
-    } else {
-      exports.storage.debug = namespaces;
-    }
-  } catch(e) {}
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-  var r;
-  try {
-    r = exports.storage.debug;
-  } catch(e) {}
-
-  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-  if (!r && typeof process !== 'undefined' && 'env' in process) {
-    r = process.env.DEBUG;
-  }
-
-  return r;
-}
-
-/**
- * Enable namespaces listed in `localStorage.debug` initially.
- */
-
-exports.enable(load());
-
-/**
- * Localstorage attempts to return the localstorage.
- *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
- *
- * @return {LocalStorage}
- * @api private
- */
-
-function localstorage() {
-  try {
-    return window.localStorage;
-  } catch (e) {}
-}
-});
-
-/**
- * Module dependencies.
- */
-
-var debug = browser('cookie');
-
-/**
- * Set or get cookie `name` with `value` and `options` object.
- *
- * @param {String} name
- * @param {String} value
- * @param {Object} options
- * @return {Mixed}
- * @api public
- */
-
-var componentCookie = function(name, value, options){
-  switch (arguments.length) {
-    case 3:
-    case 2:
-      return set$1(name, value, options);
-    case 1:
-      return get$1(name);
-    default:
-      return all();
-  }
-};
-
-/**
- * Set cookie `name` to `value`.
- *
- * @param {String} name
- * @param {String} value
- * @param {Object} options
- * @api private
- */
-
-function set$1(name, value, options) {
-  options = options || {};
-  var str = encode(name) + '=' + encode(value);
-
-  if (null == value) options.maxage = -1;
-
-  if (options.maxage) {
-    options.expires = new Date(+new Date + options.maxage);
-  }
-
-  if (options.path) str += '; path=' + options.path;
-  if (options.domain) str += '; domain=' + options.domain;
-  if (options.expires) str += '; expires=' + options.expires.toUTCString();
-  if (options.secure) str += '; secure';
-
-  document.cookie = str;
-}
-
-/**
- * Return all cookies.
- *
- * @return {Object}
- * @api private
- */
-
-function all() {
-  var str;
-  try {
-    str = document.cookie;
-  } catch (err) {
-    if (typeof console !== 'undefined' && typeof console.error === 'function') {
-      console.error(err.stack || err);
-    }
-    return {};
-  }
-  return parse(str);
-}
-
-/**
- * Get cookie `name`.
- *
- * @param {String} name
- * @return {String}
- * @api private
- */
-
-function get$1(name) {
-  return all()[name];
-}
-
-/**
- * Parse cookie `str`.
- *
- * @param {String} str
- * @return {Object}
- * @api private
- */
-
-function parse(str) {
-  var obj = {};
-  var pairs = str.split(/ *; */);
-  var pair;
-  if ('' == pairs[0]) return obj;
-  for (var i = 0; i < pairs.length; ++i) {
-    pair = pairs[i].split('=');
-    obj[decode(pair[0])] = decode(pair[1]);
-  }
   return obj;
-}
+};
 
-/**
- * Encode.
- */
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
 
-function encode(value){
-  try {
-    return encodeURIComponent(value);
-  } catch (e) {
-    debug('error `encode(%o)` - %o', value, e);
-  }
-}
-
-/**
- * Decode.
- */
-
-function decode(value) {
-  try {
-    return decodeURIComponent(value);
-  } catch (e) {
-    debug('error `decode(%o)` - %o', value, e);
-  }
-}
-
-var lib = createCommonjsModule(function (module, exports) {
-'use strict';
-
-/**
- * Module dependencies.
- */
-
-var parse = componentUrl.parse;
-
-
-/**
- * Get the top domain.
- *
- * The function constructs the levels of domain and attempts to set a global
- * cookie on each one when it succeeds it returns the top level domain.
- *
- * The method returns an empty string when the hostname is an ip or `localhost`.
- *
- * Example levels:
- *
- *      domain.levels('http://www.google.co.uk');
- *      // => ["co.uk", "google.co.uk", "www.google.co.uk"]
- *
- * Example:
- *
- *      domain('http://localhost:3000/baz');
- *      // => ''
- *      domain('http://dev:3000/baz');
- *      // => ''
- *      domain('http://127.0.0.1:3000/baz');
- *      // => ''
- *      domain('http://segment.io/baz');
- *      // => 'segment.io'
- *
- * @param {string} url
- * @return {string}
- * @api public
- */
-function domain(url) {
-  var cookie$$1 = exports.cookie;
-  var levels = exports.levels(url);
-
-  // Lookup the real top level one.
-  for (var i = 0; i < levels.length; ++i) {
-    var cname = '__tld__';
-    var domain = levels[i];
-    var opts = { domain: '.' + domain };
-
-    cookie$$1(cname, 1, opts);
-    if (cookie$$1(cname)) {
-      cookie$$1(cname, null, opts);
-      return domain;
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
     }
   }
 
-  return '';
-}
-
-/**
- * Levels returns all levels of the given url.
- *
- * @param {string} url
- * @return {Array}
- * @api public
- */
-domain.levels = function(url) {
-  var host = parse(url).hostname;
-  var parts = host.split('.');
-  var last = parts[parts.length - 1];
-  var levels = [];
-
-  // Ip address.
-  if (parts.length === 4 && last === parseInt(last, 10)) {
-    return levels;
-  }
-
-  // Localhost.
-  if (parts.length <= 1) {
-    return levels;
-  }
-
-  // Create levels.
-  for (var i = parts.length - 2; i >= 0; --i) {
-    levels.push(parts.slice(i).join('.'));
-  }
-
-  return levels;
+  return target;
 };
-
-/**
- * Expose cookie on domain.
- */
-domain.cookie = componentCookie;
-
-/*
- * Exports.
- */
-
-exports = module.exports = domain;
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 /**
  * toString ref.
@@ -2017,7 +1150,7 @@ var toString = Object.prototype.toString;
  * @api public
  */
 
-var type = function (val) {
+function type (val) {
   switch (toString.call(val)) {
     case '[object Date]':
       return 'date';
@@ -2050,7 +1183,7 @@ var type = function (val) {
 
   val = val.valueOf ? val.valueOf() : Object.prototype.valueOf.apply(val);
   return typeof val === 'undefined' ? 'undefined' : _typeof(val);
-};
+}
 
 var logLevels = {
   DISABLE: 0,
@@ -2297,6 +1430,57 @@ var utils = {
   validateProperties: validateProperties
 };
 
+var getLocation = function getLocation() {
+  return window.location;
+};
+
+var get = function get(name) {
+  try {
+    var ca = document.cookie.split(';');
+    var value = null;
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) === ' ') {
+        c = c.substring(1, c.length);
+      }
+      if (c.indexOf(name) === 0) {
+        value = c.substring(name.length, c.length);
+        break;
+      }
+    }
+
+    return value;
+  } catch (e) {
+    return null;
+  }
+};
+
+var set = function set(name, value, opts) {
+  var expires = value !== null ? opts.expirationDays : -1;
+  if (expires) {
+    var date = new Date();
+    date.setTime(date.getTime() + expires * 24 * 60 * 60 * 1000);
+    expires = date;
+  }
+  var str = name + '=' + value;
+  if (expires) {
+    str += '; expires=' + expires.toUTCString();
+  }
+  str += '; path=/';
+  if (opts.domain) {
+    str += '; domain=' + opts.domain;
+  }
+  if (opts.secure) {
+    str += '; Secure';
+  }
+  document.cookie = str;
+};
+
+var baseCookie = {
+  set: set,
+  get: get
+};
+
 /*
  * Cookie data
  */
@@ -2313,6 +1497,45 @@ var reset = function reset() {
   };
 };
 
+var getHost = function getHost(url) {
+  var a = document.createElement('a');
+  a.href = url;
+  return a.hostname || location.hostname;
+};
+
+var topDomain = function topDomain(url) {
+  var host = getHost(url);
+  var parts = host.split('.');
+  var last = parts[parts.length - 1];
+  var levels = [];
+
+  if (parts.length === 4 && last === parseInt(last, 10)) {
+    return levels;
+  }
+
+  if (parts.length <= 1) {
+    return levels;
+  }
+
+  for (var i = parts.length - 2; i >= 0; --i) {
+    levels.push(parts.slice(i).join('.'));
+  }
+
+  for (var _i = 0; _i < levels.length; ++_i) {
+    var cname = '__tld_test__';
+    var domain = levels[_i];
+    var opts = { domain: '.' + domain };
+
+    baseCookie.set(cname, 1, opts);
+    if (baseCookie.get(cname)) {
+      baseCookie.set(cname, null, opts);
+      return domain;
+    }
+  }
+
+  return '';
+};
+
 var options = function options(opts) {
   if (arguments.length === 0) {
     return _options;
@@ -2321,17 +1544,20 @@ var options = function options(opts) {
   opts = opts || {};
 
   _options.expirationDays = opts.expirationDays;
+  _options.secure = opts.secure;
 
-  var domain = !utils.isEmptyString(opts.domain) ? opts.domain : '.' + lib(window.location.href);
+  var domain = !utils.isEmptyString(opts.domain) ? opts.domain : '.' + topDomain(getLocation().href);
   var token = Math.random();
   _options.domain = domain;
-  set('amplitude_test', token);
-  var stored = get('amplitude_test');
+  set$1('amplitude_test', token);
+  var stored = get$1('amplitude_test');
   if (!stored || stored !== token) {
     domain = null;
   }
   remove('amplitude_test');
   _options.domain = domain;
+
+  return _options;
 };
 
 var _domainSpecific = function _domainSpecific(name) {
@@ -2343,61 +1569,33 @@ var _domainSpecific = function _domainSpecific(name) {
   return name + suffix;
 };
 
-var get = function get(name) {
-  try {
-    var nameEq = _domainSpecific(name) + '=';
-    var ca = document.cookie.split(';');
-    var value = null;
-    for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) === ' ') {
-        c = c.substring(1, c.length);
-      }
-      if (c.indexOf(nameEq) === 0) {
-        value = c.substring(nameEq.length, c.length);
-        break;
-      }
-    }
+var get$1 = function get(name) {
+  var nameEq = _domainSpecific(name) + '=';
+  var value = baseCookie.get(nameEq);
 
+  try {
     if (value) {
       return JSON.parse(Base64.decode(value));
     }
-    return null;
   } catch (e) {
     return null;
   }
+
+  return null;
 };
 
-var set = function set(name, value) {
+var set$1 = function set(name, value) {
   try {
-    _set(_domainSpecific(name), Base64.encode(JSON.stringify(value)), _options);
+    baseCookie.set(_domainSpecific(name), Base64.encode(JSON.stringify(value)), _options);
     return true;
   } catch (e) {
     return false;
   }
 };
 
-var _set = function _set(name, value, opts) {
-  var expires = value !== null ? opts.expirationDays : -1;
-  if (expires) {
-    var date = new Date();
-    date.setTime(date.getTime() + expires * 24 * 60 * 60 * 1000);
-    expires = date;
-  }
-  var str = name + '=' + value;
-  if (expires) {
-    str += '; expires=' + expires.toUTCString();
-  }
-  str += '; path=/';
-  if (opts.domain) {
-    str += '; domain=' + opts.domain;
-  }
-  document.cookie = str;
-};
-
 var remove = function remove(name) {
   try {
-    _set(_domainSpecific(name), null, _options);
+    baseCookie.set(_domainSpecific(name), null, _options);
     return true;
   } catch (e) {
     return false;
@@ -2407,115 +1605,108 @@ var remove = function remove(name) {
 var Cookie = {
   reset: reset,
   options: options,
-  get: get,
-  set: set,
+  get: get$1,
+  set: set$1,
   remove: remove
-
 };
 
 /* jshint -W020, unused: false, noempty: false, boss: true */
 
-/*
- * Implement localStorage to support Firefox 2-3 and IE 5-7
- */
-var localStorage; // jshint ignore:line
+{
+  var localStorage; // jshint ignore:line
 
-// test that Window.localStorage is available and works
-function windowLocalStorageAvailable() {
-  var uid = new Date();
-  var result;
-  try {
-    window.localStorage.setItem(uid, uid);
-    result = window.localStorage.getItem(uid) === String(uid);
-    window.localStorage.removeItem(uid);
-    return result;
-  } catch (e) {
-    // localStorage not available
-  }
-  return false;
-}
+  // test that Window.localStorage is available and works
+  var windowLocalStorageAvailable = function windowLocalStorageAvailable() {
+    var uid = new Date();
+    var result;
+    try {
+      window.localStorage.setItem(uid, uid);
+      result = window.localStorage.getItem(uid) === String(uid);
+      window.localStorage.removeItem(uid);
+      return result;
+    } catch (e) {
+      // localStorage not available
+    }
+    return false;
+  };
 
-if (windowLocalStorageAvailable()) {
-  localStorage = window.localStorage;
-} else if (window.globalStorage) {
-  // Firefox 2-3 use globalStorage
-  // See https://developer.mozilla.org/en/dom/storage#globalStorage
-  try {
-    localStorage = window.globalStorage[window.location.hostname];
-  } catch (e) {
-    // Something bad happened...
+  if (windowLocalStorageAvailable()) {
+    localStorage = window.localStorage;
+  } else if (window.globalStorage) {
+    // Firefox 2-3 use globalStorage
+    // See https://developer.mozilla.org/en/dom/storage#globalStorage
+    try {
+      localStorage = window.globalStorage[window.location.hostname];
+    } catch (e) {
+      // Something bad happened...
+    }
+  } else {
+    // IE 5-7 use userData
+    // See http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx
+    var div = document.createElement('div'),
+        attrKey = 'localStorage';
+    div.style.display = 'none';
+    document.getElementsByTagName('head')[0].appendChild(div);
+    if (div.addBehavior) {
+      div.addBehavior('#default#userdata');
+      localStorage = {
+        length: 0,
+        setItem: function setItem(k, v) {
+          div.load(attrKey);
+          if (!div.getAttribute(k)) {
+            this.length++;
+          }
+          div.setAttribute(k, v);
+          div.save(attrKey);
+        },
+        getItem: function getItem(k) {
+          div.load(attrKey);
+          return div.getAttribute(k);
+        },
+        removeItem: function removeItem(k) {
+          div.load(attrKey);
+          if (div.getAttribute(k)) {
+            this.length--;
+          }
+          div.removeAttribute(k);
+          div.save(attrKey);
+        },
+        clear: function clear() {
+          div.load(attrKey);
+          var i = 0;
+          var attr;
+          while (attr = div.XMLDocument.documentElement.attributes[i++]) {
+            div.removeAttribute(attr.name);
+          }
+          div.save(attrKey);
+          this.length = 0;
+        },
+        key: function key(k) {
+          div.load(attrKey);
+          return div.XMLDocument.documentElement.attributes[k];
+        }
+      };
+      div.load(attrKey);
+      localStorage.length = div.XMLDocument.documentElement.attributes.length;
+    } else {
+      /* Nothing we can do ... */
+    }
   }
-} else {
-  // IE 5-7 use userData
-  // See http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx
-  var div = document.createElement('div'),
-      attrKey = 'localStorage';
-  div.style.display = 'none';
-  document.getElementsByTagName('head')[0].appendChild(div);
-  if (div.addBehavior) {
-    div.addBehavior('#default#userdata');
+  if (!localStorage) {
     localStorage = {
       length: 0,
-      setItem: function setItem(k, v) {
-        div.load(attrKey);
-        if (!div.getAttribute(k)) {
-          this.length++;
-        }
-        div.setAttribute(k, v);
-        div.save(attrKey);
-      },
-      getItem: function getItem(k) {
-        div.load(attrKey);
-        return div.getAttribute(k);
-      },
-      removeItem: function removeItem(k) {
-        div.load(attrKey);
-        if (div.getAttribute(k)) {
-          this.length--;
-        }
-        div.removeAttribute(k);
-        div.save(attrKey);
-      },
-      clear: function clear() {
-        div.load(attrKey);
-        var i = 0;
-        var attr;
-        while (attr = div.XMLDocument.documentElement.attributes[i++]) {
-          div.removeAttribute(attr.name);
-        }
-        div.save(attrKey);
-        this.length = 0;
-      },
-      key: function key(k) {
-        div.load(attrKey);
-        return div.XMLDocument.documentElement.attributes[k];
-      }
+      setItem: function setItem(k, v) {},
+      getItem: function getItem(k) {},
+      removeItem: function removeItem(k) {},
+      clear: function clear() {},
+      key: function key(k) {}
     };
-    div.load(attrKey);
-    localStorage.length = div.XMLDocument.documentElement.attributes.length;
-  } else {
-    /* Nothing we can do ... */
   }
-}
-if (!localStorage) {
-  localStorage = {
-    length: 0,
-    setItem: function setItem(k, v) {},
-    getItem: function getItem(k) {},
-    removeItem: function removeItem(k) {},
-    clear: function clear() {},
-    key: function key(k) {}
-  };
 }
 
 var localStorage$1 = localStorage;
 
 /* jshint -W020, unused: false, noempty: false, boss: true */
-
-/*
- * Abstraction layer for cookie storage.
- * Uses cookie if available, otherwise fallback to localstorage.
- */
 
 var cookieStorage = function cookieStorage() {
   this.storage = null;
@@ -2550,12 +1741,14 @@ cookieStorage.prototype.getStorage = function () {
     this.storage = {
       _options: {
         expirationDays: undefined,
-        domain: undefined
+        domain: undefined,
+        secure: false
       },
       reset: function reset() {
         this._options = {
           expirationDays: undefined,
-          domain: undefined
+          domain: undefined,
+          secure: false
         };
       },
       options: function options(opts) {
@@ -2566,7 +1759,7 @@ cookieStorage.prototype.getStorage = function () {
         this._options.expirationDays = opts.expirationDays || this._options.expirationDays;
         // localStorage is specific to subdomains
         this._options.domain = opts.domain || this._options.domain || window.location.hostname;
-        return this._options;
+        return this._options.secure = opts.secure || false;
       },
       get: function get(name) {
         try {
@@ -2805,29 +1998,7 @@ Identify.prototype._addOperation = function (operation, property, value) {
 };
 
 var md5 = createCommonjsModule(function (module) {
-/*
- * JavaScript MD5
- * https://github.com/blueimp/JavaScript-MD5
- *
- * Copyright 2011, Sebastian Tschan
- * https://blueimp.net
- *
- * Licensed under the MIT license:
- * https://opensource.org/licenses/MIT
- *
- * Based on
- * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
- * Digest Algorithm, as defined in RFC 1321.
- * Version 2.2 Copyright (C) Paul Johnston 1999 - 2009
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- * Distributed under the BSD License
- * See http://pajhome.org.uk/crypt/md5 for more info.
- */
-
-/* global define */
-
 (function ($) {
-  'use strict';
 
   /*
   * Add integers, wrapping at 2^32. This uses 16-bit operations internally
@@ -3087,2417 +2258,420 @@ var md5 = createCommonjsModule(function (module) {
 })(commonjsGlobal);
 });
 
-/**
- * Removes all key-value entries from the list cache.
- *
- * @private
- * @name clear
- * @memberOf ListCache
- */
-function listCacheClear() {
-  this.__data__ = [];
-  this.size = 0;
-}
-
-var _listCacheClear = listCacheClear;
-
-/**
- * Performs a
- * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
- * comparison between two values to determine if they are equivalent.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to compare.
- * @param {*} other The other value to compare.
- * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
- * @example
- *
- * var object = { 'a': 1 };
- * var other = { 'a': 1 };
- *
- * _.eq(object, object);
- * // => true
- *
- * _.eq(object, other);
- * // => false
- *
- * _.eq('a', 'a');
- * // => true
- *
- * _.eq('a', Object('a'));
- * // => false
- *
- * _.eq(NaN, NaN);
- * // => true
- */
-function eq(value, other) {
-  return value === other || (value !== value && other !== other);
-}
-
-var eq_1 = eq;
-
-/**
- * Gets the index at which the `key` is found in `array` of key-value pairs.
- *
- * @private
- * @param {Array} array The array to inspect.
- * @param {*} key The key to search for.
- * @returns {number} Returns the index of the matched value, else `-1`.
- */
-function assocIndexOf(array, key) {
-  var length = array.length;
-  while (length--) {
-    if (eq_1(array[length][0], key)) {
-      return length;
-    }
-  }
-  return -1;
-}
-
-var _assocIndexOf = assocIndexOf;
-
-/** Used for built-in method references. */
-var arrayProto = Array.prototype;
-
-/** Built-in value references. */
-var splice = arrayProto.splice;
-
-/**
- * Removes `key` and its value from the list cache.
- *
- * @private
- * @name delete
- * @memberOf ListCache
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
- */
-function listCacheDelete(key) {
-  var data = this.__data__,
-      index = _assocIndexOf(data, key);
-
-  if (index < 0) {
-    return false;
-  }
-  var lastIndex = data.length - 1;
-  if (index == lastIndex) {
-    data.pop();
-  } else {
-    splice.call(data, index, 1);
-  }
-  --this.size;
-  return true;
-}
-
-var _listCacheDelete = listCacheDelete;
-
-/**
- * Gets the list cache value for `key`.
- *
- * @private
- * @name get
- * @memberOf ListCache
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
- */
-function listCacheGet(key) {
-  var data = this.__data__,
-      index = _assocIndexOf(data, key);
-
-  return index < 0 ? undefined : data[index][1];
-}
-
-var _listCacheGet = listCacheGet;
-
-/**
- * Checks if a list cache value for `key` exists.
- *
- * @private
- * @name has
- * @memberOf ListCache
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
- */
-function listCacheHas(key) {
-  return _assocIndexOf(this.__data__, key) > -1;
-}
-
-var _listCacheHas = listCacheHas;
-
-/**
- * Sets the list cache `key` to `value`.
- *
- * @private
- * @name set
- * @memberOf ListCache
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the list cache instance.
- */
-function listCacheSet(key, value) {
-  var data = this.__data__,
-      index = _assocIndexOf(data, key);
-
-  if (index < 0) {
-    ++this.size;
-    data.push([key, value]);
-  } else {
-    data[index][1] = value;
-  }
-  return this;
-}
-
-var _listCacheSet = listCacheSet;
-
-/**
- * Creates an list cache object.
- *
- * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
- */
-function ListCache(entries) {
-  var index = -1,
-      length = entries == null ? 0 : entries.length;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-
-// Add methods to `ListCache`.
-ListCache.prototype.clear = _listCacheClear;
-ListCache.prototype['delete'] = _listCacheDelete;
-ListCache.prototype.get = _listCacheGet;
-ListCache.prototype.has = _listCacheHas;
-ListCache.prototype.set = _listCacheSet;
-
-var _ListCache = ListCache;
-
-/**
- * Removes all key-value entries from the stack.
- *
- * @private
- * @name clear
- * @memberOf Stack
- */
-function stackClear() {
-  this.__data__ = new _ListCache;
-  this.size = 0;
-}
-
-var _stackClear = stackClear;
-
-/**
- * Removes `key` and its value from the stack.
- *
- * @private
- * @name delete
- * @memberOf Stack
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
- */
-function stackDelete(key) {
-  var data = this.__data__,
-      result = data['delete'](key);
-
-  this.size = data.size;
-  return result;
-}
-
-var _stackDelete = stackDelete;
-
-/**
- * Gets the stack value for `key`.
- *
- * @private
- * @name get
- * @memberOf Stack
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
- */
-function stackGet(key) {
-  return this.__data__.get(key);
-}
-
-var _stackGet = stackGet;
-
-/**
- * Checks if a stack value for `key` exists.
- *
- * @private
- * @name has
- * @memberOf Stack
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
- */
-function stackHas(key) {
-  return this.__data__.has(key);
-}
-
-var _stackHas = stackHas;
-
-/** Detect free variable `global` from Node.js. */
-var freeGlobal = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
-
-var _freeGlobal = freeGlobal;
-
-/** Detect free variable `self`. */
-var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
-
-/** Used as a reference to the global object. */
-var root = _freeGlobal || freeSelf || Function('return this')();
-
-var _root = root;
-
-/** Built-in value references. */
-var Symbol$1 = _root.Symbol;
-
-var _Symbol = Symbol$1;
-
-/** Used for built-in method references. */
-var objectProto$1 = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$1 = objectProto$1.hasOwnProperty;
-
-/**
- * Used to resolve the
- * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
- * of values.
- */
-var nativeObjectToString = objectProto$1.toString;
-
-/** Built-in value references. */
-var symToStringTag$1 = _Symbol ? _Symbol.toStringTag : undefined;
-
-/**
- * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
- *
- * @private
- * @param {*} value The value to query.
- * @returns {string} Returns the raw `toStringTag`.
- */
-function getRawTag(value) {
-  var isOwn = hasOwnProperty$1.call(value, symToStringTag$1),
-      tag = value[symToStringTag$1];
-
-  try {
-    value[symToStringTag$1] = undefined;
-    var unmasked = true;
-  } catch (e) {}
-
-  var result = nativeObjectToString.call(value);
-  if (unmasked) {
-    if (isOwn) {
-      value[symToStringTag$1] = tag;
-    } else {
-      delete value[symToStringTag$1];
-    }
-  }
-  return result;
-}
-
-var _getRawTag = getRawTag;
-
-/** Used for built-in method references. */
-var objectProto$2 = Object.prototype;
-
-/**
- * Used to resolve the
- * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
- * of values.
- */
-var nativeObjectToString$1 = objectProto$2.toString;
-
-/**
- * Converts `value` to a string using `Object.prototype.toString`.
- *
- * @private
- * @param {*} value The value to convert.
- * @returns {string} Returns the converted string.
- */
-function objectToString(value) {
-  return nativeObjectToString$1.call(value);
-}
-
-var _objectToString = objectToString;
-
-/** `Object#toString` result references. */
-var nullTag = '[object Null]';
-var undefinedTag = '[object Undefined]';
-
-/** Built-in value references. */
-var symToStringTag = _Symbol ? _Symbol.toStringTag : undefined;
-
-/**
- * The base implementation of `getTag` without fallbacks for buggy environments.
- *
- * @private
- * @param {*} value The value to query.
- * @returns {string} Returns the `toStringTag`.
- */
-function baseGetTag(value) {
-  if (value == null) {
-    return value === undefined ? undefinedTag : nullTag;
-  }
-  return (symToStringTag && symToStringTag in Object(value))
-    ? _getRawTag(value)
-    : _objectToString(value);
-}
-
-var _baseGetTag = baseGetTag;
-
-/**
- * Checks if `value` is the
- * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
- * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */
-function isObject(value) {
-  var type = typeof value;
-  return value != null && (type == 'object' || type == 'function');
-}
-
-var isObject_1 = isObject;
-
-/** `Object#toString` result references. */
-var asyncTag = '[object AsyncFunction]';
-var funcTag = '[object Function]';
-var genTag = '[object GeneratorFunction]';
-var proxyTag = '[object Proxy]';
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a function, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  if (!isObject_1(value)) {
-    return false;
-  }
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in Safari 9 which returns 'object' for typed arrays and other constructors.
-  var tag = _baseGetTag(value);
-  return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
-}
-
-var isFunction_1 = isFunction;
-
-/** Used to detect overreaching core-js shims. */
-var coreJsData = _root['__core-js_shared__'];
-
-var _coreJsData = coreJsData;
-
-/** Used to detect methods masquerading as native. */
-var maskSrcKey = (function() {
-  var uid = /[^.]+$/.exec(_coreJsData && _coreJsData.keys && _coreJsData.keys.IE_PROTO || '');
-  return uid ? ('Symbol(src)_1.' + uid) : '';
-}());
-
-/**
- * Checks if `func` has its source masked.
- *
- * @private
- * @param {Function} func The function to check.
- * @returns {boolean} Returns `true` if `func` is masked, else `false`.
- */
-function isMasked(func) {
-  return !!maskSrcKey && (maskSrcKey in func);
-}
-
-var _isMasked = isMasked;
-
-/** Used for built-in method references. */
-var funcProto$1 = Function.prototype;
-
-/** Used to resolve the decompiled source of functions. */
-var funcToString$1 = funcProto$1.toString;
-
-/**
- * Converts `func` to its source code.
- *
- * @private
- * @param {Function} func The function to convert.
- * @returns {string} Returns the source code.
- */
-function toSource(func) {
-  if (func != null) {
-    try {
-      return funcToString$1.call(func);
-    } catch (e) {}
-    try {
-      return (func + '');
-    } catch (e) {}
-  }
-  return '';
-}
-
-var _toSource = toSource;
-
-/**
- * Used to match `RegExp`
- * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
- */
-var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
-
-/** Used to detect host constructors (Safari). */
-var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/** Used for built-in method references. */
-var funcProto = Function.prototype;
-var objectProto = Object.prototype;
-
-/** Used to resolve the decompiled source of functions. */
-var funcToString = funcProto.toString;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/** Used to detect if a method is native. */
-var reIsNative = RegExp('^' +
-  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
-  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-);
-
-/**
- * The base implementation of `_.isNative` without bad shim checks.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a native function,
- *  else `false`.
- */
-function baseIsNative(value) {
-  if (!isObject_1(value) || _isMasked(value)) {
-    return false;
-  }
-  var pattern = isFunction_1(value) ? reIsNative : reIsHostCtor;
-  return pattern.test(_toSource(value));
-}
-
-var _baseIsNative = baseIsNative;
-
-/**
- * Gets the value at `key` of `object`.
- *
- * @private
- * @param {Object} [object] The object to query.
- * @param {string} key The key of the property to get.
- * @returns {*} Returns the property value.
- */
-function getValue(object, key) {
-  return object == null ? undefined : object[key];
-}
-
-var _getValue = getValue;
-
-/**
- * Gets the native function at `key` of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {string} key The key of the method to get.
- * @returns {*} Returns the function if it's native, else `undefined`.
- */
-function getNative(object, key) {
-  var value = _getValue(object, key);
-  return _baseIsNative(value) ? value : undefined;
-}
-
-var _getNative = getNative;
-
-/* Built-in method references that are verified to be native. */
-var Map = _getNative(_root, 'Map');
-
-var _Map = Map;
-
-/* Built-in method references that are verified to be native. */
-var nativeCreate = _getNative(Object, 'create');
-
-var _nativeCreate = nativeCreate;
-
-/**
- * Removes all key-value entries from the hash.
- *
- * @private
- * @name clear
- * @memberOf Hash
- */
-function hashClear() {
-  this.__data__ = _nativeCreate ? _nativeCreate(null) : {};
-  this.size = 0;
-}
-
-var _hashClear = hashClear;
-
-/**
- * Removes `key` and its value from the hash.
- *
- * @private
- * @name delete
- * @memberOf Hash
- * @param {Object} hash The hash to modify.
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
- */
-function hashDelete(key) {
-  var result = this.has(key) && delete this.__data__[key];
-  this.size -= result ? 1 : 0;
-  return result;
-}
-
-var _hashDelete = hashDelete;
-
-/** Used to stand-in for `undefined` hash values. */
-var HASH_UNDEFINED = '__lodash_hash_undefined__';
-
-/** Used for built-in method references. */
-var objectProto$3 = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$2 = objectProto$3.hasOwnProperty;
-
-/**
- * Gets the hash value for `key`.
- *
- * @private
- * @name get
- * @memberOf Hash
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
- */
-function hashGet(key) {
-  var data = this.__data__;
-  if (_nativeCreate) {
-    var result = data[key];
-    return result === HASH_UNDEFINED ? undefined : result;
-  }
-  return hasOwnProperty$2.call(data, key) ? data[key] : undefined;
-}
-
-var _hashGet = hashGet;
-
-/** Used for built-in method references. */
-var objectProto$4 = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$3 = objectProto$4.hasOwnProperty;
-
-/**
- * Checks if a hash value for `key` exists.
- *
- * @private
- * @name has
- * @memberOf Hash
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
- */
-function hashHas(key) {
-  var data = this.__data__;
-  return _nativeCreate ? (data[key] !== undefined) : hasOwnProperty$3.call(data, key);
-}
-
-var _hashHas = hashHas;
-
-/** Used to stand-in for `undefined` hash values. */
-var HASH_UNDEFINED$1 = '__lodash_hash_undefined__';
-
-/**
- * Sets the hash `key` to `value`.
- *
- * @private
- * @name set
- * @memberOf Hash
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the hash instance.
- */
-function hashSet(key, value) {
-  var data = this.__data__;
-  this.size += this.has(key) ? 0 : 1;
-  data[key] = (_nativeCreate && value === undefined) ? HASH_UNDEFINED$1 : value;
-  return this;
-}
-
-var _hashSet = hashSet;
-
-/**
- * Creates a hash object.
- *
- * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
- */
-function Hash(entries) {
-  var index = -1,
-      length = entries == null ? 0 : entries.length;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-
-// Add methods to `Hash`.
-Hash.prototype.clear = _hashClear;
-Hash.prototype['delete'] = _hashDelete;
-Hash.prototype.get = _hashGet;
-Hash.prototype.has = _hashHas;
-Hash.prototype.set = _hashSet;
-
-var _Hash = Hash;
-
-/**
- * Removes all key-value entries from the map.
- *
- * @private
- * @name clear
- * @memberOf MapCache
- */
-function mapCacheClear() {
-  this.size = 0;
-  this.__data__ = {
-    'hash': new _Hash,
-    'map': new (_Map || _ListCache),
-    'string': new _Hash
-  };
-}
-
-var _mapCacheClear = mapCacheClear;
-
-/**
- * Checks if `value` is suitable for use as unique object key.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
- */
-function isKeyable(value) {
-  var type = typeof value;
-  return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
-    ? (value !== '__proto__')
-    : (value === null);
-}
-
-var _isKeyable = isKeyable;
-
-/**
- * Gets the data for `map`.
- *
- * @private
- * @param {Object} map The map to query.
- * @param {string} key The reference key.
- * @returns {*} Returns the map data.
- */
-function getMapData(map, key) {
-  var data = map.__data__;
-  return _isKeyable(key)
-    ? data[typeof key == 'string' ? 'string' : 'hash']
-    : data.map;
-}
-
-var _getMapData = getMapData;
-
-/**
- * Removes `key` and its value from the map.
- *
- * @private
- * @name delete
- * @memberOf MapCache
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
- */
-function mapCacheDelete(key) {
-  var result = _getMapData(this, key)['delete'](key);
-  this.size -= result ? 1 : 0;
-  return result;
-}
-
-var _mapCacheDelete = mapCacheDelete;
-
-/**
- * Gets the map value for `key`.
- *
- * @private
- * @name get
- * @memberOf MapCache
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
- */
-function mapCacheGet(key) {
-  return _getMapData(this, key).get(key);
-}
-
-var _mapCacheGet = mapCacheGet;
-
-/**
- * Checks if a map value for `key` exists.
- *
- * @private
- * @name has
- * @memberOf MapCache
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
- */
-function mapCacheHas(key) {
-  return _getMapData(this, key).has(key);
-}
-
-var _mapCacheHas = mapCacheHas;
-
-/**
- * Sets the map `key` to `value`.
- *
- * @private
- * @name set
- * @memberOf MapCache
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the map cache instance.
- */
-function mapCacheSet(key, value) {
-  var data = _getMapData(this, key),
-      size = data.size;
-
-  data.set(key, value);
-  this.size += data.size == size ? 0 : 1;
-  return this;
-}
-
-var _mapCacheSet = mapCacheSet;
-
-/**
- * Creates a map cache object to store key-value pairs.
- *
- * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
- */
-function MapCache(entries) {
-  var index = -1,
-      length = entries == null ? 0 : entries.length;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
-}
-
-// Add methods to `MapCache`.
-MapCache.prototype.clear = _mapCacheClear;
-MapCache.prototype['delete'] = _mapCacheDelete;
-MapCache.prototype.get = _mapCacheGet;
-MapCache.prototype.has = _mapCacheHas;
-MapCache.prototype.set = _mapCacheSet;
-
-var _MapCache = MapCache;
-
-/** Used as the size to enable large array optimizations. */
-var LARGE_ARRAY_SIZE = 200;
-
-/**
- * Sets the stack `key` to `value`.
- *
- * @private
- * @name set
- * @memberOf Stack
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the stack cache instance.
- */
-function stackSet(key, value) {
-  var data = this.__data__;
-  if (data instanceof _ListCache) {
-    var pairs = data.__data__;
-    if (!_Map || (pairs.length < LARGE_ARRAY_SIZE - 1)) {
-      pairs.push([key, value]);
-      this.size = ++data.size;
-      return this;
-    }
-    data = this.__data__ = new _MapCache(pairs);
-  }
-  data.set(key, value);
-  this.size = data.size;
-  return this;
-}
-
-var _stackSet = stackSet;
-
-/**
- * Creates a stack cache object to store key-value pairs.
- *
- * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
- */
-function Stack(entries) {
-  var data = this.__data__ = new _ListCache(entries);
-  this.size = data.size;
-}
-
-// Add methods to `Stack`.
-Stack.prototype.clear = _stackClear;
-Stack.prototype['delete'] = _stackDelete;
-Stack.prototype.get = _stackGet;
-Stack.prototype.has = _stackHas;
-Stack.prototype.set = _stackSet;
-
-var _Stack = Stack;
-
-var defineProperty = (function() {
-  try {
-    var func = _getNative(Object, 'defineProperty');
-    func({}, '', {});
-    return func;
-  } catch (e) {}
-}());
-
-var _defineProperty$1 = defineProperty;
-
-/**
- * The base implementation of `assignValue` and `assignMergeValue` without
- * value checks.
- *
- * @private
- * @param {Object} object The object to modify.
- * @param {string} key The key of the property to assign.
- * @param {*} value The value to assign.
- */
-function baseAssignValue(object, key, value) {
-  if (key == '__proto__' && _defineProperty$1) {
-    _defineProperty$1(object, key, {
-      'configurable': true,
-      'enumerable': true,
-      'value': value,
-      'writable': true
-    });
-  } else {
-    object[key] = value;
-  }
-}
-
-var _baseAssignValue = baseAssignValue;
-
-/**
- * This function is like `assignValue` except that it doesn't assign
- * `undefined` values.
- *
- * @private
- * @param {Object} object The object to modify.
- * @param {string} key The key of the property to assign.
- * @param {*} value The value to assign.
- */
-function assignMergeValue(object, key, value) {
-  if ((value !== undefined && !eq_1(object[key], value)) ||
-      (value === undefined && !(key in object))) {
-    _baseAssignValue(object, key, value);
-  }
-}
-
-var _assignMergeValue = assignMergeValue;
-
-/**
- * Creates a base function for methods like `_.forIn` and `_.forOwn`.
- *
- * @private
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {Function} Returns the new base function.
- */
-function createBaseFor(fromRight) {
-  return function(object, iteratee, keysFunc) {
-    var index = -1,
-        iterable = Object(object),
-        props = keysFunc(object),
-        length = props.length;
-
-    while (length--) {
-      var key = props[fromRight ? length : ++index];
-      if (iteratee(iterable[key], key, iterable) === false) {
-        break;
-      }
-    }
-    return object;
-  };
-}
-
-var _createBaseFor = createBaseFor;
-
-/**
- * The base implementation of `baseForOwn` which iterates over `object`
- * properties returned by `keysFunc` and invokes `iteratee` for each property.
- * Iteratee functions may exit iteration early by explicitly returning `false`.
- *
- * @private
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @param {Function} keysFunc The function to get the keys of `object`.
- * @returns {Object} Returns `object`.
- */
-var baseFor = _createBaseFor();
-
-var _baseFor = baseFor;
-
-var _cloneBuffer = createCommonjsModule(function (module, exports) {
-/** Detect free variable `exports`. */
-var freeExports = 'object' == 'object' && exports && !exports.nodeType && exports;
-
-/** Detect free variable `module`. */
-var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
-
-/** Detect the popular CommonJS extension `module.exports`. */
-var moduleExports = freeModule && freeModule.exports === freeExports;
-
-/** Built-in value references. */
-var Buffer = moduleExports ? _root.Buffer : undefined,
-    allocUnsafe = Buffer ? Buffer.allocUnsafe : undefined;
-
-/**
- * Creates a clone of  `buffer`.
- *
- * @private
- * @param {Buffer} buffer The buffer to clone.
- * @param {boolean} [isDeep] Specify a deep clone.
- * @returns {Buffer} Returns the cloned buffer.
- */
-function cloneBuffer(buffer, isDeep) {
-  if (isDeep) {
-    return buffer.slice();
-  }
-  var length = buffer.length,
-      result = allocUnsafe ? allocUnsafe(length) : new buffer.constructor(length);
-
-  buffer.copy(result);
-  return result;
-}
-
-module.exports = cloneBuffer;
-});
-
-/** Built-in value references. */
-var Uint8Array = _root.Uint8Array;
-
-var _Uint8Array = Uint8Array;
-
-/**
- * Creates a clone of `arrayBuffer`.
- *
- * @private
- * @param {ArrayBuffer} arrayBuffer The array buffer to clone.
- * @returns {ArrayBuffer} Returns the cloned array buffer.
- */
-function cloneArrayBuffer(arrayBuffer) {
-  var result = new arrayBuffer.constructor(arrayBuffer.byteLength);
-  new _Uint8Array(result).set(new _Uint8Array(arrayBuffer));
-  return result;
-}
-
-var _cloneArrayBuffer = cloneArrayBuffer;
-
-/**
- * Creates a clone of `typedArray`.
- *
- * @private
- * @param {Object} typedArray The typed array to clone.
- * @param {boolean} [isDeep] Specify a deep clone.
- * @returns {Object} Returns the cloned typed array.
- */
-function cloneTypedArray(typedArray, isDeep) {
-  var buffer = isDeep ? _cloneArrayBuffer(typedArray.buffer) : typedArray.buffer;
-  return new typedArray.constructor(buffer, typedArray.byteOffset, typedArray.length);
-}
-
-var _cloneTypedArray = cloneTypedArray;
-
-/**
- * Copies the values of `source` to `array`.
- *
- * @private
- * @param {Array} source The array to copy values from.
- * @param {Array} [array=[]] The array to copy values to.
- * @returns {Array} Returns `array`.
- */
-function copyArray(source, array) {
-  var index = -1,
-      length = source.length;
-
-  array || (array = Array(length));
-  while (++index < length) {
-    array[index] = source[index];
-  }
-  return array;
-}
-
-var _copyArray = copyArray;
-
-/** Built-in value references. */
-var objectCreate = Object.create;
-
-/**
- * The base implementation of `_.create` without support for assigning
- * properties to the created object.
- *
- * @private
- * @param {Object} proto The object to inherit from.
- * @returns {Object} Returns the new object.
- */
-var baseCreate = (function() {
-  function object() {}
-  return function(proto) {
-    if (!isObject_1(proto)) {
-      return {};
-    }
-    if (objectCreate) {
-      return objectCreate(proto);
-    }
-    object.prototype = proto;
-    var result = new object;
-    object.prototype = undefined;
-    return result;
-  };
-}());
-
-var _baseCreate = baseCreate;
-
-/**
- * Creates a unary function that invokes `func` with its argument transformed.
- *
- * @private
- * @param {Function} func The function to wrap.
- * @param {Function} transform The argument transform.
- * @returns {Function} Returns the new function.
- */
-function overArg(func, transform) {
-  return function(arg) {
-    return func(transform(arg));
-  };
-}
-
-var _overArg = overArg;
-
-/** Built-in value references. */
-var getPrototype = _overArg(Object.getPrototypeOf, Object);
-
-var _getPrototype = getPrototype;
-
-/** Used for built-in method references. */
-var objectProto$5 = Object.prototype;
-
-/**
- * Checks if `value` is likely a prototype object.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
- */
-function isPrototype(value) {
-  var Ctor = value && value.constructor,
-      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto$5;
-
-  return value === proto;
-}
-
-var _isPrototype = isPrototype;
-
-/**
- * Initializes an object clone.
- *
- * @private
- * @param {Object} object The object to clone.
- * @returns {Object} Returns the initialized clone.
- */
-function initCloneObject(object) {
-  return (typeof object.constructor == 'function' && !_isPrototype(object))
-    ? _baseCreate(_getPrototype(object))
-    : {};
-}
-
-var _initCloneObject = initCloneObject;
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return value != null && typeof value == 'object';
-}
-
-var isObjectLike_1 = isObjectLike;
-
-/** `Object#toString` result references. */
-var argsTag = '[object Arguments]';
-
-/**
- * The base implementation of `_.isArguments`.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an `arguments` object,
- */
-function baseIsArguments(value) {
-  return isObjectLike_1(value) && _baseGetTag(value) == argsTag;
-}
-
-var _baseIsArguments = baseIsArguments;
-
-/** Used for built-in method references. */
-var objectProto$6 = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$4 = objectProto$6.hasOwnProperty;
-
-/** Built-in value references. */
-var propertyIsEnumerable = objectProto$6.propertyIsEnumerable;
-
-/**
- * Checks if `value` is likely an `arguments` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an `arguments` object,
- *  else `false`.
- * @example
- *
- * _.isArguments(function() { return arguments; }());
- * // => true
- *
- * _.isArguments([1, 2, 3]);
- * // => false
- */
-var isArguments = _baseIsArguments(function() { return arguments; }()) ? _baseIsArguments : function(value) {
-  return isObjectLike_1(value) && hasOwnProperty$4.call(value, 'callee') &&
-    !propertyIsEnumerable.call(value, 'callee');
+var strictUriEncode = function (str) {
+	return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
+		return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+	});
 };
 
-var isArguments_1 = isArguments;
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+/* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
-/**
- * Checks if `value` is classified as an `Array` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array, else `false`.
- * @example
- *
- * _.isArray([1, 2, 3]);
- * // => true
- *
- * _.isArray(document.body.children);
- * // => false
- *
- * _.isArray('abc');
- * // => false
- *
- * _.isArray(_.noop);
- * // => false
- */
-var isArray = Array.isArray;
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
 
-var isArray_1 = isArray;
-
-/** Used as references for various `Number` constants. */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This method is loosely based on
- * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- * @example
- *
- * _.isLength(3);
- * // => true
- *
- * _.isLength(Number.MIN_VALUE);
- * // => false
- *
- * _.isLength(Infinity);
- * // => false
- *
- * _.isLength('3');
- * // => false
- */
-function isLength(value) {
-  return typeof value == 'number' &&
-    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+	return Object(val);
 }
 
-var isLength_1 = isLength;
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
 
-/**
- * Checks if `value` is array-like. A value is considered array-like if it's
- * not a function and has a `value.length` that's an integer greater than or
- * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- * @example
- *
- * _.isArrayLike([1, 2, 3]);
- * // => true
- *
- * _.isArrayLike(document.body.children);
- * // => true
- *
- * _.isArrayLike('abc');
- * // => true
- *
- * _.isArrayLike(_.noop);
- * // => false
- */
-function isArrayLike(value) {
-  return value != null && isLength_1(value.length) && !isFunction_1(value);
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (err) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
 }
 
-var isArrayLike_1 = isArrayLike;
-
-/**
- * This method is like `_.isArrayLike` except that it also checks if `value`
- * is an object.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array-like object,
- *  else `false`.
- * @example
- *
- * _.isArrayLikeObject([1, 2, 3]);
- * // => true
- *
- * _.isArrayLikeObject(document.body.children);
- * // => true
- *
- * _.isArrayLikeObject('abc');
- * // => false
- *
- * _.isArrayLikeObject(_.noop);
- * // => false
- */
-function isArrayLikeObject(value) {
-  return isObjectLike_1(value) && isArrayLike_1(value);
-}
-
-var isArrayLikeObject_1 = isArrayLikeObject;
-
-/**
- * This method returns `false`.
- *
- * @static
- * @memberOf _
- * @since 4.13.0
- * @category Util
- * @returns {boolean} Returns `false`.
- * @example
- *
- * _.times(2, _.stubFalse);
- * // => [false, false]
- */
-function stubFalse() {
-  return false;
-}
-
-var stubFalse_1 = stubFalse;
-
-var isBuffer_1 = createCommonjsModule(function (module, exports) {
-/** Detect free variable `exports`. */
-var freeExports = 'object' == 'object' && exports && !exports.nodeType && exports;
-
-/** Detect free variable `module`. */
-var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
-
-/** Detect the popular CommonJS extension `module.exports`. */
-var moduleExports = freeModule && freeModule.exports === freeExports;
-
-/** Built-in value references. */
-var Buffer = moduleExports ? _root.Buffer : undefined;
-
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined;
-
-/**
- * Checks if `value` is a buffer.
- *
- * @static
- * @memberOf _
- * @since 4.3.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a buffer, else `false`.
- * @example
- *
- * _.isBuffer(new Buffer(2));
- * // => true
- *
- * _.isBuffer(new Uint8Array(2));
- * // => false
- */
-var isBuffer = nativeIsBuffer || stubFalse_1;
-
-module.exports = isBuffer;
-});
-
-/** `Object#toString` result references. */
-var objectTag = '[object Object]';
-
-/** Used for built-in method references. */
-var funcProto$2 = Function.prototype;
-var objectProto$7 = Object.prototype;
-
-/** Used to resolve the decompiled source of functions. */
-var funcToString$2 = funcProto$2.toString;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$5 = objectProto$7.hasOwnProperty;
-
-/** Used to infer the `Object` constructor. */
-var objectCtorString = funcToString$2.call(Object);
-
-/**
- * Checks if `value` is a plain object, that is, an object created by the
- * `Object` constructor or one with a `[[Prototype]]` of `null`.
- *
- * @static
- * @memberOf _
- * @since 0.8.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- * }
- *
- * _.isPlainObject(new Foo);
- * // => false
- *
- * _.isPlainObject([1, 2, 3]);
- * // => false
- *
- * _.isPlainObject({ 'x': 0, 'y': 0 });
- * // => true
- *
- * _.isPlainObject(Object.create(null));
- * // => true
- */
-function isPlainObject(value) {
-  if (!isObjectLike_1(value) || _baseGetTag(value) != objectTag) {
-    return false;
-  }
-  var proto = _getPrototype(value);
-  if (proto === null) {
-    return true;
-  }
-  var Ctor = hasOwnProperty$5.call(proto, 'constructor') && proto.constructor;
-  return typeof Ctor == 'function' && Ctor instanceof Ctor &&
-    funcToString$2.call(Ctor) == objectCtorString;
-}
-
-var isPlainObject_1 = isPlainObject;
-
-/** `Object#toString` result references. */
-var argsTag$1 = '[object Arguments]';
-var arrayTag = '[object Array]';
-var boolTag = '[object Boolean]';
-var dateTag = '[object Date]';
-var errorTag = '[object Error]';
-var funcTag$1 = '[object Function]';
-var mapTag = '[object Map]';
-var numberTag = '[object Number]';
-var objectTag$1 = '[object Object]';
-var regexpTag = '[object RegExp]';
-var setTag = '[object Set]';
-var stringTag = '[object String]';
-var weakMapTag = '[object WeakMap]';
-
-var arrayBufferTag = '[object ArrayBuffer]';
-var dataViewTag = '[object DataView]';
-var float32Tag = '[object Float32Array]';
-var float64Tag = '[object Float64Array]';
-var int8Tag = '[object Int8Array]';
-var int16Tag = '[object Int16Array]';
-var int32Tag = '[object Int32Array]';
-var uint8Tag = '[object Uint8Array]';
-var uint8ClampedTag = '[object Uint8ClampedArray]';
-var uint16Tag = '[object Uint16Array]';
-var uint32Tag = '[object Uint32Array]';
-
-/** Used to identify `toStringTag` values of typed arrays. */
-var typedArrayTags = {};
-typedArrayTags[float32Tag] = typedArrayTags[float64Tag] =
-typedArrayTags[int8Tag] = typedArrayTags[int16Tag] =
-typedArrayTags[int32Tag] = typedArrayTags[uint8Tag] =
-typedArrayTags[uint8ClampedTag] = typedArrayTags[uint16Tag] =
-typedArrayTags[uint32Tag] = true;
-typedArrayTags[argsTag$1] = typedArrayTags[arrayTag] =
-typedArrayTags[arrayBufferTag] = typedArrayTags[boolTag] =
-typedArrayTags[dataViewTag] = typedArrayTags[dateTag] =
-typedArrayTags[errorTag] = typedArrayTags[funcTag$1] =
-typedArrayTags[mapTag] = typedArrayTags[numberTag] =
-typedArrayTags[objectTag$1] = typedArrayTags[regexpTag] =
-typedArrayTags[setTag] = typedArrayTags[stringTag] =
-typedArrayTags[weakMapTag] = false;
-
-/**
- * The base implementation of `_.isTypedArray` without Node.js optimizations.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
- */
-function baseIsTypedArray(value) {
-  return isObjectLike_1(value) &&
-    isLength_1(value.length) && !!typedArrayTags[_baseGetTag(value)];
-}
-
-var _baseIsTypedArray = baseIsTypedArray;
-
-/**
- * The base implementation of `_.unary` without support for storing metadata.
- *
- * @private
- * @param {Function} func The function to cap arguments for.
- * @returns {Function} Returns the new capped function.
- */
-function baseUnary(func) {
-  return function(value) {
-    return func(value);
-  };
-}
-
-var _baseUnary = baseUnary;
-
-var _nodeUtil = createCommonjsModule(function (module, exports) {
-/** Detect free variable `exports`. */
-var freeExports = 'object' == 'object' && exports && !exports.nodeType && exports;
-
-/** Detect free variable `module`. */
-var freeModule = freeExports && 'object' == 'object' && module && !module.nodeType && module;
-
-/** Detect the popular CommonJS extension `module.exports`. */
-var moduleExports = freeModule && freeModule.exports === freeExports;
-
-/** Detect free variable `process` from Node.js. */
-var freeProcess = moduleExports && _freeGlobal.process;
-
-/** Used to access faster Node.js helpers. */
-var nodeUtil = (function() {
-  try {
-    return freeProcess && freeProcess.binding && freeProcess.binding('util');
-  } catch (e) {}
-}());
-
-module.exports = nodeUtil;
-});
-
-/* Node.js helper references. */
-var nodeIsTypedArray = _nodeUtil && _nodeUtil.isTypedArray;
-
-/**
- * Checks if `value` is classified as a typed array.
- *
- * @static
- * @memberOf _
- * @since 3.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
- * @example
- *
- * _.isTypedArray(new Uint8Array);
- * // => true
- *
- * _.isTypedArray([]);
- * // => false
- */
-var isTypedArray = nodeIsTypedArray ? _baseUnary(nodeIsTypedArray) : _baseIsTypedArray;
-
-var isTypedArray_1 = isTypedArray;
-
-/** Used for built-in method references. */
-var objectProto$8 = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$6 = objectProto$8.hasOwnProperty;
-
-/**
- * Assigns `value` to `key` of `object` if the existing value is not equivalent
- * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
- * for equality comparisons.
- *
- * @private
- * @param {Object} object The object to modify.
- * @param {string} key The key of the property to assign.
- * @param {*} value The value to assign.
- */
-function assignValue(object, key, value) {
-  var objValue = object[key];
-  if (!(hasOwnProperty$6.call(object, key) && eq_1(objValue, value)) ||
-      (value === undefined && !(key in object))) {
-    _baseAssignValue(object, key, value);
-  }
-}
-
-var _assignValue = assignValue;
-
-/**
- * Copies properties of `source` to `object`.
- *
- * @private
- * @param {Object} source The object to copy properties from.
- * @param {Array} props The property identifiers to copy.
- * @param {Object} [object={}] The object to copy properties to.
- * @param {Function} [customizer] The function to customize copied values.
- * @returns {Object} Returns `object`.
- */
-function copyObject(source, props, object, customizer) {
-  var isNew = !object;
-  object || (object = {});
-
-  var index = -1,
-      length = props.length;
-
-  while (++index < length) {
-    var key = props[index];
-
-    var newValue = customizer
-      ? customizer(object[key], source[key], key, object, source)
-      : undefined;
-
-    if (newValue === undefined) {
-      newValue = source[key];
-    }
-    if (isNew) {
-      _baseAssignValue(object, key, newValue);
-    } else {
-      _assignValue(object, key, newValue);
-    }
-  }
-  return object;
-}
-
-var _copyObject = copyObject;
-
-/**
- * The base implementation of `_.times` without support for iteratee shorthands
- * or max array length checks.
- *
- * @private
- * @param {number} n The number of times to invoke `iteratee`.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the array of results.
- */
-function baseTimes(n, iteratee) {
-  var index = -1,
-      result = Array(n);
-
-  while (++index < n) {
-    result[index] = iteratee(index);
-  }
-  return result;
-}
-
-var _baseTimes = baseTimes;
-
-/** Used as references for various `Number` constants. */
-var MAX_SAFE_INTEGER$1 = 9007199254740991;
-
-/** Used to detect unsigned integer values. */
-var reIsUint = /^(?:0|[1-9]\d*)$/;
-
-/**
- * Checks if `value` is a valid array-like index.
- *
- * @private
- * @param {*} value The value to check.
- * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
- * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
- */
-function isIndex(value, length) {
-  length = length == null ? MAX_SAFE_INTEGER$1 : length;
-  return !!length &&
-    (typeof value == 'number' || reIsUint.test(value)) &&
-    (value > -1 && value % 1 == 0 && value < length);
-}
-
-var _isIndex = isIndex;
-
-/** Used for built-in method references. */
-var objectProto$9 = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$7 = objectProto$9.hasOwnProperty;
-
-/**
- * Creates an array of the enumerable property names of the array-like `value`.
- *
- * @private
- * @param {*} value The value to query.
- * @param {boolean} inherited Specify returning inherited property names.
- * @returns {Array} Returns the array of property names.
- */
-function arrayLikeKeys(value, inherited) {
-  var isArr = isArray_1(value),
-      isArg = !isArr && isArguments_1(value),
-      isBuff = !isArr && !isArg && isBuffer_1(value),
-      isType = !isArr && !isArg && !isBuff && isTypedArray_1(value),
-      skipIndexes = isArr || isArg || isBuff || isType,
-      result = skipIndexes ? _baseTimes(value.length, String) : [],
-      length = result.length;
-
-  for (var key in value) {
-    if ((inherited || hasOwnProperty$7.call(value, key)) &&
-        !(skipIndexes && (
-           // Safari 9 has enumerable `arguments.length` in strict mode.
-           key == 'length' ||
-           // Node.js 0.10 has enumerable non-index properties on buffers.
-           (isBuff && (key == 'offset' || key == 'parent')) ||
-           // PhantomJS 2 has enumerable non-index properties on typed arrays.
-           (isType && (key == 'buffer' || key == 'byteLength' || key == 'byteOffset')) ||
-           // Skip index properties.
-           _isIndex(key, length)
-        ))) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-var _arrayLikeKeys = arrayLikeKeys;
-
-/**
- * This function is like
- * [`Object.keys`](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
- * except that it includes inherited enumerable properties.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- */
-function nativeKeysIn(object) {
-  var result = [];
-  if (object != null) {
-    for (var key in Object(object)) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-var _nativeKeysIn = nativeKeysIn;
-
-/** Used for built-in method references. */
-var objectProto$10 = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$8 = objectProto$10.hasOwnProperty;
-
-/**
- * The base implementation of `_.keysIn` which doesn't treat sparse arrays as dense.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- */
-function baseKeysIn(object) {
-  if (!isObject_1(object)) {
-    return _nativeKeysIn(object);
-  }
-  var isProto = _isPrototype(object),
-      result = [];
-
-  for (var key in object) {
-    if (!(key == 'constructor' && (isProto || !hasOwnProperty$8.call(object, key)))) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-var _baseKeysIn = baseKeysIn;
-
-/**
- * Creates an array of the own and inherited enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects.
- *
- * @static
- * @memberOf _
- * @since 3.0.0
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keysIn(new Foo);
- * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
- */
-function keysIn(object) {
-  return isArrayLike_1(object) ? _arrayLikeKeys(object, true) : _baseKeysIn(object);
-}
-
-var keysIn_1 = keysIn;
-
-/**
- * Converts `value` to a plain object flattening inherited enumerable string
- * keyed properties of `value` to own properties of the plain object.
- *
- * @static
- * @memberOf _
- * @since 3.0.0
- * @category Lang
- * @param {*} value The value to convert.
- * @returns {Object} Returns the converted plain object.
- * @example
- *
- * function Foo() {
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.assign({ 'a': 1 }, new Foo);
- * // => { 'a': 1, 'b': 2 }
- *
- * _.assign({ 'a': 1 }, _.toPlainObject(new Foo));
- * // => { 'a': 1, 'b': 2, 'c': 3 }
- */
-function toPlainObject(value) {
-  return _copyObject(value, keysIn_1(value));
-}
-
-var toPlainObject_1 = toPlainObject;
-
-/**
- * A specialized version of `baseMerge` for arrays and objects which performs
- * deep merges and tracks traversed objects enabling objects with circular
- * references to be merged.
- *
- * @private
- * @param {Object} object The destination object.
- * @param {Object} source The source object.
- * @param {string} key The key of the value to merge.
- * @param {number} srcIndex The index of `source`.
- * @param {Function} mergeFunc The function to merge values.
- * @param {Function} [customizer] The function to customize assigned values.
- * @param {Object} [stack] Tracks traversed source values and their merged
- *  counterparts.
- */
-function baseMergeDeep(object, source, key, srcIndex, mergeFunc, customizer, stack) {
-  var objValue = object[key],
-      srcValue = source[key],
-      stacked = stack.get(srcValue);
-
-  if (stacked) {
-    _assignMergeValue(object, key, stacked);
-    return;
-  }
-  var newValue = customizer
-    ? customizer(objValue, srcValue, (key + ''), object, source, stack)
-    : undefined;
-
-  var isCommon = newValue === undefined;
-
-  if (isCommon) {
-    var isArr = isArray_1(srcValue),
-        isBuff = !isArr && isBuffer_1(srcValue),
-        isTyped = !isArr && !isBuff && isTypedArray_1(srcValue);
-
-    newValue = srcValue;
-    if (isArr || isBuff || isTyped) {
-      if (isArray_1(objValue)) {
-        newValue = objValue;
-      }
-      else if (isArrayLikeObject_1(objValue)) {
-        newValue = _copyArray(objValue);
-      }
-      else if (isBuff) {
-        isCommon = false;
-        newValue = _cloneBuffer(srcValue, true);
-      }
-      else if (isTyped) {
-        isCommon = false;
-        newValue = _cloneTypedArray(srcValue, true);
-      }
-      else {
-        newValue = [];
-      }
-    }
-    else if (isPlainObject_1(srcValue) || isArguments_1(srcValue)) {
-      newValue = objValue;
-      if (isArguments_1(objValue)) {
-        newValue = toPlainObject_1(objValue);
-      }
-      else if (!isObject_1(objValue) || (srcIndex && isFunction_1(objValue))) {
-        newValue = _initCloneObject(srcValue);
-      }
-    }
-    else {
-      isCommon = false;
-    }
-  }
-  if (isCommon) {
-    // Recursively merge objects and arrays (susceptible to call stack limits).
-    stack.set(srcValue, newValue);
-    mergeFunc(newValue, srcValue, srcIndex, customizer, stack);
-    stack['delete'](srcValue);
-  }
-  _assignMergeValue(object, key, newValue);
-}
-
-var _baseMergeDeep = baseMergeDeep;
-
-/**
- * The base implementation of `_.merge` without support for multiple sources.
- *
- * @private
- * @param {Object} object The destination object.
- * @param {Object} source The source object.
- * @param {number} srcIndex The index of `source`.
- * @param {Function} [customizer] The function to customize merged values.
- * @param {Object} [stack] Tracks traversed source values and their merged
- *  counterparts.
- */
-function baseMerge(object, source, srcIndex, customizer, stack) {
-  if (object === source) {
-    return;
-  }
-  _baseFor(source, function(srcValue, key) {
-    if (isObject_1(srcValue)) {
-      stack || (stack = new _Stack);
-      _baseMergeDeep(object, source, key, srcIndex, baseMerge, customizer, stack);
-    }
-    else {
-      var newValue = customizer
-        ? customizer(object[key], srcValue, (key + ''), object, source, stack)
-        : undefined;
-
-      if (newValue === undefined) {
-        newValue = srcValue;
-      }
-      _assignMergeValue(object, key, newValue);
-    }
-  }, keysIn_1);
-}
-
-var _baseMerge = baseMerge;
-
-/**
- * This method returns the first argument it receives.
- *
- * @static
- * @since 0.1.0
- * @memberOf _
- * @category Util
- * @param {*} value Any value.
- * @returns {*} Returns `value`.
- * @example
- *
- * var object = { 'a': 1 };
- *
- * console.log(_.identity(object) === object);
- * // => true
- */
-function identity(value) {
-  return value;
-}
-
-var identity_1 = identity;
-
-/**
- * A faster alternative to `Function#apply`, this function invokes `func`
- * with the `this` binding of `thisArg` and the arguments of `args`.
- *
- * @private
- * @param {Function} func The function to invoke.
- * @param {*} thisArg The `this` binding of `func`.
- * @param {Array} args The arguments to invoke `func` with.
- * @returns {*} Returns the result of `func`.
- */
-function apply(func, thisArg, args) {
-  switch (args.length) {
-    case 0: return func.call(thisArg);
-    case 1: return func.call(thisArg, args[0]);
-    case 2: return func.call(thisArg, args[0], args[1]);
-    case 3: return func.call(thisArg, args[0], args[1], args[2]);
-  }
-  return func.apply(thisArg, args);
-}
-
-var _apply = apply;
-
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeMax = Math.max;
-
-/**
- * A specialized version of `baseRest` which transforms the rest array.
- *
- * @private
- * @param {Function} func The function to apply a rest parameter to.
- * @param {number} [start=func.length-1] The start position of the rest parameter.
- * @param {Function} transform The rest array transform.
- * @returns {Function} Returns the new function.
- */
-function overRest(func, start, transform) {
-  start = nativeMax(start === undefined ? (func.length - 1) : start, 0);
-  return function() {
-    var args = arguments,
-        index = -1,
-        length = nativeMax(args.length - start, 0),
-        array = Array(length);
-
-    while (++index < length) {
-      array[index] = args[start + index];
-    }
-    index = -1;
-    var otherArgs = Array(start + 1);
-    while (++index < start) {
-      otherArgs[index] = args[index];
-    }
-    otherArgs[start] = transform(array);
-    return _apply(func, this, otherArgs);
-  };
-}
-
-var _overRest = overRest;
-
-/**
- * Creates a function that returns `value`.
- *
- * @static
- * @memberOf _
- * @since 2.4.0
- * @category Util
- * @param {*} value The value to return from the new function.
- * @returns {Function} Returns the new constant function.
- * @example
- *
- * var objects = _.times(2, _.constant({ 'a': 1 }));
- *
- * console.log(objects);
- * // => [{ 'a': 1 }, { 'a': 1 }]
- *
- * console.log(objects[0] === objects[1]);
- * // => true
- */
-function constant(value) {
-  return function() {
-    return value;
-  };
-}
-
-var constant_1 = constant;
-
-/**
- * The base implementation of `setToString` without support for hot loop shorting.
- *
- * @private
- * @param {Function} func The function to modify.
- * @param {Function} string The `toString` result.
- * @returns {Function} Returns `func`.
- */
-var baseSetToString = !_defineProperty$1 ? identity_1 : function(func, string) {
-  return _defineProperty$1(func, 'toString', {
-    'configurable': true,
-    'enumerable': false,
-    'value': constant_1(string),
-    'writable': true
-  });
+var objectAssign = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
 };
 
-var _baseSetToString = baseSetToString;
+var token = '%[a-f0-9]{2}';
+var singleMatcher = new RegExp(token, 'gi');
+var multiMatcher = new RegExp('(' + token + ')+', 'gi');
 
-/** Used to detect hot functions by number of calls within a span of milliseconds. */
-var HOT_COUNT = 800;
-var HOT_SPAN = 16;
+function decodeComponents(components, split) {
+	try {
+		// Try to decode the entire string first
+		return decodeURIComponent(components.join(''));
+	} catch (err) {
+		// Do nothing
+	}
 
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeNow = Date.now;
+	if (components.length === 1) {
+		return components;
+	}
 
-/**
- * Creates a function that'll short out and invoke `identity` instead
- * of `func` when it's called `HOT_COUNT` or more times in `HOT_SPAN`
- * milliseconds.
- *
- * @private
- * @param {Function} func The function to restrict.
- * @returns {Function} Returns the new shortable function.
- */
-function shortOut(func) {
-  var count = 0,
-      lastCalled = 0;
+	split = split || 1;
 
-  return function() {
-    var stamp = nativeNow(),
-        remaining = HOT_SPAN - (stamp - lastCalled);
+	// Split the array in 2 parts
+	var left = components.slice(0, split);
+	var right = components.slice(split);
 
-    lastCalled = stamp;
-    if (remaining > 0) {
-      if (++count >= HOT_COUNT) {
-        return arguments[0];
-      }
-    } else {
-      count = 0;
-    }
-    return func.apply(undefined, arguments);
-  };
+	return Array.prototype.concat.call([], decodeComponents(left), decodeComponents(right));
 }
 
-var _shortOut = shortOut;
+function decode(input) {
+	try {
+		return decodeURIComponent(input);
+	} catch (err) {
+		var tokens = input.match(singleMatcher);
 
-/**
- * Sets the `toString` method of `func` to return `string`.
- *
- * @private
- * @param {Function} func The function to modify.
- * @param {Function} string The `toString` result.
- * @returns {Function} Returns `func`.
- */
-var setToString = _shortOut(_baseSetToString);
+		for (var i = 1; i < tokens.length; i++) {
+			input = decodeComponents(tokens, i).join('');
 
-var _setToString = setToString;
+			tokens = input.match(singleMatcher);
+		}
 
-/**
- * The base implementation of `_.rest` which doesn't validate or coerce arguments.
- *
- * @private
- * @param {Function} func The function to apply a rest parameter to.
- * @param {number} [start=func.length-1] The start position of the rest parameter.
- * @returns {Function} Returns the new function.
- */
-function baseRest(func, start) {
-  return _setToString(_overRest(func, start, identity_1), func + '');
+		return input;
+	}
 }
 
-var _baseRest = baseRest;
+function customDecodeURIComponent(input) {
+	// Keep track of all the replacements and prefill the map with the `BOM`
+	var replaceMap = {
+		'%FE%FF': '\uFFFD\uFFFD',
+		'%FF%FE': '\uFFFD\uFFFD'
+	};
 
-/**
- * Checks if the given arguments are from an iteratee call.
- *
- * @private
- * @param {*} value The potential iteratee value argument.
- * @param {*} index The potential iteratee index or key argument.
- * @param {*} object The potential iteratee object argument.
- * @returns {boolean} Returns `true` if the arguments are from an iteratee call,
- *  else `false`.
- */
-function isIterateeCall(value, index, object) {
-  if (!isObject_1(object)) {
-    return false;
-  }
-  var type = typeof index;
-  if (type == 'number'
-        ? (isArrayLike_1(object) && _isIndex(index, object.length))
-        : (type == 'string' && index in object)
-      ) {
-    return eq_1(object[index], value);
-  }
-  return false;
+	var match = multiMatcher.exec(input);
+	while (match) {
+		try {
+			// Decode as big chunks as possible
+			replaceMap[match[0]] = decodeURIComponent(match[0]);
+		} catch (err) {
+			var result = decode(match[0]);
+
+			if (result !== match[0]) {
+				replaceMap[match[0]] = result;
+			}
+		}
+
+		match = multiMatcher.exec(input);
+	}
+
+	// Add `%C2` at the end of the map to make sure it does not replace the combinator before everything else
+	replaceMap['%C2'] = '\uFFFD';
+
+	var entries = Object.keys(replaceMap);
+
+	for (var i = 0; i < entries.length; i++) {
+		// Replace all decoded components
+		var key = entries[i];
+		input = input.replace(new RegExp(key, 'g'), replaceMap[key]);
+	}
+
+	return input;
 }
 
-var _isIterateeCall = isIterateeCall;
+var decodeUriComponent = function (encodedURI) {
+	if (typeof encodedURI !== 'string') {
+		throw new TypeError('Expected `encodedURI` to be of type `string`, got `' + typeof encodedURI + '`');
+	}
 
-/**
- * Creates a function like `_.assign`.
- *
- * @private
- * @param {Function} assigner The function to assign values.
- * @returns {Function} Returns the new assigner function.
- */
-function createAssigner(assigner) {
-  return _baseRest(function(object, sources) {
-    var index = -1,
-        length = sources.length,
-        customizer = length > 1 ? sources[length - 1] : undefined,
-        guard = length > 2 ? sources[2] : undefined;
+	try {
+		encodedURI = encodedURI.replace(/\+/g, ' ');
 
-    customizer = (assigner.length > 3 && typeof customizer == 'function')
-      ? (length--, customizer)
-      : undefined;
-
-    if (guard && _isIterateeCall(sources[0], sources[1], guard)) {
-      customizer = length < 3 ? undefined : customizer;
-      length = 1;
-    }
-    object = Object(object);
-    while (++index < length) {
-      var source = sources[index];
-      if (source) {
-        assigner(object, source, index, customizer);
-      }
-    }
-    return object;
-  });
-}
-
-var _createAssigner = createAssigner;
-
-/**
- * This method is like `_.assign` except that it recursively merges own and
- * inherited enumerable string keyed properties of source objects into the
- * destination object. Source properties that resolve to `undefined` are
- * skipped if a destination value exists. Array and plain object properties
- * are merged recursively. Other objects and value types are overridden by
- * assignment. Source objects are applied from left to right. Subsequent
- * sources overwrite property assignments of previous sources.
- *
- * **Note:** This method mutates `object`.
- *
- * @static
- * @memberOf _
- * @since 0.5.0
- * @category Object
- * @param {Object} object The destination object.
- * @param {...Object} [sources] The source objects.
- * @returns {Object} Returns `object`.
- * @example
- *
- * var object = {
- *   'a': [{ 'b': 2 }, { 'd': 4 }]
- * };
- *
- * var other = {
- *   'a': [{ 'c': 3 }, { 'e': 5 }]
- * };
- *
- * _.merge(object, other);
- * // => { 'a': [{ 'b': 2, 'c': 3 }, { 'd': 4, 'e': 5 }] }
- */
-var merge = _createAssigner(function(object, source, srcIndex) {
-  _baseMerge(object, source, srcIndex);
-});
-
-var merge_1$1 = merge;
-
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-// If obj.hasOwnProperty has been overridden, then calling
-// obj.hasOwnProperty(prop) will break.
-// See: https://github.com/joyent/node/issues/1707
-function hasOwnProperty$9(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-var isArray$2 = Array.isArray || function (xs) {
-  return Object.prototype.toString.call(xs) === '[object Array]';
-};
-function stringifyPrimitive(v) {
-  switch (typeof v) {
-    case 'string':
-      return v;
-
-    case 'boolean':
-      return v ? 'true' : 'false';
-
-    case 'number':
-      return isFinite(v) ? v : '';
-
-    default:
-      return '';
-  }
-}
-
-function stringify (obj, sep, eq, name) {
-  sep = sep || '&';
-  eq = eq || '=';
-  if (obj === null) {
-    obj = undefined;
-  }
-
-  if (typeof obj === 'object') {
-    return map(objectKeys(obj), function(k) {
-      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
-      if (isArray$2(obj[k])) {
-        return map(obj[k], function(v) {
-          return ks + encodeURIComponent(stringifyPrimitive(v));
-        }).join(sep);
-      } else {
-        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
-      }
-    }).join(sep);
-
-  }
-
-  if (!name) return '';
-  return encodeURIComponent(stringifyPrimitive(name)) + eq +
-         encodeURIComponent(stringifyPrimitive(obj));
-}
-
-function map (xs, f) {
-  if (xs.map) return xs.map(f);
-  var res = [];
-  for (var i = 0; i < xs.length; i++) {
-    res.push(f(xs[i], i));
-  }
-  return res;
-}
-
-var objectKeys = Object.keys || function (obj) {
-  var res = [];
-  for (var key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) res.push(key);
-  }
-  return res;
+		// Try the built in decoder first
+		return decodeURIComponent(encodedURI);
+	} catch (err) {
+		// Fallback to a more advanced decoder
+		return customDecodeURIComponent(encodedURI);
+	}
 };
 
-function parse$2(qs, sep, eq, options) {
-  sep = sep || '&';
-  eq = eq || '=';
-  var obj = {};
+function encoderForArrayFormat(opts) {
+	switch (opts.arrayFormat) {
+		case 'index':
+			return function (key, value, index) {
+				return value === null ? [
+					encode(key, opts),
+					'[',
+					index,
+					']'
+				].join('') : [
+					encode(key, opts),
+					'[',
+					encode(index, opts),
+					']=',
+					encode(value, opts)
+				].join('');
+			};
 
-  if (typeof qs !== 'string' || qs.length === 0) {
-    return obj;
-  }
+		case 'bracket':
+			return function (key, value) {
+				return value === null ? encode(key, opts) : [
+					encode(key, opts),
+					'[]=',
+					encode(value, opts)
+				].join('');
+			};
 
-  var regexp = /\+/g;
-  qs = qs.split(sep);
-
-  var maxKeys = 1000;
-  if (options && typeof options.maxKeys === 'number') {
-    maxKeys = options.maxKeys;
-  }
-
-  var len = qs.length;
-  // maxKeys <= 0 means that we should not limit keys count
-  if (maxKeys > 0 && len > maxKeys) {
-    len = maxKeys;
-  }
-
-  for (var i = 0; i < len; ++i) {
-    var x = qs[i].replace(regexp, '%20'),
-        idx = x.indexOf(eq),
-        kstr, vstr, k, v;
-
-    if (idx >= 0) {
-      kstr = x.substr(0, idx);
-      vstr = x.substr(idx + 1);
-    } else {
-      kstr = x;
-      vstr = '';
-    }
-
-    k = decodeURIComponent(kstr);
-    v = decodeURIComponent(vstr);
-
-    if (!hasOwnProperty$9(obj, k)) {
-      obj[k] = v;
-    } else if (isArray$2(obj[k])) {
-      obj[k].push(v);
-    } else {
-      obj[k] = [obj[k], v];
-    }
-  }
-
-  return obj;
+		default:
+			return function (key, value) {
+				return value === null ? encode(key, opts) : [
+					encode(key, opts),
+					'=',
+					encode(value, opts)
+				].join('');
+			};
+	}
 }
-var querystring = {
-  encode: stringify,
-  stringify: stringify,
-  decode: parse$2,
-  parse: parse$2
+
+function parserForArrayFormat(opts) {
+	var result;
+
+	switch (opts.arrayFormat) {
+		case 'index':
+			return function (key, value, accumulator) {
+				result = /\[(\d*)\]$/.exec(key);
+
+				key = key.replace(/\[\d*\]$/, '');
+
+				if (!result) {
+					accumulator[key] = value;
+					return;
+				}
+
+				if (accumulator[key] === undefined) {
+					accumulator[key] = {};
+				}
+
+				accumulator[key][result[1]] = value;
+			};
+
+		case 'bracket':
+			return function (key, value, accumulator) {
+				result = /(\[\])$/.exec(key);
+				key = key.replace(/\[\]$/, '');
+
+				if (!result) {
+					accumulator[key] = value;
+					return;
+				} else if (accumulator[key] === undefined) {
+					accumulator[key] = [value];
+					return;
+				}
+
+				accumulator[key] = [].concat(accumulator[key], value);
+			};
+
+		default:
+			return function (key, value, accumulator) {
+				if (accumulator[key] === undefined) {
+					accumulator[key] = value;
+					return;
+				}
+
+				accumulator[key] = [].concat(accumulator[key], value);
+			};
+	}
+}
+
+function encode(value, opts) {
+	if (opts.encode) {
+		return opts.strict ? strictUriEncode(value) : encodeURIComponent(value);
+	}
+
+	return value;
+}
+
+function keysSorter(input) {
+	if (Array.isArray(input)) {
+		return input.sort();
+	} else if (typeof input === 'object') {
+		return keysSorter(Object.keys(input)).sort(function (a, b) {
+			return Number(a) - Number(b);
+		}).map(function (key) {
+			return input[key];
+		});
+	}
+
+	return input;
+}
+
+function extract(str) {
+	var queryStart = str.indexOf('?');
+	if (queryStart === -1) {
+		return '';
+	}
+	return str.slice(queryStart + 1);
+}
+
+function parse(str, opts) {
+	opts = objectAssign({arrayFormat: 'none'}, opts);
+
+	var formatter = parserForArrayFormat(opts);
+
+	// Create an object with no prototype
+	// https://github.com/sindresorhus/query-string/issues/47
+	var ret = Object.create(null);
+
+	if (typeof str !== 'string') {
+		return ret;
+	}
+
+	str = str.trim().replace(/^[?#&]/, '');
+
+	if (!str) {
+		return ret;
+	}
+
+	str.split('&').forEach(function (param) {
+		var parts = param.replace(/\+/g, ' ').split('=');
+		// Firefox (pre 40) decodes `%3D` to `=`
+		// https://github.com/sindresorhus/query-string/pull/37
+		var key = parts.shift();
+		var val = parts.length > 0 ? parts.join('=') : undefined;
+
+		// missing `=` should be `null`:
+		// http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
+		val = val === undefined ? null : decodeUriComponent(val);
+
+		formatter(decodeUriComponent(key), val, ret);
+	});
+
+	return Object.keys(ret).sort().reduce(function (result, key) {
+		var val = ret[key];
+		if (Boolean(val) && typeof val === 'object' && !Array.isArray(val)) {
+			// Sort object keys, not values
+			result[key] = keysSorter(val);
+		} else {
+			result[key] = val;
+		}
+
+		return result;
+	}, Object.create(null));
+}
+
+var extract_1 = extract;
+var parse_1 = parse;
+
+var stringify = function (obj, opts) {
+	var defaults = {
+		encode: true,
+		strict: true,
+		arrayFormat: 'none'
+	};
+
+	opts = objectAssign(defaults, opts);
+
+	if (opts.sort === false) {
+		opts.sort = function () {};
+	}
+
+	var formatter = encoderForArrayFormat(opts);
+
+	return obj ? Object.keys(obj).sort(opts.sort).map(function (key) {
+		var val = obj[key];
+
+		if (val === undefined) {
+			return '';
+		}
+
+		if (val === null) {
+			return encode(key, opts);
+		}
+
+		if (Array.isArray(val)) {
+			var result = [];
+
+			val.slice().forEach(function (val2) {
+				if (val2 === undefined) {
+					return;
+				}
+
+				result.push(formatter(key, val2, result.length));
+			});
+
+			return result.join('&');
+		}
+
+		return encode(key, opts) + '=' + encode(val, opts);
+	}).filter(function (x) {
+		return x.length > 0;
+	}).join('&') : '';
+};
+
+var parseUrl = function (str, opts) {
+	return {
+		url: str.split('?')[0] || '',
+		query: parse(extract(str), opts)
+	};
+};
+
+var queryString = {
+	extract: extract_1,
+	parse: parse_1,
+	stringify: stringify,
+	parseUrl: parseUrl
 };
 
 /*
@@ -5526,7 +2700,7 @@ Request.prototype.send = function (callback) {
     };
     xdr.ontimeout = function () {};
     xdr.onprogress = function () {};
-    xdr.send(querystring.stringify(this.data));
+    xdr.send(queryString.stringify(this.data));
   } else {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', this.url, true);
@@ -5536,7 +2710,7 @@ Request.prototype.send = function (callback) {
       }
     };
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-    xhr.send(querystring.stringify(this.data));
+    xhr.send(queryString.stringify(this.data));
   }
   //log('sent request to ' + this.url + ' with data ' + decodeURIComponent(queryString(this.data)));
 };
@@ -5704,8 +2878,6 @@ var uaParser = createCommonjsModule(function (module, exports) {
  */
 
 (function (window, undefined) {
-
-    'use strict';
 
     //////////////
     // Constants
@@ -5918,7 +3090,7 @@ var uaParser = createCommonjsModule(function (module, exports) {
                     'RT'        : 'ARM'
                 },
                 name : {
-                    'Windows Phone' : 'Windows Phone OS',
+                    'Windows Phone' : 'Windows Phone OS'
                 }
             }
         }
@@ -6597,6 +3769,7 @@ var uaParser = createCommonjsModule(function (module, exports) {
 
 })(typeof window === 'object' ? window : commonjsGlobal);
 });
+var uaParser_1 = uaParser.UAParser;
 
 /* jshint bitwise: false, laxbreak: true */
 
@@ -6608,7 +3781,7 @@ var uaParser = createCommonjsModule(function (module, exports) {
  * Used to generate UUIDs for deviceIds.
  * @private
  */
-var uuid$1 = function uuid(a) {
+var uuid = function uuid(a) {
     return a // if the placeholder was passed, return
     ? ( // a random number from 0 to 15
     a ^ // unless b is 8,
@@ -6628,7 +3801,7 @@ var uuid$1 = function uuid(a) {
     );
 };
 
-var version = '4.5.2';
+var version = '4.6.0';
 
 var getLanguage = function getLanguage() {
     return navigator && (navigator.languages && navigator.languages[0] || navigator.language || navigator.userLanguage) || undefined;
@@ -6659,6 +3832,7 @@ var DEFAULT_OPTIONS = {
   savedMaxCount: 1000,
   saveEvents: true,
   saveParamsReferrerOncePerSession: true,
+  secureCookie: false,
   sessionTimeout: 30 * 60 * 1000,
   trackingOptions: {
     city: true,
@@ -6679,8 +3853,6 @@ var DEFAULT_OPTIONS = {
   uploadBatchSize: 100
 };
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 /**
  * AmplitudeClient SDK API - instance constructor.
  * The Amplitude class handles creation of client instances, all you need to do is call amplitude.getInstance()
@@ -6694,7 +3866,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._unsentEvents = [];
   this._unsentIdentifys = [];
   this._ua = new uaParser(navigator.userAgent).getResult();
-  this.options = merge_1$1({}, DEFAULT_OPTIONS);
+  this.options = _extends({}, DEFAULT_OPTIONS, { trackingOptions: _extends({}, DEFAULT_OPTIONS.trackingOptions) });
   this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
@@ -6746,7 +3918,8 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
-      domain: this.options.domain
+      domain: this.options.domain,
+      secure: this.options.secureCookie
     });
     this.options.domain = this.cookieStorage.options().domain;
 
@@ -6756,7 +3929,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     _loadCookieData(this);
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
-    this.options.deviceId = type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' && !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId || this.options.deviceIdFromUrlParam && this._getDeviceIdFromUrlParam(this._getUrlParams()) || this.options.deviceId || uuid$1() + 'R';
+    this.options.deviceId = type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' && !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId || this.options.deviceIdFromUrlParam && this._getDeviceIdFromUrlParam(this._getUrlParams()) || this.options.deviceId || uuid() + 'R';
     this.options.userId = type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId || type(opt_userId) === 'number' && opt_userId.toString() || this.options.userId || null;
 
     // load unsent events and identifies before any attempt to log new ones
@@ -7407,7 +4580,7 @@ AmplitudeClient.prototype.resetSessionId = function resetSessionId() {
   * @public
   */
 AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
-  this.setDeviceId(uuid$1() + 'R');
+  this.setDeviceId(uuid() + 'R');
 };
 
 /**
@@ -7562,7 +4735,7 @@ AmplitudeClient.prototype.groupIdentify = function (group_type, group_name, iden
   if (identify_obj instanceof Identify) {
     // only send if there are operations
     if (Object.keys(identify_obj.userPropertiesOperations).length > 0) {
-      return this._logEvent(constants.GROUP_IDENTIFY_EVENT, null, null, null, _defineProperty({}, group_type, group_name), identify_obj.userPropertiesOperations, null, opt_callback);
+      return this._logEvent(constants.GROUP_IDENTIFY_EVENT, null, null, null, defineProperty({}, group_type, group_name), identify_obj.userPropertiesOperations, null, opt_callback);
     } else {
       if (type(opt_callback) === 'function') {
         opt_callback(0, 'No request sent', { reason: 'No group property operations' });
@@ -7624,8 +4797,8 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     _saveCookieData(this);
 
     userProperties = userProperties || {};
-    var trackingOptions = merge_1$1({}, this._apiPropertiesTrackingOptions);
-    apiProperties = merge_1$1(trackingOptions, apiProperties || {});
+    var trackingOptions = _extends({}, this._apiPropertiesTrackingOptions);
+    apiProperties = _extends({}, apiProperties || {}, trackingOptions);
     eventProperties = eventProperties || {};
     groups = groups || {};
     groupProperties = groupProperties || {};
@@ -7645,7 +4818,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       api_properties: apiProperties,
       event_properties: utils.truncate(utils.validateProperties(eventProperties)),
       user_properties: utils.truncate(utils.validateProperties(userProperties)),
-      uuid: uuid$1(),
+      uuid: uuid(),
       library: {
         name: 'amplitude-js',
         version: version
@@ -7827,29 +5000,31 @@ AmplitudeClient.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
   }
 };
 
-/**
- * Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
- * @public
- * @deprecated
- * @param {number} price - price of revenue event
- * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
- * @param {string} product - (optional) product identifier
- * @example amplitudeClient.logRevenue(3.99, 1, 'product_1234');
- */
-AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, product) {
-  // Test that the parameters are of the right type.
-  if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
-    // utils.log('Price and quantity arguments to logRevenue must be numbers');
-    return -1;
-  }
+{
+  /**
+   * Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
+   * @public
+   * @deprecated
+   * @param {number} price - price of revenue event
+   * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
+   * @param {string} product - (optional) product identifier
+   * @example amplitudeClient.logRevenue(3.99, 1, 'product_1234');
+   */
+  AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, product) {
+    // Test that the parameters are of the right type.
+    if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || quantity !== undefined && !_isNumber(quantity)) {
+      // utils.log('Price and quantity arguments to logRevenue must be numbers');
+      return -1;
+    }
 
-  return this._logEvent(constants.REVENUE_EVENT, {}, {
-    productId: product,
-    special: 'revenue_amount',
-    quantity: quantity || 1,
-    price: price
-  }, null, null, null, null, null);
-};
+    return this._logEvent(constants.REVENUE_EVENT, {}, {
+      productId: product,
+      special: 'revenue_amount',
+      quantity: quantity || 1,
+      price: price
+    }, null, null, null, null, null);
+  };
+}
 
 /**
  * Remove events in storage with event ids up to and including maxEventId.
@@ -8026,14 +5201,16 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIde
   };
 };
 
-/**
- * Set global user properties. Note this is deprecated, and we recommend using setUserProperties
- * @public
- * @deprecated
- */
-AmplitudeClient.prototype.setGlobalUserProperties = function setGlobalUserProperties(userProperties) {
-  this.setUserProperties(userProperties);
-};
+{
+  /**
+   * Set global user properties. Note this is deprecated, and we recommend using setUserProperties
+   * @public
+   * @deprecated
+   */
+  AmplitudeClient.prototype.setGlobalUserProperties = function setGlobalUserProperties(userProperties) {
+    this.setUserProperties(userProperties);
+  };
+}
 
 /**
  * Get the current version of Amplitude's Javascript SDK.
@@ -8042,125 +5219,6 @@ AmplitudeClient.prototype.setGlobalUserProperties = function setGlobalUserProper
  * @example var amplitudeVersion = amplitude.__VERSION__;
  */
 AmplitudeClient.prototype.__VERSION__ = version;
-
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeKeys = _overArg(Object.keys, Object);
-
-var _nativeKeys = nativeKeys;
-
-/** Used for built-in method references. */
-var objectProto$12 = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$11 = objectProto$12.hasOwnProperty;
-
-/**
- * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- */
-function baseKeys(object) {
-  if (!_isPrototype(object)) {
-    return _nativeKeys(object);
-  }
-  var result = [];
-  for (var key in Object(object)) {
-    if (hasOwnProperty$11.call(object, key) && key != 'constructor') {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-var _baseKeys = baseKeys;
-
-/**
- * Creates an array of the own enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects. See the
- * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
- * for more details.
- *
- * @static
- * @since 0.1.0
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keys(new Foo);
- * // => ['a', 'b'] (iteration order is not guaranteed)
- *
- * _.keys('hi');
- * // => ['0', '1']
- */
-function keys(object) {
-  return isArrayLike_1(object) ? _arrayLikeKeys(object) : _baseKeys(object);
-}
-
-var keys_1 = keys;
-
-/** Used for built-in method references. */
-var objectProto$11 = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty$10 = objectProto$11.hasOwnProperty;
-
-/**
- * Assigns own enumerable string keyed properties of source objects to the
- * destination object. Source objects are applied from left to right.
- * Subsequent sources overwrite property assignments of previous sources.
- *
- * **Note:** This method mutates `object` and is loosely based on
- * [`Object.assign`](https://mdn.io/Object/assign).
- *
- * @static
- * @memberOf _
- * @since 0.10.0
- * @category Object
- * @param {Object} object The destination object.
- * @param {...Object} [sources] The source objects.
- * @returns {Object} Returns `object`.
- * @see _.assignIn
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- * }
- *
- * function Bar() {
- *   this.c = 3;
- * }
- *
- * Foo.prototype.b = 2;
- * Bar.prototype.d = 4;
- *
- * _.assign({ 'a': 0 }, new Foo, new Bar);
- * // => { 'a': 1, 'c': 3 }
- */
-var assign = _createAssigner(function(object, source) {
-  if (_isPrototype(source) || isArrayLike_1(source)) {
-    _copyObject(source, keys_1(source), object);
-    return;
-  }
-  for (var key in source) {
-    if (hasOwnProperty$10.call(source, key)) {
-      _assignValue(object, key, source[key]);
-    }
-  }
-});
-
-var assign_1$1 = assign;
 
 /**
  * Amplitude SDK API - instance manager.
@@ -8171,7 +5229,7 @@ var assign_1$1 = assign;
  * @example var amplitude = new Amplitude();
  */
 var Amplitude = function Amplitude() {
-  this.options = assign_1$1({}, DEFAULT_OPTIONS);
+  this.options = _extends({}, DEFAULT_OPTIONS);
   this._q = [];
   this._instances = {}; // mapping of instance names to instances
 };
@@ -8189,326 +5247,330 @@ Amplitude.prototype.getInstance = function getInstance(instance) {
   return client;
 };
 
-/**
- * Initializes the Amplitude Javascript SDK with your apiKey and any optional configurations.
- * This is required before any other methods can be called.
- * @public
- * @param {string} apiKey - The API key for your app.
- * @param {string} opt_userId - (optional) An identifier for this user.
- * @param {object} opt_config - (optional) Configuration options.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#configuration-options} for list of options and default values.
- * @param {function} opt_callback - (optional) Provide a callback function to run after initialization is complete.
- * @deprecated Please use amplitude.getInstance().init(apiKey, opt_userId, opt_config, opt_callback);
- * @example amplitude.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
- */
-Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_callback) {
-  this.getInstance().init(apiKey, opt_userId, opt_config, function (instance) {
-    // make options such as deviceId available for callback functions
-    this.options = instance.options;
-    if (type(opt_callback) === 'function') {
-      opt_callback(instance);
+{
+  /**
+   * Run functions queued up by proxy loading snippet
+   * @private
+   */
+  Amplitude.prototype.runQueuedFunctions = function () {
+    // run queued up old versions of functions
+    for (var i = 0; i < this._q.length; i++) {
+      var fn = this[this._q[i][0]];
+      if (type(fn) === 'function') {
+        fn.apply(this, this._q[i].slice(1));
+      }
     }
-  }.bind(this));
-};
+    this._q = []; // clear function queue after running
 
-/**
- * Run functions queued up by proxy loading snippet
- * @private
- */
-Amplitude.prototype.runQueuedFunctions = function () {
-  // run queued up old versions of functions
-  for (var i = 0; i < this._q.length; i++) {
-    var fn = this[this._q[i][0]];
-    if (type(fn) === 'function') {
-      fn.apply(this, this._q[i].slice(1));
+    // run queued up functions on instances
+    for (var instance in this._instances) {
+      if (this._instances.hasOwnProperty(instance)) {
+        this._instances[instance].runQueuedFunctions();
+      }
     }
-  }
-  this._q = []; // clear function queue after running
+  };
+}
 
-  // run queued up functions on instances
-  for (var instance in this._instances) {
-    if (this._instances.hasOwnProperty(instance)) {
-      this._instances[instance].runQueuedFunctions();
-    }
-  }
-};
+{
+  /**
+   * Initializes the Amplitude Javascript SDK with your apiKey and any optional configurations.
+   * This is required before any other methods can be called.
+   * @public
+   * @param {string} apiKey - The API key for your app.
+   * @param {string} opt_userId - (optional) An identifier for this user.
+   * @param {object} opt_config - (optional) Configuration options.
+   * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#configuration-options} for list of options and default values.
+   * @param {function} opt_callback - (optional) Provide a callback function to run after initialization is complete.
+   * @deprecated Please use amplitude.getInstance().init(apiKey, opt_userId, opt_config, opt_callback);
+   * @example amplitude.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
+   */
+  Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_callback) {
+    this.getInstance().init(apiKey, opt_userId, opt_config, function (instance) {
+      // make options such as deviceId available for callback functions
+      this.options = instance.options;
+      if (type(opt_callback) === 'function') {
+        opt_callback(instance);
+      }
+    }.bind(this));
+  };
 
-/**
- * Returns true if a new session was created during initialization, otherwise false.
- * @public
- * @return {boolean} Whether a new session was created during initialization.
- * @deprecated Please use amplitude.getInstance().isNewSession();
- */
-Amplitude.prototype.isNewSession = function isNewSession() {
-  return this.getInstance().isNewSession();
-};
+  /**
+   * Returns true if a new session was created during initialization, otherwise false.
+   * @public
+   * @return {boolean} Whether a new session was created during initialization.
+   * @deprecated Please use amplitude.getInstance().isNewSession();
+   */
+  Amplitude.prototype.isNewSession = function isNewSession() {
+    return this.getInstance().isNewSession();
+  };
 
-/**
- * Returns the id of the current session.
- * @public
- * @return {number} Id of the current session.
- * @deprecated Please use amplitude.getInstance().getSessionId();
- */
-Amplitude.prototype.getSessionId = function getSessionId() {
-  return this.getInstance().getSessionId();
-};
+  /**
+   * Returns the id of the current session.
+   * @public
+   * @return {number} Id of the current session.
+   * @deprecated Please use amplitude.getInstance().getSessionId();
+   */
+  Amplitude.prototype.getSessionId = function getSessionId() {
+    return this.getInstance().getSessionId();
+  };
 
-/**
- * Increments the eventId and returns it.
- * @private
- */
-Amplitude.prototype.nextEventId = function nextEventId() {
-  return this.getInstance().nextEventId();
-};
+  /**
+   * Increments the eventId and returns it.
+   * @private
+   */
+  Amplitude.prototype.nextEventId = function nextEventId() {
+    return this.getInstance().nextEventId();
+  };
 
-/**
- * Increments the identifyId and returns it.
- * @private
- */
-Amplitude.prototype.nextIdentifyId = function nextIdentifyId() {
-  return this.getInstance().nextIdentifyId();
-};
+  /**
+   * Increments the identifyId and returns it.
+   * @private
+   */
+  Amplitude.prototype.nextIdentifyId = function nextIdentifyId() {
+    return this.getInstance().nextIdentifyId();
+  };
 
-/**
- * Increments the sequenceNumber and returns it.
- * @private
- */
-Amplitude.prototype.nextSequenceNumber = function nextSequenceNumber() {
-  return this.getInstance().nextSequenceNumber();
-};
+  /**
+   * Increments the sequenceNumber and returns it.
+   * @private
+   */
+  Amplitude.prototype.nextSequenceNumber = function nextSequenceNumber() {
+    return this.getInstance().nextSequenceNumber();
+  };
 
-/**
- * Saves unsent events and identifies to localStorage. JSON stringifies event queues before saving.
- * Note: this is called automatically every time events are logged, unless you explicitly set option saveEvents to false.
- * @private
- */
-Amplitude.prototype.saveEvents = function saveEvents() {
-  this.getInstance().saveEvents();
-};
+  /**
+   * Saves unsent events and identifies to localStorage. JSON stringifies event queues before saving.
+   * Note: this is called automatically every time events are logged, unless you explicitly set option saveEvents to false.
+   * @private
+   */
+  Amplitude.prototype.saveEvents = function saveEvents() {
+    this.getInstance().saveEvents();
+  };
 
-/**
- * Sets a customer domain for the amplitude cookie. Useful if you want to support cross-subdomain tracking.
- * @public
- * @param {string} domain to set.
- * @deprecated Please use amplitude.getInstance().setDomain(domain);
- * @example amplitude.setDomain('.amplitude.com');
- */
-Amplitude.prototype.setDomain = function setDomain(domain) {
-  this.getInstance().setDomain(domain);
-};
+  /**
+   * Sets a customer domain for the amplitude cookie. Useful if you want to support cross-subdomain tracking.
+   * @public
+   * @param {string} domain to set.
+   * @deprecated Please use amplitude.getInstance().setDomain(domain);
+   * @example amplitude.setDomain('.amplitude.com');
+   */
+  Amplitude.prototype.setDomain = function setDomain(domain) {
+    this.getInstance().setDomain(domain);
+  };
 
-/**
- * Sets an identifier for the current user.
- * @public
- * @param {string} userId - identifier to set. Can be null.
- * @deprecated Please use amplitude.getInstance().setUserId(userId);
- * @example amplitude.setUserId('joe@gmail.com');
- */
-Amplitude.prototype.setUserId = function setUserId(userId) {
-  this.getInstance().setUserId(userId);
-};
+  /**
+   * Sets an identifier for the current user.
+   * @public
+   * @param {string} userId - identifier to set. Can be null.
+   * @deprecated Please use amplitude.getInstance().setUserId(userId);
+   * @example amplitude.setUserId('joe@gmail.com');
+   */
+  Amplitude.prototype.setUserId = function setUserId(userId) {
+    this.getInstance().setUserId(userId);
+  };
 
-/**
- * Add user to a group or groups. You need to specify a groupType and groupName(s).
- * For example you can group people by their organization.
- * In that case groupType is "orgId" and groupName would be the actual ID(s).
- * groupName can be a string or an array of strings to indicate a user in multiple gruups.
- * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
- * Note: this will also set groupType: groupName as a user property.
- * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information.
- * @public
- * @param {string} groupType - the group type (ex: orgId)
- * @param {string|list} groupName - the name of the group (ex: 15), or a list of names of the groups
- * @deprecated Please use amplitude.getInstance().setGroup(groupType, groupName);
- * @example amplitude.setGroup('orgId', 15); // this adds the current user to orgId 15.
- */
-Amplitude.prototype.setGroup = function (groupType, groupName) {
-  this.getInstance().setGroup(groupType, groupName);
-};
+  /**
+   * Add user to a group or groups. You need to specify a groupType and groupName(s).
+   * For example you can group people by their organization.
+   * In that case groupType is "orgId" and groupName would be the actual ID(s).
+   * groupName can be a string or an array of strings to indicate a user in multiple gruups.
+   * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
+   * Note: this will also set groupType: groupName as a user property.
+   * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information.
+   * @public
+   * @param {string} groupType - the group type (ex: orgId)
+   * @param {string|list} groupName - the name of the group (ex: 15), or a list of names of the groups
+   * @deprecated Please use amplitude.getInstance().setGroup(groupType, groupName);
+   * @example amplitude.setGroup('orgId', 15); // this adds the current user to orgId 15.
+   */
+  Amplitude.prototype.setGroup = function (groupType, groupName) {
+    this.getInstance().setGroup(groupType, groupName);
+  };
 
-/**
- * Sets whether to opt current user out of tracking.
- * @public
- * @param {boolean} enable - if true then no events will be logged or sent.
- * @deprecated Please use amplitude.getInstance().setOptOut(enable);
- * @example: amplitude.setOptOut(true);
- */
-Amplitude.prototype.setOptOut = function setOptOut(enable) {
-  this.getInstance().setOptOut(enable);
-};
+  /**
+   * Sets whether to opt current user out of tracking.
+   * @public
+   * @param {boolean} enable - if true then no events will be logged or sent.
+   * @deprecated Please use amplitude.getInstance().setOptOut(enable);
+   * @example: amplitude.setOptOut(true);
+   */
+  Amplitude.prototype.setOptOut = function setOptOut(enable) {
+    this.getInstance().setOptOut(enable);
+  };
 
-/**
-  * Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you
-  * are doing. This can be used in conjunction with `setUserId(null)` to anonymize users after they log out.
-  * With a null userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
-  * This uses src/uuid.js to regenerate the deviceId.
-  * @public
-  * @deprecated Please use amplitude.getInstance().regenerateDeviceId();
-  */
-Amplitude.prototype.regenerateDeviceId = function regenerateDeviceId() {
-  this.getInstance().regenerateDeviceId();
-};
+  /**
+    * Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you
+    * are doing. This can be used in conjunction with `setUserId(null)` to anonymize users after they log out.
+    * With a null userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
+    * This uses src/uuid.js to regenerate the deviceId.
+    * @public
+    * @deprecated Please use amplitude.getInstance().regenerateDeviceId();
+    */
+  Amplitude.prototype.regenerateDeviceId = function regenerateDeviceId() {
+    this.getInstance().regenerateDeviceId();
+  };
 
-/**
-  * Sets a custom deviceId for current user. Note: this is not recommended unless you know what you are doing
-  * (like if you have your own system for managing deviceIds). Make sure the deviceId you set is sufficiently unique
-  * (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
-  * @public
-  * @param {string} deviceId - custom deviceId for current user.
-  * @deprecated Please use amplitude.getInstance().setDeviceId(deviceId);
-  * @example amplitude.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
-  */
-Amplitude.prototype.setDeviceId = function setDeviceId(deviceId) {
-  this.getInstance().setDeviceId(deviceId);
-};
+  /**
+    * Sets a custom deviceId for current user. Note: this is not recommended unless you know what you are doing
+    * (like if you have your own system for managing deviceIds). Make sure the deviceId you set is sufficiently unique
+    * (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
+    * @public
+    * @param {string} deviceId - custom deviceId for current user.
+    * @deprecated Please use amplitude.getInstance().setDeviceId(deviceId);
+    * @example amplitude.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
+    */
+  Amplitude.prototype.setDeviceId = function setDeviceId(deviceId) {
+    this.getInstance().setDeviceId(deviceId);
+  };
 
-/**
- * Sets user properties for the current user.
- * @public
- * @param {object} - object with string keys and values for the user properties to set.
- * @param {boolean} - DEPRECATED opt_replace: in earlier versions of the JS SDK the user properties object was kept in
- * memory and replace = true would replace the object in memory. Now the properties are no longer stored in memory, so replace is deprecated.
- * @deprecated Please use amplitude.getInstance.setUserProperties(userProperties);
- * @example amplitude.setUserProperties({'gender': 'female', 'sign_up_complete': true})
- */
-Amplitude.prototype.setUserProperties = function setUserProperties(userProperties) {
-  this.getInstance().setUserProperties(userProperties);
-};
+  /**
+   * Sets user properties for the current user.
+   * @public
+   * @param {object} - object with string keys and values for the user properties to set.
+   * @param {boolean} - DEPRECATED opt_replace: in earlier versions of the JS SDK the user properties object was kept in
+   * memory and replace = true would replace the object in memory. Now the properties are no longer stored in memory, so replace is deprecated.
+   * @deprecated Please use amplitude.getInstance.setUserProperties(userProperties);
+   * @example amplitude.setUserProperties({'gender': 'female', 'sign_up_complete': true})
+   */
+  Amplitude.prototype.setUserProperties = function setUserProperties(userProperties) {
+    this.getInstance().setUserProperties(userProperties);
+  };
 
-/**
- * Clear all of the user properties for the current user. Note: clearing user properties is irreversible!
- * @public
- * @deprecated Please use amplitude.getInstance().clearUserProperties();
- * @example amplitude.clearUserProperties();
- */
-Amplitude.prototype.clearUserProperties = function clearUserProperties() {
-  this.getInstance().clearUserProperties();
-};
+  /**
+   * Clear all of the user properties for the current user. Note: clearing user properties is irreversible!
+   * @public
+   * @deprecated Please use amplitude.getInstance().clearUserProperties();
+   * @example amplitude.clearUserProperties();
+   */
+  Amplitude.prototype.clearUserProperties = function clearUserProperties() {
+    this.getInstance().clearUserProperties();
+  };
 
-/**
- * Send an identify call containing user property operations to Amplitude servers.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
- * for more information on the Identify API and user property operations.
- * @param {Identify} identify_obj - the Identify object containing the user property operations to send.
- * @param {Amplitude~eventCallback} opt_callback - (optional) callback function to run when the identify event has been sent.
- * Note: the server response code and response body from the identify event upload are passed to the callback function.
- * @deprecated Please use amplitude.getInstance().identify(identify);
- * @example
- * var identify = new amplitude.Identify().set('colors', ['rose', 'gold']).add('karma', 1).setOnce('sign_up_date', '2016-03-31');
- * amplitude.identify(identify);
- */
-Amplitude.prototype.identify = function (identify_obj, opt_callback) {
-  this.getInstance().identify(identify_obj, opt_callback);
-};
+  /**
+   * Send an identify call containing user property operations to Amplitude servers.
+   * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
+   * for more information on the Identify API and user property operations.
+   * @param {Identify} identify_obj - the Identify object containing the user property operations to send.
+   * @param {Amplitude~eventCallback} opt_callback - (optional) callback function to run when the identify event has been sent.
+   * Note: the server response code and response body from the identify event upload are passed to the callback function.
+   * @deprecated Please use amplitude.getInstance().identify(identify);
+   * @example
+   * var identify = new amplitude.Identify().set('colors', ['rose', 'gold']).add('karma', 1).setOnce('sign_up_date', '2016-03-31');
+   * amplitude.identify(identify);
+   */
+  Amplitude.prototype.identify = function (identify_obj, opt_callback) {
+    this.getInstance().identify(identify_obj, opt_callback);
+  };
 
-/**
- * Set a versionName for your application.
- * @public
- * @param {string} versionName - The version to set for your application.
- * @deprecated Please use amplitude.getInstance().setVersionName(versionName);
- * @example amplitude.setVersionName('1.12.3');
- */
-Amplitude.prototype.setVersionName = function setVersionName(versionName) {
-  this.getInstance().setVersionName(versionName);
-};
+  /**
+   * Set a versionName for your application.
+   * @public
+   * @param {string} versionName - The version to set for your application.
+   * @deprecated Please use amplitude.getInstance().setVersionName(versionName);
+   * @example amplitude.setVersionName('1.12.3');
+   */
+  Amplitude.prototype.setVersionName = function setVersionName(versionName) {
+    this.getInstance().setVersionName(versionName);
+  };
 
-/**
- * This is the callback for logEvent and identify calls. It gets called after the event/identify is uploaded,
- * and the server response code and response body from the upload request are passed to the callback function.
- * @callback Amplitude~eventCallback
- * @param {number} responseCode - Server response code for the event / identify upload request.
- * @param {string} responseBody - Server response body for the event / identify upload request.
- */
+  /**
+   * This is the callback for logEvent and identify calls. It gets called after the event/identify is uploaded,
+   * and the server response code and response body from the upload request are passed to the callback function.
+   * @callback Amplitude~eventCallback
+   * @param {number} responseCode - Server response code for the event / identify upload request.
+   * @param {string} responseBody - Server response body for the event / identify upload request.
+   */
 
-/**
- * Log an event with eventType and eventProperties
- * @public
- * @param {string} eventType - name of event
- * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
- * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
- * Note: the server response code and response body from the event upload are passed to the callback function.
- * @deprecated Please use amplitude.getInstance().logEvent(eventType, eventProperties, opt_callback);
- * @example amplitude.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
- */
-Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
-  return this.getInstance().logEvent(eventType, eventProperties, opt_callback);
-};
+  /**
+   * Log an event with eventType and eventProperties
+   * @public
+   * @param {string} eventType - name of event
+   * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
+   * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
+   * Note: the server response code and response body from the event upload are passed to the callback function.
+   * @deprecated Please use amplitude.getInstance().logEvent(eventType, eventProperties, opt_callback);
+   * @example amplitude.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
+   */
+  Amplitude.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
+    return this.getInstance().logEvent(eventType, eventProperties, opt_callback);
+  };
 
-/**
- * Log an event with eventType, eventProperties, and groups. Use this to set event-level groups.
- * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
- * (unless you explicitly set it with setGroup).
- * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information
- * about groups and Count by Distinct on the Amplitude platform.
- * @public
- * @param {string} eventType - name of event
- * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
- * @param {object} groups - (optional) an object with string groupType: groupName values for the event being logged.
- * groupName can be a string or an array of strings.
- * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
- * Note: the server response code and response body from the event upload are passed to the callback function.
- * Deprecated Please use amplitude.getInstance().logEventWithGroups(eventType, eventProperties, groups, opt_callback);
- * @example amplitude.logEventWithGroups('Clicked Button', null, {'orgId': 24});
- */
-Amplitude.prototype.logEventWithGroups = function (eventType, eventProperties, groups, opt_callback) {
-  return this.getInstance().logEventWithGroups(eventType, eventProperties, groups, opt_callback);
-};
+  /**
+   * Log an event with eventType, eventProperties, and groups. Use this to set event-level groups.
+   * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
+   * (unless you explicitly set it with setGroup).
+   * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information
+   * about groups and Count by Distinct on the Amplitude platform.
+   * @public
+   * @param {string} eventType - name of event
+   * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
+   * @param {object} groups - (optional) an object with string groupType: groupName values for the event being logged.
+   * groupName can be a string or an array of strings.
+   * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
+   * Note: the server response code and response body from the event upload are passed to the callback function.
+   * Deprecated Please use amplitude.getInstance().logEventWithGroups(eventType, eventProperties, groups, opt_callback);
+   * @example amplitude.logEventWithGroups('Clicked Button', null, {'orgId': 24});
+   */
+  Amplitude.prototype.logEventWithGroups = function (eventType, eventProperties, groups, opt_callback) {
+    return this.getInstance().logEventWithGroups(eventType, eventProperties, groups, opt_callback);
+  };
 
-/**
- * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
- * revenueType and event properties.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue}
- * for more information on the Revenue interface and logging revenue.
- * @public
- * @param {Revenue} revenue_obj - the revenue object containing the revenue data being logged.
- * @deprecated Please use amplitude.getInstance().logRevenueV2(revenue_obj);
- * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99);
- * amplitude.logRevenueV2(revenue);
- */
-Amplitude.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
-  return this.getInstance().logRevenueV2(revenue_obj);
-};
+  /**
+   * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
+   * revenueType and event properties.
+   * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue}
+   * for more information on the Revenue interface and logging revenue.
+   * @public
+   * @param {Revenue} revenue_obj - the revenue object containing the revenue data being logged.
+   * @deprecated Please use amplitude.getInstance().logRevenueV2(revenue_obj);
+   * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99);
+   * amplitude.logRevenueV2(revenue);
+   */
+  Amplitude.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
+    return this.getInstance().logRevenueV2(revenue_obj);
+  };
 
-/**
- * Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
- * @public
- * @param {number} price - price of revenue event
- * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
- * @param {string} product - (optional) product identifier
- * @deprecated Please use amplitude.getInstance().logRevenueV2(revenue_obj);
- * @example amplitude.logRevenue(3.99, 1, 'product_1234');
- */
-Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
-  return this.getInstance().logRevenue(price, quantity, product);
-};
+  /**
+   * Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
+   * @public
+   * @param {number} price - price of revenue event
+   * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
+   * @param {string} product - (optional) product identifier
+   * @deprecated Please use amplitude.getInstance().logRevenueV2(revenue_obj);
+   * @example amplitude.logRevenue(3.99, 1, 'product_1234');
+   */
+  Amplitude.prototype.logRevenue = function logRevenue(price, quantity, product) {
+    return this.getInstance().logRevenue(price, quantity, product);
+  };
 
-/**
- * Remove events in storage with event ids up to and including maxEventId.
- * @private
- */
-Amplitude.prototype.removeEvents = function removeEvents(maxEventId, maxIdentifyId) {
-  this.getInstance().removeEvents(maxEventId, maxIdentifyId);
-};
+  /**
+   * Remove events in storage with event ids up to and including maxEventId.
+   * @private
+   */
+  Amplitude.prototype.removeEvents = function removeEvents(maxEventId, maxIdentifyId) {
+    this.getInstance().removeEvents(maxEventId, maxIdentifyId);
+  };
 
-/**
- * Send unsent events. Note: this is called automatically after events are logged if option batchEvents is false.
- * If batchEvents is true, then events are only sent when batch criterias are met.
- * @private
- * @param {Amplitude~eventCallback} callback - (optional) callback to run after events are sent.
- * Note the server response code and response body are passed to the callback as input arguments.
- */
-Amplitude.prototype.sendEvents = function sendEvents(callback) {
-  this.getInstance().sendEvents(callback);
-};
+  /**
+   * Send unsent events. Note: this is called automatically after events are logged if option batchEvents is false.
+   * If batchEvents is true, then events are only sent when batch criterias are met.
+   * @private
+   * @param {Amplitude~eventCallback} callback - (optional) callback to run after events are sent.
+   * Note the server response code and response body are passed to the callback as input arguments.
+   */
+  Amplitude.prototype.sendEvents = function sendEvents(callback) {
+    this.getInstance().sendEvents(callback);
+  };
 
-/**
- * Set global user properties. Note this is deprecated, and we recommend using setUserProperties
- * @public
- * @deprecated
- */
-Amplitude.prototype.setGlobalUserProperties = function setGlobalUserProperties(userProperties) {
-  this.getInstance().setUserProperties(userProperties);
-};
+  /**
+   * Set global user properties. Note this is deprecated, and we recommend using setUserProperties
+   * @public
+   * @deprecated
+   */
+  Amplitude.prototype.setGlobalUserProperties = function setGlobalUserProperties(userProperties) {
+    this.getInstance().setUserProperties(userProperties);
+  };
+}
 
 /**
  * Get the current version of Amplitude's Javascript SDK.
@@ -8519,6 +5581,7 @@ Amplitude.prototype.setGlobalUserProperties = function setGlobalUserProperties(u
 Amplitude.prototype.__VERSION__ = version;
 
 /* jshint expr:true */
+
 var old = window.amplitude || {};
 var newInstance = new Amplitude();
 newInstance._q = old._q || [];

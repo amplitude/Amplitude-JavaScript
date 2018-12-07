@@ -1,3 +1,12 @@
+### 4.6.0 (February 25, 2018)
+
+* Add support for unsetting utm params when a new session is created
+* Update dependencies to pass yarn audit
+* Bugfix: Allow logLevel to be set to disabled.
+* Bugfix: Update ua-parser to work in quirks mode in older internet explorer versions
+* Fetch ua-parsers-js from npm instead of github
+* Add `secureCookie` option to add a secure flag to the cookie
+
 ### 4.5.2 (November 10, 2018)
 
 * Bugfix: Default groupProperties to empty object in logEvent.
