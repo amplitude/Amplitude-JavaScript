@@ -12,13 +12,13 @@ export default {
   },
   name: 'amplitude',
   plugins: [
+    commonjs(),
     builtins(),
     babel({
       exclude: 'node_modules/**'
     }),
     resolve({
       browser: true,
-    }),
-    commonjs(),
+    })
   ],
 }
