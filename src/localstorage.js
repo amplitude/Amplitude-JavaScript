@@ -30,7 +30,7 @@ if (windowLocalStorageAvailable()) {
   } catch (e) {
     // Something bad happened...
   }
-} else {
+} else if (typeof document !== 'undefined') {
   // IE 5-7 use userData
   // See http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx
   var div = document.createElement('div'),
