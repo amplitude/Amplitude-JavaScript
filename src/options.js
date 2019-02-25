@@ -21,6 +21,7 @@ export default {
   savedMaxCount: 1000,
   saveEvents: true,
   saveParamsReferrerOncePerSession: true,
+  secureCookie: false,
   sessionTimeout: 30 * 60 * 1000,
   trackingOptions: {
     city: true,

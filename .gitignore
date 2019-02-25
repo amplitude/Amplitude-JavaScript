@@ -4,3 +4,7 @@ npm-debug.log
 build
 dist
 .DS_Store
+*.crt
+*.key
+amplitude.nocompat.js
+amplitude.nocompat.min.js

@@ -1,5 +1,4 @@
 /* jshint expr:true */
-import 'json3';
 import Amplitude from  './amplitude';
 
 var old = window.amplitude || {};

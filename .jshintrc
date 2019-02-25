@@ -67,7 +67,7 @@
     "browserify"    : false,    // Browserify (node.js code in the browser)
     "couch"         : false,    // CouchDB
     "devel"         : true,     // Development/debugging (alert, confirm, etc)
-    "esversion"     : 6,        // Support ES version 6 syntax
+    "esversion"     : 9,        // Support ES version 9 syntax
     "dojo"          : false,    // Dojo Toolkit
     "jasmine"       : false,    // Jasmine
     "jquery"        : false,    // jQuery
@@ -84,5 +84,9 @@
     "yui"           : false,    // Yahoo User Interface
 
     // Custom Globals
-    "globals"       : {}        // additional predefined global variables
+    "globals"       : {         // additional predefined global variables
+      "BUILD_COMPAT_2_0": true,
+      "BUILD_COMPAT_SNIPPET": true,
+      "BUILD_COMPAT_LOCAL_STORAGE": true
+    }
 }

@@ -2,7 +2,7 @@
   "presets": [
     ["env", {
       "targets": {
-        "browsers": ["ie >= 6"]
+        "browsers": ["ie >= 9"]
       },
       "modules": false
     }]

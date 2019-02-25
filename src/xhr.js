@@ -1,4 +1,4 @@
-import querystring from 'querystring';
+import queryString from 'query-string';
 
 /*
  * Simple AJAX request object
@@ -26,7 +26,7 @@ Request.prototype.send = function(callback) {
     };
     xdr.ontimeout = function () {};
     xdr.onprogress = function() {};
-    xdr.send(querystring.stringify(this.data));
+    xdr.send(queryString.stringify(this.data));
   } else {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', this.url, true);
@@ -36,7 +36,7 @@ Request.prototype.send = function(callback) {
       }
     };
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-    xhr.send(querystring.stringify(this.data));
+    xhr.send(queryString.stringify(this.data));
   }
   //log('sent request to ' + this.url + ' with data ' + decodeURIComponent(queryString(this.data)));
 };
