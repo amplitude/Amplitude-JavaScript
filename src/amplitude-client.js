@@ -1262,7 +1262,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents(callback) {
 
   this._sending = true;
   var protocol = this.options.forceHttps ? 'https' : ('https:' === window.location.protocol ? 'https' : 'http');
-  var url = protocol + '://' + this.options.apiEndpoint + '/';
+  var url = protocol + '://' + this.options.apiEndpoint;
 
   // fetch events to send
   var numEvents = Math.min(this._unsentCount(), this.options.uploadBatchSize);
