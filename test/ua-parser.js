@@ -1,11 +1,11 @@
 
 import UAParser from '@amplitude/ua-parser-js';
 
-describe('ua-parser', function() {
+describe('ua-parser', function(done) {
   it('should find an os and device for all agents', function () {
     var parser = new UAParser();
 
-    browsers.forEach(function (browser) {
+    browsers.forEach(function (browser, index) {
       parser.setUA(browser[1]);
       var uap = parser.getResult();
 
@@ -19,7 +19,7 @@ describe('ua-parser', function() {
 });
 
 var browsers = [
-["(device unknown) - Android - Puffin 2.9174AT (AT=android tablet)","Mozilla/5.0 (X11; U; Linux x86_64; en-us) AppleWebKit/534.35 (KHTML, like Gecko) Chrome/11.0.696.65 Safari/534.35 Puffin/2.9174AT","Chrome","11","Linux","x86_64"],
+["(device unknown) - Android - Puffin 2.9174AT (AT=android tablet)","Mozilla/5.0 (X11; U; Linux x86_64; en-us) AppleWebKit/534.35 (KHTML, like Gecko) Chrome/11.0.696.65 Safari/534.35 Puffin/2.9174AT","Puffin","2","Linux","x86_64"],
 ["(device unknown) - Android 4.1 - AppleWebKit 534.30","Mozilla/5.0 (Linux; U; Android 4.1; en-us; sdk Build/MR1) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.1 Safari/534.30","Android Browser","4","Android","4.1"],
 ["(device unknown) - Android 4.2 - Safari 535.19","Mozilla/5.0 (Linux; U; Android 4.2; en-us; sdk Build/MR1) AppleWebKit/535.19 (KHTML, like Gecko) Version/4.2 Safari/535.19","Android Browser","4","Android","4.2"],
 ["Acer Iconia - Android - 3.0.1 - AppleWebKit 534.13","Mozilla/5.0 (Linux; U; Android 3.0.1; fr-fr; A500 Build/HRI66) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13","Android Browser","4","Android","3.0.1"],
@@ -46,7 +46,7 @@ var browsers = [
 ["Android 4.4 - (Nexus 5) - AppleWebKit/536.23","Mozilla/5.0 (Linux; Android 4.4; Nexus 5 Build/BuildID) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36","Chrome Mobile","30","Android","4.4"],
 ["Android 4.4.2 - Chrome 35.0.1916.141","Mozilla/5.0 (Linux; Android 4.4.2; SAMSUNG-SM-T537A Build/KOT49H) AppleWebKit/537.36 (KHTML like Gecko) Chrome/35.0.1916.141 Safari/537.36","Chrome","35","Android","4.4.2"],
 ["Android SDK - Android 1.5 - Mobile Safari 525.20.1","Mozilla/5.0 (Linux; U; Android 1.5; en-us; sdk Build/CUPCAKE) AppleWebkit/528.5 (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1","Android Browser","3","Android","1.5"],
-["Apple iPad - iOS - Puffin/3.9174IT (IT=ios tablet)","Mozilla/5.0 (X11; U; Linux x86_64; en-AU) AppleWebKit/534.35 (KHTML, like Gecko) Chrome/11.0.696.65 Safari/534.35 Puffin/3.9174IT","Chrome","11","Linux","x86_64"],
+["Apple iPad - iOS - Puffin/3.9174IT (IT=ios tablet)","Mozilla/5.0 (X11; U; Linux x86_64; en-AU) AppleWebKit/534.35 (KHTML, like Gecko) Chrome/11.0.696.65 Safari/534.35 Puffin/3.9174IT","Puffin","3","Linux","x86_64"],
 ["Apple iPad - iOS 5_1 - Safari 5.1 (7534.48.3)","Mozilla/5.0 (iPad; CPU OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko ) Version/5.1 Mobile/9B176 Safari/7534.48.3","Mobile Safari","5","iPad","5.1"],
 ["Apple iPad - iOS 8_0_2 - Safari 7 (9537.53)","Mozilla/5.0 (iPad; CPU OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML like Gecko) Mobile/12A405 Version/7.0 Safari/9537.53","Safari","7","iPad","8.0.2"],
 ["Apple iPad 1 - iOS 3.2 - Safari 531","Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10","Mobile Safari","4","iPad","3.2"],
@@ -152,7 +152,7 @@ var browsers = [
 ["Firefox 3.0.12 - (Ubuntu karmic 9.10)","Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.11) Gecko/2009060309 Ubuntu/9.10 (karmic) Firefox/3.0.11","Firefox","3","Linux","9.10"],
 ["Firefox 3.0.2pre (Win XP 64)","Mozilla/5.0 (Windows; U; Windows NT 6.0 x64; en-US; rv:1.9pre) Gecko/2008072421 Minefield/3.0.2pre","Mozilla","5","Windows","Vista"],
 ["Firefox 3.0.3 (OS X PPC)","Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.0.3) Gecko/2008092414 Firefox/3.0.3","Firefox","3","Mac","10.5"],
-["Firefox 3.1b3 (SunOs)","Mozilla/5.0 (X11; U; SunOS i86pc; en-US; rv:1.9.1b3) Gecko/20090429 Firefox/3.1b3","Firefox","3","Solaris","i86"],
+["Firefox 3.1b3 (SunOs)","Mozilla/5.0 (X11; U; SunOS i86pc; en-US; rv:1.9.1b3) Gecko/20090429 Firefox/3.1b3","Firefox","3","Solaris","i86pc"],
 ["Firefox 3.5 (OpenBSD)","Mozilla/5.0 (X11; U; OpenBSD i386; en-US; rv:1.9.1) Gecko/20090702 Firefox/3.5","Firefox","3","Linux","i386"],
 ["Firefox 3.5 (OS X 10.5 Intel)","Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1) Gecko/20090624 Firefox/3.5","Firefox","3","Mac","10.5"],
 ["Firefox 3.5.2 - Shiretoko (Ubuntu 9.04)","Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.1.2) Gecko/20090803 Ubuntu/9.04 (jaunty) Shiretoko/3.5.2","Mozilla","5","Linux","9.04"],

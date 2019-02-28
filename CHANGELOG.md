@@ -1,4 +1,10 @@
-### 4.6.0 (February 25, 2018)
+### 5.0.0 (February 27, 2019)
+
+* Stop committing generated files to the git repository
+* Sync with upstream ua-parser for user agent parsing
+* Drop custom user agent parsing for symbian and blackberry
+
+### 4.6.0 (February 25, 2019)
 
 * Add support for unsetting utm params when a new session is created
 * Update dependencies to pass yarn audit

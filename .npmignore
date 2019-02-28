@@ -15,3 +15,5 @@ karma.conf.js
 scripts
 .npmignore
 .jshintrc
+amplitude.min.js
+amplitude-snippet.min.js

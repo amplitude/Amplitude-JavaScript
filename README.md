@@ -11,7 +11,7 @@ Please see our [installation guide](https://amplitude.zendesk.com/hc/en-us/artic
 [![npm version](https://badge.fury.io/js/amplitude-js.svg)](https://badge.fury.io/js/amplitude-js)
 [![Bower version](https://badge.fury.io/bo/amplitude-js.svg)](https://badge.fury.io/bo/amplitude-js)
 
-[4.6.0 - Released on February 25, 2019](https://github.com/amplitude/Amplitude-JavaScript/releases/latest)
+[5.0.0 - Released on February 27, 2019](https://github.com/amplitude/Amplitude-JavaScript/releases/latest)
 
 
 # JavaScript SDK Reference #
@@ -24,6 +24,24 @@ See our [JavaScript SDK Reference](https://amplitude.zendesk.com/hc/en-us/articl
 
 # Changelog #
 Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
+
+# Upgrading Major Versions and Breaking Changes #
+
+## 5.0
+
+We stopped committing the generated amplitude.min.js and amplitude.js files to
+the repository. This should only affect you if you load amplitude via github.
+You should use `npm` or `yarn` instead.
+
+We dropped our custom symbian and blackberry user agent parsing to simply match
+what the ua-parser-js library does.
+
+## 4.0
+
+The library now defaults to sending requests to https://api.amplitude.com
+instead of //api.amplitude.com. This should only affect you if your site does
+not use https and you use a Content Security Policy.
+
 
 # Questions? #
 If you have questions about using or installing our JavaScript SDK, you can send an email to [Amplitude Support](mailto:platform@amplitude.com).
