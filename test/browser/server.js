@@ -9,7 +9,7 @@ const app = express();
 app.use(express.static(__dirname + '/../..'));
 app.use(express.static(__dirname));
 app.listen(port);
-console.log('Listening on port ' + port + '...');
+console.log(`Listening on http://localhost:${port}`);
 
 if (!!process.env.USE_SSL) {
   const options = {

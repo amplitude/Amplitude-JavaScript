@@ -13,8 +13,7 @@ export default {
   plugins: [
     babel({
       exclude: 'node_modules/**',
-      externalHelpersWhitelist: ['defineProperty', 'extends', 'typeof'],
-      plugins: ['external-helpers', 'transform-object-rest-spread'],
+      plugins: ['@babel/plugin-proposal-object-rest-spread'],
     }),
     resolve({
       browser: true,
@@ -24,6 +23,12 @@ export default {
       BUILD_COMPAT_2_0: 'false',
       BUILD_COMPAT_LOCAL_STORAGE: 'false',
     }),
-    commonjs(),
+    commonjs({
+      include: [
+        'node_modules/query-string/**',
+        'node_modules/@amplitude/ua-parser-js/**',
+        'node_modules/blueimp-md5/**',
+      ],
+    }),
   ],
-}
+};

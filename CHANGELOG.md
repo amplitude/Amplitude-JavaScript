@@ -1,7 +1,12 @@
 ### 5.0.0 (February 27, 2019)
 
-* Stop committing generated files to the git repository
+* Allow for api endpoints that do not end with a trailing slash
 * Sync with upstream ua-parser for user agent parsing
+* Upgrade rollup/babel dependencies
+
+## Breaking Changes
+* Drop JSON polyfill. This will break IE 7 and older. You can install your own JSON polyfill before loading amplitude.
+* Stop committing generated files to the master branch in the git repository (do not install amplitude from git).
 * Drop custom user agent parsing for symbian and blackberry
 
 ### 4.6.0 (February 25, 2019)
