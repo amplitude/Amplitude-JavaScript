@@ -1413,7 +1413,7 @@ describe('setVersionName', function() {
       amplitude.options.forceHttps = false;
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
-      assert.equal(server.requests[0].url, 'http://api.amplitude.com/');
+      assert.equal(server.requests[0].url, 'http://api.amplitude.com');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
     });
@@ -1422,7 +1422,7 @@ describe('setVersionName', function() {
       amplitude.options.forceHttps = true;
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
-      assert.equal(server.requests[0].url, 'https://api.amplitude.com/');
+      assert.equal(server.requests[0].url, 'https://api.amplitude.com');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
     });
@@ -1431,7 +1431,7 @@ describe('setVersionName', function() {
       amplitude.init(apiKey, null, { forceHttps: true });
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
-      assert.equal(server.requests[0].url, 'https://api.amplitude.com/');
+      assert.equal(server.requests[0].url, 'https://api.amplitude.com');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
     });

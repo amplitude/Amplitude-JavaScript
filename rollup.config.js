@@ -23,12 +23,6 @@ export default {
       BUILD_COMPAT_2_0: 'true',
       BUILD_COMPAT_LOCAL_STORAGE: 'true',
     }),
-    commonjs({
-      include: [
-        'node_modules/query-string/**',
-        'node_modules/@amplitude/ua-parser-js/**',
-        'node_modules/blueimp-md5/**',
-      ],
-    }),
+    commonjs(),
   ],
 };
