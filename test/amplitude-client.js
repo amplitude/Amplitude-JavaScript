@@ -65,6 +65,16 @@ describe('AmplitudeClient', function() {
       assert.ok(onInit2Called);
     });
 
+    it('should clear the onInitQueue', function() {
+      let onInitCalled = false;
+      let onInit2Called = false;
+      amplitude.onInit(() => { onInitCalled = true; });
+      amplitude.onInit(() => { onInit2Called = true; });
+
+      amplitude.init(apiKey);
+      assert.lengthOf(amplitude._onInit, 0);
+    });
+
     it('fails on invalid apiKeys', function() {
       amplitude.init(null);
       assert.equal(amplitude.options.apiKey, undefined);

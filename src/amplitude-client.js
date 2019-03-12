@@ -154,6 +154,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
   for (let i = 0; i < this._onInit.length; i++) {
     this._onInit[i]();
   }
+  this._onInit = [];
 };
 
 /**
