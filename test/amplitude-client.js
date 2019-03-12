@@ -54,6 +54,27 @@ describe('AmplitudeClient', function() {
       assert.equal(new AmplitudeClient('$DEFAULT_INSTANCE')._instanceName, '$default_instance');
     });
 
+    it('should invoke onInit callbacks', function() {
+      let onInitCalled = false;
+      let onInit2Called = false;
+      amplitude.onInit(() => { onInitCalled = true; });
+      amplitude.onInit(() => { onInit2Called = true; });
+
+      amplitude.init(apiKey);
+      assert.ok(onInitCalled);
+      assert.ok(onInit2Called);
+    });
+
+    it('should clear the onInitQueue', function() {
+      let onInitCalled = false;
+      let onInit2Called = false;
+      amplitude.onInit(() => { onInitCalled = true; });
+      amplitude.onInit(() => { onInit2Called = true; });
+
+      amplitude.init(apiKey);
+      assert.lengthOf(amplitude._onInit, 0);
+    });
+
     it('fails on invalid apiKeys', function() {
       amplitude.init(null);
       assert.equal(amplitude.options.apiKey, undefined);
@@ -1413,7 +1434,7 @@ describe('setVersionName', function() {
       amplitude.options.forceHttps = false;
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
-      assert.equal(server.requests[0].url, 'http://api.amplitude.com/');
+      assert.equal(server.requests[0].url, 'http://api.amplitude.com');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
     });
@@ -1422,7 +1443,7 @@ describe('setVersionName', function() {
       amplitude.options.forceHttps = true;
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
-      assert.equal(server.requests[0].url, 'https://api.amplitude.com/');
+      assert.equal(server.requests[0].url, 'https://api.amplitude.com');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
     });
@@ -1431,7 +1452,7 @@ describe('setVersionName', function() {
       amplitude.init(apiKey, null, { forceHttps: true });
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
-      assert.equal(server.requests[0].url, 'https://api.amplitude.com/');
+      assert.equal(server.requests[0].url, 'https://api.amplitude.com');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
     });

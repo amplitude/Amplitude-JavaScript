@@ -1,8 +1,8 @@
 {
   "presets": [
-    ["env", {
+    ["@babel/env", {
       "targets": {
-        "browsers": ["ie >= 9"]
+        "browsers": ["ie >= 8"]
       },
       "modules": false
     }]

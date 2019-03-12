@@ -2,7 +2,7 @@ import language from './language';
 
 // default options
 export default {
-  apiEndpoint: 'api.amplitude.com/',
+  apiEndpoint: 'api.amplitude.com',
   batchEvents: false,
   cookieExpiration: 365 * 10,
   cookieName: 'amplitude_id',

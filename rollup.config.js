@@ -4,7 +4,7 @@ import replace from 'rollup-plugin-replace';
 import babel from 'rollup-plugin-babel';
 
 export default {
-  input: 'src/index.compat.js',
+  input: 'src/index.js',
   output: {
     name: 'amplitude',
     file: 'amplitude.js',
@@ -13,8 +13,7 @@ export default {
   plugins: [
     babel({
       exclude: 'node_modules/**',
-      externalHelpersWhitelist: ['defineProperty', 'extends', 'typeof'],
-      plugins: ['external-helpers', 'transform-object-rest-spread'],
+      plugins: ['@babel/plugin-proposal-object-rest-spread'],
     }),
     resolve({
       browser: true,
@@ -26,4 +25,4 @@ export default {
     }),
     commonjs(),
   ],
-}
+};

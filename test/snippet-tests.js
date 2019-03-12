@@ -54,6 +54,15 @@ describe('Snippet', function() {
     assert.deepEqual(amplitude._iq['instance2']._q[1], ['logEvent', 'Event']);
   });
 
+  it('amplitude object should proxy onInit', function() {
+    const callback = () => { };
+    amplitude.getInstance('onInit').onInit(callback);
+    amplitude.getInstance('onInit').init('API_KEY');
+    amplitude.getInstance('onInit').logEvent('Event', {prop: 1});
+    assert.lengthOf(amplitude._iq['oninit']._q, 3);
+    assert.deepEqual(amplitude._iq['oninit']._q[0], ['onInit', callback]);
+  });
+
   it('amplitude object should proxy resetSessionId', function() {
     amplitude.getInstance('reset_session_id_instance').init('API_KEY');
     amplitude.getInstance('reset_session_id_instance').resetSessionId();
