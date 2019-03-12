@@ -54,6 +54,17 @@ describe('AmplitudeClient', function() {
       assert.equal(new AmplitudeClient('$DEFAULT_INSTANCE')._instanceName, '$default_instance');
     });
 
+    it('should invoke onInit callbacks', function() {
+      let onInitCalled = false;
+      let onInit2Called = false;
+      amplitude.onInit(() => { onInitCalled = true; });
+      amplitude.onInit(() => { onInit2Called = true; });
+
+      amplitude.init(apiKey);
+      assert.ok(onInitCalled);
+      assert.ok(onInit2Called);
+    });
+
     it('fails on invalid apiKeys', function() {
       amplitude.init(null);
       assert.equal(amplitude.options.apiKey, undefined);

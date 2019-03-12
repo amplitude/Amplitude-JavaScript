@@ -11,7 +11,7 @@ Please see our [installation guide](https://amplitude.zendesk.com/hc/en-us/artic
 [![npm version](https://badge.fury.io/js/amplitude-js.svg)](https://badge.fury.io/js/amplitude-js)
 [![Bower version](https://badge.fury.io/bo/amplitude-js.svg)](https://badge.fury.io/bo/amplitude-js)
 
-[4.6.0 - Released on February 25, 2019](https://github.com/amplitude/Amplitude-JavaScript/releases/latest)
+[4.7.0 - Released on March 12, 2019](https://github.com/amplitude/Amplitude-JavaScript/releases/latest)
 
 
 # JavaScript SDK Reference #

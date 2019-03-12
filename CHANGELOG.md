@@ -1,4 +1,20 @@
-### 4.6.0 (February 25, 2018)
+### 5.0.0 (Unreleased)
+
+* Add `onInit` method that accepts a callback that will be invoked after init
+* Allow for api endpoints that do not end with a trailing slash
+* Sync with upstream ua-parser for user agent parsing
+* Upgrade rollup/babel dependencies
+
+## Breaking Changes
+* Drop JSON polyfill. This will break IE 7 and older. You can install your own JSON polyfill before loading amplitude.
+* Stop committing generated files to the master branch in the git repository (do not install amplitude from git).
+* Drop custom user agent parsing for symbian and blackberry
+
+### 4.7.0 (March 12, 2019)
+
+* Cherry-picked from 5.0.0: Add `onInit` method that accepts a callback that will be invoked after init
+
+### 4.6.0 (February 25, 2019)
 
 * Add support for unsetting utm params when a new session is created
 * Update dependencies to pass yarn audit

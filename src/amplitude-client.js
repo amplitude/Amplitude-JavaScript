@@ -31,6 +31,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
   this._updateScheduled = false;
+  this._onInit = [];
 
   // event meta data
   this._eventId = 0;
@@ -148,6 +149,10 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     if (type(opt_callback) === 'function') {
       opt_callback(this);
     }
+  }
+
+  for (let i = 0; i < this._onInit.length; i++) {
+    this._onInit[i]();
   }
 };
 
@@ -283,6 +288,14 @@ AmplitudeClient.prototype._parseSavedUnsentEventsString = function _parseSavedUn
  */
 AmplitudeClient.prototype.isNewSession = function isNewSession() {
   return this._newSession;
+};
+
+/**
+ * Store callbacks to call after init
+ * @private
+ */
+AmplitudeClient.prototype.onInit = function (callback) {
+  this._onInit.push(callback);
 };
 
 /**
