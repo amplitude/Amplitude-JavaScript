@@ -65,6 +65,22 @@ describe('AmplitudeClient', function() {
       assert.ok(onInit2Called);
     });
 
+    it('should not invoke onInit callbacks before init is called', function() {
+      let onInitCalled = false;
+      amplitude.onInit(() => { onInitCalled = true; });
+
+      assert.ok(onInitCalled === false);
+      amplitude.init(apiKey);
+      assert.ok(onInitCalled);
+    });
+
+    it('should immediately invoke onInit callbacks if already initialized', function() {
+      let onInitCalled = false;
+      amplitude.init(apiKey);
+      amplitude.onInit(() => { onInitCalled = true; });
+      assert.ok(onInitCalled);
+    });
+
     it('should clear the onInitQueue', function() {
       let onInitCalled = false;
       let onInit2Called = false;

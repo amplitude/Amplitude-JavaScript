@@ -40,6 +40,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._newSession = false;
   this._sequenceNumber = 0;
   this._sessionId = null;
+  this._isInitialized = false;
 
   this._userAgent = (navigator && navigator.userAgent) || null;
 };
@@ -155,6 +156,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this._onInit[i]();
   }
   this._onInit = [];
+  this._isInitialized = true;
 };
 
 /**
@@ -296,7 +298,11 @@ AmplitudeClient.prototype.isNewSession = function isNewSession() {
  * @private
  */
 AmplitudeClient.prototype.onInit = function (callback) {
-  this._onInit.push(callback);
+  if (this._isInitialized) {
+    callback();
+  } else {
+    this._onInit.push(callback);
+  }
 };
 
 /**
