@@ -1,13 +1,14 @@
-### 5.0.0 (Unreleased)
+### 5.0.0 (March 19, 2019)
 
 * Add `onInit` method that accepts a callback that will be invoked after init
 * Allow for api endpoints that do not end with a trailing slash
 * Sync with upstream ua-parser for user agent parsing
 * Upgrade rollup/babel dependencies
+* Invoke runQueuedFunctions from the main library instead of the snippet. This will allow integrations to take advantage of the queueing feature on sites that do not use the snippet.
 
-## Breaking Changes
+#### Breaking Changes
 * Drop JSON polyfill. This will break IE 7 and older. You can install your own JSON polyfill before loading amplitude.
-* Stop committing generated files to the master branch in the git repository (do not install amplitude from git).
+* Stop committing generated files to the master branch in the git repository. You should not install amplitude from the master git branch. You should never import amplitude.min.js into your build.
 * Drop custom user agent parsing for symbian and blackberry
 
 
