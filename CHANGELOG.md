@@ -1,3 +1,8 @@
+### 5.2.0 (March 28, 2019)
+
+* Stop warning when null property values are instrumented
+* Allow for objects nested within arrays
+
 ### 5.0.0 (March 19, 2019)
 
 * Add `onInit` method that accepts a callback that will be invoked after init
