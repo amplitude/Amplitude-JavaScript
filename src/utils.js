@@ -133,7 +133,7 @@ var validateProperties = function validateProperties(properties) {
 };
 
 var invalidValueTypes = [
-  'null', 'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
+  'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
 ];
 
 var validatePropertyValue = function validatePropertyValue(key, value) {
@@ -150,11 +150,14 @@ var validatePropertyValue = function validatePropertyValue(key, value) {
     for (var i = 0; i < value.length; i++) {
       var element = value[i];
       var elemType = type(element);
-      if (elemType === 'array' || elemType === 'object') {
+      if (elemType === 'array') {
         log.warn('WARNING: Cannot have ' + elemType + ' nested in an array property value, skipping');
         continue;
+      } else if (elemType === 'object') {
+        arrayCopy.push(validateProperties(element));
+      } else {
+        arrayCopy.push(validatePropertyValue(key, element));
       }
-      arrayCopy.push(validatePropertyValue(key, element));
     }
     value = arrayCopy;
   } else if (valueType === 'object') {

@@ -575,9 +575,9 @@ describe('AmplitudeClient', function() {
         'bool': true,
         'string': 'test',
         'array': [0, 1, 2, '3'],
-        'nested_array': ['a'],
+        'nested_array': ['a', {'key':'value'}],
         'object': {'key':'value'},
-        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
+        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2', {'k3':'v3'}]}}
       }
 
       // check that event loaded into memory
@@ -604,9 +604,9 @@ describe('AmplitudeClient', function() {
         'bool': true,
         'string': 'test',
         'array': [0, 1, 2, '3'],
-        'nested_array': ['a'],
+        'nested_array': ['a', {'key':'value'}],
         'object': {'key':'value'},
-        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
+        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2', {'k3':'v3'}]}}
       }
 
       // check that event loaded into memory
@@ -710,7 +710,7 @@ it ('should load saved events from localStorage new keys and send events', funct
         'bool': true,
         'string': 'test',
         'array': [0, 1, 2, '3'],
-        'nested_array': ['a'],
+        'nested_array': ['a', {'key':'value'}],
         'object': {
           'key': 'value'
         },
@@ -719,7 +719,7 @@ it ('should load saved events from localStorage new keys and send events', funct
           'l': [0, 1],
           'o': {
               'k2': 'v2',
-              'l2': ['e2']
+              'l2': ['e2', {'k3':'v3'}]
           }
         }
       }
@@ -2348,9 +2348,9 @@ describe('setVersionName', function() {
         'error': 'Error: oops',
         'string': 'test',
         'array': [0, 1, 2, '3'],
-        'nested_array': ['a'],
+        'nested_array': ['a', {'key': 'value'}],
         'object': {'key':'value', '15':'Error: oops'},
-        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2']}}
+        'nested_object': {'k':'v', 'l':[0,1], 'o':{'k2':'v2', 'l2': ['e2', {'k3': 'v3'}]}}
       });
     });
 
