@@ -133,7 +133,7 @@ var validateProperties = function validateProperties(properties) {
 };
 
 var invalidValueTypes = [
-  'null', 'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
+  'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
 ];
 
 var validatePropertyValue = function validatePropertyValue(key, value) {
