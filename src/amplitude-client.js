@@ -10,7 +10,7 @@ import type from './type';
 import UAParser from '@amplitude/ua-parser-js';
 import utils from './utils';
 import UUID from './uuid';
-import version from './version';
+import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
 
 /**

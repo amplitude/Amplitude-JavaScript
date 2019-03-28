@@ -1,25 +1,48 @@
-var fs = require('fs');
-var path = require('path');
-var package = require('../package');
-var previous = require('../build/version');
+const fs = require('fs');
+const path = require('path');
+const {version} = require('../package');
+const {format} = require('date-fns');
+const crypto = require('crypto');
 
-var version = package.version;
+const cwd = process.cwd();
 
-var cwd = process.cwd();
-
-function replaceVersion(filepath) {
+function replaceTextInFile(filepath, match, replacement) {
   var filename = path.join(cwd, filepath);
-  fs.writeFileSync(filename, fs.readFileSync(filename, 'utf-8').split(previous).join(version));
-  console.log('Updated ', filepath);
+
+  const updatedText = fs
+    .readFileSync(filename, 'utf-8')
+    .replace(match, replacement);
+
+  if (updatedText.indexOf(replacement) === -1) {
+    throw new Error(`Failed to update text in ${filepath}`);
+  }
+
+  fs.writeFileSync(filename, updatedText);
+
+  console.log(`Updated ${filepath}: ${replacement}`);
 }
 
-console.log('Updating to version ' + version);
-
-var files = [
-  'README.md',
+// Update version in snippet
+replaceTextInFile(
   path.join('src', 'amplitude-snippet.js'),
-  path.join('src', 'version.js'),
-];
-files.map(replaceVersion);
+  /cdn\.amplitude\.com\/libs\/amplitude-[0-9]+\.[0-9]+\.[0-9]+-min\.gz\.js/,
+  `cdn.amplitude.com/libs/amplitude-${version}-min.gz.js`,
+);
 
-console.log('Updated version from', previous, 'to', version);
+// Update integrity hash in snippet
+const sdkText = fs.readFileSync(path.join('dist', `amplitude-${version}-min.js`), 'utf-8');
+const hash = crypto.createHash('sha384').update(sdkText).digest('base64');
+replaceTextInFile(
+  path.join('src', 'amplitude-snippet.js'),
+  /as.integrity = 'sha384-[a-zA-Z0-9+\/]+';/,
+  `as.integrity = 'sha384-${hash}';`,
+);
+
+// Update version and relase date in readme
+replaceTextInFile(
+  'README.md',
+  /\[[0-9]+\.[0-9]+\.[0-9]+ - Released on [A-Z][a-z]+ [0-9]+, [0-9]{4}]/,
+  `[${version} - Released on ${format(new Date(), 'MMMM D, YYYY')}]`,
+);
+
+console.log(`Updated version to ${version}`);

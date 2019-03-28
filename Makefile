@@ -51,8 +51,7 @@ node_modules: package.json
 #
 # Target for updating version.
 
-version: package.json src/version.js
-	@$(ROLLUP) src/version.js -o build/version.js -f cjs
+version: package.json
 	node scripts/version
 
 #
@@ -65,7 +64,7 @@ README.md: $(SNIPPET_OUT) version
 # Target for `amplitude.js` file.
 #
 
-$(OUT): node_modules $(SRC) version rollup.config.js rollup.min.js
+$(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js
 	@$(JSHINT) --verbose $(SRC)
 	@NODE_ENV=production $(ROLLUP) --config rollup.config.js
 	@NODE_ENV=production $(ROLLUP) --config rollup.nocompat.js

@@ -4,7 +4,7 @@ import Identify from './identify';
 import Revenue from './revenue';
 import type from './type';
 import utils from './utils';
-import version from './version';
+import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
 
 /**
