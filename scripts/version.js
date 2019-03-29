@@ -30,7 +30,7 @@ replaceTextInFile(
 );
 
 // Update integrity hash in snippet
-const sdkText = fs.readFileSync(path.join('dist', `amplitude-${version}-min.js`), 'utf-8');
+const sdkText = fs.readFileSync(path.join('.', `amplitude.min.js`), 'utf-8');
 const hash = crypto.createHash('sha384').update(sdkText).digest('base64');
 replaceTextInFile(
   path.join('src', 'amplitude-snippet.js'),

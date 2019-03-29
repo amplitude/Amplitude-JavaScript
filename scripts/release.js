@@ -1,9 +1,8 @@
 var fs = require('fs-extra');
 var path = require('path');
-var package = require('../package');
+const { version } = require('../package');
 var exec = require('child_process').exec;
 
-var version = package.version;
 var cwd = process.cwd();
 
 var file = path.join(cwd, 'dist', 'amplitude-' + version + '.js');

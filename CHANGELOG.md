@@ -1,3 +1,7 @@
+### 5.2.1 (March 28, 2019)
+
+* Fix npm publish failure where built files were missing.
+
 ### 5.2.0 (March 28, 2019)
 
 * Stop warning when null property values are instrumented
