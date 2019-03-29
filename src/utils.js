@@ -133,13 +133,15 @@ var validateProperties = function validateProperties(properties) {
 };
 
 var invalidValueTypes = [
-  'nan', 'undefined', 'function', 'arguments', 'regexp', 'element'
+  'nan', 'function', 'arguments', 'regexp', 'element'
 ];
 
 var validatePropertyValue = function validatePropertyValue(key, value) {
   var valueType = type(value);
   if (invalidValueTypes.indexOf(valueType) !== -1) {
     log.warn('WARNING: Property key "' + key + '" with invalid value type ' + valueType + ', ignoring');
+    value = null;
+  } else if (valueType === 'undefined') {
     value = null;
   } else if (valueType === 'error') {
     value = String(value);

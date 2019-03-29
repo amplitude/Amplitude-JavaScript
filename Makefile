@@ -74,11 +74,11 @@ $(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js
 #
 # Target for minified `amplitude-snippet.js` file.
 #
-$(SNIPPET_OUT): $(SRC) $(SNIPPET) version
+$(SNIPPET_OUT): $(SRC) $(SNIPPET)
 	@$(JSHINT) --verbose $(SNIPPET)
 	@$(MINIFY) $(SNIPPET) -m -b max-line-len=80,beautify=false | awk 'NF' > $(SNIPPET_OUT)
 
-$(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET) version
+$(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET)
 	@grep -Ev "\ba?s\b" $(SNIPPET) | $(MINIFY) -m -b max-line-len=80,beautify=false - \
 		| awk 'NF' > $(SEGMENT_SNIPPET_OUT)
 
@@ -86,7 +86,7 @@ $(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET) version
 # Target for `tests-build.js` file.
 #
 
-build: $(TESTS) $(OUT) $(SNIPPET_OUT) $(SEGMENT_SNIPPET_OUT) README.md
+build: $(TESTS) $(OUT) $(SNIPPET_OUT) $(SEGMENT_SNIPPET_OUT)
 	@$(ROLLUP) --config rollup.test.js
 	@$(ROLLUP) --config rollup.snippet-tests.js
 
