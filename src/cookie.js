@@ -130,11 +130,10 @@ var remove = function(name) {
   }
 };
 
-
 export default {
-  reset: reset,
-  options: options,
-  get: get,
-  set: set,
-  remove: remove
+  reset,
+  options,
+  get,
+  set,
+  remove
 };

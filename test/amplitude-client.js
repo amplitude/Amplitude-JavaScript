@@ -3219,6 +3219,35 @@ describe('setVersionName', function() {
     });
   });
 
+  describe('setDomain', function() {
+    beforeEach(() => {
+      reset();
+      amplitude.init(apiKey, null, { cookieExpiration: 365, secureCookie: true });
+    });
+
+    it('should set the cookie domain to null for an invalid domain', () => {
+      amplitude.setDomain('.foobar.com');
+      const options = cookie.options();
+      assert.equal(options.domain, null);
+    });
+
+    it('should not change the expirationDays options', () => {
+      amplitude.setDomain('.foobar.com');
+      const options = cookie.options();
+      assert.equal(options.expirationDays, 365);
+    });
+
+    it('should not change the secureCookie options', () => {
+      amplitude.setDomain('.foobar.com');
+      const options = cookie.options();
+      assert.equal(options.secure, true);
+    });
+
+    afterEach(() => {
+      reset();
+    });
+  });
+
   describe('sessionId', function() {
     var clock;
     beforeEach(function() {
