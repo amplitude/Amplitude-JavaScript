@@ -7,6 +7,7 @@ dist
 *.crt
 *.key
 amplitude.js
+amplitude.esm.js
 amplitude.min.js
 amplitude.nocompat.js
 amplitude.nocompat.min.js
