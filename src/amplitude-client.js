@@ -674,6 +674,8 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
 
   try {
     this.cookieStorage.options({
+      expirationDays: this.options.cookieExpiration,
+      secure: this.options.secureCookie,
       domain: domain
     });
     this.options.domain = this.cookieStorage.options().domain;
