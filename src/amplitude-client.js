@@ -1099,7 +1099,7 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
  * @public
  * @param {string} eventType - name of event
  * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
- * @param {number} timesatmp - (optional) the custom timestamp as milliseconds since epoch.
+ * @param {number} timestamp - (optional) the custom timestamp as milliseconds since epoch.
  * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
  * Note: the server response code and response body from the event upload are passed to the callback function.
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
