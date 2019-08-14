@@ -1,3 +1,8 @@
+### 5.3.0 (August 14, 2019)
+
+* Add ES Module build #183
+* Fix setDomain bug where setting the cooke domain clobbered other cookie setings
+
 ### 5.2.2 (March 29, 2019)
 
 * Stop warning when `undefined` property values are instrumented
