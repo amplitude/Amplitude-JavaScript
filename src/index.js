@@ -10,7 +10,12 @@ for (var instance in old._iq) { // migrate each instance's queue
   }
 }
 
-newInstance.runQueuedFunctions();
+if(newInstance.runQueuedFunctions){
+  newInstance.runQueuedFunctions();
+} else {
+  console.error("[Amplitude] Error: could not load SDK");
+}
+  
 
 // export the instance
 export default newInstance;
