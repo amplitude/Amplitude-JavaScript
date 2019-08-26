@@ -10,7 +10,9 @@ for (var instance in old._iq) { // migrate each instance's queue
   }
 }
 
-newInstance.runQueuedFunctions();
+if (BUILD_COMPAT_SNIPPET) {
+  newInstance.runQueuedFunctions();
+}
 
 // export the instance
 export default newInstance;
