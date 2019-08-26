@@ -1,7 +1,12 @@
+### 5.3.1 (August 26, 2019)
+
+* Fix bug where runQueuedFunctions was unnecessarily being called on module import
+* Update dependencies to pass yarn audit again.
+
 ### 5.3.0 (August 14, 2019)
 
 * Add ES Module build #183
-* Fix setDomain bug where setting the cooke domain clobbered other cookie setings
+* Fix setDomain bug where setting the cookie domain clobbered other cookie setings
 
 ### 5.2.2 (March 29, 2019)
 
