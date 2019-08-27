@@ -85,9 +85,6 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    if (this._instanceName === Constants.DEFAULT_INSTANCE) {
-      _upgradeCookieData(this);
-    }
     _loadCookieData(this);
 
     // load deviceId and userId from input, or try to fetch existing value from cookie
@@ -244,23 +241,11 @@ AmplitudeClient.prototype._apiKeySet = function _apiKeySet(methodName) {
  */
 AmplitudeClient.prototype._loadSavedUnsentEvents = function _loadSavedUnsentEvents(unsentKey) {
   var savedUnsentEventsString = this._getFromStorage(localStorage, unsentKey);
-  var events = this._parseSavedUnsentEventsString(savedUnsentEventsString, unsentKey);
+  var unsentEvents = this._parseSavedUnsentEventsString(savedUnsentEventsString, unsentKey);
 
-  var savedUnsentEventsStringLegacy = this._getFromStorageLegacy(localStorage, unsentKey);
-  var legacyEvents = this._parseSavedUnsentEventsString(savedUnsentEventsStringLegacy, unsentKey);
-
-  var unsentEvents = legacyEvents.concat(events);
-
-  // Migrate legacy events out of storage
-  this._removeFromLegacyStorage(localStorage, unsentKey);
   this._setInStorage(localStorage, unsentKey, JSON.stringify(unsentEvents));
 
   return unsentEvents;
-};
-
-
-AmplitudeClient.prototype._removeFromLegacyStorage = function _removeFromLegacyStorage(storage, key) {
-  storage.removeItem(key + this._legacyStorageSuffix);
 };
 
 /**
@@ -393,81 +378,12 @@ AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, ke
 };
 
 /**
- * Helper function to fetch values from storage
- * Storage argument allows for localStoraoge and sessionStoraoge
- * @private
- */
-AmplitudeClient.prototype._getFromStorageLegacy = function _getFromStorageLegacy(storage, key) {
-  return storage.getItem(key + this._legacyStorageSuffix);
-};
-
-/**
  * Helper function to set values in storage
  * Storage argument allows for localStoraoge and sessionStoraoge
  * @private
  */
 AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, value) {
   storage.setItem(key + this._storageSuffix, value);
-};
-
-/**
- * cookieData (deviceId, userId, optOut, sessionId, lastEventTime, eventId, identifyId, sequenceNumber)
- * can be stored in many different places (localStorage, cookie, etc).
- * Need to unify all sources into one place with a one-time upgrade/migration.
- * @private
- */
-var _upgradeCookieData = function _upgradeCookieData(scope) {
-  // skip if already migrated to 4.10+
-  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
-  if (type(cookieData) === 'object') {
-    return;
-  }
-  // skip if already migrated to 2.70+
-  cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._legacyStorageSuffix);
-  if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
-    return;
-  }
-
-  var _getAndRemoveFromLocalStorage = function _getAndRemoveFromLocalStorage(key) {
-    var value = localStorage.getItem(key);
-    localStorage.removeItem(key);
-    return value;
-  };
-
-  // in v2.6.0, deviceId, userId, optOut was migrated to localStorage with keys + first 6 char of apiKey
-  var apiKeySuffix = (type(scope.options.apiKey) === 'string' && ('_' + scope.options.apiKey.slice(0, 6))) || '';
-  var localStorageDeviceId = _getAndRemoveFromLocalStorage(Constants.DEVICE_ID + apiKeySuffix);
-  var localStorageUserId = _getAndRemoveFromLocalStorage(Constants.USER_ID + apiKeySuffix);
-  var localStorageOptOut = _getAndRemoveFromLocalStorage(Constants.OPT_OUT + apiKeySuffix);
-  if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
-    localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
-  }
-
-  // pre-v2.7.0 event and session meta-data was stored in localStorage. move to cookie for sub-domain support
-  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(Constants.SESSION_ID));
-  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_EVENT_TIME));
-  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_EVENT_ID));
-  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_IDENTIFY_ID));
-  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_SEQUENCE_NUMBER));
-
-  var _getFromCookie = function _getFromCookie(key) {
-    return type(cookieData) === 'object' && cookieData[key];
-  };
-  scope.options.deviceId = _getFromCookie('deviceId') || localStorageDeviceId;
-  scope.options.userId = _getFromCookie('userId') || localStorageUserId;
-  scope._sessionId = _getFromCookie('sessionId') || localStorageSessionId || scope._sessionId;
-  scope._lastEventTime = _getFromCookie('lastEventTime') || localStorageLastEventTime || scope._lastEventTime;
-  scope._eventId = _getFromCookie('eventId') || localStorageEventId || scope._eventId;
-  scope._identifyId = _getFromCookie('identifyId') || localStorageIdentifyId || scope._identifyId;
-  scope._sequenceNumber = _getFromCookie('sequenceNumber') || localStorageSequenceNumber || scope._sequenceNumber;
-
-  // optOut is a little trickier since it is a boolean
-  scope.options.optOut = localStorageOptOut || false;
-  if (cookieData && cookieData.optOut !== undefined && cookieData.optOut !== null) {
-    scope.options.optOut = String(cookieData.optOut) === 'true';
-  }
-
-  _saveCookieData(scope);
 };
 
 /**
@@ -1376,16 +1292,8 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIde
 
     // case 3: need to compare sequence numbers
     } else {
-      // events logged before v2.5.0 won't have a sequence number, put those first
-      if (!('sequence_number' in this._unsentEvents[eventIndex]) ||
-          this._unsentEvents[eventIndex].sequence_number <
-          this._unsentIdentifys[identifyIndex].sequence_number) {
-        event = this._unsentEvents[eventIndex++];
-        maxEventId = event.event_id;
-      } else {
-        event = this._unsentIdentifys[identifyIndex++];
-        maxIdentifyId = event.event_id;
-      }
+      event = this._unsentIdentifys[identifyIndex++];
+      maxIdentifyId = event.event_id;
     }
 
     eventsToSend.push(event);
