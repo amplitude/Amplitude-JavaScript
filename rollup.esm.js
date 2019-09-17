@@ -23,6 +23,7 @@ export default {
     replace({
       BUILD_COMPAT_SNIPPET: 'false',
       BUILD_COMPAT_2_0: 'false',
+      BUILD_COMPAT_REACT_NATIVE: 'false',
       BUILD_COMPAT_LOCAL_STORAGE: 'false',
     }),
     commonjs({

@@ -1,6 +1,17 @@
 import language from './language';
 
-// default options
+let platform = 'Web';
+
+if (BUILD_COMPAT_REACT_NATIVE) {
+  console.warn('we got some native conditional loading here navigator');
+  const { Platform } = require('react-native');
+  if (Platform.OS === 'ios') {
+    platform = 'iOS';
+  } else if (Platform.OS === 'android') {
+    platform = 'Android';
+  }
+}
+
 export default {
   apiEndpoint: 'api.amplitude.com',
   batchEvents: false,
@@ -17,7 +28,7 @@ export default {
   language: language.language,
   logLevel: 'WARN',
   optOut: false,
-  platform: 'Web',
+  platform,
   savedMaxCount: 1000,
   saveEvents: true,
   saveParamsReferrerOncePerSession: true,
@@ -26,6 +37,8 @@ export default {
   trackingOptions: {
     city: true,
     country: true,
+    carrier: true,
+    device_manufacturer: true,
     device_model: true,
     dma: true,
     ip_address: true,

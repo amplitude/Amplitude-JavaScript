@@ -64,10 +64,11 @@ README.md: $(SNIPPET_OUT) version
 # Target for `amplitude.js` file.
 #
 
-$(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js
+$(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js rollup.native.js rollup.esm.js
 	@$(JSHINT) --verbose $(SRC)
 	@NODE_ENV=production $(ROLLUP) --config rollup.config.js
 	@NODE_ENV=production $(ROLLUP) --config rollup.esm.js
+	@NODE_ENV=production $(ROLLUP) --config rollup.native.js
 	@NODE_ENV=production $(ROLLUP) --config rollup.nocompat.js
 	@NODE_ENV=production $(ROLLUP) --config rollup.min.js
 	@NODE_ENV=production $(ROLLUP) --config rollup.nocompat.min.js
