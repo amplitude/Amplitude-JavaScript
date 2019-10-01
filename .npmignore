@@ -21,3 +21,5 @@ amplitude.nocompat.min.js
 amplitude-segment-snippet.min.js
 *.log
 src
+.watchmanconfig
+.babelrc
