@@ -1,3 +1,8 @@
+### 5.4.2 (October 1, 2019)
+
+* Fix issues with react native device identification
+* Remove legacy cookie migration code
+
 ### 5.3.1 (August 26, 2019)
 
 * Fix bug where runQueuedFunctions was unnecessarily being called on module import

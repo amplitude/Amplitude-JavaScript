@@ -3,15 +3,41 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>Amplitude Tests</title>
+    <style>
+      .column {
+        display: flex;
+        flex-direction: column;
+      }
+      .row {
+        display: flex;
+        flex-direction: row;
+      }
+      .row > * {
+        margin-right: 0.25rem;
+      }
+      .column > * {
+        margin-bottom: 0.5rem;
+      }
+    </style>
 </head>
 <body>
-  <div style="display: flex; flex-direction: column">
-    <a href="./mocha-tests.html">mocha</a>
+  <div class="column">
+    <div class="row">
+      <a href="./mocha-tests.html">mocha tests</a>
+      <span>Run the unit tests in your browser</span>
+    </div>
+    <div class="row">
+      <a href="./snippet.html">snippet tests</a>
+      <span>Run the snippet unit tests in your browser</span>
+    </div>
+    <div class="row">
+      <a href="./playground.html">require js</a>
+      <span>Playground</span>
+    </div>
     <a href="amplitudejs-requirejs.html">require js</a>
     <a href="amplitudejs-segment.html">segment </a>
     <a href="amplitudejs.html">amplitude js</a>
     <a href="amplitudejs2.html">amplitude js 2</a>
-    <a href="snippet.html">snippet</a>
   </div>
 </body>
 </html>
