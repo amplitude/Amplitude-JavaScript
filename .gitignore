@@ -12,3 +12,5 @@ amplitude.min.js
 amplitude.nocompat.js
 amplitude.nocompat.min.js
 amplitude-snippet.min.js
+amplitude.native.js
+.watchmanconfig
