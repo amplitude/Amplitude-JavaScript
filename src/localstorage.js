@@ -4,13 +4,13 @@
  * Implement localStorage to support Firefox 2-3 and IE 5-7
  */
 
+var localStorage; // jshint ignore:line
+
 if (!BUILD_COMPAT_LOCAL_STORAGE) {
   localStorage = window.localStorage;
 }
 
 if (BUILD_COMPAT_LOCAL_STORAGE) {
-  var localStorage; // jshint ignore:line
-
   // test that Window.localStorage is available and works
   const windowLocalStorageAvailable = () => {
     var uid = new Date();

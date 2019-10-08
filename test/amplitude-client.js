@@ -508,8 +508,8 @@ describe('AmplitudeClient', function() {
         '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
         'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
         ':131,"groups":{}}]';
-      localStorage.setItem('amplitude_unsent', existingEvent);
-      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvent);
+      localStorage.setItem('amplitude_unsent_identify_' + apiKey, existingIdentify);
 
       var amplitude2 = new AmplitudeClient('$default_Instance');
       amplitude2.init(apiKey, null, {batchEvents: true});
@@ -535,8 +535,8 @@ describe('AmplitudeClient', function() {
         '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
         'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
         ':131,"groups":{}}]';
-      localStorage.setItem('amplitude_unsent_new_app', existingEvent);
-      localStorage.setItem('amplitude_unsent_identify_new_app', existingIdentify);
+      localStorage.setItem('amplitude_unsent_' + apiKey + '_new_app', existingEvent);
+      localStorage.setItem('amplitude_unsent_identify_' + apiKey + '_new_app', existingIdentify);
       assert.isNull(localStorage.getItem('amplitude_unsent'));
       assert.isNull(localStorage.getItem('amplitude_unsent_identify'));
 
@@ -565,7 +565,7 @@ describe('AmplitudeClient', function() {
         '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
         '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}},"user_properties":{},"uuid":"650407a1-d705-' +
         '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
-      localStorage.setItem('amplitude_unsent', existingEvents);
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvents);
 
       var amplitude2 = new AmplitudeClient('$default_instance');
       amplitude2.init(apiKey, null, {batchEvents: true});
@@ -594,7 +594,7 @@ describe('AmplitudeClient', function() {
         '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
         '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}}},"event_properties":{},"uuid":"650407a1-d705-' +
         '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]'
-      localStorage.setItem('amplitude_unsent_identify', existingEvents);
+      localStorage.setItem('amplitude_unsent_identify_' + apiKey, existingEvents);
 
       var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey, null, {batchEvents: true});
@@ -625,8 +625,8 @@ describe('AmplitudeClient', function() {
         '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
         'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
         ':131}]';
-      localStorage.setItem('amplitude_unsent', existingEvent);
-      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvent);
+      localStorage.setItem('amplitude_unsent_identify_' + apiKey, existingIdentify);
 
       var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
@@ -661,8 +661,8 @@ it ('should load saved events from localStorage new keys and send events', funct
         '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
         'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
         ':131}]';
-      localStorage.setItem('amplitude_unsent_new_app', existingEvent);
-      localStorage.setItem('amplitude_unsent_identify_new_app', existingIdentify);
+      localStorage.setItem('amplitude_unsent_' + apiKey + '_new_app', existingEvent);
+      localStorage.setItem('amplitude_unsent_identify_' + apiKey + '_new_app', existingIdentify);
 
       var amplitude2 = new AmplitudeClient('new_app');
       amplitude2.init(apiKey, null, {batchEvents: true, eventUploadThreshold: 2});
@@ -698,7 +698,7 @@ it ('should load saved events from localStorage new keys and send events', funct
           '[0,1,2,"3"],"nested_array":["a",{"key":"value"},["b"]],"object":{"key":"value"},"nested_object":' +
           '{"k":"v","l":[0,1],"o":{"k2":"v2","l2":["e2",{"k3":"v3"}]}}},"user_properties":{},"uuid":"650407a1-d705-' +
           '47a0-8918-b4530ce51f89","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number":5}]';
-      localStorage.setItem('amplitude_unsent', existingEvents);
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvents);
 
       var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey, null, {
@@ -773,11 +773,14 @@ it ('should load saved events from localStorage new keys and send events', funct
 
       var amplitude2 = new AmplitudeClient('new_app');
       amplitude2.init(apiKey, null, {trackingOptions: trackingOptions});
+      console.log(JSON.stringify(amplitude2.options.trackingOptions));
 
       // check config loaded correctly
       assert.deepEqual(amplitude2.options.trackingOptions, {
         city: false,
         country: true,
+        carrier: true,
+        device_manufacturer: true,
         device_model: true,
         dma: true,
         ip_address: false,
@@ -2992,8 +2995,8 @@ describe('setVersionName', function() {
         '"event_properties":{},"user_properties":{"$set":{"age":30,"city":"San Francisco, CA"}},"uuid":"' +
         'c50e1be4-7976-436a-aa25-d9ee38951082","library":{"name":"amplitude-js","version":"2.9.0"},"sequence_number"' +
         ':131, "groups":{}}]';
-      localStorage.setItem('amplitude_unsent', existingEvent);
-      localStorage.setItem('amplitude_unsent_identify', existingIdentify);
+      localStorage.setItem('amplitude_unsent_' + apiKey, existingEvent);
+      localStorage.setItem('amplitude_unsent_identify_' + apiKey, existingIdentify);
 
       clock.tick(30 * 60 * 1000 + 1);  // force new session
       amplitude.init(apiKey, undefined, {
