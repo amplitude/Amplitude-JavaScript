@@ -59,7 +59,7 @@ cookieStorage.prototype.getStorage = function() {
         opts = opts || {};
         this._options.expirationDays = opts.expirationDays || this._options.expirationDays;
         // localStorage is specific to subdomains
-        this._options.domain = opts.domain || this._options.domain || window && window.location && window.location.hostname;
+        this._options.domain = opts.domain || this._options.domain || (window && window.location && window.location.hostname);
         return this._options.secure = opts.secure || false;
       },
       get: function(name) {

@@ -98,8 +98,12 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     });
     this.options.domain = this.cookieStorage.options().domain;
 
+    if (this._instanceName === Constants.DEFAULT_INSTANCE) {
+      _upgradeCookieData(this);
+    }
     _loadCookieData(this);
     this._pendingReadStorage = true;
+
 
     const initFromStorage = () => {
       // load deviceId and userId from input, or try to fetch existing value from cookie
@@ -189,6 +193,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       });
     } else {
       initFromStorage();
+      this.runQueuedFunctions();
     }
 
   } catch (e) {
@@ -258,13 +263,15 @@ var _parseConfig = function _parseConfig(options, config) {
  * @private
  */
 AmplitudeClient.prototype.runQueuedFunctions = function () {
-  for (var i = 0; i < this._q.length; i++) {
-    var fn = this[this._q[i][0]];
+  const queue = this._q;
+  this._q = [];
+
+  for (var i = 0; i < queue.length; i++) {
+    var fn = this[queue[i][0]];
     if (type(fn) === 'function') {
-      fn.apply(this, this._q[i].slice(1));
+      fn.apply(this, queue[i].slice(1));
     }
   }
-  this._q = []; // clear function queue after running
 };
 
 /**
@@ -428,6 +435,60 @@ AmplitudeClient.prototype._getFromStorage = function _getFromStorage(storage, ke
  */
 AmplitudeClient.prototype._setInStorage = function _setInStorage(storage, key, value) {
   storage.setItem(key + this._storageSuffix, value);
+};
+
+var _upgradeCookieData = function _upgradeCookieData(scope) {
+  // skip if already migrated to 4.10+
+  var cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._storageSuffix);
+  if (type(cookieData) === 'object') {
+    return;
+  }
+  // skip if already migrated to 2.70+
+  cookieData = scope.cookieStorage.get(scope.options.cookieName + scope._legacyStorageSuffix);
+  if (type(cookieData) === 'object' && cookieData.deviceId && cookieData.sessionId && cookieData.lastEventTime) {
+    return;
+  }
+
+  var _getAndRemoveFromLocalStorage = function _getAndRemoveFromLocalStorage(key) {
+    var value = localStorage.getItem(key);
+    localStorage.removeItem(key);
+    return value;
+  };
+
+  // in v2.6.0, deviceId, userId, optOut was migrated to localStorage with keys + first 6 char of apiKey
+  var apiKeySuffix = (type(scope.options.apiKey) === 'string' && ('_' + scope.options.apiKey.slice(0, 6))) || '';
+  var localStorageDeviceId = _getAndRemoveFromLocalStorage(Constants.DEVICE_ID + apiKeySuffix);
+  var localStorageUserId = _getAndRemoveFromLocalStorage(Constants.USER_ID + apiKeySuffix);
+  var localStorageOptOut = _getAndRemoveFromLocalStorage(Constants.OPT_OUT + apiKeySuffix);
+  if (localStorageOptOut !== null && localStorageOptOut !== undefined) {
+    localStorageOptOut = String(localStorageOptOut) === 'true'; // convert to boolean
+  }
+
+  // pre-v2.7.0 event and session meta-data was stored in localStorage. move to cookie for sub-domain support
+  var localStorageSessionId = parseInt(_getAndRemoveFromLocalStorage(Constants.SESSION_ID));
+  var localStorageLastEventTime = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_EVENT_TIME));
+  var localStorageEventId = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_EVENT_ID));
+  var localStorageIdentifyId = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_IDENTIFY_ID));
+  var localStorageSequenceNumber = parseInt(_getAndRemoveFromLocalStorage(Constants.LAST_SEQUENCE_NUMBER));
+
+  var _getFromCookie = function _getFromCookie(key) {
+    return type(cookieData) === 'object' && cookieData[key];
+  };
+  scope.options.deviceId = _getFromCookie('deviceId') || localStorageDeviceId;
+  scope.options.userId = _getFromCookie('userId') || localStorageUserId;
+  scope._sessionId = _getFromCookie('sessionId') || localStorageSessionId || scope._sessionId;
+  scope._lastEventTime = _getFromCookie('lastEventTime') || localStorageLastEventTime || scope._lastEventTime;
+  scope._eventId = _getFromCookie('eventId') || localStorageEventId || scope._eventId;
+  scope._identifyId = _getFromCookie('identifyId') || localStorageIdentifyId || scope._identifyId;
+  scope._sequenceNumber = _getFromCookie('sequenceNumber') || localStorageSequenceNumber || scope._sequenceNumber;
+
+  // optOut is a little trickier since it is a boolean
+  scope.options.optOut = localStorageOptOut || false;
+  if (cookieData && cookieData.optOut !== undefined && cookieData.optOut !== null) {
+    scope.options.optOut = String(cookieData.optOut) === 'true';
+  }
+
+  _saveCookieData(scope);
 };
 
 /**
@@ -1375,8 +1436,16 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIde
 
     // case 3: need to compare sequence numbers
     } else {
-      event = this._unsentIdentifys[identifyIndex++];
-      maxIdentifyId = event.event_id;
+      // events logged before v2.5.0 won't have a sequence number, put those first
+      if (!('sequence_number' in this._unsentEvents[eventIndex]) ||
+          this._unsentEvents[eventIndex].sequence_number <
+          this._unsentIdentifys[identifyIndex].sequence_number) {
+        event = this._unsentEvents[eventIndex++];
+        maxEventId = event.event_id;
+      } else {
+        event = this._unsentIdentifys[identifyIndex++];
+        maxIdentifyId = event.event_id;
+      }
     }
 
     eventsToSend.push(event);
