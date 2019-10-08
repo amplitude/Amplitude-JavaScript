@@ -2579,6 +2579,14 @@ describe('setVersionName', function() {
       assert.strictEqual(amplitude2.options.optOut, true);
     });
 
+    it('should favor the config optOut setting over cookie optOut if the config optOut is set to true', function() {
+      var amplitude = new AmplitudeClient();
+      cookie.set(amplitude.options.cookieName, { optOut: false });
+      amplitude.init(apiKey, null, { optOut: true });
+
+      assert.strictEqual(amplitude.options.optOut, true);
+    });
+
     it('should limit identify events queued', function() {
       amplitude.init(apiKey, null, {savedMaxCount: 10});
 
