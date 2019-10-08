@@ -517,7 +517,10 @@ var _loadCookieDataProps = function _loadCookieDataProps(scope, cookieData) {
     scope.options.userId = cookieData.userId;
   }
   if (cookieData.optOut !== null && cookieData.optOut !== undefined) {
-    scope.options.optOut = cookieData.optOut;
+    // Do not clobber config opt out value if cookieData has optOut as false
+    if (cookieData.optOut !== false) {
+      scope.options.optOut = cookieData.optOut;
+    }
   }
   if (cookieData.sessionId) {
     scope._sessionId = parseInt(cookieData.sessionId);
