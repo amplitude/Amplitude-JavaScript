@@ -3,7 +3,6 @@ import language from './language';
 let platform = 'Web';
 
 if (BUILD_COMPAT_REACT_NATIVE) {
-  console.warn('we got some native conditional loading here navigator');
   const { Platform } = require('react-native');
   if (Platform.OS === 'ios') {
     platform = 'iOS';
@@ -28,6 +27,7 @@ export default {
   language: language.language,
   logLevel: 'WARN',
   optOut: false,
+  onError: () => {},
   platform,
   savedMaxCount: 1000,
   saveEvents: true,

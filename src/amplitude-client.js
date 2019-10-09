@@ -13,17 +13,14 @@ import UUID from './uuid';
 import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
 
-let asyncStorage;
+let AsyncStorage;
 let Platform;
 let DeviceInfo;
 if (BUILD_COMPAT_REACT_NATIVE) {
   const reactNative = require('react-native');
+  AsyncStorage = require('@react-native-community/async-storage').default;
   Platform = reactNative.Platform;
-  asyncStorage = reactNative.AsyncStorage;
-  try {
-    DeviceInfo = require('react-native-device-info');
-  } catch(e) {
-  }
+  DeviceInfo = require('react-native-device-info');
 }
 
 /**
@@ -98,19 +95,20 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     });
     this.options.domain = this.cookieStorage.options().domain;
 
-    if (this._instanceName === Constants.DEFAULT_INSTANCE) {
-      _upgradeCookieData(this);
+    if (!BUILD_COMPAT_REACT_NATIVE) {
+      if (this._instanceName === Constants.DEFAULT_INSTANCE) {
+        _upgradeCookieData(this);
+      }
     }
     _loadCookieData(this);
     this._pendingReadStorage = true;
 
-
-    const initFromStorage = () => {
+    const initFromStorage = (deviceId) => {
       // load deviceId and userId from input, or try to fetch existing value from cookie
       this.options.deviceId = (type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' &&
           !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) ||
           (this.options.deviceIdFromUrlParam && this._getDeviceIdFromUrlParam(this._getUrlParams())) ||
-          this.options.deviceId || UUID() + 'R';
+          this.options.deviceId || deviceId || UUID() + 'R';
       this.options.userId =
         (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         (type(opt_userId) === 'number' && opt_userId.toString()) ||
@@ -136,9 +134,6 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
       // load unsent events and identifies before any attempt to log new ones
       if (this.options.saveEvents) {
-        this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey).concat(this._unsentEvents);
-        this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey).concat(this._unsentIdentifys);
-
         // validate event properties for unsent events
         for (let i = 0; i < this._unsentEvents.length; i++) {
           var eventProperties = this._unsentEvents[i].event_properties;
@@ -170,38 +165,63 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       this._isInitialized = true;
     };
 
-    if (asyncStorage) {
-      asyncStorage.getItem(this._storageSuffix).then((json) => {
-        const cookieData = JSON.parse(json);
-        if (cookieData) {
-          _loadCookieDataProps(this, cookieData);
+    if (AsyncStorage) {
+      Promise.all([
+          AsyncStorage.getItem(this._storageSuffix),
+          AsyncStorage.getItem(this.options.unsentKey),
+          AsyncStorage.getItem(this.options.unsentIdentifyKey),
+      ]).then((values) => {
+        if (values[0]) {
+          const cookieData = JSON.parse(values[0]);
+          if (cookieData) {
+            _loadCookieDataProps(this, cookieData);
+          }
+        }
+        if (this.options.saveEvents) {
+          this._unsentEvents = this._parseSavedUnsentEventsString(values[1]).concat(this._unsentEvents);
+          this._unsentIdentifys = this._parseSavedUnsentEventsString(values[2]).concat(this._unsentIdentifys);
         }
         if (DeviceInfo) {
-          Promise.all([DeviceInfo.getCarrier(),DeviceInfo.getModel(), DeviceInfo.getManufacturer()]).then(values => {
+          Promise.all([
+            DeviceInfo.getCarrier(),
+            DeviceInfo.getModel(),
+            DeviceInfo.getManufacturer(),
+            DeviceInfo.getUniqueId(),
+          ]).then(values => {
             this.deviceInfo = {
               carrier: values[0],
               model: values[1],
               manufacturer: values[2]
             };
-            initFromStorage();
+            initFromStorage(values[3]);
             this.runQueuedFunctions();
+            if (type(opt_callback) === 'function') {
+              opt_callback(this);
+            }
+          }).catch((err) => {
+            this.options.onError(err);
           });
         } else {
           initFromStorage();
           this.runQueuedFunctions();
         }
+      }).catch((err) => {
+        this.options.onError(err);
       });
     } else {
+      if (this.options.saveEvents) {
+        this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey).concat(this._unsentEvents);
+        this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey).concat(this._unsentIdentifys);
+      }
       initFromStorage();
       this.runQueuedFunctions();
+      if (type(opt_callback) === 'function') {
+        opt_callback(this);
+      }
     }
-
-  } catch (e) {
-    utils.log.error(e);
-  } finally {
-    if (type(opt_callback) === 'function') {
-      opt_callback(this);
-    }
+  } catch (err) {
+    utils.log.error(err);
+    this.options.onError(err);
   }
 };
 
@@ -554,8 +574,8 @@ var _saveCookieData = function _saveCookieData(scope) {
     identifyId: scope._identifyId,
     sequenceNumber: scope._sequenceNumber
   };
-  if (asyncStorage) {
-    asyncStorage.setItem(scope._storageSuffix, JSON.stringify(cookieData));
+  if (AsyncStorage) {
+    AsyncStorage.setItem(scope._storageSuffix, JSON.stringify(cookieData));
   }
   scope.cookieStorage.set(scope.options.cookieName + scope._storageSuffix, cookieData);
 };
@@ -681,11 +701,19 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
  */
 AmplitudeClient.prototype.saveEvents = function saveEvents() {
   try {
-    this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    if (AsyncStorage) {
+      AsyncStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    } else {
+      this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
+    }
   } catch (e) {}
 
   try {
-    this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+    if (AsyncStorage) {
+      AsyncStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+    } else {
+      this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+    }
   } catch (e) {}
 };
 
@@ -999,7 +1027,9 @@ AmplitudeClient.prototype.setVersionName = function setVersionName(versionName) 
  * @private
  */
 AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventProperties, apiProperties, userProperties, groups, groupProperties, timestamp, callback) {
-  _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
+  if (!BUILD_COMPAT_REACT_NATIVE) {
+    _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
+  }
   if (!eventType) {
     if (type(callback) === 'function') {
       callback(0, 'No request sent', {reason: 'Missing eventType'});
