@@ -1,3 +1,11 @@
+### 5.5.0 (October 9, 2019)
+
+* Fix bug where optOut settings would be overridden by cookie loading
+* Fix initialization bugs introduced by removing legacy data migration code.
+* Use `@react-native-community/async-storage` instead of the deprecated `AsyncStorage`.
+* Pull react-native device identifier from device info when possible
+* Pull react-native unsent events from async storage
+
 ### 5.4.2 (October 1, 2019)
 
 * Fix issues with react native device identification
