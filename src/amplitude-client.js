@@ -193,14 +193,16 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
               DeviceInfo.getCarrier(),
               DeviceInfo.getModel(),
               DeviceInfo.getManufacturer(),
+              DeviceInfo.getVersion(),
               DeviceInfo.getUniqueId(),
             ]).then(values => {
               this.deviceInfo = {
                 carrier: values[0],
                 model: values[1],
-                manufacturer: values[2]
+                manufacturer: values[2],
+                version: values[3]
               };
-              initFromStorage(values[3]);
+              initFromStorage(values[4]);
               this.runQueuedFunctions();
               if (type(opt_callback) === 'function') {
                 opt_callback(this);
@@ -1142,6 +1144,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     let osVersion = this._ua.browser.major;
     let deviceModel = this._ua.os.name;
     let deviceManufacturer;
+    let versionName;
     let carrier;
     if (BUILD_COMPAT_REACT_NATIVE) {
       osName = Platform.OS;
@@ -1150,6 +1153,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
         carrier = this.deviceInfo.carrier;
         deviceManufacturer = this.deviceInfo.manufacturer;
         deviceModel = this.deviceInfo.model;
+        versionName = this.deviceInfo.version;
       }
     }
 
@@ -1166,7 +1170,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       event_id: eventId,
       session_id: this._sessionId || -1,
       event_type: eventType,
-      version_name: _shouldTrackField(this, 'version_name') ? (this.options.versionName || null) : null,
+      version_name: _shouldTrackField(this, 'version_name') ? (this.options.versionName || versionName || null) : null,
       platform: _shouldTrackField(this, 'platform') ? this.options.platform : null,
       os_name: _shouldTrackField(this, 'os_name') ? (osName || null) : null,
       os_version: _shouldTrackField(this, 'os_version') ? (osVersion || null) : null,
