@@ -1,3 +1,9 @@
+### 5.6.0 (October 21, 2019)
+
+* Drop esm module from package.json to prevent it from being the default build.
+* Add fallback localStorage support to the esm module.
+* Fix integrity hash
+
 ### 5.5.0 (October 9, 2019)
 
 * Fix bug where optOut settings would be overridden by cookie loading
