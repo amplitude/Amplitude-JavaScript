@@ -25,6 +25,13 @@ See our [JavaScript SDK Reference](https://amplitude.zendesk.com/hc/en-us/articl
 # Changelog #
 Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
 
+# React Native #
+
+This library now supports react-native. It has two dependencies on react-native modules you will have to install yourself:
+
+* [react-native-device-info](https://www.npmjs.com/package/react-native-device-info)
+* [@react-native-community/async-storage](https://www.npmjs.com/package/@react-native-community/async-storage)
+
 # Upgrading Major Versions and Breaking Changes #
 
 ## 5.0
