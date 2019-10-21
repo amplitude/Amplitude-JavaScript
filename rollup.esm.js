@@ -22,9 +22,9 @@ export default {
     }),
     replace({
       BUILD_COMPAT_SNIPPET: 'false',
-      BUILD_COMPAT_2_0: 'false',
+      BUILD_COMPAT_LOCAL_STORAGE: 'true',
+      BUILD_COMPAT_2_0: 'true',
       BUILD_COMPAT_REACT_NATIVE: 'false',
-      BUILD_COMPAT_LOCAL_STORAGE: 'false',
     }),
     commonjs({
       include: "node_modules/**"
