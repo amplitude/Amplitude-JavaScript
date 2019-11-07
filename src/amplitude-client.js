@@ -168,7 +168,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     if (AsyncStorage) {
       Promise.all([
           AsyncStorage.getItem(this._storageSuffix),
-          AsyncStorage.getItem(this.options.unsentKey),
+          AsyncStorage.getItem(this.options.unsentKey + this._storageSuffix),
           AsyncStorage.getItem(this.options.unsentIdentifyKey),
       ]).then((values) => {
         if (values[0]) {
@@ -702,7 +702,7 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
 AmplitudeClient.prototype.saveEvents = function saveEvents() {
   try {
     if (AsyncStorage) {
-      AsyncStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
+      AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, JSON.stringify(this._unsentEvents));
     } else {
       this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
     }
