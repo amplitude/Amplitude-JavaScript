@@ -17,7 +17,7 @@ export default {
   cookieExpiration: 365 * 10,
   cookieName: 'amplitude_id',
   deviceIdFromUrlParam: false,
-  domain: '',
+  domain: undefined,
   eventUploadPeriodMillis: 30 * 1000, // 30s
   eventUploadThreshold: 30,
   forceHttps: true,

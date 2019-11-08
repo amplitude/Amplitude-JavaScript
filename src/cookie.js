@@ -48,7 +48,7 @@ const topDomain = (url) => {
   for (let i = 0; i < levels.length; ++i) {
     const cname = '__tld_test__';
     const domain = levels[i];
-    const opts = { domain: '.' + domain };
+    const opts = { domain: domain };
 
     baseCookie.set(cname, 1, opts);
     if (baseCookie.get(cname)) {
@@ -71,7 +71,7 @@ var options = function(opts) {
   _options.expirationDays = opts.expirationDays;
   _options.secure = opts.secure;
 
-  var domain = (!utils.isEmptyString(opts.domain)) ? opts.domain : '.' + topDomain(getLocation().href);
+  var domain = (opts.domain !== undefined) ? opts.domain : topDomain(getLocation().href);
   var token = Math.random();
   _options.domain = domain;
   set('amplitude_test', token);
