@@ -212,8 +212,8 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       });
     } else {
       if (this.options.saveEvents) {
-        this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey + this._storageSuffix).concat(this._unsentEvents);
-        this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey + this._storageSuffix).concat(this._unsentIdentifys);
+        this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey).concat(this._unsentEvents);
+        this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey).concat(this._unsentIdentifys);
       }
       initFromStorage();
       this.runQueuedFunctions();
@@ -240,7 +240,7 @@ AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(c
       var unsentIdentifyKey = values[1];
       Promise.all([
         AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, unsentEventsString),
-        AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, unsentIdentifyKey ),
+        AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, unsentIdentifyKey),
       ]).then(() => {
         Promise.all([
         AsyncStorage.removeItem(this.options.unsentKey),
@@ -248,7 +248,7 @@ AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(c
         ]).then(cb);
       }).catch((err) => {
         this.options.onError(err);
-      });;
+      });
     }
   }).catch((err) => {
     this.options.onError(err);
