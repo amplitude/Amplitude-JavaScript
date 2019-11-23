@@ -1,3 +1,6 @@
+### 5.7.0 (November 22, 2019)
+* Namespace AsyncStorage with api key to prevent cross domain contamination
+
 ### 5.6.0 (October 21, 2019)
 
 * Drop esm module from package.json to prevent it from being the default build.

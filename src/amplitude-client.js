@@ -166,47 +166,49 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     };
 
     if (AsyncStorage) {
-      Promise.all([
-          AsyncStorage.getItem(this._storageSuffix),
-          AsyncStorage.getItem(this.options.unsentKey),
-          AsyncStorage.getItem(this.options.unsentIdentifyKey),
-      ]).then((values) => {
-        if (values[0]) {
-          const cookieData = JSON.parse(values[0]);
-          if (cookieData) {
-            _loadCookieDataProps(this, cookieData);
-          }
-        }
-        if (this.options.saveEvents) {
-          this._unsentEvents = this._parseSavedUnsentEventsString(values[1]).concat(this._unsentEvents);
-          this._unsentIdentifys = this._parseSavedUnsentEventsString(values[2]).concat(this._unsentIdentifys);
-        }
-        if (DeviceInfo) {
-          Promise.all([
-            DeviceInfo.getCarrier(),
-            DeviceInfo.getModel(),
-            DeviceInfo.getManufacturer(),
-            DeviceInfo.getUniqueId(),
-          ]).then(values => {
-            this.deviceInfo = {
-              carrier: values[0],
-              model: values[1],
-              manufacturer: values[2]
-            };
-            initFromStorage(values[3]);
-            this.runQueuedFunctions();
-            if (type(opt_callback) === 'function') {
-              opt_callback(this);
+      this._migrateUnsentEvents(() => {
+        Promise.all([
+            AsyncStorage.getItem(this._storageSuffix),
+            AsyncStorage.getItem(this.options.unsentKey + this._storageSuffix),
+            AsyncStorage.getItem(this.options.unsentIdentifyKey + this._storageSuffix),
+        ]).then((values) => {
+          if (values[0]) {
+            const cookieData = JSON.parse(values[0]);
+            if (cookieData) {
+              _loadCookieDataProps(this, cookieData);
             }
-          }).catch((err) => {
-            this.options.onError(err);
-          });
-        } else {
-          initFromStorage();
-          this.runQueuedFunctions();
-        }
-      }).catch((err) => {
-        this.options.onError(err);
+          }
+          if (this.options.saveEvents) {
+            this._unsentEvents = this._parseSavedUnsentEventsString(values[1]).concat(this._unsentEvents);
+            this._unsentIdentifys = this._parseSavedUnsentEventsString(values[2]).concat(this._unsentIdentifys);
+          }
+          if (DeviceInfo) {
+            Promise.all([
+              DeviceInfo.getCarrier(),
+              DeviceInfo.getModel(),
+              DeviceInfo.getManufacturer(),
+              DeviceInfo.getUniqueId(),
+            ]).then(values => {
+              this.deviceInfo = {
+                carrier: values[0],
+                model: values[1],
+                manufacturer: values[2]
+              };
+              initFromStorage(values[3]);
+              this.runQueuedFunctions();
+              if (type(opt_callback) === 'function') {
+                opt_callback(this);
+              }
+            }).catch((err) => {
+              this.options.onError(err);
+            });
+          } else {
+            initFromStorage();
+            this.runQueuedFunctions();
+          }
+        }).catch((err) => {
+          this.options.onError(err);
+        });
       });
     } else {
       if (this.options.saveEvents) {
@@ -223,6 +225,34 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     utils.log.error(err);
     this.options.onError(err);
   }
+};
+
+/**
+ * @private
+ */
+AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(cb) {
+  Promise.all([
+      AsyncStorage.getItem(this.options.unsentKey),
+      AsyncStorage.getItem(this.options.unsentIdentifyKey),
+  ]).then((values) => {
+    if (this.options.saveEvents) {
+      var unsentEventsString = values[0];
+      var unsentIdentifyKey = values[1];
+      Promise.all([
+        AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, unsentEventsString),
+        AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, unsentIdentifyKey),
+      ]).then(() => {
+        Promise.all([
+        AsyncStorage.removeItem(this.options.unsentKey),
+        AsyncStorage.removeItem(this.options.unsentIdentifyKey),
+        ]).then(cb);
+      }).catch((err) => {
+        this.options.onError(err);
+      });
+    }
+  }).catch((err) => {
+    this.options.onError(err);
+  });
 };
 
 /**
@@ -702,7 +732,7 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
 AmplitudeClient.prototype.saveEvents = function saveEvents() {
   try {
     if (AsyncStorage) {
-      AsyncStorage.setItem(this.options.unsentKey, JSON.stringify(this._unsentEvents));
+      AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, JSON.stringify(this._unsentEvents));
     } else {
       this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
     }
@@ -710,7 +740,7 @@ AmplitudeClient.prototype.saveEvents = function saveEvents() {
 
   try {
     if (AsyncStorage) {
-      AsyncStorage.setItem(this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+      AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, JSON.stringify(this._unsentIdentifys));
     } else {
       this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
     }
