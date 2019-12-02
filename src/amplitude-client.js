@@ -238,17 +238,27 @@ AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(c
     if (this.options.saveEvents) {
       var unsentEventsString = values[0];
       var unsentIdentifyKey = values[1];
-      Promise.all([
-        AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, unsentEventsString),
-        AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, unsentIdentifyKey),
-      ]).then(() => {
-        Promise.all([
-        AsyncStorage.removeItem(this.options.unsentKey),
-        AsyncStorage.removeItem(this.options.unsentIdentifyKey),
-        ]).then(cb);
-      }).catch((err) => {
-        this.options.onError(err);
-      });
+
+      var itemsToSet = [];
+      var itemsToRemove = [];
+
+      if (!!unsentEventsString) {
+        itemsToSet.push(AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, JSON.stringify(unsentEventsString)));
+        itemsToRemove.push(AsyncStorage.removeItem(this.options.unsentKey));
+      }
+
+      if (!!unsentIdentifyKey) {
+        itemsToSet.push(AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, JSON.stringify(unsentIdentifyKey)));
+        itemsToRemove.push(AsyncStorage.removeItem(this.options.unsentIdentifyKey));
+      }
+
+      if (itemsToSet.length > 0) {
+        Promise.all(itemsToSet).then(() => {
+          Promise.all(itemsToRemove).then(cb);
+        }).catch((err) => {
+          this.options.onError(err);
+        });
+      }
     }
   }).catch((err) => {
     this.options.onError(err);
