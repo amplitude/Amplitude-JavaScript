@@ -1,3 +1,6 @@
+### 5.7.1 (December 2, 2019)
+* Fix issue where null unsentKey and unsentIdentifyKeys were causing log crashes
+
 ### 5.7.0 (November 22, 2019)
 * Namespace AsyncStorage with api key to prevent cross domain contamination
 
