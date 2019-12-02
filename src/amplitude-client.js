@@ -258,7 +258,11 @@ AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(c
         }).catch((err) => {
           this.options.onError(err);
         });
+      } else {
+        cb();
       }
+    } else {
+      cb();
     }
   }).catch((err) => {
     this.options.onError(err);
