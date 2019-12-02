@@ -254,17 +254,15 @@ AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(c
 
       if (itemsToSet.length > 0) {
         Promise.all(itemsToSet).then(() => {
-          Promise.all(itemsToRemove).then(cb);
+          Promise.all(itemsToRemove);
         }).catch((err) => {
           this.options.onError(err);
         });
-      } else {
-        cb();
       }
-    } else {
-      cb();
     }
-  }).catch((err) => {
+  })
+  .then(cb)
+  .catch((err) => {
     this.options.onError(err);
   });
 };
