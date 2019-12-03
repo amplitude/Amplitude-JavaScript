@@ -242,12 +242,12 @@ AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(c
       var itemsToSet = [];
       var itemsToRemove = [];
 
-      if (!!unsentEventsString && !unsentEventsString.includes(this._storageSuffix)) {
+      if (!!unsentEventsString) {
         itemsToSet.push(AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, JSON.stringify(unsentEventsString)));
         itemsToRemove.push(AsyncStorage.removeItem(this.options.unsentKey));
       }
 
-      if (!!unsentIdentifyKey && unsentIdentifyKey.includes(this._storageSuffix)) {
+      if (!!unsentIdentifyKey) {
         itemsToSet.push(AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, JSON.stringify(unsentIdentifyKey)));
         itemsToRemove.push(AsyncStorage.removeItem(this.options.unsentIdentifyKey));
       }
