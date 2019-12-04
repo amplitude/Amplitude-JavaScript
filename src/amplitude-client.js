@@ -75,6 +75,12 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     return;
   }
 
+  var hasExistingCookie = !!this.cookieStorage.get(this.options.cookieName + this._storageSuffix);
+  if (opt_config && opt_config.deferInitialization && !hasExistingCookie) {
+    this._deferInitialization(apiKey, opt_userId, opt_config, opt_callback);
+    return;
+  }
+
   try {
     this.options.apiKey = apiKey;
     this._storageSuffix = '_' + apiKey + this._legacyStorageSuffix;
@@ -766,6 +772,10 @@ AmplitudeClient.prototype.saveEvents = function saveEvents() {
  * @example amplitudeClient.setDomain('.amplitude.com');
  */
 AmplitudeClient.prototype.setDomain = function setDomain(domain) {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setDomain', domain]);
+  }
+
   if (!utils.validateInput(domain, 'domain', 'string')) {
     return;
   }
@@ -791,6 +801,10 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
  * @example amplitudeClient.setUserId('joe@gmail.com');
  */
 AmplitudeClient.prototype.setUserId = function setUserId(userId) {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setUserId', userId]);
+  }
+
   try {
     this.options.userId = (userId !== undefined && userId !== null && ('' + userId)) || null;
     _saveCookieData(this);
@@ -813,6 +827,10 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
  * @example amplitudeClient.setGroup('orgId', 15); // this adds the current user to orgId 15.
  */
 AmplitudeClient.prototype.setGroup = function(groupType, groupName) {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setGroup', groupType, groupName]);
+  }
+
   if (!this._apiKeySet('setGroup()') || !utils.validateInput(groupType, 'groupType', 'string') ||
         utils.isEmptyString(groupType)) {
     return;
@@ -831,6 +849,10 @@ AmplitudeClient.prototype.setGroup = function(groupType, groupName) {
  * @example: amplitude.setOptOut(true);
  */
 AmplitudeClient.prototype.setOptOut = function setOptOut(enable) {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setOptOut', enable]);
+  }
+
   if (!utils.validateInput(enable, 'enable', 'boolean')) {
     return;
   }
@@ -868,6 +890,10 @@ AmplitudeClient.prototype.resetSessionId = function resetSessionId() {
   * @public
   */
 AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['regenerateDeviceId']);
+  }
+
   this.setDeviceId(UUID() + 'R');
 };
 
@@ -880,6 +906,10 @@ AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
   * @example amplitudeClient.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
   */
 AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setDeviceId', deviceId]);
+  }
+
   if (!utils.validateInput(deviceId, 'deviceId', 'string')) {
     return;
   }
@@ -903,8 +933,8 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
  * @example amplitudeClient.setUserProperties({'gender': 'female', 'sign_up_complete': true})
  */
 AmplitudeClient.prototype.setUserProperties = function setUserProperties(userProperties) {
-  if (this._pendingReadStorage) {
-    return this._q.push(['identify', userProperties]); 
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setUserProperties', userProperties]);
   }
   if (!this._apiKeySet('setUserProperties()') || !utils.validateInput(userProperties, 'userProperties', 'object')) {
     return;
@@ -931,6 +961,10 @@ AmplitudeClient.prototype.setUserProperties = function setUserProperties(userPro
  * @example amplitudeClient.clearUserProperties();
  */
 AmplitudeClient.prototype.clearUserProperties = function clearUserProperties(){
+  if (this._shouldDeferCall()) {
+    return this._q.push(['clearUserProperties']);
+  }
+
   if (!this._apiKeySet('clearUserProperties()')) {
     return;
   }
@@ -967,8 +1001,8 @@ var _convertProxyObjectToRealObject = function _convertProxyObjectToRealObject(i
  * amplitude.identify(identify);
  */
 AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
-  if (this._pendingReadStorage) {
-    return this._q.push(['identify', identify_obj, opt_callback]); 
+  if (this._shouldDeferCall()) {
+    return this._q.push(['identify', identify_obj, opt_callback]);
   }
   if (!this._apiKeySet('identify()')) {
     if (type(opt_callback) === 'function') {
@@ -1002,8 +1036,8 @@ AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
 };
 
 AmplitudeClient.prototype.groupIdentify = function(group_type, group_name, identify_obj, opt_callback) {
-  if (this._pendingReadStorage) {
-    return this._q.push(['groupIdentify', group_type, group_name, identify_obj, opt_callback]); 
+  if (this._shouldDeferCall()) {
+    return this._q.push(['groupIdentify', group_type, group_name, identify_obj, opt_callback]);
   }
   if (!this._apiKeySet('groupIdentify()')) {
     if (type(opt_callback) === 'function') {
@@ -1058,6 +1092,10 @@ AmplitudeClient.prototype.groupIdentify = function(group_type, group_name, ident
  * @example amplitudeClient.setVersionName('1.12.3');
  */
 AmplitudeClient.prototype.setVersionName = function setVersionName(versionName) {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setVersionName', versionName]);
+  }
+
   if (!utils.validateInput(versionName, 'versionName', 'string')) {
     return;
   }
@@ -1217,8 +1255,8 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
-  if (this._pendingReadStorage) {
-    return this._q.push(['logEvent', eventType, eventProperties, opt_callback]); 
+  if (this._shouldDeferCall()) {
+    return this._q.push(['logEvent', eventType, eventProperties, opt_callback]);
   }
   return this.logEventWithTimestamp(eventType, eventProperties, null, opt_callback);
 };
@@ -1234,8 +1272,8 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, eventProperties, timestamp, opt_callback) {
-  if (this._pendingReadStorage) {
-    return this._q.push(['logEventWithTimestamp', eventType, eventProperties, timestamp, opt_callback]); 
+  if (this._shouldDeferCall()) {
+    return this._q.push(['logEventWithTimestamp', eventType, eventProperties, timestamp, opt_callback]);
   }
   if (!this._apiKeySet('logEvent()')) {
     if (type(opt_callback) === 'function') {
@@ -1274,8 +1312,8 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, e
  * @example amplitudeClient.logEventWithGroups('Clicked Button', null, {'orgId': 24});
  */
 AmplitudeClient.prototype.logEventWithGroups = function(eventType, eventProperties, groups, opt_callback) {
-  if (this._pendingReadStorage) {
-    return this._q.push(['logEventWithGroups', eventType, eventProperties, groups, opt_callback]); 
+  if (this._shouldDeferCall()) {
+    return this._q.push(['logEventWithGroups', eventType, eventProperties, groups, opt_callback]);
   }
   if (!this._apiKeySet('logEventWithGroups()')) {
     if (type(opt_callback) === 'function') {
@@ -1311,6 +1349,10 @@ var _isNumber = function _isNumber(n) {
  * amplitude.logRevenueV2(revenue);
  */
 AmplitudeClient.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['logRevenueV2', revenue_obj]);
+  }
+
   if (!this._apiKeySet('logRevenueV2()')) {
     return;
   }
@@ -1341,6 +1383,10 @@ if (BUILD_COMPAT_2_0) {
    * @example amplitudeClient.logRevenue(3.99, 1, 'product_1234');
    */
   AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, product) {
+    if (this._shouldDeferCall()) {
+      return this._q.push(['logRevenue', price, quantity, product]);
+    }
+
     // Test that the parameters are of the right type.
     if (!this._apiKeySet('logRevenue()') || !_isNumber(price) || (quantity !== undefined && !_isNumber(quantity))) {
       // utils.log('Price and quantity arguments to logRevenue must be numbers');
@@ -1551,5 +1597,34 @@ if (BUILD_COMPAT_2_0) {
  * @example var amplitudeVersion = amplitude.__VERSION__;
  */
 AmplitudeClient.prototype.__VERSION__ = version;
+
+/**
+ * Determines whether or not to push call to this._q or invoke it
+ * @private
+ */
+AmplitudeClient.prototype._shouldDeferCall = function _shouldDeferCall() {
+  return this._pendingReadStorage || this._initializationDeferred;
+};
+
+/**
+ * Defers Initialization by putting all functions into storage until users
+ * have accepted terms for tracking
+ * @private
+ */
+AmplitudeClient.prototype._deferInitialization = function _deferInitialization(apiKey, opt_userId, opt_config, opt_callback) {
+  this._initializationDeferred = true;
+  this._q.push(['init', apiKey, opt_userId, opt_config, opt_callback]);
+};
+
+/**
+ * Enable tracking via logging events and dropping a cookie
+ * Intended to be used with the deferInitialization configuration flag
+ * @public
+ */
+AmplitudeClient.prototype.enableTracking = function enableTracking() {
+  // This will call init (which drops the cookie) and will run any pending tasks
+  _saveCookieData(this);
+  this.runQueuedFunctions();
+};
 
 export default AmplitudeClient;
