@@ -3369,7 +3369,7 @@ describe('setVersionName', function() {
       });
     });
 
-    describe('upon to opting into analytics', function () {
+    describe('upon opting into analytics', function () {
       it('should drop a cookie', function () {
         amplitude.enableTracking();
         var cookieData = cookie.get(amplitude.options.cookieName + '_' + apiKey);
@@ -3380,11 +3380,27 @@ describe('setVersionName', function() {
         amplitude.logEvent('Event Type 1');
         amplitude.logEvent('Event Type 2');
         amplitude.logEventWithTimestamp('test', null, 2000, null);
+        assert.lengthOf(amplitude._unsentEvents, 0, 'should not have any pending events to be sent');
         amplitude.enableTracking();
 
+        assert.lengthOf(server.requests, 1, 'should have sent a request to Amplitude');
         var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
         assert.lengthOf(events, 1, 'should have sent a request to Amplitude');
         assert.lengthOf(amplitude._unsentEvents, 3, 'should have saved the remaining events')
+      });
+      it('should send new events', function () {
+        assert.lengthOf(amplitude._unsentEvents, 0, 'should start with no pending events to be sent');
+        amplitude.identify(new Identify().set('prop1', 'value1'));
+        amplitude.logEvent('Event Type 1');
+        amplitude.logEvent('Event Type 2');
+        amplitude.logEventWithTimestamp('test', null, 2000, null);
+        assert.lengthOf(amplitude._unsentEvents, 0, 'should not have any pending events to be sent');
+
+        amplitude.enableTracking();
+        assert.lengthOf(amplitude._unsentEvents, 3, 'should have saved the remaining events')
+
+        amplitude.logEvent('Event Type 3');
+        assert.lengthOf(amplitude._unsentEvents, 4, 'should save the new events')
       });
       it('should not continue to deferInitialization if an amplitude cookie exists', function () {
         amplitude.enableTracking();

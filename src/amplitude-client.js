@@ -75,15 +75,15 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     return;
   }
 
-  var hasExistingCookie = !!this.cookieStorage.get(this.options.cookieName + this._storageSuffix);
-  if (opt_config && opt_config.deferInitialization && !hasExistingCookie) {
-    this._deferInitialization(apiKey, opt_userId, opt_config, opt_callback);
-    return;
-  }
-
   try {
     this.options.apiKey = apiKey;
     this._storageSuffix = '_' + apiKey + this._legacyStorageSuffix;
+
+    var hasExistingCookie = !!this.cookieStorage.get(this.options.cookieName + this._storageSuffix);
+    if (opt_config && opt_config.deferInitialization && !hasExistingCookie) {
+      this._deferInitialization(apiKey, opt_userId, opt_config, opt_callback);
+      return;
+    }
 
     _parseConfig(this.options, opt_config);
 
@@ -1619,10 +1619,12 @@ AmplitudeClient.prototype._deferInitialization = function _deferInitialization(a
 /**
  * Enable tracking via logging events and dropping a cookie
  * Intended to be used with the deferInitialization configuration flag
+ * This will drop a cookie and reset initialization deferred
  * @public
  */
 AmplitudeClient.prototype.enableTracking = function enableTracking() {
   // This will call init (which drops the cookie) and will run any pending tasks
+  this._initializationDeferred = false;
   _saveCookieData(this);
   this.runQueuedFunctions();
 };
