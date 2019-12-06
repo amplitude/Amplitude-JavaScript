@@ -773,7 +773,7 @@ AmplitudeClient.prototype.saveEvents = function saveEvents() {
  */
 AmplitudeClient.prototype.setDomain = function setDomain(domain) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['setDomain', domain]);
+    return this._q.push(['setDomain'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   if (!utils.validateInput(domain, 'domain', 'string')) {
@@ -802,7 +802,7 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
  */
 AmplitudeClient.prototype.setUserId = function setUserId(userId) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['setUserId', userId]);
+    return this._q.push(['setUserId'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   try {
@@ -828,7 +828,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
  */
 AmplitudeClient.prototype.setGroup = function(groupType, groupName) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['setGroup', groupType, groupName]);
+    return this._q.push(['setGroup'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   if (!this._apiKeySet('setGroup()') || !utils.validateInput(groupType, 'groupType', 'string') ||
@@ -850,7 +850,7 @@ AmplitudeClient.prototype.setGroup = function(groupType, groupName) {
  */
 AmplitudeClient.prototype.setOptOut = function setOptOut(enable) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['setOptOut', enable]);
+    return this._q.push(['setOptOut'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   if (!utils.validateInput(enable, 'enable', 'boolean')) {
@@ -891,7 +891,7 @@ AmplitudeClient.prototype.resetSessionId = function resetSessionId() {
   */
 AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
   if (this._shouldDeferCall()) {
-    return this._q.push(['regenerateDeviceId']);
+    return this._q.push(['regenerateDeviceId'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   this.setDeviceId(UUID() + 'R');
@@ -907,7 +907,7 @@ AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
   */
 AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['setDeviceId', deviceId]);
+    return this._q.push(['setDeviceId'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   if (!utils.validateInput(deviceId, 'deviceId', 'string')) {
@@ -934,7 +934,7 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
  */
 AmplitudeClient.prototype.setUserProperties = function setUserProperties(userProperties) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['setUserProperties', userProperties]);
+    return this._q.push(['setUserProperties'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('setUserProperties()') || !utils.validateInput(userProperties, 'userProperties', 'object')) {
     return;
@@ -962,7 +962,7 @@ AmplitudeClient.prototype.setUserProperties = function setUserProperties(userPro
  */
 AmplitudeClient.prototype.clearUserProperties = function clearUserProperties(){
   if (this._shouldDeferCall()) {
-    return this._q.push(['clearUserProperties']);
+    return this._q.push(['clearUserProperties'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   if (!this._apiKeySet('clearUserProperties()')) {
@@ -1002,7 +1002,7 @@ var _convertProxyObjectToRealObject = function _convertProxyObjectToRealObject(i
  */
 AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['identify', identify_obj, opt_callback]);
+    return this._q.push(['identify'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('identify()')) {
     if (type(opt_callback) === 'function') {
@@ -1037,7 +1037,7 @@ AmplitudeClient.prototype.identify = function(identify_obj, opt_callback) {
 
 AmplitudeClient.prototype.groupIdentify = function(group_type, group_name, identify_obj, opt_callback) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['groupIdentify', group_type, group_name, identify_obj, opt_callback]);
+    return this._q.push(['groupIdentify'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('groupIdentify()')) {
     if (type(opt_callback) === 'function') {
@@ -1093,7 +1093,7 @@ AmplitudeClient.prototype.groupIdentify = function(group_type, group_name, ident
  */
 AmplitudeClient.prototype.setVersionName = function setVersionName(versionName) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['setVersionName', versionName]);
+    return this._q.push(['setVersionName'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   if (!utils.validateInput(versionName, 'versionName', 'string')) {
@@ -1256,7 +1256,7 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  */
 AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['logEvent', eventType, eventProperties, opt_callback]);
+    return this._q.push(['logEvent'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   return this.logEventWithTimestamp(eventType, eventProperties, null, opt_callback);
 };
@@ -1273,7 +1273,7 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
  */
 AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, eventProperties, timestamp, opt_callback) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['logEventWithTimestamp', eventType, eventProperties, timestamp, opt_callback]);
+    return this._q.push(['logEventWithTimestamp'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('logEvent()')) {
     if (type(opt_callback) === 'function') {
@@ -1313,7 +1313,7 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, e
  */
 AmplitudeClient.prototype.logEventWithGroups = function(eventType, eventProperties, groups, opt_callback) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['logEventWithGroups', eventType, eventProperties, groups, opt_callback]);
+    return this._q.push(['logEventWithGroups'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('logEventWithGroups()')) {
     if (type(opt_callback) === 'function') {
@@ -1350,7 +1350,7 @@ var _isNumber = function _isNumber(n) {
  */
 AmplitudeClient.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
   if (this._shouldDeferCall()) {
-    return this._q.push(['logRevenueV2', revenue_obj]);
+    return this._q.push(['logRevenueV2'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   if (!this._apiKeySet('logRevenueV2()')) {
@@ -1384,7 +1384,7 @@ if (BUILD_COMPAT_2_0) {
    */
   AmplitudeClient.prototype.logRevenue = function logRevenue(price, quantity, product) {
     if (this._shouldDeferCall()) {
-      return this._q.push(['logRevenue', price, quantity, product]);
+      return this._q.push(['logRevenue'].concat(Array.prototype.slice.call(arguments, 0)));
     }
 
     // Test that the parameters are of the right type.
@@ -1611,9 +1611,9 @@ AmplitudeClient.prototype._shouldDeferCall = function _shouldDeferCall() {
  * have accepted terms for tracking
  * @private
  */
-AmplitudeClient.prototype._deferInitialization = function _deferInitialization(apiKey, opt_userId, opt_config, opt_callback) {
+AmplitudeClient.prototype._deferInitialization = function _deferInitialization() {
   this._initializationDeferred = true;
-  this._q.push(['init', apiKey, opt_userId, opt_config, opt_callback]);
+  this._q.push(['init'].concat(Array.prototype.slice.call(arguments, 0)));
 };
 
 /**

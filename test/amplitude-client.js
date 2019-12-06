@@ -3333,12 +3333,30 @@ describe('setVersionName', function() {
   });
 
   describe('deferInitialization config', function () {
-    beforeEach(function () {
-      reset();
-      amplitude.init(apiKey, null, { cookieExpiration: 365, deferInitialization: true });
-    });
+    it('should keep tracking users who already have an amplitude cookie', function () {
+      var now = new Date().getTime();
+      var cookieData = {
+        userId: 'test_user_id',
+        optOut: false,
+        sessionId: now,
+        lastEventTime: now,
+        eventId: 50,
+        identifyId: 60
+      }
 
+      cookie.set(amplitude.options.cookieName + keySuffix, cookieData);
+      amplitude.init(apiKey, null, { cookieExpiration: 365, deferInitialization: true });
+      amplitude.identify(new Identify().set('prop1', 'value1'));
+
+      var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(server.requests, 1, 'should have sent a request to Amplitude');
+      assert.equal(events[0].event_type, '$identify');
+    });
     describe('prior to opting into analytics', function () {
+      beforeEach(function () {
+        reset();
+        amplitude.init(apiKey, null, { cookieExpiration: 365, deferInitialization: true });
+      });
       it('should not initially drop a cookie if deferInitialization is set to true', function () {
         var cookieData = cookie.get(amplitude.options.cookieName + '_' + apiKey);
         assert.isNull(cookieData);
@@ -3370,6 +3388,10 @@ describe('setVersionName', function() {
     });
 
     describe('upon opting into analytics', function () {
+      beforeEach(function () {
+        reset();
+        amplitude.init(apiKey, null, { cookieExpiration: 365, deferInitialization: true });
+      });
       it('should drop a cookie', function () {
         amplitude.enableTracking();
         var cookieData = cookie.get(amplitude.options.cookieName + '_' + apiKey);
@@ -3411,5 +3433,5 @@ describe('setVersionName', function() {
         assert.lengthOf(events, 1, 'should have sent a request to Amplitude');
       });
     });
-  })
+  });
 });
