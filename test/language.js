@@ -63,7 +63,7 @@ describe('language', function() {
         assert.equal(language.getLanguage(), 'some-third-locale');
     });
 
-    it('should return empty string if browser language is not set', function() {
+    it('should return empty string if navigator language is not set', function() {
         languagesStub.value(undefined);
         languageStub.value(undefined);
         userLanguageStub.value(undefined);
