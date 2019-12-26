@@ -4,5 +4,5 @@ var getLanguage = function() {
 };
 
 export default {
-    language: getLanguage()
+    getLanguage
 };
