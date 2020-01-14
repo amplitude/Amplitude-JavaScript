@@ -10,6 +10,9 @@ export default {
     name: 'amplitude',
     file: 'amplitude.js',
     format: 'umd',
+    amd: {
+      id: 'amplitude',
+    }
   },
   plugins: [
     json(),
