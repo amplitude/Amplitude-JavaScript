@@ -114,7 +114,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       this.options.deviceId = (type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' &&
           !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) ||
           (this.options.deviceIdFromUrlParam && this._getDeviceIdFromUrlParam(this._getUrlParams())) ||
-          this.options.deviceId || deviceId || UUID() + 'R';
+          this.options.deviceId || deviceId || this.generateDeviceId();
       this.options.userId =
         (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         (type(opt_userId) === 'number' && opt_userId.toString()) ||
@@ -894,7 +894,16 @@ AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
     return this._q.push(['regenerateDeviceId'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
-  this.setDeviceId(UUID() + 'R');
+  this.setDeviceId(this.generateDeviceId());
+};
+
+/**
+  * Generate a unique device ID. This is used internally by amplitude, but is exposed
+  * publicly for those needed access to the inner implementation.
+  * @public
+  */
+AmplitudeClient.prototype.generateDeviceId = function generateDeviceId() {
+  return UUID() + 'R';
 };
 
 /**
@@ -903,10 +912,11 @@ AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
   * (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
   * @public
   * @param {string} deviceId - custom deviceId for current user.
+  * @param {boolean} doNotDefer - set to true if you wish the deviceId to be set regardless of whether tracking is paused.
   * @example amplitudeClient.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
   */
-AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
-  if (this._shouldDeferCall()) {
+AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId, doNotDefer) {
+  if (!doNotDefer && this._shouldDeferCall()) {
     return this._q.push(['setDeviceId'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
@@ -1177,7 +1187,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       api_properties: apiProperties,
       event_properties: utils.truncate(utils.validateProperties(eventProperties)),
       user_properties: utils.truncate(utils.validateProperties(userProperties)),
-      uuid: UUID(),
+      uuid: this.generateDeviceId(),
       library: {
         name: 'amplitude-js',
         version: version
