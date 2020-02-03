@@ -1,3 +1,6 @@
+### 5.9.0 (February 3, 2020)
+* Add default versionName to for react-native
+
 ### 5.8.0 (December 6, 2019)
 * Add support to defer saving an amplitude cookie and logging events until a user has opted in
 
