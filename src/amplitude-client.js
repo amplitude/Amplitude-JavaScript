@@ -1258,8 +1258,8 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * Note: the server response code and response body from the event upload are passed to the callback function.
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
-AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
-  if (this._shouldDeferCall()) {
+AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback, forceDiffer) {
+  if (this._shouldDeferCall() || forceDiffer) {
     return this._q.push(['logEvent'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   return this.logEventWithTimestamp(eventType, eventProperties, null, opt_callback);
@@ -1404,6 +1404,25 @@ if (BUILD_COMPAT_2_0) {
       price: price
     }, null, null, null, null, null);
   };
+}
+
+/**
+ * Flush all scheduled events.
+ * @public
+ * @param {Amplitude~eventCallback} callback - (optional) callback to run after events are sent.
+ */
+
+ AmplitudeClient.prototype.flushEvents = function flushEvents(callback) {
+  if (this._unsentCount() === 0) {
+    return false;
+  }
+
+  this.sendEvents(callback);
+
+  if (this._unsentCount() >= this.options.eventUploadThreshold) {
+    return true;
+  }
+  return false;
 }
 
 /**
