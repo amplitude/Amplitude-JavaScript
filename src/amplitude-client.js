@@ -1183,7 +1183,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       user_properties: utils.truncate(utils.validateProperties(userProperties)),
       uuid: UUID(),
       library: {
-        name: 'amplitude-js',
+        name: BUILD_COMPAT_REACT_NATIVE ? 'amplitude-react-native' : 'amplitude-js',
         version: version
       },
       sequence_number: sequenceNumber, // for ordering events and identifys
