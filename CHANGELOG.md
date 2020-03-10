@@ -1,3 +1,7 @@
+### 5.10.0 (March 10, 2020)
+* `Library` field for event will include `amplitude-react-native` when using SDK in react native.
+* `Device Type` field now will show the actual device model instead of OS name.
+
 ### 5.9.0 (February 3, 2020)
 * Add default versionName to for react-native
 
