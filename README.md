@@ -26,7 +26,6 @@ See our [JavaScript SDK Reference](https://amplitude.zendesk.com/hc/en-us/articl
 Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
 
 # React Native #
-
 This library now supports react-native. It has two dependencies on react-native modules you will have to install yourself:
 
 * [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) Tested with version 3.1.4
@@ -35,7 +34,6 @@ This library now supports react-native. It has two dependencies on react-native 
 # Upgrading Major Versions and Breaking Changes #
 
 ## 5.0
-
 We stopped committing the generated amplitude.min.js and amplitude.js files to
 the repository. This should only affect you if you load amplitude via github.
 You should use `npm` or `yarn` instead.
@@ -44,14 +42,12 @@ We dropped our custom symbian and blackberry user agent parsing to simply match
 what the ua-parser-js library does.
 
 ## 4.0
-
 The library now defaults to sending requests to https://api.amplitude.com
 instead of //api.amplitude.com. This should only affect you if your site does
 not use https and you use a Content Security Policy.
 
-
-# Questions? #
-If you have questions about using or installing our JavaScript SDK, you can send an email to [Amplitude Support](mailto:platform@amplitude.com).
+# Need Help? #
+If you have any problems or issues over our SDK, feel free to create a github issue or submit a request on [Amplitude Help](https://help.amplitude.com/hc/en-us/requests/new).
 
 # License #
 ```text
