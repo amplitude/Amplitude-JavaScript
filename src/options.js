@@ -15,8 +15,11 @@ export default {
   apiEndpoint: 'api.amplitude.com',
   batchEvents: false,
   cookieExpiration: 365 * 10,
-  cookieName: 'amplitude_id',
+  cookieName: 'amplitude_id', // this is a deprecated option
   sameSiteCookie: 'None',
+  cookieForceUpgrade: false,
+  deferInitialization: false,
+  disableCookies: false,
   deviceIdFromUrlParam: false,
   domain: '',
   eventUploadPeriodMillis: 30 * 1000, // 30s
