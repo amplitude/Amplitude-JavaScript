@@ -8,7 +8,7 @@ export default {
   input: 'src/index.js',
   output: {
     name: 'amplitude',
-    file: 'amplitude.js',
+    file: 'browser/amplitude.js',
     format: 'umd',
     amd: {
       id: 'amplitude',

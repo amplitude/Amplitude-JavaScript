@@ -4,6 +4,8 @@
   "version": "5.10.0",
   "license": "MIT",
   "description": "Javascript library for Amplitude Analytics",
+  "workspaces": ["browser", "react-native"],
+  "private": true,
   "keywords": [
     "analytics",
     "amplitude"

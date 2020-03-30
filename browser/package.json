@@ -1,0 +1,8 @@
+{
+  "name": "amplitude-js",
+  "author": "Amplitude <support@amplitude.com>",
+  "version": "5.10.0",
+  "license": "MIT",
+  "description": "Javascript library for Amplitude Analytics",
+  "main": "amplitude.js"
+}

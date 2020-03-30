@@ -1,0 +1,16 @@
+{
+  "name": "@amplitude/react-native",
+  "author": "Amplitude <support@amplitude.com>",
+  "repository": "git://github.com/amplitude/amplitude-javascript.git",
+  "description": "React Native library for Amplitude Analytics",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": false,
+  "main": "amplitude.native.js",
+  "react-native": "amplitude.native.js",
+  "dependencies": {
+    "@react-native-community/async-storage": "1.6.2",
+    "react-native-device-info": "1.6.2"
+  }
+}

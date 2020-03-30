@@ -8,7 +8,7 @@ export default {
   input: 'src/index.js',
   output: {
     name: 'amplitude',
-    file: 'amplitude.native.js',
+    file: 'react-native/amplitude.native.js',
     format: 'umd',
   },
   plugins: [
