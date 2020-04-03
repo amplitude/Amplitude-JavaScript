@@ -11,3 +11,4 @@ import './amplitude.js';
 import './amplitude-client.js';
 import './utils.js';
 import './revenue.js';
+import './base-cookie.js';

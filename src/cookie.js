@@ -70,6 +70,7 @@ var options = function(opts) {
 
   _options.expirationDays = opts.expirationDays;
   _options.secure = opts.secure;
+  _options.sameSite = opts.sameSite;
 
   var domain = (!utils.isEmptyString(opts.domain)) ? opts.domain : '.' + topDomain(getLocation().href);
   var token = Math.random();

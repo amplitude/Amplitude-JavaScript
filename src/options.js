@@ -16,6 +16,7 @@ export default {
   batchEvents: false,
   cookieExpiration: 365 * 10,
   cookieName: 'amplitude_id',
+  sameSiteCookie: 'None',
   deviceIdFromUrlParam: false,
   domain: '',
   eventUploadPeriodMillis: 30 * 1000, // 30s
