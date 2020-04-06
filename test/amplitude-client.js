@@ -9,6 +9,7 @@ import queryString from 'query-string';
 import Identify from '../src/identify.js';
 import Revenue from '../src/revenue.js';
 import constants from '../src/constants.js';
+import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 
 // maintain for testing backwards compatability
 describe('AmplitudeClient', function() {
@@ -34,6 +35,7 @@ describe('AmplitudeClient', function() {
   function reset() {
     localStorage.clear();
     sessionStorage.clear();
+    restoreCookie();
     cookie.remove(amplitude.options.cookieName);
     cookie.remove(amplitude.options.cookieName + keySuffix);
     cookie.remove(amplitude.options.cookieName + '_new_app');
@@ -72,6 +74,24 @@ describe('AmplitudeClient', function() {
       assert.ok(onInitCalled === false);
       amplitude.init(apiKey);
       assert.ok(onInitCalled);
+    });
+
+    it('should set the Secure flag on cookie with the secureCookie option', () => {
+      mockCookie();
+      amplitude.init(apiKey, null, { secureCookie: true });
+      assert.include(getCookie('amplitude_id_' + apiKey).options, 'Secure');
+    });
+
+    it('should set the SameSite cookie option to None by default', () => {
+      mockCookie();
+      amplitude.init(apiKey);
+      assert.include(getCookie('amplitude_id_' + apiKey).options, 'SameSite=None');
+    });
+
+    it('should set the sameSite option on a cookie with the sameSiteCookie Option', () => {
+      mockCookie();
+      amplitude.init(apiKey, null, {sameSiteCookie: 'Strict'});
+      assert.include(getCookie('amplitude_id_' + apiKey).options, 'SameSite=Strict');
     });
 
     it('should immediately invoke onInit callbacks if already initialized', function() {
@@ -3352,6 +3372,7 @@ describe('setVersionName', function() {
       assert.lengthOf(server.requests, 1, 'should have sent a request to Amplitude');
       assert.equal(events[0].event_type, '$identify');
     });
+
     describe('prior to opting into analytics', function () {
       beforeEach(function () {
         reset();

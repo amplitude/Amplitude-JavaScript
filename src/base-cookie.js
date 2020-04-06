@@ -39,7 +39,9 @@ const set = (name, value, opts) => {
   if (opts.secure) {
     str += '; Secure';
   }
-  str += '; SameSite=Lax';
+  if (opts.sameSite) {
+    str += '; SameSite=' + opts.sameSite;
+  }
   document.cookie = str;
 };
 
