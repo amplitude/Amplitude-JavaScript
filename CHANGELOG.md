@@ -1,3 +1,6 @@
+### 5.11.0 (April 6, 2020)
+* Add a `sameSiteCookie` option to set the SameSite cookie. It is set to `None` by default
+
 ### 5.10.0 (March 10, 2020)
 * `Library` field for event will include `amplitude-react-native` when using SDK in react native.
 * `Device Type` field now will show the actual device model instead of OS name.
