@@ -1,7 +1,7 @@
 {
   "name": "amplitude-js",
   "description": "Javascript library for Amplitude Analytics",
-  "main": "amplitude.js",
+  "main": "amplitude.umd.js",
   "authors": [
     "Amplitude <support@amplitude.com>"
   ],

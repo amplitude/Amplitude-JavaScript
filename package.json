@@ -1,7 +1,7 @@
 {
   "name": "amplitude-js",
   "author": "Amplitude <support@amplitude.com>",
-  "version": "5.11.0",
+  "version": "5.12.0",
   "license": "MIT",
   "description": "Javascript library for Amplitude Analytics",
   "keywords": [
@@ -9,7 +9,7 @@
     "amplitude"
   ],
   "repository": "git://github.com/amplitude/amplitude-javascript.git",
-  "main": "amplitude.js",
+  "main": "amplitude.umd.js",
   "react-native": "amplitude.native.js",
   "dependencies": {
     "@amplitude/ua-parser-js": "0.7.20",
