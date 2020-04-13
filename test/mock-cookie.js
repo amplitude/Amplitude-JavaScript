@@ -12,7 +12,7 @@ export const mockCookie = () => {
   document.__defineSetter__('cookie', function (str) {
     const indexEquals = str.indexOf("=");
     const key = str.substr(0, indexEquals);
-    const remainingStr = str.substring(str + 1);
+    const remainingStr = str.substring(key.length + 1);
     const splitSemi = remainingStr.split(';').map((str)=> str.trim());
 
     rawCookieData[key] = {

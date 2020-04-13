@@ -19,6 +19,7 @@ export default {
   USER_ID: 'amplitude_userId',
 
   COOKIE_TEST: 'amplitude_cookie_test',
+  COOKIE_PREFIX: "amp",
 
   // revenue keys
   REVENUE_EVENT: 'revenue_amount',
