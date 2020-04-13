@@ -9,7 +9,7 @@ export default {
   output: {
     name: 'amplitude',
     file: 'amplitude.js',
-    format: 'iife',
+    format: 'umd',
     amd: {
       id: 'amplitude',
     }
