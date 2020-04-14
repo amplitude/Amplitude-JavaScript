@@ -756,10 +756,10 @@ AmplitudeClient.prototype.saveEvents = function saveEvents() {
 };
 
 /**
- * Sets a customer domain for the amplitude cookie. Useful if you want to support cross-subdomain tracking.
+ * Sets a customer domain for the amplitude cookie. Specified domain will include all subdomains. If you want to disable tracking for subdomains specify an empty string `''`, this will set cookies for the current domain only.
  * @public
  * @param {string} domain to set.
- * @example amplitudeClient.setDomain('.amplitude.com');
+ * @example amplitudeClient.setDomain('amplitude.com');
  */
 AmplitudeClient.prototype.setDomain = function setDomain(domain) {
   if (this._shouldDeferCall()) {

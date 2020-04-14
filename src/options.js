@@ -21,7 +21,7 @@ export default {
   deferInitialization: false,
   disableCookies: false,
   deviceIdFromUrlParam: false,
-  domain: '',
+  domain: undefined,
   eventUploadPeriodMillis: 30 * 1000, // 30s
   eventUploadThreshold: 30,
   forceHttps: true,
