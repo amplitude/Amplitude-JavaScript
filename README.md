@@ -18,7 +18,7 @@ Please see our [installation guide](https://amplitude.zendesk.com/hc/en-us/artic
 [![npm version](https://badge.fury.io/js/amplitude-js.svg)](https://badge.fury.io/js/amplitude-js)
 [![Bower version](https://badge.fury.io/bo/amplitude-js.svg)](https://badge.fury.io/bo/amplitude-js)
 
-[5.11.0 - Released on April 6, 2020](https://github.com/amplitude/Amplitude-JavaScript/releases/latest)
+[6.0.0 - Released on April 17, 2020](https://github.com/amplitude/Amplitude-JavaScript/releases/latest)
 
 
 # JavaScript SDK Reference #
@@ -39,6 +39,17 @@ This library now supports react-native. It has two dependencies on react-native 
 * [@react-native-community/async-storage](https://www.npmjs.com/package/@react-native-community/async-storage) Tested with version 1.6.2
 
 # Upgrading Major Versions and Breaking Changes #
+
+## 6.0
+The cookie format has been changed to be more compact. If you use the same
+Amplitude project(API key) across multiple applications, and you track
+anonymous users across those applications, you will want to update amplitude
+across all those applications at the same time. Otherwise these anonymous users
+will have a different device id in your different applications.
+
+If you do not have multiple installations of amplitude, or if you do not track
+anonymous users across different installations of amplitude, this change should
+not affect you.
 
 ## 5.0
 We stopped committing the generated amplitude.min.js and amplitude.js files to

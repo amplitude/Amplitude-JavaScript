@@ -4,7 +4,10 @@
 * Allow for localStorage fallback with the `disableCookie` option.
 * Only new and unseen devices will get the compact cookie. `cookieForceUpgrade` will force all browsers to upgrade and delete the old cookie.
 
-### 5.12.0 (April 17, 2020)
+#### Breaking Changes
+* The cookie format has been changed to be more compact. If you use the same Amplitude project(API key) across multiple applications, and you track anonymous users across those applications, you will want to update amplitude across all those applications at the same time.
+
+### 5.12.0 (April 12, 2020)
 * Use an IIFE build for the snippet. This will issues where the snippet wouldn't load for require js users.
 
 ### 5.11.0 (April 6, 2020)
