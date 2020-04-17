@@ -16,3 +16,4 @@ amplitude.native.js
 amplitude-segment-snippet.min.js
 .watchmanconfig
 package-lock.json
+amplitude.umd.js

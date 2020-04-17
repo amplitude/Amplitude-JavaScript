@@ -1,3 +1,4 @@
+### 6.0.1 (April 17, 2020)
 ### 6.0.0 (April 17, 2020)
 * Use a more compact cookie format
 * Fix issue where a cookie key could have a space appear inside of it
