@@ -3,10 +3,10 @@
  */
 
 import Base64 from './base64';
-import Constants from './constants';
 import utils from './utils';
 import getLocation from './get-location';
 import baseCookie from './base-cookie';
+import topDomain from './top-domain';
 
 
 var _options = {
@@ -21,51 +21,6 @@ var reset = function() {
     domain: undefined
   };
 };
-
-const getHost = (url) => {
-  const a = document.createElement('a');
-  a.href = url;
-  return a.hostname || location.hostname; 
-};
-
-let _topDomain = '';
-
-const topDomain = (url) => {
-  if (_topDomain) {
-    return topDomain;
-  }
-  const host = getHost(url);
-  const parts = host.split('.');
-  const last = parts[parts.length - 1];
-  const levels = [];
-
-  if (parts.length === 4 && last === parseInt(last, 10)) {
-    return levels;
-  }
-
-  if (parts.length <= 1) {
-    return levels;
-  }
-
-  for (let i = parts.length - 2; i >= 0; --i) {
-    levels.push(parts.slice(i).join('.'));
-  }
-
-  for (let i = 0; i < levels.length; ++i) {
-    const cname = '__tld_test__';
-    const domain = levels[i];
-    const opts = { domain: '.' + domain };
-
-    baseCookie.set(cname, 1, opts);
-    if (baseCookie.get(cname)) {
-      baseCookie.set(cname, null, opts);
-      return domain;
-    }
-  }
-
-  return '';
-};
-
 
 var options = function(opts) {
   if (arguments.length === 0) {
@@ -151,34 +106,12 @@ var remove = function(name) {
   }
 };
 
-let _areCookiesEnabled = null;
-
-// test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
-const areCookiesEnabled = () => {
-  if (_areCookiesEnabled !== null) {
-    return _areCookiesEnabled;
-  }
-  var uid = String(new Date());
-  var result;
-  try {
-    set(Constants.COOKIE_TEST, uid);
-    _areCookiesEnabled = get(Constants.COOKIE_TEST) === uid;
-    remove(Constants.COOKIE_TEST);
-    return result;
-  } catch (e) {
-    // cookies are not enabled
-  }
-  return false;
-};
-
 export default {
   reset,
   options,
-  topDomain,
   get,
   set,
   remove,
-  areCookiesEnabled,
   setRaw,
   getRaw
 };

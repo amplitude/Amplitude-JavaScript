@@ -1,8 +1,10 @@
 import AmplitudeClient from '../src/amplitude-client.js';
 import getUtmData from '../src/utm.js';
-import MetadataStorage from '../src/metaDataStorage';
+import Cookie from '../src/cookie';
+import MetadataStorage from '../src/metadata-storage';
 import localStorage from '../src/localstorage.js';
 import CookieStorage from '../src/cookiestorage.js';
+import baseCookie from '../src/base-cookie.js';
 import Base64 from '../src/base64.js';
 import cookie from '../src/cookie.js';
 import utils from '../src/utils.js';
@@ -352,16 +354,16 @@ describe('AmplitudeClient', function() {
       clock.tick(1000);
 
       localStorage.clear();
-      sinon.stub(cookie, 'areCookiesEnabled').returns(false);
+      sinon.stub(baseCookie, 'areCookiesEnabled').returns(false);
       var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey, userId, {'deviceId': deviceId});
-      cookie.areCookiesEnabled.restore();
+      baseCookie.areCookiesEnabled.restore();
       clock.restore();
 
       var cookieData = localStorage.getItem(cookieName);
       assert.equal(
         cookieData,
-        `${deviceId}.${Base64.encode(userId)}..1000.1000.0.0.0`
+        `${deviceId}.${Base64.encode(userId)}..v8.v8.0.0.0`
       );
       assert.isNull(cookie.get(amplitude2.options.cookieName)); // assert did not write to cookies
     });
@@ -416,7 +418,7 @@ describe('AmplitudeClient', function() {
       var sessionId = new Date().getTime();
 
       localStorage.clear();
-      localStorage.setItem(cookieName,`0.0.0.${sessionId}.${sessionId}.50.60.70`);
+      localStorage.setItem(cookieName,`0.0.0.${sessionId.toString(32)}.${sessionId.toString(32)}.1i.1s.26`);
 
       clock.tick(10);
       amplitude2.init(apiKey, userId);
@@ -1369,10 +1371,11 @@ describe('setVersionName', function() {
 
   describe('logEvent', function() {
 
-    var clock;
+    let clock, startTime;
 
     beforeEach(function() {
-      clock = sinon.useFakeTimers();
+      startTime = Date.now();
+      clock = sinon.useFakeTimers(startTime);
       amplitude.init(apiKey);
     });
 
@@ -2217,9 +2220,9 @@ describe('setVersionName', function() {
       var deviceId = 'test_device_id';
       var amplitude2 = new AmplitudeClient();
 
-      sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
+      sinon.stub(baseCookie, 'areCookiesEnabled').returns(false);
       amplitude2.init(apiKey, null, {deviceId: deviceId, batchEvents: true, eventUploadThreshold: 5});
-      CookieStorage.prototype._cookiesEnabled.restore();
+      baseCookie.areCookiesEnabled.restore();
 
       amplitude2.logEvent('test');
       clock.tick(10); // starts the session
@@ -2227,14 +2230,13 @@ describe('setVersionName', function() {
       clock.tick(20);
       amplitude2.setUserProperties({'key':'value'}); // identify event at time 30
 
-      const storage = new MetadataStorage({storageKey: cookieName});
-      const cookieData = storage.load();
+      const cookieData = amplitude2._metadataStorage.load();
       assert.deepEqual(cookieData, {
         'deviceId': deviceId,
         'userId': null,
         'optOut': false,
-        'sessionId': 10,
-        'lastEventTime': 30,
+        'sessionId': startTime,
+        'lastEventTime': startTime + 30,
         'eventId': 2,
         'identifyId': 1,
         'sequenceNumber': 3
@@ -3193,10 +3195,11 @@ describe('setVersionName', function() {
   });
 
   describe('sessionId', function() {
-    var clock;
+    let clock, startTime;
     beforeEach(function() {
       reset();
-      clock = sinon.useFakeTimers();
+      startTime = Date.now();
+      clock = sinon.useFakeTimers(startTime);
       amplitude.init(apiKey);
     });
 
@@ -3222,8 +3225,6 @@ describe('setVersionName', function() {
       clock.tick(timestamp);
       var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey);
-      assert.equal(amplitude2._sessionId, timestamp);
-      assert.equal(amplitude2.getSessionId(), timestamp);
       assert.equal(amplitude2.getSessionId(), amplitude2._sessionId);
     });
 
@@ -3232,14 +3233,10 @@ describe('setVersionName', function() {
       clock.tick(timestamp);
       var amplitude2 = new AmplitudeClient();
       amplitude2.init(apiKey);
-      assert.equal(amplitude2._sessionId, timestamp);
-      assert.equal(amplitude2.getSessionId(), timestamp);
-      assert.equal(amplitude2.getSessionId(), amplitude2._sessionId);
+      assert.equal(amplitude2.getSessionId(), startTime);
 
       amplitude2.setSessionId('invalid session id');
-      assert.equal(amplitude2._sessionId, timestamp);
-      assert.equal(amplitude2.getSessionId(), timestamp);
-      assert.equal(amplitude2.getSessionId(), amplitude2._sessionId);
+      assert.equal(amplitude2.getSessionId(), startTime);
     });
 
     it('should let user override sessionId with setSessionId', function() {
@@ -3250,17 +3247,13 @@ describe('setVersionName', function() {
       var sessionId = 1000;
       clock.tick(sessionId);
       amplitude2.init(apiKey);
-      assert.equal(amplitude2._sessionId, sessionId);
-      assert.equal(amplitude2.getSessionId(), sessionId);
-      assert.equal(amplitude2.getSessionId(), amplitude2._sessionId);
-      assert.equal(amplitude2._metadataStorage.load().sessionId, sessionId);
+      assert.equal(amplitude2.getSessionId(), startTime);
+      assert.equal(amplitude2._metadataStorage.load().sessionId, startTime);
 
       // override sessionId with setSessionId
       var newSessionId = 10000;
       amplitude2.setSessionId(newSessionId);
-      assert.equal(amplitude2._sessionId, newSessionId);
       assert.equal(amplitude2.getSessionId(), newSessionId);
-      assert.equal(amplitude2.getSessionId(), amplitude2._sessionId);
       assert.equal(amplitude2._metadataStorage.load().sessionId, newSessionId);
     });
   });

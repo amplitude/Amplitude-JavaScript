@@ -1,10 +1,11 @@
 import Amplitude from '../src/amplitude.js';
 import getUtmData from '../src/utm.js';
-import MetadataStorage from '../src/metaDataStorage';
+import MetadataStorage from '../src/metadata-storage';
 import localStorage from '../src/localstorage.js';
 import CookieStorage from '../src/cookiestorage.js';
 import Base64 from '../src/base64.js';
 import cookie from '../src/cookie.js';
+import baseCookie from '../src/base-cookie.js';
 import utils from '../src/utils.js';
 import queryString from 'query-string';
 import Identify from '../src/identify.js';
@@ -862,10 +863,11 @@ describe('setVersionName', function() {
 
   describe('logEvent', function() {
 
-    var clock;
+    let clock, startTime;
 
     beforeEach(function() {
-      clock = sinon.useFakeTimers();
+      startTime = Date.now();
+      clock = sinon.useFakeTimers(startTime);
       amplitude.init(apiKey);
     });
 
@@ -1694,9 +1696,9 @@ describe('setVersionName', function() {
       var deviceId = 'test_device_id';
       var amplitude2 = new Amplitude();
 
-      sinon.stub(CookieStorage.prototype, '_cookiesEnabled').returns(false);
+      sinon.stub(baseCookie, 'areCookiesEnabled').returns(false);
       amplitude2.init(apiKey, null, {deviceId: deviceId, batchEvents: true, eventUploadThreshold: 5});
-      CookieStorage.prototype._cookiesEnabled.restore();
+      baseCookie.areCookiesEnabled.restore();
 
       amplitude2.logEvent('test');
       clock.tick(10); // starts the session
@@ -1704,14 +1706,13 @@ describe('setVersionName', function() {
       clock.tick(20);
       amplitude2.setUserProperties({'key':'value'}); // identify event at time 30
 
-      const storage = new MetadataStorage({storageKey: cookieName});
-      const cookieData = storage.load();
+      const cookieData = amplitude2.getInstance()._metadataStorage.load();
       assert.deepEqual(cookieData, {
         'deviceId': deviceId,
         'userId': null,
         'optOut': false,
-        'sessionId': 10,
-        'lastEventTime': 30,
+        'sessionId': startTime,
+        'lastEventTime': startTime + 30,
         'eventId': 2,
         'identifyId': 1,
         'sequenceNumber': 3

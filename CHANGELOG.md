@@ -1,3 +1,15 @@
+### 6.0.0 (April 17, 2020)
+* Use a more compact cookie format
+* Fix issue where a cookie key could have a space appear inside of it
+* Allow for localStorage fallback with the `disableCookie` option.
+* Only new and unseen devices will get the compact cookie. `cookieForceUpgrade` will force all browsers to upgrade and delete the old cookie.
+
+### 5.12.0 (April 17, 2020)
+* Use an IIFE build for the snippet. This will issues where the snippet wouldn't load for require js users.
+
+### 5.11.0 (April 6, 2020)
+* Add a `sameSiteCookie` option to set the SameSite cookie. It is set to `None` by default
+
 ### 5.11.0 (April 6, 2020)
 * Add a `sameSiteCookie` option to set the SameSite cookie. It is set to `None` by default
 

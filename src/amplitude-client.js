@@ -1,6 +1,6 @@
 import Constants from './constants';
 import cookieStorage from './cookiestorage';
-import MetadataStorage from './metaDataStorage';
+import MetadataStorage from '../src/metadata-storage';
 import getUtmData from './utm';
 import Identify from './identify';
 import localStorage from './localstorage';  // jshint ignore:line

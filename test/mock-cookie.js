@@ -2,7 +2,8 @@ let rawCookieData = {};
 
 let isMocked = false;
 
-export const mockCookie = () => {
+export const mockCookie = (options) => {
+  const {disabled} = options || {};
   isMocked = true;
 
   document.__defineGetter__('cookie', function () {
@@ -10,6 +11,9 @@ export const mockCookie = () => {
   });
 
   document.__defineSetter__('cookie', function (str) {
+    if (disabled) {
+      return '';
+    }
     const indexEquals = str.indexOf("=");
     const key = str.substr(0, indexEquals);
     const remainingStr = str.substring(key.length + 1);
