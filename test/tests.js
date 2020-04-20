@@ -13,3 +13,4 @@ import './utils.js';
 import './revenue.js';
 import './base-cookie.js';
 import './top-domain.js';
+import './base64Id.js';

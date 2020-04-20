@@ -11,6 +11,7 @@ import type from './type';
 import UAParser from '@amplitude/ua-parser-js';
 import utils from './utils';
 import UUID from './uuid';
+import base64Id from './base64Id';
 import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
 
@@ -141,7 +142,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       this.options.deviceId = (type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' &&
           !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) ||
           (this.options.deviceIdFromUrlParam && this._getDeviceIdFromUrlParam(this._getUrlParams())) ||
-          this.options.deviceId || deviceId || UUID() + 'R';
+          this.options.deviceId || deviceId || base64Id();
       this.options.userId =
         (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         (type(opt_userId) === 'number' && opt_userId.toString()) ||
@@ -885,7 +886,7 @@ AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
     return this._q.push(['regenerateDeviceId'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
-  this.setDeviceId(UUID() + 'R');
+  this.setDeviceId(base64Id());
 };
 
 /**
