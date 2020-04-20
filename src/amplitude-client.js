@@ -167,21 +167,8 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
       // load unsent events and identifies before any attempt to log new ones
       if (this.options.saveEvents) {
-        // validate event properties for unsent events
-        for (let i = 0; i < this._unsentEvents.length; i++) {
-          var eventProperties = this._unsentEvents[i].event_properties;
-          var groups = this._unsentEvents[i].groups;
-          this._unsentEvents[i].event_properties = utils.validateProperties(eventProperties);
-          this._unsentEvents[i].groups = utils.validateGroups(groups);
-        }
-
-        // validate user properties for unsent identifys
-        for (let j = 0; j < this._unsentIdentifys.length; j++) {
-          var userProperties = this._unsentIdentifys[j].user_properties;
-          var identifyGroups = this._unsentIdentifys[j].groups;
-          this._unsentIdentifys[j].user_properties = utils.validateProperties(userProperties);
-          this._unsentIdentifys[j].groups = utils.validateGroups(identifyGroups);
-        }
+        _validateUnsentEventQueue(this._unsentEvents);
+        _validateUnsentEventQueue(this._unsentIdentifys);
       }
 
       this._lastEventTime = now;
@@ -212,8 +199,8 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
             }
           }
           if (this.options.saveEvents) {
-            this._unsentEvents = this._parseSavedUnsentEventsString(values[1]).concat(this._unsentEvents);
-            this._unsentIdentifys = this._parseSavedUnsentEventsString(values[2]).concat(this._unsentIdentifys);
+            this._unsentEvents = this._parseSavedUnsentEventsString(values[1]).map(event => ({event})).concat(this._unsentEvents);
+            this._unsentIdentifys = this._parseSavedUnsentEventsString(values[2]).map(event => ({event})).concat(this._unsentIdentifys);
           }
           if (DeviceInfo) {
             Promise.all([
@@ -247,8 +234,8 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       });
     } else {
       if (this.options.saveEvents) {
-        this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey).concat(this._unsentEvents);
-        this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey).concat(this._unsentIdentifys);
+        this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey).map(event => ({event})).concat(this._unsentEvents);
+        this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey).map(event => ({event})).concat(this._unsentIdentifys);
       }
       initFromStorage();
       this.runQueuedFunctions();
@@ -259,6 +246,19 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
   } catch (err) {
     utils.log.error(err);
     this.options.onError(err);
+  }
+};
+
+// validate properties for unsent events
+const _validateUnsentEventQueue = (queue) => {
+  for (let i = 0; i < queue.length; i++) {
+    const userProperties = queue[i].event.user_properties;
+    const eventProperties = queue[i].event.event_properties;
+    const groups = queue[i].event.groups;
+
+    queue[i].event.user_properties = utils.validateProperties(userProperties);
+    queue[i].event.event_properties = utils.validateProperties(eventProperties);
+    queue[i].event.groups = utils.validateGroups(groups);
   }
 };
 
@@ -486,20 +486,20 @@ AmplitudeClient.prototype._unsentCount = function _unsentCount() {
  * Send events if ready. Returns true if events are sent.
  * @private
  */
-AmplitudeClient.prototype._sendEventsIfReady = function _sendEventsIfReady(callback) {
+AmplitudeClient.prototype._sendEventsIfReady = function _sendEventsIfReady() {
   if (this._unsentCount() === 0) {
     return false;
   }
 
   // if batching disabled, send any unsent events immediately
   if (!this.options.batchEvents) {
-    this.sendEvents(callback);
+    this.sendEvents();
     return true;
   }
 
   // if batching enabled, check if min threshold met for batch size
   if (this._unsentCount() >= this.options.eventUploadThreshold) {
-    this.sendEvents(callback);
+    this.sendEvents();
     return true;
   }
 
@@ -739,18 +739,22 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
  */
 AmplitudeClient.prototype.saveEvents = function saveEvents() {
   try {
+    const serializedUnsentEvents = JSON.stringify(this._unsentEvents.map(({event}) => event));
+
     if (AsyncStorage) {
-      AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, JSON.stringify(this._unsentEvents));
+      AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, serializedUnsentEvents);
     } else {
-      this._setInStorage(localStorage, this.options.unsentKey, JSON.stringify(this._unsentEvents));
+      this._setInStorage(localStorage, this.options.unsentKey, serializedUnsentEvents);
     }
   } catch (e) {}
 
   try {
+    const serializedIdentifys = JSON.stringify(this._unsentIdentifys.map(unsentIdentify => unsentIdentify.event));
+
     if (AsyncStorage) {
-      AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, JSON.stringify(this._unsentIdentifys));
+      AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, serializedIdentifys);
     } else {
-      this._setInStorage(localStorage, this.options.unsentIdentifyKey, JSON.stringify(this._unsentIdentifys));
+      this._setInStorage(localStorage, this.options.unsentIdentifyKey, serializedIdentifys);
     }
   } catch (e) {}
 };
@@ -1183,10 +1187,10 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
     };
 
     if (eventType === Constants.IDENTIFY_EVENT || eventType === Constants.GROUP_IDENTIFY_EVENT) {
-      this._unsentIdentifys.push(event);
+      this._unsentIdentifys.push({event, callback});
       this._limitEventsQueued(this._unsentIdentifys);
     } else {
-      this._unsentEvents.push(event);
+      this._unsentEvents.push({event, callback});
       this._limitEventsQueued(this._unsentEvents);
     }
 
@@ -1194,9 +1198,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       this.saveEvents();
     }
 
-    if (!this._sendEventsIfReady(callback) && type(callback) === 'function') {
-      callback(0, 'No request sent', {reason: 'No events to send or upload queued'});
-    }
+    this._sendEventsIfReady(callback);
 
     return eventId;
   } catch (e) {
@@ -1400,9 +1402,9 @@ if (BUILD_COMPAT_2_0) {
  * Remove events in storage with event ids up to and including maxEventId.
  * @private
  */
-AmplitudeClient.prototype.removeEvents = function removeEvents(maxEventId, maxIdentifyId) {
-  _removeEvents(this, '_unsentEvents', maxEventId);
-  _removeEvents(this, '_unsentIdentifys', maxIdentifyId);
+AmplitudeClient.prototype.removeEvents = function removeEvents(maxEventId, maxIdentifyId, status, response) {
+  _removeEvents(this, '_unsentEvents', maxEventId, status, response);
+  _removeEvents(this, '_unsentIdentifys', maxIdentifyId, status, response);
 };
 
 /**
@@ -1410,15 +1412,21 @@ AmplitudeClient.prototype.removeEvents = function removeEvents(maxEventId, maxId
  * Does a true filter in case events get out of order or old events are removed.
  * @private
  */
-var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
+var _removeEvents = function _removeEvents(scope, eventQueue, maxId, status, response) {
   if (maxId < 0) {
     return;
   }
 
   var filteredEvents = [];
   for (var i = 0; i < scope[eventQueue].length || 0; i++) {
-    if (scope[eventQueue][i].event_id > maxId) {
-      filteredEvents.push(scope[eventQueue][i]);
+    const unsentEvent = scope[eventQueue][i]; 
+
+    if (unsentEvent.event.event_id > maxId) {
+      filteredEvents.push(unsentEvent);
+    } else {
+      if (unsentEvent.callback) {
+        unsentEvent.callback(status, response);
+      }
     }
   }
   scope[eventQueue] = filteredEvents;
@@ -1428,32 +1436,26 @@ var _removeEvents = function _removeEvents(scope, eventQueue, maxId) {
  * Send unsent events. Note: this is called automatically after events are logged if option batchEvents is false.
  * If batchEvents is true, then events are only sent when batch criterias are met.
  * @private
- * @param {Amplitude~eventCallback} callback - (optional) callback to run after events are sent.
- * Note the server response code and response body are passed to the callback as input arguments.
  */
-AmplitudeClient.prototype.sendEvents = function sendEvents(callback) {
+AmplitudeClient.prototype.sendEvents = function sendEvents() {
   if (!this._apiKeySet('sendEvents()')) {
-    if (type(callback) === 'function') {
-      callback(0, 'No request sent', {reason: 'API key not set'});
-    }
+    this.removeEvents(Infinity, Infinity, 0, 'No request sent', {reason: 'API key not set'});
     return;
   }
+
   if (this.options.optOut) {
-    if (type(callback) === 'function') {
-      callback(0, 'No request sent', {reason: 'optOut is set to true'});
-    }
+    this.removeEvents(Infinity, Infinity, 0, 'No request sent', {reason: 'Opt out is set to true'});
     return;
   }
+
+  // How is it possible to get into this state?
   if (this._unsentCount() === 0) {
-    if (type(callback) === 'function') {
-      callback(0, 'No request sent', {reason: 'No events to send'});
-    }
     return;
   }
+
+  // We only make one request at a time. sendEvents will be invoked again once
+  // the last request completes.
   if (this._sending) {
-    if (type(callback) === 'function') {
-      callback(0, 'No request sent', {reason: 'Request already in progress. Events will be sent once this request is complete'});
-    }
     return;
   }
 
@@ -1466,7 +1468,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents(callback) {
   var mergedEvents = this._mergeEventsAndIdentifys(numEvents);
   var maxEventId = mergedEvents.maxEventId;
   var maxIdentifyId = mergedEvents.maxIdentifyId;
-  var events = JSON.stringify(mergedEvents.eventsToSend);
+  var events = JSON.stringify(mergedEvents.eventsToSend.map(({event}) => event));
   var uploadTime = new Date().getTime();
 
   var data = {
@@ -1482,7 +1484,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents(callback) {
     scope._sending = false;
     try {
       if (status === 200 && response === 'success') {
-        scope.removeEvents(maxEventId, maxIdentifyId);
+        scope.removeEvents(maxEventId, maxIdentifyId, status, response);
 
         // Update the event cache after the removal of sent events.
         if (scope.options.saveEvents) {
@@ -1490,25 +1492,27 @@ AmplitudeClient.prototype.sendEvents = function sendEvents(callback) {
         }
 
         // Send more events if any queued during previous send.
-        if (!scope._sendEventsIfReady(callback) && type(callback) === 'function') {
-          callback(status, response);
-        }
+        scope._sendEventsIfReady();
 
       // handle payload too large
       } else if (status === 413) {
         // utils.log('request too large');
         // Can't even get this one massive event through. Drop it, even if it is an identify.
         if (scope.options.uploadBatchSize === 1) {
-          scope.removeEvents(maxEventId, maxIdentifyId);
+          scope.removeEvents(maxEventId, maxIdentifyId, status, response);
         }
 
         // The server complained about the length of the request. Backoff and try again.
         scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
-        scope.sendEvents(callback);
+        scope.sendEvents();
 
-      } else if (type(callback) === 'function') { // If server turns something like a 400
-        callback(status, response);
       }
+      // else {
+      //  all the events are still queued, and will be retried when the next
+      //  event is sent In the interest of debugging, it would be nice to have
+      //  something like an event emitter for a better debugging experince
+      //  here.
+      // }
     } catch (e) {
       // utils.log('failed upload');
     }
@@ -1528,9 +1532,9 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIde
   var maxIdentifyId = -1;
 
   while (eventsToSend.length < numEvents) {
-    var event;
-    var noIdentifys = identifyIndex >= this._unsentIdentifys.length;
-    var noEvents = eventIndex >= this._unsentEvents.length;
+    let unsentEvent;
+    let noIdentifys = identifyIndex >= this._unsentIdentifys.length;
+    let noEvents = eventIndex >= this._unsentEvents.length;
 
     // case 0: no events or identifys left
     // note this should not happen, this means we have less events and identifys than expected
@@ -1541,29 +1545,29 @@ AmplitudeClient.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIde
 
     // case 1: no identifys - grab from events
     else if (noIdentifys) {
-      event = this._unsentEvents[eventIndex++];
-      maxEventId = event.event_id;
+      unsentEvent = this._unsentEvents[eventIndex++];
+      maxEventId = unsentEvent.event.event_id;
 
     // case 2: no events - grab from identifys
     } else if (noEvents) {
-      event = this._unsentIdentifys[identifyIndex++];
-      maxIdentifyId = event.event_id;
+      unsentEvent = this._unsentIdentifys[identifyIndex++];
+      maxIdentifyId = unsentEvent.event.event_id;
 
     // case 3: need to compare sequence numbers
     } else {
       // events logged before v2.5.0 won't have a sequence number, put those first
-      if (!('sequence_number' in this._unsentEvents[eventIndex]) ||
-          this._unsentEvents[eventIndex].sequence_number <
-          this._unsentIdentifys[identifyIndex].sequence_number) {
-        event = this._unsentEvents[eventIndex++];
-        maxEventId = event.event_id;
+      if (!('sequence_number' in this._unsentEvents[eventIndex].event) ||
+          this._unsentEvents[eventIndex].event.sequence_number <
+          this._unsentIdentifys[identifyIndex].event.sequence_number) {
+        unsentEvent = this._unsentEvents[eventIndex++];
+        maxEventId = unsentEvent.event.event_id;
       } else {
-        event = this._unsentIdentifys[identifyIndex++];
-        maxIdentifyId = event.event_id;
+        unsentEvent = this._unsentIdentifys[identifyIndex++];
+        maxIdentifyId = unsentEvent.event.event_id;
       }
     }
 
-    eventsToSend.push(event);
+    eventsToSend.push(unsentEvent);
   }
 
   return {
