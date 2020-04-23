@@ -114,7 +114,7 @@ Identify.prototype.prepend = function(property, value) {
  * Sets the value of a given user property. If a value already exists, it will be overwriten with the new value.
  * @public
  * @param {string} property - The user property key.
- * @param {number|string|list|object} value - A value or values to set.
+ * @param {number|string|list|boolean|object} value - A value or values to set.
  * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
  * @return {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().set('user_type', 'beta');
@@ -132,7 +132,7 @@ Identify.prototype.set = function(property, value) {
  * Useful for capturing properties such as 'initial_signup_date', 'initial_referrer', etc.
  * @public
  * @param {string} property - The user property key.
- * @param {number|string|list|object} value - A value or values to set once.
+ * @param {number|string|list|boolean|object} value - A value or values to set once.
  * Values can be numbers, strings, lists, or object (key:value dict will be flattened).
  * @return {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
  * @example var identify = new amplitude.Identify().setOnce('sign_up_date', '2016-04-01');
