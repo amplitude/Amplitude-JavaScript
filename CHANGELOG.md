@@ -1,4 +1,10 @@
+### 6.1.0 (April 23, 2020)
+* Use a more compact format for newly generated device IDs
+* Fix issue with react native failing to initialize metadatastorage
+
 ### 6.0.1 (April 17, 2020)
+* Fix issue where the umd module did not build.
+
 ### 6.0.0 (April 17, 2020)
 * Use a more compact cookie format
 * Fix issue where a cookie key could have a space appear inside of it
