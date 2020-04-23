@@ -3,7 +3,7 @@
 * Fix issue with react native failing to initialize metadatastorage
 
 ### 6.0.1 (April 17, 2020)
-* Fix issue where the umd module did not build.
+* Fix issue where the UMD module did not build.
 
 ### 6.0.0 (April 17, 2020)
 * Use a more compact cookie format
@@ -15,10 +15,7 @@
 * The cookie format has been changed to be more compact. If you use the same Amplitude project(API key) across multiple applications, and you track anonymous users across those applications, you will want to update amplitude across all those applications at the same time.
 
 ### 5.12.0 (April 12, 2020)
-* Use an IIFE build for the snippet. This will issues where the snippet wouldn't load for require js users.
-
-### 5.11.0 (April 6, 2020)
-* Add a `sameSiteCookie` option to set the SameSite cookie. It is set to `None` by default
+* Use an IIFE build for the snippet. This will solve issues where the snippet wouldn't load for require js users.
 
 ### 5.11.0 (April 6, 2020)
 * Add a `sameSiteCookie` option to set the SameSite cookie. It is set to `None` by default
