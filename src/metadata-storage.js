@@ -17,8 +17,12 @@ class MetadataStorage {
     this.secure = secure;
     this.sameSite = sameSite;
     this.expirationDays = expirationDays;
-    const writableTopDomain = topDomain(getLocation().href);
-    this.cookieDomain = domain || (writableTopDomain ? '.' + writableTopDomain : null);
+    this.cookieDomain ='';
+
+    if (!BUILD_COMPAT_REACT_NATIVE) {
+      const writableTopDomain = topDomain(getLocation().href);
+      this.cookieDomain = domain || (writableTopDomain ? '.' + writableTopDomain : null);
+    }
   }
 
   getCookieStorageKey() {
