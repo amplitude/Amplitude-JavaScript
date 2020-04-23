@@ -28,7 +28,7 @@ export default {
   includeGclid: false,
   includeReferrer: false,
   includeUtm: false,
-  language: language.language,
+  language: language.getLanguage(),
   logLevel: 'WARN',
   optOut: false,
   onError: () => {},
