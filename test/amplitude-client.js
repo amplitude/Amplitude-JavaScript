@@ -64,24 +64,26 @@ describe('AmplitudeClient', function() {
       assert.equal(new AmplitudeClient('$DEFAULT_INSTANCE')._instanceName, '$default_instance');
     });
 
-    it('should invoke onInit callbacks', function() {
-      let onInitCalled = false;
-      let onInit2Called = false;
-      amplitude.onInit(() => { onInitCalled = true; });
-      amplitude.onInit(() => { onInit2Called = true; });
+    it('should invoke onInit callbacks', () => {
+      const callback = sinon.spy();
+      amplitude.onInit(callback);
+      amplitude.onInit(callback);
 
       amplitude.init(apiKey);
-      assert.ok(onInitCalled);
-      assert.ok(onInit2Called);
+      assert.isTrue(callback.calledTwice);
     });
 
-    it('should not invoke onInit callbacks before init is called', function() {
-      let onInitCalled = false;
-      amplitude.onInit(() => { onInitCalled = true; });
+    it('should not invoke onInit callbacks before init is called', () => {
+      const callback = sinon.spy();
+      amplitude.onInit(callback);
+      assert.isFalse(callback.calledOnce);
+    });
 
-      assert.ok(onInitCalled === false);
+    it('should pass the amplitude instance to onInit callbacks', () => {
+      const callback = sinon.spy();
+      amplitude.onInit(callback);
       amplitude.init(apiKey);
-      assert.ok(onInitCalled);
+      assert.isTrue(callback.calledWith(amplitude));
     });
 
     it('should set the Secure flag on cookie with the secureCookie option', () => {
