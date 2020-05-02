@@ -121,12 +121,12 @@ describe('Amplitude', function() {
       assert.lengthOf(app2._unsentEvents, 1);
       assert.lengthOf(app2._unsentIdentifys, 0);
 
-      assert.deepEqual(amplitude.getInstance()._unsentEvents[0].event_type, 'amplitude event');
-      assert.deepEqual(amplitude.getInstance()._unsentEvents[1].event_type, 'amplitude event2');
+      assert.deepEqual(amplitude.getInstance()._unsentEvents[0].event.event_type, 'amplitude event');
+      assert.deepEqual(amplitude.getInstance()._unsentEvents[1].event.event_type, 'amplitude event2');
       assert.deepEqual(amplitude.getInstance()._unsentIdentifys, []);
       assert.deepEqual(app1._unsentEvents, []);
-      assert.deepEqual(app1._unsentIdentifys[0].user_properties, {'$set':{'key':'value'}});
-      assert.deepEqual(app2._unsentEvents[0].event_type, 'app2 event');
+      assert.deepEqual(app1._unsentIdentifys[0].event.user_properties, {'$set':{'key':'value'}});
+      assert.deepEqual(app2._unsentEvents[0].event.event_type, 'app2 event');
       assert.deepEqual(app2._unsentIdentifys, []);
 
       assert.equal(amplitude.getInstance()._eventId, 2);
@@ -330,8 +330,8 @@ describe('Amplitude', function() {
       amplitude2.init(apiKey, null, {batchEvents: true});
 
       // check event loaded into memory
-      assert.deepEqual(amplitude2.getInstance()._unsentEvents, JSON.parse(existingEvent));
-      assert.deepEqual(amplitude2.getInstance()._unsentIdentifys, JSON.parse(existingIdentify));
+      assert.deepEqual(amplitude2.getInstance()._unsentEvents.map(({event}) => event), JSON.parse(existingEvent));
+      assert.deepEqual(amplitude2.getInstance()._unsentIdentifys.map(({event}) => event), JSON.parse(existingIdentify));
 
       // check local storage keys are still same for default instance
       assert.equal(localStorage.getItem('amplitude_unsent_' + apiKey), existingEvent);
@@ -367,8 +367,8 @@ describe('Amplitude', function() {
       }
 
       // check that event loaded into memory
-      assert.deepEqual(amplitude2.getInstance()._unsentEvents[0].event_properties, {});
-      assert.deepEqual(amplitude2.getInstance()._unsentEvents[1].event_properties, expected);
+      assert.deepEqual(amplitude2.getInstance()._unsentEvents[0].event.event_properties, {});
+      assert.deepEqual(amplitude2.getInstance()._unsentEvents[1].event.event_properties, expected);
     });
 
     it('should validate user properties when loading saved identifys from localStorage', function() {
@@ -396,7 +396,7 @@ describe('Amplitude', function() {
       }
 
       // check that event loaded into memory
-      assert.deepEqual(amplitude2.getInstance()._unsentIdentifys[0].user_properties, {'$set': expected});
+      assert.deepEqual(amplitude2.getInstance()._unsentIdentifys[0].event.user_properties, {'$set': expected});
     });
 
     it ('should load saved events from localStorage new keys and send events', function() {
@@ -475,8 +475,8 @@ describe('Amplitude', function() {
       }
 
       // check that event loaded into memory
-      assert.deepEqual(amplitude2.getInstance()._unsentEvents[0].event_properties, {});
-      assert.deepEqual(amplitude2.getInstance()._unsentEvents[1].event_properties, expected);
+      assert.deepEqual(amplitude2.getInstance()._unsentEvents[0].event.event_properties, {});
+      assert.deepEqual(amplitude2.getInstance()._unsentEvents[1].event.event_properties, expected);
     });
   });
 
@@ -630,12 +630,12 @@ describe('setVersionName', function() {
       amplitude.init(apiKey, null, {batchEvents: true});
       amplitude.setVersionName('testVersionName1');
       amplitude.logEvent('testEvent1');
-      assert.equal(amplitude.getInstance()._unsentEvents[0].version_name, 'testVersionName1');
+      assert.equal(amplitude.getInstance()._unsentEvents[0].event.version_name, 'testVersionName1');
 
       // should ignore non-string values
       amplitude.setVersionName(15000);
       amplitude.logEvent('testEvent2');
-      assert.equal(amplitude.getInstance()._unsentEvents[1].version_name, 'testVersionName1');
+      assert.equal(amplitude.getInstance()._unsentEvents[1].event.version_name, 'testVersionName1');
     });
   });
 
@@ -1001,7 +1001,10 @@ describe('setVersionName', function() {
 
       var amplitude2 = new Amplitude();
       amplitude2.init(apiKey);
-      assert.deepEqual(amplitude2.getInstance()._unsentEvents, amplitude.getInstance()._unsentEvents);
+      assert.deepEqual(
+        amplitude2.getInstance()._unsentEvents.map(({event}) => event),
+        amplitude.getInstance()._unsentEvents.map(({event}) => event)
+      );
     });
 
     it('should not save events', function() {
@@ -1066,7 +1069,7 @@ describe('setVersionName', function() {
       assert.lengthOf(server.requests, 1);
       var unsentEvents = amplitude.getInstance()._unsentEvents;
       assert.lengthOf(unsentEvents, 5);
-      assert.deepEqual(unsentEvents[4].event_properties, {index: 14});
+      assert.deepEqual(unsentEvents[4].event.event_properties, {index: 14});
 
       // remaining 5 events should be sent by the delayed sendEvent call
       clock.tick(eventUploadPeriodMillis);
@@ -1286,15 +1289,14 @@ describe('setVersionName', function() {
       };
       amplitude.logEvent('test', null, callback);
       assert.lengthOf(server.requests, 0);
-      assert.equal(counter, 1);
-      assert.equal(value, 0);
-      assert.equal(message, 'No request sent');
 
       // check that request is made after delay, but callback is not run a second time
       clock.tick(eventUploadPeriodMillis);
       assert.lengthOf(server.requests, 1);
       server.respondWith('success');
       server.respond();
+      assert.equal(value, 200);
+      assert.equal(message, 'success');
       assert.equal(counter, 1);
     });
 
@@ -1387,24 +1389,6 @@ describe('setVersionName', function() {
       assert.equal(counter, 1);
       assert.equal(value, 200);
       assert.equal(message, 'success');
-    });
-
-    it ('should run callback if server returns something other than 200 and 413', function () {
-      var counter = 0;
-      var value = -1;
-      var message = '';
-      var callback = function (status, response) {
-        counter++;
-        value = status;
-        message = response;
-      };
-
-      amplitude.logEvent('test', null, callback);
-      server.respondWith([404, {}, 'Not found']);
-      server.respond();
-      assert.equal(counter, 1);
-      assert.equal(value, 404);
-      assert.equal(message, 'Not found');
     });
 
     it('should send 3 identify events', function() {
@@ -1571,7 +1555,7 @@ describe('setVersionName', function() {
 
       amplitude.identify(new Identify().add('photoCount', 1));
       amplitude.logEvent('test');
-      delete amplitude.getInstance()._unsentEvents[0].sequence_number; // delete sequence number to simulate old event
+      delete amplitude.getInstance()._unsentEvents[0].event.sequence_number; // delete sequence number to simulate old event
       amplitude.getInstance()._sequenceNumber = 1; // reset sequence number
       amplitude.identify(new Identify().add('photoCount', 2));
 
@@ -1766,12 +1750,12 @@ describe('setVersionName', function() {
       });
     });
 
-    it('should validate user propeorties', function() {
+    it('should validate user properties', function() {
       var identify = new Identify().set(10, 10);
       amplitude.init(apiKey, null, {batchEvents: true});
       amplitude.identify(identify);
 
-      assert.deepEqual(amplitude.getInstance()._unsentIdentifys[0].user_properties, {'$set': {'10': 10}});
+      assert.deepEqual(amplitude.getInstance()._unsentIdentifys[0].event.user_properties, {'$set': {'10': 10}});
     });
 
     it('should synchronize event data across multiple amplitude instances that share the same cookie', function() {
@@ -1789,14 +1773,14 @@ describe('setVersionName', function() {
       amplitude1.logEvent('test5');
 
       // the event ids should all be sequential since amplitude1 and amplitude2 have synchronized cookies
-      var eventId = amplitude1.getInstance()._unsentEvents[0]['event_id'];
-      assert.equal(amplitude2.getInstance()._unsentEvents[0]['event_id'], eventId + 1);
-      assert.equal(amplitude1.getInstance()._unsentEvents[1]['event_id'], eventId + 2);
-      assert.equal(amplitude2.getInstance()._unsentEvents[1]['event_id'], eventId + 3);
+      var eventId = amplitude1.getInstance()._unsentEvents[0].event['event_id'];
+      assert.equal(amplitude2.getInstance()._unsentEvents[0].event['event_id'], eventId + 1);
+      assert.equal(amplitude1.getInstance()._unsentEvents[1].event['event_id'], eventId + 2);
+      assert.equal(amplitude2.getInstance()._unsentEvents[1].event['event_id'], eventId + 3);
 
-      var sequenceNumber = amplitude1.getInstance()._unsentEvents[0]['sequence_number'];
-      assert.equal(amplitude2.getInstance()._unsentIdentifys[0]['sequence_number'], sequenceNumber + 4);
-      assert.equal(amplitude1.getInstance()._unsentEvents[2]['sequence_number'], sequenceNumber +  5);
+      var sequenceNumber = amplitude1.getInstance()._unsentEvents[0].event['sequence_number'];
+      assert.equal(amplitude2.getInstance()._unsentIdentifys[0].event['sequence_number'], sequenceNumber + 4);
+      assert.equal(amplitude1.getInstance()._unsentEvents[2].event['sequence_number'], sequenceNumber +  5);
     });
 
     it('should handle groups input', function() {
