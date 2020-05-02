@@ -1,3 +1,8 @@
+### 6.2.0 (May 1, 2020)
+* Invoke the logEvent callbacks when a request is actually sent or when we give up on sending a request.
+* Pass the initialized amplitude instance to the `onInit` callback.
+* Fix language validation issue that occured when language was undefined.
+
 ### 6.1.0 (April 23, 2020)
 * Use a more compact format for newly generated device IDs
 * Fix issue with react native failing to initialize metadatastorage
