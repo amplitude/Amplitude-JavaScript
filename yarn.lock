@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@amplitude/ua-parser-js@0.7.20":
-  version "0.7.20"
-  resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.20.tgz#15652f8cc4fee72d962a5f2101cfde6f3c8e87b8"
-  integrity sha512-bmW++BLt1Hg+4HCExLXP+0Jhgy2eTsEevqkVc5o4yYbgwdP/gV3gEQXzyVrMVlWWNLgph/tFIkf5PVlSpCELEg==
+"@amplitude/ua-parser-js@0.7.21":
+  version "0.7.21"
+  resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.21.tgz#3ef80003889f06aad2d7a70f1c0c69d3edcd2791"
+  integrity sha512-/wvuy8W5+qc3pZy/y3/RbA9iZGBS24UejYZwhnm/CTGDKeGt3emtu4j8k1qkzFfH/aio9J1GWZ6BofoWxIaLgw==
 
 "@babel/code-frame@^7.0.0":
   version "7.0.0"
