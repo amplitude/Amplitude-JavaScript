@@ -10,7 +10,7 @@
 A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
 
 ## Setup
-Please see our [installation guide](https://amplitude.zendesk.com/hc/en-us/articles/115001361248-JavaScript-SDK-Installation) for instructions on installing and using our JavaScript SDK.
+Please see our [installation guide](https://developers.amplitude.com/docs/javascript-setup) for instructions on installing and using our JavaScript SDK.
 
 ## Latest Version
 [![Circle CI](https://circleci.com/gh/amplitude/Amplitude-JavaScript.svg?style=shield&circle-token=80de0dbb7632b2db13f76ccb20a79bbdfc50c215)](https://circleci.com/gh/amplitude/Amplitude-JavaScript)
