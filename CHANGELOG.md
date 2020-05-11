@@ -1,3 +1,9 @@
+### 7.0.0 (May 3, 2020)
+* Sync with upstream ua-parser to detect more browsers and devices
+
+#### Breaking Changes
+* Windows Phone, IE Mobile, and Opera Mobile devices will be reported to amplitude slightly different. They will appear as "Windows Phone OS", "IEMobile", and "Opera Mobile" respectively.
+
 ### 6.2.0 (May 1, 2020)
 * Invoke the logEvent callbacks when a request is actually sent or when we give up on sending a request.
 * Pass the initialized amplitude instance to the `onInit` callback.
