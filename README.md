@@ -5,23 +5,15 @@
   <br />
 </p>
 
-# Amplitude-JavaScript
-
-A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
-
-## Setup
-Please see our [installation guide](https://developers.amplitude.com/docs/javascript-setup) for instructions on installing and using our JavaScript SDK.
-
-## Latest Version
 [![Circle CI](https://circleci.com/gh/amplitude/Amplitude-JavaScript.svg?style=shield&circle-token=80de0dbb7632b2db13f76ccb20a79bbdfc50c215)](https://circleci.com/gh/amplitude/Amplitude-JavaScript)
 [![npm version](https://badge.fury.io/js/amplitude-js.svg)](https://badge.fury.io/js/amplitude-js)
 [![Bower version](https://badge.fury.io/bo/amplitude-js.svg)](https://badge.fury.io/bo/amplitude-js)
 
-[6.2.0 - Released on May 1, 2020](https://github.com/amplitude/Amplitude-JavaScript/releases/latest)
+# Official Amplitude JS/Web SDK
+A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
 
-
-## JavaScript SDK Reference
-See our [JavaScript SDK Reference](https://amplitude.zendesk.com/hc/en-us/articles/115002889587-JavaScript-SDK-Reference) for a list and description of all available SDK methods.
+## Installation and Quick Start
+Please visit our :100:[Developer Center](https://developers.amplitude.com/docs/javascript) for instructions on installing and using our the SDK.
 
 ## Demo Pages
 * A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/master/test/browser/amplitudejs.html) showing a simple integration on a web page.
