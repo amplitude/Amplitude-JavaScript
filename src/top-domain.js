@@ -1,4 +1,5 @@
 import baseCookie from './base-cookie';
+import base64Id from './base64Id';
 
 const getHost = (url) => {
   const a = document.createElement('a');
@@ -10,13 +11,13 @@ const topDomain = (url) => {
   const host = getHost(url);
   const parts = host.split('.');
   const levels = [];
+  const cname = '_tldtest_' + base64Id();
 
   for (let i = parts.length - 2; i >= 0; --i) {
     levels.push(parts.slice(i).join('.'));
   }
 
   for (let i = 0; i < levels.length; ++i) {
-    const cname = '__tld_test__';
     const domain = levels[i];
     const opts = { domain: '.' + domain };
 

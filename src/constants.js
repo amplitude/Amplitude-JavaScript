@@ -18,7 +18,7 @@ export default {
   OPT_OUT: 'amplitude_optOut',
   USER_ID: 'amplitude_userId',
 
-  COOKIE_TEST: 'amplitude_cookie_test',
+  COOKIE_TEST_PREFIX: 'amp_cookie_test',
   COOKIE_PREFIX: "amp",
 
   // revenue keys

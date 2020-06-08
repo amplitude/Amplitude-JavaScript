@@ -1,4 +1,5 @@
 import Constants from './constants';
+import base64Id from './base64Id';
 
 const get = (name) => {
   try {
@@ -50,9 +51,10 @@ const set = (name, value, opts) => {
 const areCookiesEnabled = () => {
   const uid = String(new Date());
   try {
-    set(Constants.COOKIE_TEST, uid, {});
-    const _areCookiesEnabled = get(Constants.COOKIE_TEST + '=') === uid;
-    set(Constants.COOKIE_TEST, null, {});
+    const cookieName = Constants.COOKIE_TEST + base64Id();
+    set(cookieName, uid, {});
+    const _areCookiesEnabled = get(cookieName + '=') === uid;
+    set(cookieName, null, {});
     return _areCookiesEnabled;
   } catch (e) {}
   return false;
