@@ -1,16 +1,17 @@
 import localStorage from '../src/localstorage.js';
 import CookieStorage from '../src/cookiestorage.js';
 import cookie from '../src/cookie.js';
+import baseCookie from '../src/base-cookie.js';
 import Amplitude from '../src/amplitude.js';
 
 describe('cookieStorage', function() {
-  var amplitude = new Amplitude();
+  new Amplitude();
   var keyPrefix = 'amp_cookiestore_';
 
   describe('getStorage', function() {
     it('should use cookies if enabled', function() {
       var cookieStorage = new CookieStorage();
-      assert.isTrue(cookieStorage._cookiesEnabled());
+      assert.isTrue(baseCookie.areCookiesEnabled());
 
       localStorage.clear();
       var uid = String(new Date());
@@ -29,8 +30,8 @@ describe('cookieStorage', function() {
 
     it('should fall back to localstorage if cookies disabled', function() {
       var cookieStorage = new CookieStorage();
-      sinon.stub(cookieStorage, '_cookiesEnabled').returns(false);
-      assert.isFalse(cookieStorage._cookiesEnabled());
+      const stub = sinon.stub(baseCookie, 'areCookiesEnabled').returns(false);
+      assert.isFalse(baseCookie.areCookiesEnabled());
 
       localStorage.clear();
       var uid = String(new Date());
@@ -45,12 +46,13 @@ describe('cookieStorage', function() {
 
       // assert nothing added to cookie
       assert.isNull(cookie.get(uid));
+      stub.restore();
     });
 
     it('should load data from localstorage if cookies disabled', function() {
       var cookieStorage = new CookieStorage();
-      sinon.stub(cookieStorage, '_cookiesEnabled').returns(false);
-      assert.isFalse(cookieStorage._cookiesEnabled());
+      const stub = sinon.stub(baseCookie, 'areCookiesEnabled').returns(false);
+      assert.isFalse(baseCookie.areCookiesEnabled());
 
       localStorage.clear();
       var uid = String(new Date());
@@ -59,6 +61,7 @@ describe('cookieStorage', function() {
 
       localStorage.removeItem(keyPrefix + uid);
       assert.isNull(cookieStorage.getStorage().get(uid));
+      stub.restore();
     });
   });
 });

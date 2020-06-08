@@ -8,24 +8,10 @@
 import Constants from './constants';
 import Cookie from './cookie';
 import localStorage from './localstorage'; // jshint ignore:line
+import baseCookie from './base-cookie';
 
 var cookieStorage = function() {
   this.storage = null;
-};
-
-// test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
-cookieStorage.prototype._cookiesEnabled = function() {
-  var uid = String(new Date());
-  var result;
-  try {
-    Cookie.set(Constants.COOKIE_TEST, uid);
-    result = Cookie.get(Constants.COOKIE_TEST) === uid;
-    Cookie.remove(Constants.COOKIE_TEST);
-    return result;
-  } catch (e) {
-    // cookies are not enabled
-  }
-  return false;
 };
 
 cookieStorage.prototype.getStorage = function() {
@@ -33,7 +19,7 @@ cookieStorage.prototype.getStorage = function() {
     return this.storage;
   }
 
-  if (this._cookiesEnabled()) {
+  if (baseCookie.areCookiesEnabled()) {
     this.storage = Cookie;
   } else {
     // if cookies disabled, fallback to localstorage
