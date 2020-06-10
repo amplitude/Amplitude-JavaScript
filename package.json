@@ -12,7 +12,7 @@
   "main": "amplitude.umd.js",
   "react-native": "amplitude.native.js",
   "dependencies": {
-    "@amplitude/ua-parser-js": "0.7.21",
+    "@amplitude/ua-parser-js": "0.7.24",
     "blueimp-md5": "^2.10.0",
     "query-string": "5"
   },

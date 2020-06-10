@@ -1,11 +1,10 @@
-
 import UAParser from '@amplitude/ua-parser-js';
 
-describe('ua-parser', function(done) {
+describe('ua-parser', function() {
   it('should find an os and device for all agents', function () {
     var parser = new UAParser();
 
-    browsers.forEach(function (browser, index) {
+    browsers.forEach(function (browser) {
       parser.setUA(browser[1]);
       var uap = parser.getResult();
 
@@ -116,13 +115,13 @@ var browsers = [
 ["Droid V2.2 - Android 2.2 - Mobile Safari 533.1","Mozilla/5.0 (Linux; U; Android 2.2; en-us; Droid Build/FRG22D) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1","Android Browser","4","Android","2.2"],
 ["Facebook Scraper 1.0","facebookscraper/1.0( http://www.facebook.com/sharescraper_help.php)",undefined,undefined,undefined,undefined],
 ["Firefox 0.8","Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.6) Gecko/20040614 Firefox/0.8","Firefox","0","Linux","i686"],
-["Firefox 0.9 (OS X Mach)","Mozilla/5.0 (Macintosh; U; Mac OS X Mach-O; en-US; rv:2.0a) Gecko/20040614 Firefox/3.0.0 ","Firefox","3","Mac","Mach"],
+["Firefox 0.9 (OS X Mach)","Mozilla/5.0 (Macintosh; U; Mac OS X Mach-O; en-US; rv:2.0a) Gecko/20040614 Firefox/3.0.0","Firefox","3","Mac","Mach"],
 ["Firefox 10.0.1 (64 bit)","Mozilla/5.0 (X11; Linux x86_64; rv:10.0.1) Gecko/20100101 Firefox/10.0.1","Firefox","10","Linux","x86_64"],
 ["Firefox 10.0.1 (OS X 10.6 Intel)","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2; rv:10.0.1) Gecko/20100101 Firefox/10.0.1","Firefox","10","Mac","10.7.2"],
 ["Firefox 10.0.1 (Win 7 64)","Mozilla/5.0 (Windows NT 6.1; WOW64; rv:10.0.1) Gecko/20100101 Firefox/10.0.1","Firefox","10","Windows","7"],
 ["Firefox 10.0.12 - OS/2 Warp 4.5","Mozilla/5.0 (OS/2; Warp 4.5; rv:10.0.12) Gecko/20100101 Firefox/10.0.12","Firefox","10","OS/2",undefined],
 ["Firefox 11.0 (32 bit)","Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.1.16) Gecko/20120421 Gecko Firefox/11.0","Firefox","11","Linux","i686"],
-["Firefox 12.0 (32 bit)","Mozilla/5.0 (X11; Linux i686; rv:12.0) Gecko/20100101 Firefox/12.0 ","Firefox","12","Linux","i686"],
+["Firefox 12.0 (32 bit)","Mozilla/5.0 (X11; Linux i686; rv:12.0) Gecko/20100101 Firefox/12.0","Firefox","12","Linux","i686"],
 ["Firefox 12.0 (Win 7 32)","Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/12.0","Firefox","12","Windows","7"],
 ["Firefox 14.0.1 (Ubuntu 64 bit)","Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:14.0) Gecko/20100101 Firefox/14.0.1","Firefox","14","Linux",undefined],
 ["Firefox 14.0.1 (Win Vista)","Mozilla/5.0 (Windows NT 6.0; rv:14.0) Gecko/20100101 Firefox/14.0.1","Firefox","14","Windows","Vista"],
@@ -270,7 +269,7 @@ var browsers = [
 ["Samsung Galaxy - Android 1.5 - Mobile Safari 525.20.1","Mozilla/5.0 (Linux; U; Android 1.5; de-de; Galaxy Build/CUPCAKE) AppleWebKit/528.5 (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1","Android Browser","3","Android","1.5"],
 ["Samsung Galaxy - Android 2.2 - Mobile Safari 533.1","Mozilla/5.0 (Linux; U; Android 2.2; en-ca; GT-P1000M Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1","Android Browser","4","Android","2.2"],
 ["Samsung GT-P7100 - Android 3.0.1 - AppleWebKit 534.13","Mozilla/5.0 (Linux; U; Android 3.0.1; en-us; GT-P7100 Build/HRI83) AppleWebkit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13","Android Browser","4","Android","3.0.1"],
-["Samsung Galaxy - Android 6.0.1 - Mobile Safari 537.36", "Mozilla/5.0 (Linux; Android 6.0.1; SAMSUNG SM-G920I Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/4.0 Chrome/44.0.2403.133 Mobile Safari/537.36","Chrome Mobile","44","Android","6.0.1"],
+["Samsung Galaxy - Android 6.0.1 - Mobile Safari 537.36", "Mozilla/5.0 (Linux; Android 6.0.1; SAMSUNG SM-G920I Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/4.0 Chrome/44.0.2403.133 Mobile Safari/537.36","Samsung Browser","4","Android","6.0.1"],
 ["T-Mobile G1 - Android 1.0 - Mobile Safari 523.12.2","Mozilla/5.0 (Linux; U; Android 1.0; en-us; dream) AppleWebKit/525.10 (KHTML, like Gecko) Version/3.0.4 Mobile Safari/523.12.2","Android Browser","3","Android","1.0"],
 ["T-Mobile G1 - Android 1.5 - Mobile Safari 525.20.1","Mozilla/5.0 (Linux; U; Android 1.5; en-us; T-Mobile G1 Build/CRB43) AppleWebKit/528.5 (KHTML, like Gecko) Version/3.1.2 Mobile Safari 525.20.1","Android Browser","3","Android","1.5"],
 ["T-Mobile G2 - Android 1.5 - Mobile Safari 525.20.1","Mozilla/5.0 (Linux; U; Android 1.5; en-gb; T-Mobile_G2_Touch Build/CUPCAKE) AppleWebKit/528.5 (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1","Android Browser","3","Android","1.5"],
