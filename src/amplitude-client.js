@@ -137,12 +137,10 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     _loadCookieData(this);
     this._pendingReadStorage = true;
 
-    const initFromStorage = (deviceId) => {
-      // load deviceId and userId from input, or try to fetch existing value from cookie
-      this.options.deviceId = (type(opt_config) === 'object' && type(opt_config.deviceId) === 'string' &&
-          !utils.isEmptyString(opt_config.deviceId) && opt_config.deviceId) ||
-          (this.options.deviceIdFromUrlParam && this._getDeviceIdFromUrlParam(this._getUrlParams())) ||
-          this.options.deviceId || deviceId || base64Id();
+    const initFromStorage = (storedDeviceId) => {
+      this.options.deviceId = this._getInitialDeviceId(
+         opt_config && opt_config.deviceId, storedDeviceId
+      );
       this.options.userId =
         (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
         (type(opt_userId) === 'number' && opt_userId.toString()) ||
@@ -248,6 +246,26 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     utils.log.error(err);
     this.options.onError(err);
   }
+};
+
+AmplitudeClient.prototype._getInitialDeviceId = function (configDeviceId, storedDeviceId) {
+  if (configDeviceId) {
+    return configDeviceId;
+  }
+
+  if (this.options.deviceIdFromUrlParam) {
+    return this._getDeviceIdFromUrlParam(this._getUrlParams());
+  }
+
+  if (this.options.deviceId) {
+    return this.options.deviceId;
+  }
+
+  if (storedDeviceId) {
+    return storedDeviceId;
+  }
+
+  return base64Id();
 };
 
 // validate properties for unsent events
