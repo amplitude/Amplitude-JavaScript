@@ -1,3 +1,4 @@
+import sinon from 'sinon';
 import localStorage from '../src/localstorage.js';
 import CookieStorage from '../src/cookiestorage.js';
 import cookie from '../src/cookie.js';

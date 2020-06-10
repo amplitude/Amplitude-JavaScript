@@ -1,5 +1,5 @@
 import topDomain from '../src/top-domain.js';
-import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
+import { mockCookie, restoreCookie } from './mock-cookie';
 
 describe('topDomain', () => {
   it('should return an empty string for localhost',() => {

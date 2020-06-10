@@ -60,7 +60,7 @@ describe('Revenue', function() {
     var revenue = new Revenue();
     assert.equal(revenue._revenueType, null);
 
-    var revenueType = 'testRevenueType'
+    var revenueType = 'testRevenueType';
     revenue.setRevenueType(revenueType);
     assert.equal(revenue._revenueType, revenueType);
 
@@ -107,7 +107,7 @@ describe('Revenue', function() {
     var productId = 'testProductId';
     var quantity = 15;
     var price = 10.99;
-    var revenueType = 'testRevenueType'
+    var revenueType = 'testRevenueType';
     var properties = {'city': 'San Francisco'};
 
     var revenue = new Revenue().setProductId(productId).setQuantity(quantity).setPrice(price);

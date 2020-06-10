@@ -1,3 +1,4 @@
+import sinon from 'sinon';
 import language from '../src/language.js';
 
 describe('language', function() {

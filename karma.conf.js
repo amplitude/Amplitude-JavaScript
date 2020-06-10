@@ -36,7 +36,7 @@ module.exports = function(config) {
     preprocessors: {
       '**/*.js': ['sourcemap']
     },
-    frameworks: ['mocha', 'chai', 'sinon'],
+    frameworks: ['mocha', 'chai'],
     files: ['amplitude-snippet.min.js', 'build/snippet-tests.js', 'build/tests.js'],
     reporters: ['mocha', 'saucelabs'],
     port: 9876,  // karma web server port

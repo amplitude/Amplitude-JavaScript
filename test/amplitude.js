@@ -1,15 +1,11 @@
+import sinon from 'sinon';
 import Amplitude from '../src/amplitude.js';
-import getUtmData from '../src/utm.js';
 import MetadataStorage from '../src/metadata-storage';
 import localStorage from '../src/localstorage.js';
-import CookieStorage from '../src/cookiestorage.js';
-import Base64 from '../src/base64.js';
 import cookie from '../src/cookie.js';
 import baseCookie from '../src/base-cookie.js';
-import utils from '../src/utils.js';
 import queryString from 'query-string';
 import Identify from '../src/identify.js';
-import Revenue from '../src/revenue.js';
 
 // maintain for testing backwards compatability
 describe('Amplitude', function() {

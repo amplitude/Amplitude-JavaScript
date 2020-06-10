@@ -1,3 +1,4 @@
+import sinon from 'sinon';
 import cookie from '../src/base-cookie';
 import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 

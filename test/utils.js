@@ -1,3 +1,4 @@
+import sinon from 'sinon';
 import utils from '../src/utils.js';
 import constants from '../src/constants.js';
 
@@ -118,7 +119,7 @@ describe('utils', function() {
         assert.isTrue(console.log.calledOnce);
       });
     });
-  })
+  });
 
   describe('validateProperties', function() {
     it('should detect invalid event property formats', function() {
@@ -137,7 +138,7 @@ describe('utils', function() {
         'test': 'yes',
         'key': 'value',
         '15': '16'
-      }
+      };
       assert.deepEqual(properties, utils.validateProperties(properties));
     });
 
@@ -150,13 +151,13 @@ describe('utils', function() {
         null: 'value',
         NaN: '16',
         d: dateString
-      }
+      };
       var expected = {
         '10': 'false',
         'null': 'value',
         'NaN': '16',
         'd': dateString
-      }
+      };
       assert.deepEqual(utils.validateProperties(properties), expected);
     });
 
@@ -166,7 +167,7 @@ describe('utils', function() {
         'undefined': undefined,
         'NaN': NaN,
         'function': utils.log.warn
-      }
+      };
       assert.deepEqual({}, utils.validateProperties(properties));
     });
 
@@ -178,7 +179,7 @@ describe('utils', function() {
       };
       var expected = {
         'error': String(e)
-      }
+      };
       assert.deepEqual(utils.validateProperties(properties), expected);
     });
 
@@ -207,7 +208,7 @@ describe('utils', function() {
               'l2': ['e2', {'k3': 'v3'}]
           }
         }
-      }
+      };
       var expected = {
         '10': 'false',
         'bool': true,
@@ -227,7 +228,7 @@ describe('utils', function() {
               'l2': ['e2', {'k3': 'v3'}]
           }
         }
-      }
+      };
       assert.deepEqual(utils.validateProperties(properties), expected);
     });
 

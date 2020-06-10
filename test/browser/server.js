@@ -6,8 +6,13 @@ const port = 9000;
 const httpsPort = 9001;
 
 const app = express();
+app.post('/test2.html', (req, res) => {
+res.set('Content-Type', 'text/html');
+res.send(fs.readFileSync(__dirname + '/test2.html'));
+});
 app.use(express.static(__dirname + '/../..'));
 app.use(express.static(__dirname));
+
 app.listen(port);
 console.log(`Listening on http://localhost:${port}`);
 

@@ -1,3 +1,4 @@
+import sinon from 'sinon';
 import AmplitudeClient from '../src/amplitude-client.js';
 import getUtmData from '../src/utm.js';
 import Cookie from '../src/cookie';
