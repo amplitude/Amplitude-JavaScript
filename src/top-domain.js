@@ -1,11 +1,6 @@
 import baseCookie from './base-cookie';
 import base64Id from './base64Id';
-
-const getHost = (url) => {
-  const a = document.createElement('a');
-  a.href = url;
-  return a.hostname || location.hostname; 
-};
+import getHost from './get-host';
 
 const topDomain = (url) => {
   const host = getHost(url);

@@ -14,6 +14,8 @@ import UUID from './uuid';
 import base64Id from './base64Id';
 import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
+import getHost from './get-host';
+import baseCookie from './base-cookie';
 
 let AsyncStorage;
 let Platform;
@@ -245,6 +247,31 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
   } catch (err) {
     utils.log.error(err);
     this.options.onError(err);
+  }
+};
+
+AmplitudeClient.prototype.deleteLowerLevelDomainCookies = function () {
+  const host = getHost();
+
+  const cookieHost =
+    (this.options.domain && this.options.domain[0] === '.') ?
+      this.options.domain.slice(1) : this.options.domain;
+
+  if (!cookieHost) {
+    return;
+  }
+
+  if (host !== cookieHost) {
+    if (new RegExp(cookieHost + '$').test(host)) {
+      const hostParts = host.split('.');
+      const cookieHostParts = cookieHost.split('.');
+
+      for (let i = hostParts.length; i > cookieHostParts.length; --i) {
+         const deleteDomain = hostParts.slice(hostParts.length - i).join('.');
+         baseCookie.set(this._cookieName, null, {domain: '.' + deleteDomain});
+      }
+      baseCookie.set(this._cookieName, null, {});
+    }
   }
 };
 
