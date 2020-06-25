@@ -1181,8 +1181,8 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
 
     let osName = this._ua.browser.name;
     let osVersion = this._ua.browser.major;
-    let deviceModel = this._ua.device.model;
-    let deviceManufacturer = this._ua.device.vendor;
+    let deviceModel = this._ua.os.name;
+    let deviceManufacturer;
 
     let versionName;
     let carrier;
