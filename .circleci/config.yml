@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/node:14.4.0-browsers
+    steps:
+      - checkout
+      - run: make test
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
