@@ -38,11 +38,4 @@ replaceTextInFile(
   `as.integrity = 'sha384-${hash}';`,
 );
 
-// Update version and relase date in readme
-replaceTextInFile(
-  'README.md',
-  /\[[0-9]+\.[0-9]+\.[0-9]+ - Released on [A-Z][a-z]+ [0-9]+, [0-9]{4}]/,
-  `[${version} - Released on ${format(new Date(), 'MMMM D, YYYY')}]`,
-);
-
 console.log(`Updated version to ${version}`);
