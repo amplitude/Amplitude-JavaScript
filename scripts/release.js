@@ -12,3 +12,11 @@ var mingzfile = path.join(cwd, 'dist', 'amplitude-' + version + '-min.gz.js');
 fs.copySync(path.join(cwd, 'amplitude.js'), file);
 fs.copySync(path.join(cwd, 'amplitude.min.js'), minfile);
 exec('gzip < ' + minfile + ' > ' + mingzfile);
+
+const umdFile = path.join(cwd, 'dist', 'amplitude-' + version + '.umd.js');
+const umdMinfile = path.join(cwd, 'dist', 'amplitude-' + version + '-min.umd.js');
+const umdMingzfile = path.join(cwd, 'dist', 'amplitude-' + version + '-min.umd.gz.js');
+
+fs.copySync(path.join(cwd, 'amplitude.umd.js'), umdFile);
+fs.copySync(path.join(cwd, 'amplitude.min.js'), umdMinfile);
+exec('gzip < ' + umdMinfile + ' > ' + umdMingzfile);
