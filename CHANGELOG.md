@@ -1,8 +1,14 @@
-### 7.0.0 (May 3, 2020)
+### 7.1.0 (Jun 28, 2020)
 * Sync with upstream ua-parser to detect more browsers and devices
+* Fix race condition where the SDK might write to the wrong cookie domain
+* Fix race condition where the SDK might think cookies are disabled
+* Revert `Device Type` field change from version 5.10.0 to show OS name again.
+* Default SameSite cookie setting to Lax
 
 #### Breaking Changes
+* The SDK cookie now defaults to SameSite=Lax
 * Windows Phone, IE Mobile, and Opera Mobile devices will be reported to amplitude slightly different. They will appear as "Windows Phone OS", "IEMobile", and "Opera Mobile" respectively.
+* The device type field has gone back to showing OS name.
 
 ### 6.2.0 (May 1, 2020)
 * Invoke the logEvent callbacks when a request is actually sent or when we give up on sending a request.
