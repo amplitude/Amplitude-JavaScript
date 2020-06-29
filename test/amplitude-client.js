@@ -93,10 +93,10 @@ describe('AmplitudeClient', function() {
       assert.include(getCookie(cookieName).options, 'Secure');
     });
 
-    it('should set the SameSite cookie option to None by default', () => {
+    it('should set the SameSite cookie option to Lax by default', () => {
       mockCookie();
       amplitude.init(apiKey);
-      assert.include(getCookie(cookieName).options, 'SameSite=None');
+      assert.include(getCookie(cookieName).options, 'SameSite=Lax');
     });
 
     it('should set the sameSite option on a cookie with the sameSiteCookie Option', () => {

@@ -16,7 +16,7 @@ export default {
   batchEvents: false,
   cookieExpiration: 365 * 10,
   cookieName: 'amplitude_id', // this is a deprecated option
-  sameSiteCookie: 'None',
+  sameSiteCookie: 'Lax',
   cookieForceUpgrade: false,
   deferInitialization: false,
   disableCookies: false,
