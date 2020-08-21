@@ -26,3 +26,4 @@ labels: 'bug'
 ## Environment
 - JS SDK Version: <!--- E.g. 7.1.0 -->
 - Installation Method: <!-- I.e. NPM/Yarn or <script> import -->
+- Browser and Version: <!-- E.g. -->
