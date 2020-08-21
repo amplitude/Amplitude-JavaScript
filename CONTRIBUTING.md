@@ -1,11 +1,12 @@
+**Hi contributor, here are some tips to help you make develop and contribute to the Amplitude SDK for JavaScript** 
+
 # Intro
-- Three ways for SDK to be loaded
+- There are three ways for SDK to be loaded
   - Standard NPM package
   - Snippet in `<script>` tag
   - RequireJS (may be dropped in future)
-- Build system is Make instead of yarn (legacy, may possibly be updated)
-- Use Amplitude Instrumentation Explorer to help development
-  - "Instrumentation" involves matters related to logging user actions (i.e. events)
+- Workflow is facilitated with both `make` and `yarn` (legacy, may possibly be updated to full `yarn`)
+- Chek out the [Amplitude Instrumentation Explorer]((https://chrome.google.com/webstore/detail/amplitude-instrumentation/acehfjhnmhbmgkedjmjlobpgdicnhkbp)) to help logging events during development
 
 # Architecture
 - `index.js` is the main entrypoint of SDK
@@ -21,5 +22,11 @@
     - only applicable to snippet import
     - Can possibly do better?
 
-# Development
-- Run `yarn dev` and open `localhost:9000` for development tools in browser
+# Setting Up Development
+- Cloning, installing, and building
+```
+git clone git@github.com:amplitude/Amplitude-JavaScript.git
+cd Amplitude-JavaScript
+make # Runs tests and generate builds
+yarn dev # Start development utility. Open localhost:9000 in your browser to access
+```
