@@ -1,6 +1,8 @@
-**Hi contributor, here are some tips to help you make develop and contribute to the Amplitude SDK for JavaScript** 
+# Contributing to the Amplitude SDK for JavaScript
+🎉 Thanks for your interest in contributing! 🎉
 
-# Intro
+## Ramping Up
+### Intro
 - There are three ways for SDK to be loaded
   - Standard NPM package
   - Snippet in `<script>` tag
@@ -8,7 +10,7 @@
 - Workflow is facilitated with both `make` and `yarn` (legacy, may possibly be updated to full `yarn`)
 - Chek out the [Amplitude Instrumentation Explorer]((https://chrome.google.com/webstore/detail/amplitude-instrumentation/acehfjhnmhbmgkedjmjlobpgdicnhkbp)) to help logging events during development
 
-# Architecture
+### Architecture
 - `index.js` is the main entrypoint of SDK
 - Stubbed methods are used when client imports via `<script>` snippet
   - Allows app to not be blocked while real JS SDK is loaded in
@@ -20,9 +22,8 @@
 - sameSiteCookie: Sets how public the cookie reading is
   - `amplitude.getInstance() is necessary even during reuse because of snippet stubbed
     - only applicable to snippet import
-    - Can possibly do better?
 
-# Setting Up Development
+### Setting Up Development
 - Cloning, installing, and building
 ```
 git clone git@github.com:amplitude/Amplitude-JavaScript.git
