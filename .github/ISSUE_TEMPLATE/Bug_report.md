@@ -1,6 +1,6 @@
 ---
 name: Bug report 🐛
-about: You're having a technical issues
+about: You're having technical issues
 labels: 'bug'
 ---
 
