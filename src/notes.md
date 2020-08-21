@@ -7,11 +7,6 @@
 - Use Amplitude Instrumentation Explorer to help development
   - "Instrumentation" involves matters related to logging user actions (i.e. events)
 
-# Concerns
-- Keep in mind backwards compatibility
-- Keep SDK build size as small as possible
-- Should support as many browsers as possible
-
 # Architecture
 - `index.js` is the main entrypoint of SDK
 - Stubbed methods are used when client imports via `<script>` snippet
@@ -28,24 +23,3 @@
 
 # Development
 - Run `yarn dev` and open `localhost:9000` for development tools in browser
-
-# Misc
-- Readme.io used for documentation
-
-# Ideas
-- E2E browser tests with sauce labs
-- merge with node?
-
-Question
-- Browser compat?
-- MaxMind
-  - Determines region from IP address
-- Some custoemrs wont update SDK
-- Consideration to bring up durign PE weekly monday discussion
-  - browserslist?
-  - eslint plugin compat?
-  - Automation for updating docs when new SDK version is published
-  - Google Tag Manager: Allows people at runtime to add random script tag
-- No plans to stop snippet
-  - might stop require js
-- user & account lookup, allows seeing stream of events sent from users
