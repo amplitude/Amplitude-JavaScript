@@ -2,6 +2,7 @@ import baseCookie from './base-cookie';
 import base64Id from './base64Id';
 import getHost from './get-host';
 
+// Utility that finds top level domain to write to
 const topDomain = (url) => {
   const host = getHost(url);
   const parts = host.split('.');

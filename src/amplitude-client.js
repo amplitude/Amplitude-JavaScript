@@ -1,14 +1,15 @@
+// Core of SDK code
 import Constants from './constants';
 import cookieStorage from './cookiestorage';
 import MetadataStorage from '../src/metadata-storage';
-import getUtmData from './utm';
+import getUtmData from './utm'; // Urchin Tracking Module 
 import Identify from './identify';
 import localStorage from './localstorage';  // jshint ignore:line
 import md5 from 'blueimp-md5';
 import Request from './xhr';
 import Revenue from './revenue';
 import type from './type';
-import UAParser from '@amplitude/ua-parser-js';
+import UAParser from '@amplitude/ua-parser-js'; // Identifying device and browser info (maybe move to backend?)
 import utils from './utils';
 import UUID from './uuid';
 import base64Id from './base64Id';
@@ -51,6 +52,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._identifyId = 0;
   this._lastEventTime = null;
   this._newSession = false;
+  // sequence used for by frontend for prioritizing event send retries
   this._sequenceNumber = 0;
   this._sessionId = null;
   this._isInitialized = false;
@@ -1567,6 +1569,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
 
 /**
  * Merge unsent events and identifys together in sequential order based on their sequence number, for uploading.
+ * Identifys given higher priority than Events. Also earlier sequence given priority
  * @private
  */
 AmplitudeClient.prototype._mergeEventsAndIdentifys = function _mergeEventsAndIdentifys(numEvents) {

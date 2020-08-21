@@ -9,7 +9,13 @@ import getLocation from './get-location';
 import localStorage from './localstorage'; // jshint ignore:line
 import topDomain from './top-domain';
 
-class MetadataStorage {
+/**
+* MetadataStorage involves SDK data persistance
+* storage priority: cookies -> localStorage -> in memory 
+* if in localStorage, unable track users between subdomains
+* if in memory, then memory can't be shared between different tabs
+*/
+ class MetadataStorage {
   constructor({storageKey, disableCookies, domain, secure, sameSite, expirationDays}) {
     this.storageKey = storageKey;
     this.disableCookieStorage = !baseCookie.areCookiesEnabled() || disableCookies;
@@ -35,18 +41,21 @@ class MetadataStorage {
     return `${this.storageKey}${suffix ? `_${suffix}` : ''}`;
   }
 
+  /*
+  * Data is saved as delimited values rather than JSO to minimize cookie space
+  * Should not change order of the items
+  */
   save({ deviceId, userId, optOut, sessionId, lastEventTime, eventId, identifyId, sequenceNumber }) {
-    // do not change the order of these items
     const value = [
       deviceId,
-      Base64.encode(userId || ''),
+      Base64.encode(userId || ''), // used to convert not unicode to alphanumeric since cookies only use alphanumeric
       optOut ? '1' : '',
-      sessionId ? sessionId.toString(32) : '0',
-      lastEventTime ? lastEventTime.toString(32) : '0',
+      sessionId ? sessionId.toString(32) : '0', // generated when instantiated, timestamp (but re-uses session id in cookie if not expired) @TODO clients may want custom session id
+      lastEventTime ? lastEventTime.toString(32) : '0', // last time an event was set
       eventId ? eventId.toString(32) : '0',
       identifyId ? identifyId.toString(32) : '0',
       sequenceNumber ? sequenceNumber.toString(32) : '0'
-    ].join('.');
+    ].join('.'); 
 
     if (this.disableCookieStorage) {
       localStorage.setItem(this.storageKey, value);
