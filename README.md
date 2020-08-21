@@ -21,8 +21,6 @@ A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.ampl
 * A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/master/test/browser/amplitudejs-requirejs.html) showing an integration using RequireJS.
 * A [demo page](https://github.com/amplitude/GTM-Web-Demo) demonstrating a potential integration with Google Tag Manager.
 
-## Changelog
-Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
 
 ## React Native
 This library now supports react-native. It has two dependencies on react-native modules you will have to install yourself:
@@ -32,6 +30,9 @@ This library now supports react-native. It has two dependencies on react-native 
 
 ## Node.js
 Please visit [Amplitude-Node](https://github.com/amplitude/Amplitude-Node) for our Node SDK.
+
+## Changelog
+Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
 
 ## Upgrading Major Versions and Breaking Changes #
 
