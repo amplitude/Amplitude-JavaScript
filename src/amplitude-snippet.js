@@ -1,3 +1,9 @@
+/**
+* Imported in client browser via <script> tag
+* Async capabilities: Interally creates stubbed window.amplitude object until real SDK loaded
+* Stubbed functions keep track of funciton calls and their arguments
+* These are sent once real SDK loaded through another <script> tag
+*/
 (function(window, document) {
   var amplitude = window.amplitude || {'_q':[],'_iq':{}};
   var as = document.createElement('script');

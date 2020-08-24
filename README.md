@@ -13,21 +13,26 @@
 A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
 
 ## Installation and Quick Start
-Please visit our :100:[Developer Center](https://developers.amplitude.com/docs/javascript) for instructions on installing and using our the SDK.
+* For using the SDK, please visit our :100:[Developer Center](https://developers.amplitude.com/docs/javascript) for instructions on installing and using our the SDK.
+* For developing the SDK, please visit our [CONTRIBUTING.md](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CONTRIBUTING.md) to get started.
 
 ## Demo Pages
 * A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/master/test/browser/amplitudejs.html) showing a simple integration on a web page.
 * A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/master/test/browser/amplitudejs-requirejs.html) showing an integration using RequireJS.
 * A [demo page](https://github.com/amplitude/GTM-Web-Demo) demonstrating a potential integration with Google Tag Manager.
 
-## Changelog
-Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
 
 ## React Native
 This library now supports react-native. It has two dependencies on react-native modules you will have to install yourself:
 
 * [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) Tested with version 3.1.4
 * [@react-native-community/async-storage](https://www.npmjs.com/package/@react-native-community/async-storage) Tested with version 1.6.2
+
+## Node.js
+Please visit [Amplitude-Node](https://github.com/amplitude/Amplitude-Node) for our Node SDK.
+
+## Changelog
+Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
 
 ## Upgrading Major Versions and Breaking Changes #
 

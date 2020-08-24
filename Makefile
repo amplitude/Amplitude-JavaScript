@@ -66,14 +66,14 @@ README.md: $(SNIPPET_OUT) version
 
 $(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js rollup.native.js rollup.esm.js rollup.umd.js rollup.umd.min.js
 	@$(JSHINT) --verbose $(SRC)
-	@NODE_ENV=production $(ROLLUP) --config rollup.config.js
-	@NODE_ENV=production $(ROLLUP) --config rollup.esm.js
-	@NODE_ENV=production $(ROLLUP) --config rollup.umd.js
-	@NODE_ENV=production $(ROLLUP) --config rollup.native.js
-	@NODE_ENV=production $(ROLLUP) --config rollup.nocompat.js
+	@NODE_ENV=production $(ROLLUP) --config rollup.config.js # is the snippet build config
+	@NODE_ENV=production $(ROLLUP) --config rollup.esm.js # does not concat dependencies, only has module and dependencies 
+	@NODE_ENV=production $(ROLLUP) --config rollup.umd.js # generates npm version, also usable in require js app
+	@NODE_ENV=production $(ROLLUP) --config rollup.native.js # generates react native build
+	@NODE_ENV=production $(ROLLUP) --config rollup.nocompat.js # may be able to remove
 	@NODE_ENV=production $(ROLLUP) --config rollup.umd.min.js
 	@NODE_ENV=production $(ROLLUP) --config rollup.min.js
-	@NODE_ENV=production $(ROLLUP) --config rollup.nocompat.min.js
+	@NODE_ENV=production $(ROLLUP) --config rollup.nocompat.min.js # may be able to remove
 
 #
 # Target for minified `amplitude-snippet.js` file.

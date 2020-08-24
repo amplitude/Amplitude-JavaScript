@@ -8,7 +8,7 @@ import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
 
 /**
- * Amplitude SDK API - instance manager.
+ * Legacy API of Amplitude SDK - instance manager. Wraps around the current amplitude-client.js which provides more features
  * Function calls directly on amplitude have been deprecated. Please call methods on the default shared instance: amplitude.getInstance() instead.
  * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps} for more information about this change.
  * @constructor Amplitude
