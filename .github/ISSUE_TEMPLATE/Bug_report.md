@@ -26,4 +26,4 @@ labels: 'bug'
 ## Environment
 - JS SDK Version: <!--- E.g. 7.1.0 -->
 - Installation Method: <!-- I.e. NPM/Yarn or <script> import -->
-- Browser and Version: <!-- E.g. Chrome 84, IE 11, Firefox 79 -->
+- Browser and Version or React Native and Device: <!-- E.g. Chrome 84, React Native@0.63 iPhone SE-->
