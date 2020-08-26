@@ -51,7 +51,7 @@ const set = (name, value, opts) => {
 const areCookiesEnabled = () => {
   const uid = String(new Date());
   try {
-    const cookieName = Constants.COOKIE_TEST + base64Id();
+    const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
     set(cookieName, uid, {});
     const _areCookiesEnabled = get(cookieName + '=') === uid;
     set(cookieName, null, {});
