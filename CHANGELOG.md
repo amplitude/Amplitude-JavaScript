@@ -1,3 +1,6 @@
+### 7.1.1 (August 26, 2020)
+* Fix an issue with detection of whether or not cookies are enabled on a device
+
 ### 7.1.0 (Jun 28, 2020)
 * Sync with upstream ua-parser to detect more browsers and devices
 * Fix race condition where the SDK might write to the wrong cookie domain
