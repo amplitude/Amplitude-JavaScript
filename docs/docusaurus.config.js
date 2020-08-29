@@ -27,7 +27,6 @@ module.exports = {
       ],
     },
     footer: {
-      style: 'dark',
       links: [
         {
           title: 'Docs',
@@ -40,36 +39,61 @@ module.exports = {
               label: 'Second Doc',
               to: 'docs/doc2/',
             },
+            {
+              label: 'Help Center',
+              href: 'https://help.amplitude.com/',
+            },
           ],
         },
         {
           title: 'Community',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+              label: 'Github Repository',
+              href: 'https://github.com/amplitude/Amplitude-javascript',
             },
             {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
+              label: 'Releases',
+              href: 'https://github.com/amplitude/Amplitude-Javascript/releases'
             },
             {
-              label: 'Twitter',
-              href: 'https://twitter.com/docusaurus',
+              label: 'npm Registry',
+              href: 'https://www.npmjs.com/package/amplitude-js',
             },
           ],
         },
         {
-          title: 'More',
+          title: 'Other SDKs',
           items: [
             {
-              label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              label: 'iOS/tvOS/macOS',
+              href: 'https://developers.amplitude.com/docs/ios',
+            },
+            {
+              label: 'Android',
+              href: 'https://developers.amplitude.com/docs/android',
+            },
+            {
+              label: 'Unity',
+              href: 'https://developers.amplitude.com/docs/unity',
+            },
+            {
+              label: 'Flutter',
+              href: 'https://developers.amplitude.com/docs/flutter',
+            },
+            {
+              label: 'Node.js',
+              href: 'https://developers.amplitude.com/docs/nodejs',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      logo: {
+        alt: 'Amplitude Logo',
+        src: 'img/amp_logo.svg',
+      },
+      copyright: `Copyright © ${new Date().getFullYear()} Amplitude, Inc.`,
+    },
     },
   },
   presets: [
