@@ -1,10 +1,12 @@
 module.exports = {
-  title: 'My Site',
-  tagline: 'The tagline of my site',
-  url: 'https://your-docusaurus-test-site.com',
+  title: 'Amplitude JS SDK Docs',
+  tagline: 'Amplitude JavaScript SDK',
+  url: 'http://amplitude.github.io/Amplitude-JavaScript',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   favicon: 'img/amp_favicon.ico',
+  organizationName: 'Amplitude',
+  projectName: 'Amplitude-Javascript',
   themeConfig: {
     navbar: {
       logo: {
