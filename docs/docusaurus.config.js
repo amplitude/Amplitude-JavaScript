@@ -7,11 +7,11 @@ module.exports = {
   favicon: 'img/amp_favicon.ico',
   themeConfig: {
     navbar: {
-      title: 'My Site',
       logo: {
         alt: 'Amplitude Logo',
         src: 'img/amp_logo.svg',
       },
+      hideOnScroll: true,
       items: [
         {
           to: 'docs/',
@@ -20,9 +20,9 @@ module.exports = {
           position: 'left',
         },
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/amplitude/Amplitude-JavaScript/',
           label: 'GitHub',
-          position: 'right',
+          position: 'left',
         },
       ],
     },
