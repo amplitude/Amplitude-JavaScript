@@ -28,6 +28,7 @@
     "express": "^4.16.2",
     "fs-extra": "^4.0.2",
     "jsdoc": "^3.6.3",
+    "jsdoc-to-markdown": "^6.0.1",
     "jshint": "^2.9.6",
     "karma": "^4.0.0",
     "karma-chai": "^0.1.0",
