@@ -40,7 +40,7 @@
     "karma-sinon": "^1.0.5",
     "karma-sourcemap-loader": "^0.3.7",
     "mocha": "^4.0.1",
-    "prettier": "^1.16.4",
+    "prettier": "^2.1.1",
     "requirejs": "^2.3.6",
     "rollup": "^1.4.1",
     "rollup-plugin-babel": "^4.3.2",
@@ -55,6 +55,7 @@
   },
   "scripts": {
     "test": "make test",
-    "dev": "node test/browser/server.js"
+    "dev": "node test/browser/server.js",
+    "generate-jsdoc": "node docs/generate-jsdoc"
   }
 }
