@@ -1,3 +1,17 @@
+## `Identify()`
+
+```
+var identify = new amplitude.Identify();
+```
+
+Identify API - instance constructor. Identify objects are a wrapper for user property operations.
+Each method adds a user property operation to the Identify object, and returns the same Identify object,
+allowing you to chain multiple method calls together.
+Note: if the same user property is used in multiple operations on a single Identify object,
+only the first operation on that property will be saved, and the rest will be ignored.
+See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
+for more information on the Identify API and user property operations.
+
 ## `Identify#add`
 
 ```

@@ -1,3 +1,17 @@
+## `Revenue()`
+
+```
+var revenue = new amplitude.Revenue();
+```
+
+Revenue API - instance constructor. Revenue objects are a wrapper for revenue data.
+Each method updates a revenue property in the Revenue object, and returns the same Revenue object,
+allowing you to chain multiple method calls together.
+Note: price is a required field to log revenue events.
+If quantity is not specified then defaults to 1.
+See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue} for more information
+about logging Revenue.
+
 ## `Revenue#setProductId`
 
 ```

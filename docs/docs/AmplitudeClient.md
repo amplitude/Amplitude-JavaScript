@@ -1,3 +1,12 @@
+## `AmplitudeClient()`
+
+```
+var amplitudeClient = new AmplitudeClient();
+```
+
+AmplitudeClient SDK API - instance constructor.
+The Amplitude class handles creation of client instances, all you need to do is call amplitude.getInstance()
+
 ## `AmplitudeClient#__VERSION__`
 
 ```

@@ -16,7 +16,8 @@ function generateMarkdown(inputFile) {
   const className = data.find((e) => e.kind === "class").name;
   const filteredData = data.filter(
     (e) =>
-      e.access === "public" && (e.kind === "function" || e.kind === "member")
+      e.kind === "constructor" ||
+      (e.access === "public" && (e.kind === "function" || e.kind === "member"))
   );
   const outputFilePath = path.join(outputDir, `${className}.md`);
 
