@@ -8,6 +8,7 @@ module.exports = {
   organizationName: 'Amplitude',
   projectName: 'Amplitude-Javascript',
   themeConfig: {
+    sidebarCollapsible: false,
     navbar: {
       logo: {
         alt: 'Amplitude Logo',
