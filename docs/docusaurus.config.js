@@ -17,12 +17,6 @@ module.exports = {
       hideOnScroll: true,
       items: [
         {
-          to: 'docs/',
-          activeBasePath: 'docs',
-          label: 'Docs',
-          position: 'left',
-        },
-        {
           href: 'https://github.com/amplitude/Amplitude-JavaScript/',
           label: 'GitHub',
           position: 'left',
@@ -46,6 +40,7 @@ module.exports = {
       {
         docs: {
           homePageId: 'AmplitudeClient',
+          routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
             'https://github.com/amplitude/Amplitude-JavaScript/',
