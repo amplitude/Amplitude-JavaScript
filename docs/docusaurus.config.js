@@ -29,67 +29,6 @@ module.exports = {
       ],
     },
     footer: {
-      links: [
-        {
-          title: 'Docs',
-          items: [
-            {
-              label: 'Style Guide',
-              to: 'docs/',
-            },
-            {
-              label: 'Second Doc',
-              to: 'docs/doc2/',
-            },
-            {
-              label: 'Help Center',
-              href: 'https://help.amplitude.com/',
-            },
-          ],
-        },
-        {
-          title: 'Community',
-          items: [
-            {
-              label: 'Github Repository',
-              href: 'https://github.com/amplitude/Amplitude-javascript',
-            },
-            {
-              label: 'Releases',
-              href: 'https://github.com/amplitude/Amplitude-Javascript/releases'
-            },
-            {
-              label: 'npm Registry',
-              href: 'https://www.npmjs.com/package/amplitude-js',
-            },
-          ],
-        },
-        {
-          title: 'Other SDKs',
-          items: [
-            {
-              label: 'iOS/tvOS/macOS',
-              href: 'https://developers.amplitude.com/docs/ios',
-            },
-            {
-              label: 'Android',
-              href: 'https://developers.amplitude.com/docs/android',
-            },
-            {
-              label: 'Unity',
-              href: 'https://developers.amplitude.com/docs/unity',
-            },
-            {
-              label: 'Flutter',
-              href: 'https://developers.amplitude.com/docs/flutter',
-            },
-            {
-              label: 'Node.js',
-              href: 'https://developers.amplitude.com/docs/nodejs',
-            },
-          ],
-        },
-      ],
       logo: {
         alt: 'Amplitude Logo',
         src: 'img/amp_logo.svg',
