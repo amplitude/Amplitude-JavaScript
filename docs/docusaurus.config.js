@@ -36,6 +36,8 @@ module.exports = {
       },
       copyright: `Copyright © ${new Date().getFullYear()} Amplitude, Inc.`,
     },
+    prism: {
+      defaultLanguage: 'javascript',
     },
   },
   presets: [
@@ -43,12 +45,10 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
-          // It is recommended to set document id as docs home page (`docs/` path).
           homePageId: 'AmplitudeClient',
           sidebarPath: require.resolve('./sidebars.js'),
-          // Please change this to your repo.
           editUrl:
-            'https://github.com/facebook/docusaurus/edit/master/website/',
+            'https://github.com/amplitude/Amplitude-JavaScript/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
