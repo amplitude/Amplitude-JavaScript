@@ -23,3 +23,32 @@
   margin: 0 calc(-1 * var(--ifm-pre-padding));
   padding: 0 var(--ifm-pre-padding);
 }
+
+/* OG site color #10069f */
+/* logo color #007fd2 */
+/* sidebar dark #003b61 */
+/* sidebar darkest #0c2a4b */
+/* Sidebar text ##c6d0d9 */
+
+/* $cerulean-50: #f4faff;
+$cerulean-100: #e4f1fa;
+$cerulean-200: #c6e2f4;
+$cerulean-300: #7bbee7;
+$cerulean-400: #48a4de;
+$cerulean-500: #007fd2;
+$cerulean-600: #0065a5;
+$cerulean-700: #005488;
+$cerulean-800: #003b61;
+$cerulean-900: #0c2a4b;
+:export {
+  cerulean-50: $cerulean-50;
+  cerulean-100: $cerulean-100;
+  cerulean-200: $cerulean-200;
+  cerulean-300: $cerulean-300;
+  cerulean-400: $cerulean-400;
+  cerulean-500: $cerulean-500;
+  cerulean-600: $cerulean-600;
+  cerulean-700: $cerulean-700;
+  cerulean-800: $cerulean-800;
+  cerulean-900: $cerulean-900;
+} */
