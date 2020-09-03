@@ -1,12 +1,12 @@
 module.exports = {
   title: 'Amplitude JS SDK Docs',
   tagline: 'Amplitude JavaScript SDK',
-  url: 'http://amplitude.github.io/Amplitude-JavaScript',
-  baseUrl: '/',
+  url: 'https://amplitude.github.io',
+  baseUrl: '/Amplitude-JavaScript/',
   onBrokenLinks: 'throw',
   favicon: 'img/amp_favicon.ico',
   organizationName: 'Amplitude',
-  projectName: 'Amplitude-Javascript',
+  projectName: 'Amplitude-JavaScript',
   themeConfig: {
     sidebarCollapsible: false,
     navbar: {
@@ -40,10 +40,11 @@ module.exports = {
       {
         docs: {
           homePageId: 'AmplitudeClient',
+          path: 'docs',
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
-            'https://github.com/amplitude/Amplitude-JavaScript/',
+            'https://github.com/amplitude/Amplitude-JavaScript/website',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
