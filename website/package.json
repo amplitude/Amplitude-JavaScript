@@ -8,7 +8,7 @@
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
-    "serve": "docusaurus serve"
+    "serve": "docusaurus build --out-dir build/Amplitude-JavaScript && yarn run docusaurus serve"
   },
   "dependencies": {
     "@docusaurus/core": "^2.0.0-alpha.61",
