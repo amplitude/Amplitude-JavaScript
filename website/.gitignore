@@ -8,6 +8,12 @@
 .docusaurus
 .cache-loader
 
+# Generated jsdoc markdown
+docs/Amplitude.md
+docs/AmplitudeClient.md
+docs/Identify.md
+docs/Revenue.md
+
 # Misc
 .DS_Store
 .env.local
