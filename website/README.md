@@ -1,28 +1,28 @@
 # Website
 
-This website is built using [Docusaurus 2](https://v2.docusaurus.io/), a modern static website generator.
+The JavaScript SDK API Reference website is built using [Docusaurus 2](https://v2.docusaurus.io/), a modern static website generator.
 
 ### Installation
 
-```
-$ yarn
-```
+Installation is automatically done when `yarn install` is ran from the base directory.
 
-### Local Development
+### Generating `website/docs/` from `src/`
 
-```
-$ yarn start
-```
+The website autogenerates markdown files of public classes and its contents using [generate-jsdoc.js](https://github.com/amplitude/Amplitude-JavaScript/blob/master/website/generate-jsdoc.js). 
 
-This command starts a local development server and open up a browser window. Most changes are reflected live without having to restart the server.
+This is done by calling `yarn docs:generate-jsdoc` from the base directory.
 
-### Build
+### Local Development Build
 
-```
-$ yarn build
-```
+Run `yarn start` from this directory or `yarn docs:start` from the base directory.
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+Because of a bug with how Docusaurus handles `baseUrl` in `docusaurus.config.js`, you should open `localhost:3000/Amplitude-JavaScript` instead of the default `localhost:3000/`
+
+### Local Production Build
+
+Similar to local development build process. This command generates static content into the `website/build/` directory and creates a server to serve it.
+
+Run `yarn serve` from this directory or `yarn docs:serve` from the base directory. Then open `localhost:3000/Amplitude-JavaScript`
 
 ### Deployment
 
@@ -30,4 +30,4 @@ This command generates static content into the `build` directory and can be serv
 $ GIT_USER=<Your GitHub username> USE_SSH=true yarn deploy
 ```
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+This will create the production build and push it the `gh-pages` branch.
