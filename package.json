@@ -28,6 +28,7 @@
     "express": "^4.16.2",
     "fs-extra": "^4.0.2",
     "jsdoc": "^3.6.3",
+    "jsdoc-to-markdown": "^6.0.1",
     "jshint": "^2.9.6",
     "karma": "^4.0.0",
     "karma-chai": "^0.1.0",
@@ -39,7 +40,7 @@
     "karma-sinon": "^1.0.5",
     "karma-sourcemap-loader": "^0.3.7",
     "mocha": "^4.0.1",
-    "prettier": "^1.16.4",
+    "prettier": "^2.1.1",
     "requirejs": "^2.3.6",
     "rollup": "^1.4.1",
     "rollup-plugin-babel": "^4.3.2",
@@ -53,7 +54,14 @@
     "uglify-js": "^2.0.0"
   },
   "scripts": {
+    "postinstall": "cd website/ && yarn install",
     "test": "make test",
-    "dev": "node test/browser/server.js"
+    "dev": "node test/browser/server.js",
+    "docs:generate-jsdoc": "node website/generate-jsdoc",
+    "docs:start": "cd website/ && yarn start",
+    "docs:build": "cd website/ && yarn build",
+    "docs:serve": "cd website/ && yarn serve",
+    "docs:deploy": "cd website/ && yarn deploy",
+    "docs:swizzle": "cd website/ && yarn swizzle"
   }
 }
