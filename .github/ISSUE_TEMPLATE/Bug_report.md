@@ -17,7 +17,7 @@ labels: 'bug'
 
 ## Steps to Reproduce
 <!--- Please provide a clear sequence of steps to reproduce this bug --> 
-<!--- Include code, if relevant -->
+<!--- Include code and images, if relevant -->
 1.
 2.
 3.
@@ -26,4 +26,4 @@ labels: 'bug'
 ## Environment
 - JS SDK Version: <!--- E.g. 7.1.0 -->
 - Installation Method: <!-- I.e. NPM/Yarn or <script> import -->
-- Browser and Version: <!-- E.g. Chrome 84, IE 11, Firefox 79 -->
+- Browser and Version or React Native and Device: <!-- E.g. Chrome 84, React Native@0.63 iPhone SE-->
