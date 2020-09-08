@@ -8,6 +8,7 @@ on: [push, pull_request]
 jobs:
   build:
     strategy:
+      max-parallel: 6
       matrix:
         node-version: [10.x, 12.x, 14.x]
         os: [macos-10.14, ubuntu-18.04]
