@@ -52,7 +52,7 @@ ${data.examples}
 
 function documentParams(data) {
   const params = data.params.map(
-    (param) => `- \`${param.name}\` (\`${param.type.names[0]}\`)
+    (param) => `- \`${param.name}\` (\`${param.type.names.join('|')}\`)
 ${param.description}
 `
   );
@@ -63,7 +63,7 @@ ${params.join("\n")}
 
 function documentReturn(data) {
   return `### Return Value
-- (\`${data.returns[0].type.names[0]}\`)
+- (\`${data.returns[0].type.names.join('|')}\`)
 ${data.returns[0].description}
 `;
 }
