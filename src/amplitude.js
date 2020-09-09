@@ -8,9 +8,9 @@ import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
 
 /**
- * Legacy API of Amplitude SDK - instance manager. Wraps around the current amplitude-client.js which provides more features
+ * Legacy API of the Amplitude JS SDK - instance manager. Wraps around the current [AmplitudeClient](https://amplitude.github.io/Amplitude-JavaScript/) which provides more features
  * Function calls directly on amplitude have been deprecated. Please call methods on the default shared instance: amplitude.getInstance() instead.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#300-update-and-logging-events-to-multiple-amplitude-apps} for more information about this change.
+ * See the [3.0.0 changelog](https://github.com/amplitude/Amplitude-JavaScript/blob/ed405afb5f06d5cf5b72539a5d09179abcf7e1fe/README.md#300-update-and-logging-events-to-multiple-amplitude-apps) for more information about this change.
  * @constructor Amplitude
  * @public
  * @example var amplitude = new Amplitude();
@@ -66,7 +66,7 @@ if (BUILD_COMPAT_2_0) {
    * @param {string} apiKey - The API key for your app.
    * @param {string} opt_userId - (optional) An identifier for this user.
    * @param {object} opt_config - (optional) Configuration options.
-   * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#configuration-options} for list of options and default values.
+   * See [options.js](https://github.com/amplitude/Amplitude-JavaScript/blob/master/src/options.js#L14) for list of options and default values.
    * @param {function} opt_callback - (optional) Provide a callback function to run after initialization is complete.
    * @deprecated Please use amplitude.getInstance().init(apiKey, opt_userId, opt_config, opt_callback);
    * @example amplitude.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
@@ -163,7 +163,7 @@ if (BUILD_COMPAT_2_0) {
    * groupName can be a string or an array of strings to indicate a user in multiple gruups.
    * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
    * Note: this will also set groupType: groupName as a user property.
-   * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information.
+   * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
    * @public
    * @param {string} groupType - the group type (ex: orgId)
    * @param {string|list} groupName - the name of the group (ex: 15), or a list of names of the groups
@@ -235,8 +235,8 @@ if (BUILD_COMPAT_2_0) {
 
   /**
    * Send an identify call containing user property operations to Amplitude servers.
-   * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
-   * for more information on the Identify API and user property operations.
+   * See the [Identify](https://amplitude.github.io/Amplitude-JavaScript/Identify/)
+   * reference page for more information on the Identify API and user property operations.
    * @param {Identify} identify_obj - the Identify object containing the user property operations to send.
    * @param {Amplitude~eventCallback} opt_callback - (optional) callback function to run when the identify event has been sent.
    * Note: the server response code and response body from the identify event upload are passed to the callback function.
@@ -286,7 +286,7 @@ if (BUILD_COMPAT_2_0) {
    * Log an event with eventType, eventProperties, and groups. Use this to set event-level groups.
    * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
    * (unless you explicitly set it with setGroup).
-   * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information
+   * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
    * about groups and Count by Distinct on the Amplitude platform.
    * @public
    * @param {string} eventType - name of event
@@ -305,8 +305,8 @@ if (BUILD_COMPAT_2_0) {
   /**
    * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
    * revenueType and event properties.
-   * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue}
-   * for more information on the Revenue interface and logging revenue.
+   * See the [Revenue](https://amplitude.github.io/Amplitude-JavaScript/Revenue/)
+   * reference page for more information on the Revenue interface and logging revenue.
    * @public
    * @param {Revenue} revenue_obj - the revenue object containing the revenue data being logged.
    * @deprecated Please use amplitude.getInstance().logRevenueV2(revenue_obj);

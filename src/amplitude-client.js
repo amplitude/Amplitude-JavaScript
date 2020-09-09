@@ -70,7 +70,7 @@ AmplitudeClient.prototype.Revenue = Revenue;
  * @param {string} apiKey - The API key for your app.
  * @param {string} opt_userId - (optional) An identifier for this user.
  * @param {object} opt_config - (optional) Configuration options.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#configuration-options} for list of options and default values.
+ * See [options.js](https://github.com/amplitude/Amplitude-JavaScript/blob/master/src/options.js#L14) for list of options and default values.
  * @param {function} opt_callback - (optional) Provide a callback function to run after initialization is complete.
  * @example amplitudeClient.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
  */
@@ -863,7 +863,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
  * groupName can be a string or an array of strings to indicate a user in multiple gruups.
  * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
  * Note: this will also set groupType: groupName as a user property.
- * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information.
+ * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
  * @public
  * @param {string} groupType - the group type (ex: orgId)
  * @param {string|list} groupName - the name of the group (ex: 15), or a list of names of the groups
@@ -1034,8 +1034,8 @@ var _convertProxyObjectToRealObject = function _convertProxyObjectToRealObject(i
 
 /**
  * Send an identify call containing user property operations to Amplitude servers.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
- * for more information on the Identify API and user property operations.
+ * See the [Identify](https://amplitude.github.io/Amplitude-JavaScript/Identify/)
+ * reference page for more information on the Identify API and user property operations.
  * @param {Identify} identify_obj - the Identify object containing the user property operations to send.
  * @param {Amplitude~eventCallback} opt_callback - (optional) callback function to run when the identify event has been sent.
  * Note: the server response code and response body from the identify event upload are passed to the callback function.
@@ -1344,7 +1344,8 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, e
  * Log an event with eventType, eventProperties, and groups. Use this to set event-level groups.
  * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
  * (unless you explicitly set it with setGroup).
- * See the [SDK Readme]{@link https://github.com/amplitude/Amplitude-Javascript#setting-groups} for more information
+ * 
+ * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
  * about groups and Count by Distinct on the Amplitude platform.
  * @public
  * @param {string} eventType - name of event
@@ -1385,8 +1386,8 @@ var _isNumber = function _isNumber(n) {
 /**
  * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
  * revenueType and event properties.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue}
- * for more information on the Revenue interface and logging revenue.
+ * See the [Revenue](https://amplitude.github.io/Amplitude-JavaScript/Revenue/)
+ * reference page for more information on the Revenue interface and logging revenue.
  * @public
  * @param {Revenue} revenue_obj - the revenue object containing the revenue data being logged.
  * @example var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99);
