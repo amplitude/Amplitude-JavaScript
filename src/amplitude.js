@@ -8,12 +8,15 @@ import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
 
 /**
- * Legacy API of the Amplitude JS SDK - instance manager. Wraps around the current [AmplitudeClient](https://amplitude.github.io/Amplitude-JavaScript/) which provides more features
+ * Deprecated legacy API of the Amplitude JS SDK - instance manager.
+ * 
+ * Wraps around the current [AmplitudeClient](https://amplitude.github.io/Amplitude-JavaScript/) which provides more features
  * Function calls directly on amplitude have been deprecated. Please call methods on the default shared instance: amplitude.getInstance() instead.
  * 
  * See the [3.0.0 changelog](https://github.com/amplitude/Amplitude-JavaScript/blob/ed405afb5f06d5cf5b72539a5d09179abcf7e1fe/README.md#300-update-and-logging-events-to-multiple-amplitude-apps) for more information about this change.
  * @constructor Amplitude
  * @public
+ * @deprecated
  * @example var amplitude = new Amplitude();
  */
 var Amplitude = function Amplitude() {
@@ -216,10 +219,10 @@ if (BUILD_COMPAT_2_0) {
   /**
    * Sets user properties for the current user.
    * @public
-   * @param {object} - object with string keys and values for the user properties to set.
-   * @param {boolean} - DEPRECATED opt_replace: in earlier versions of the JS SDK the user properties object was kept in
+   * @param {object} userProperties - object with string keys and values for the user properties to set.
+   * @param {boolean} opt_replace - Deprecated. In earlier versions of the JS SDK the user properties object was kept in
    * memory and replace = true would replace the object in memory. Now the properties are no longer stored in memory, so replace is deprecated.
-   * @deprecated Please use amplitude.getInstance.setUserProperties(userProperties);
+   * @deprecated Please use amplitude.getInstance().setUserProperties(userProperties);
    * @example amplitude.setUserProperties({'gender': 'female', 'sign_up_complete': true})
    */
   Amplitude.prototype.setUserProperties = function setUserProperties(userProperties) {
@@ -300,7 +303,7 @@ if (BUILD_COMPAT_2_0) {
    * groupName can be a string or an array of strings.
    * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
    * Note: the server response code and response body from the event upload are passed to the callback function.
-   * Deprecated Please use amplitude.getInstance().logEventWithGroups(eventType, eventProperties, groups, opt_callback);
+   * @deprecated Please use amplitude.getInstance().logEventWithGroups(eventType, eventProperties, groups, opt_callback);
    * @example amplitude.logEventWithGroups('Clicked Button', null, {'orgId': 24});
    */
   Amplitude.prototype.logEventWithGroups = function(eventType, eventProperties, groups, opt_callback) {
@@ -324,7 +327,7 @@ if (BUILD_COMPAT_2_0) {
   };
 
   /**
-   * Log revenue event with a price, quantity, and product identifier. DEPRECATED - use logRevenueV2
+   * Log revenue event with a price, quantity, and product identifier.
    * @public
    * @param {number} price - price of revenue event
    * @param {number} quantity - (optional) quantity of products in revenue event. If no quantity specified default to 1.
@@ -356,9 +359,9 @@ if (BUILD_COMPAT_2_0) {
   };
 
   /**
-   * Set global user properties. Note this is deprecated, and we recommend using setUserProperties
+   * Set global user properties.
    * @public
-   * @deprecated
+   * @deprecated Please use amplitudeClient.setUserProperties
    */
   Amplitude.prototype.setGlobalUserProperties = function setGlobalUserProperties(userProperties) {
     this.getInstance().setUserProperties(userProperties);
