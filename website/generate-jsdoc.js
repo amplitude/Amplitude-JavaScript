@@ -59,7 +59,7 @@ ${data.examples}
 }
 
 function documentDeprecated(data) {
-  return `:::deprecated
+  return `:::danger Deprecated
   ${data.deprecated}
   :::
 `;
