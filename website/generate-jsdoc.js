@@ -26,16 +26,18 @@ function generateMarkdown(inputFile) {
     .join("\n");
   fs.writeFileSync(
     path.join(outputDir, `${className}.md`),
-    prettier.format(markdownOutput, { parser: "markdown" })
+    prettier.format(markdownOutput, { parser: "mdx" })
   );
 }
 
 function documentItem(data) {
-  return `## \`${data.id}\`
+  return `${documentHeader(data)}
 
 ${data.examples ? documentExamples(data) : ""}
 
 ${data.description || ""} 
+
+${data.deprecated ? documentDeprecated(data) : ""}
 
 ${data.params ? documentParams(data) : ""}
 
@@ -43,10 +45,24 @@ ${data.returns ? documentReturn(data) : ""}
 `;
 }
 
+function documentHeader(data) {
+  if (data.deprecated)
+    return `## ~~\`${data.id}\`~~`
+  return `## \`${data.id}\``
+}
+
 function documentExamples(data) {
   return `\`\`\`
 ${data.examples}
 \`\`\`
+`;
+}
+
+function documentDeprecated(data) {
+  return `<div style={{ padding: '10px', backgroundColor: '#ff4c59' }}>
+  <h6>DEPRECATED</h6>
+  ${data.deprecated}
+</div>
 `;
 }
 
