@@ -21,8 +21,6 @@ var AMP_OP_UNSET = '$unset';
  * allowing you to chain multiple method calls together.
  * Note: if the same user property is used in multiple operations on a single Identify object,
  * only the first operation on that property will be saved, and the rest will be ignored.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#user-properties-and-user-property-operations}
- * for more information on the Identify API and user property operations.
  * @constructor Identify
  * @public
  * @example var identify = new amplitude.Identify();

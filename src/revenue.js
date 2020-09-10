@@ -2,19 +2,13 @@ import constants from './constants';
 import type from './type';
 import utils from './utils';
 
-/*
- * Wrapper for logging Revenue data. Revenue objects get passed to amplitude.logRevenueV2 to send to Amplitude servers.
- * Note: price is the only required field. If quantity is not specified, then defaults to 1.
- */
-
 /**
- * Revenue API - instance constructor. Revenue objects are a wrapper for revenue data.
+ * Revenue API - instance constructor. Wrapper for logging Revenue data. Revenue objects get passed to amplitude.logRevenueV2 to send to Amplitude servers.
  * Each method updates a revenue property in the Revenue object, and returns the same Revenue object,
  * allowing you to chain multiple method calls together.
+ * 
  * Note: price is a required field to log revenue events.
  * If quantity is not specified then defaults to 1.
- * See [Readme]{@link https://github.com/amplitude/Amplitude-Javascript#tracking-revenue} for more information
- * about logging Revenue.
  * @constructor Revenue
  * @public
  * @example var revenue = new amplitude.Revenue();
@@ -68,7 +62,8 @@ Revenue.prototype.setQuantity = function setQuantity(quantity) {
 
 /**
  * Set a value for the price. This field is required for all revenue being logged.
- * Note revenue amount is calculated as price * quantity.
+ * 
+ * Note: revenue amount is calculated as price * quantity.
  * @public
  * @param {number} price - Double value for the quantity.
  * @return {Revenue} Returns the same Revenue object, allowing you to chain multiple method calls together.
