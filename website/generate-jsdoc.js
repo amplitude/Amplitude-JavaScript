@@ -59,10 +59,9 @@ ${data.examples}
 }
 
 function documentDeprecated(data) {
-  return `<div style={{ padding: '10px', backgroundColor: '#ff4c59' }}>
-  <h6>DEPRECATED</h6>
+  return `:::deprecated
   ${data.deprecated}
-</div>
+  :::
 `;
 }
 
