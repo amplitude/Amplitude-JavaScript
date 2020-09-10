@@ -10,6 +10,7 @@ import DEFAULT_OPTIONS from './options';
 /**
  * Legacy API of the Amplitude JS SDK - instance manager. Wraps around the current [AmplitudeClient](https://amplitude.github.io/Amplitude-JavaScript/) which provides more features
  * Function calls directly on amplitude have been deprecated. Please call methods on the default shared instance: amplitude.getInstance() instead.
+ * 
  * See the [3.0.0 changelog](https://github.com/amplitude/Amplitude-JavaScript/blob/ed405afb5f06d5cf5b72539a5d09179abcf7e1fe/README.md#300-update-and-logging-events-to-multiple-amplitude-apps) for more information about this change.
  * @constructor Amplitude
  * @public
@@ -199,7 +200,9 @@ if (BUILD_COMPAT_2_0) {
 
   /**
     * Sets a custom deviceId for current user. Note: this is not recommended unless you know what you are doing
-    * (like if you have your own system for managing deviceIds). Make sure the deviceId you set is sufficiently unique
+    * (like if you have your own system for managing deviceIds).
+    * 
+    * Make sure the deviceId you set is sufficiently unique
     * (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
     * @public
     * @param {string} deviceId - custom deviceId for current user.
@@ -284,8 +287,10 @@ if (BUILD_COMPAT_2_0) {
 
   /**
    * Log an event with eventType, eventProperties, and groups. Use this to set event-level groups.
+   * 
    * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
    * (unless you explicitly set it with setGroup).
+   * 
    * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
    * about groups and Count by Distinct on the Amplitude platform.
    * @public
@@ -305,6 +310,7 @@ if (BUILD_COMPAT_2_0) {
   /**
    * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
    * revenueType and event properties.
+   * 
    * See the [Revenue](https://amplitude.github.io/Amplitude-JavaScript/Revenue/)
    * reference page for more information on the Revenue interface and logging revenue.
    * @public

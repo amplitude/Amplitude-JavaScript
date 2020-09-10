@@ -858,10 +858,12 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
 
 /**
  * Add user to a group or groups. You need to specify a groupType and groupName(s).
+ * 
  * For example you can group people by their organization.
- * In that case groupType is "orgId" and groupName would be the actual ID(s).
+ * In that case, groupType is "orgId" and groupName would be the actual ID(s).
  * groupName can be a string or an array of strings to indicate a user in multiple gruups.
  * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
+ * 
  * Note: this will also set groupType: groupName as a user property.
  * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
  * @public
@@ -1386,6 +1388,7 @@ var _isNumber = function _isNumber(n) {
 /**
  * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
  * revenueType and event properties.
+ * 
  * See the [Revenue](https://amplitude.github.io/Amplitude-JavaScript/Revenue/)
  * reference page for more information on the Revenue interface and logging revenue.
  * @public
