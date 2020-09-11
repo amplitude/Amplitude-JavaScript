@@ -354,14 +354,28 @@ AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(c
  * @private
  */
 AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndReferrer() {
+  let utmProperties;
+  let referrerProperties
+  let gclidProperties;
   if (this.options.includeUtm) {
-    this._initUtmData();
+    utmProperties = this._initUtmData();
   }
   if (this.options.includeReferrer) {
-    this._saveReferrer(this._getReferrer());
+    referrerProperties = this._saveReferrer(this._getReferrer());
   }
   if (this.options.includeGclid) {
-    this._saveGclid(this._getUrlParams());
+    gclidProperties = this._saveGclid(this._getUrlParams());
+  }
+  if (this.options.logAttributionCapturedEvent) {
+    const attributionProperties = Object.assign(
+      {},
+      utmProperties,
+      referrerProperties,
+      gclidProperties
+    );
+    if (Object.keys(attributionProperties).length > 0) {
+      this.logEvent(Constants.ATTRIBUTION_EVENT, attributionProperties);
+    }
   }
 };
 
@@ -675,6 +689,7 @@ AmplitudeClient.prototype._initUtmData = function _initUtmData(queryParams, cook
   cookieParams = cookieParams || this.cookieStorage.get('__utmz');
   var utmProperties = getUtmData(cookieParams, queryParams);
   _sendParamsReferrerUserProperties(this, utmProperties);
+  return utmProperties;
 };
 
 /**
@@ -739,6 +754,7 @@ AmplitudeClient.prototype._saveGclid = function _saveGclid(urlParams) {
   }
   var gclidProperties = {'gclid': gclid};
   _sendParamsReferrerUserProperties(this, gclidProperties);
+  return gclidProperties;
 };
 
 /**
@@ -778,6 +794,7 @@ AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
     'referring_domain': this._getReferringDomain(referrer)
   };
   _sendParamsReferrerUserProperties(this, referrerInfo);
+  return referrerInfo;
 };
 
 /**

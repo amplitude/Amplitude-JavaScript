@@ -30,6 +30,7 @@ export default {
   includeUtm: false,
   language: language.getLanguage(),
   logLevel: 'WARN',
+  logAttributionCapturedEvent: false,
   optOut: false,
   onError: () => {},
   platform,
