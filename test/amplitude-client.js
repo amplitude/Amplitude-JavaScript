@@ -391,7 +391,7 @@ describe('AmplitudeClient', function() {
         identifyId: 60,
         sequenceNumber: 70
       }
-      const storage = new MetadataStorage({storageKey: cookieName, disableCookieStorage: true});
+      const storage = new MetadataStorage({storageKey: cookieName, disableCookies: true});
       storage.save(cookieData);
 
       clock.tick(10);
