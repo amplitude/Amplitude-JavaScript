@@ -8,7 +8,10 @@
     "analytics",
     "amplitude"
   ],
-  "repository": "git://github.com/amplitude/amplitude-javascript.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amplitude/amplitude-javascript.git"
+  },
   "main": "amplitude.umd.js",
   "react-native": "amplitude.native.js",
   "dependencies": {
@@ -51,7 +54,8 @@
     "rollup-plugin-replace": "^2.1.0",
     "rollup-plugin-uglify": "^6.0.2",
     "sinon": "^7.0.0",
-    "uglify-js": "^2.0.0"
+    "uglify-js": "^2.0.0",
+    "semantic-release": "^17.1.1"
   },
   "scripts": {
     "postinstall": "cd website/ && yarn install",
@@ -62,6 +66,14 @@
     "docs:build": "cd website/ && yarn build",
     "docs:serve": "cd website/ && yarn serve",
     "docs:deploy": "cd website/ && yarn deploy",
-    "docs:swizzle": "cd website/ && yarn swizzle"
+    "docs:swizzle": "cd website/ && yarn swizzle",
+    "semantic-release": "semantic-release"
+  },
+  "bugs": {
+    "url": "https://github.com/amplitude/amplitude-javascript/issues"
+  },
+  "homepage": "https://github.com/amplitude/amplitude-javascript#readme",
+  "directories": {
+    "test": "test"
   }
 }
