@@ -27,7 +27,7 @@
                    'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId',
                    'setGlobalUserProperties', 'identify', 'clearUserProperties',
                    'setGroup', 'logRevenueV2', 'regenerateDeviceId',
-                   'logEventWithTimestamp', 'logEventWithGroups'];
+                   'logEventWithTimestamp', 'logEventWithGroups', 'onInit'];
       function setUpProxy(instance) {
         function proxyMain(fn) {
           instance[fn] = function() {
@@ -89,6 +89,14 @@
     }
 </script>
 <script>
+    // Used to show proof of concept, will be removed before merging
+    amplitude.getInstance('app5').onInit((client) => {
+      const isNewSession = client.isNewSession();
+      if (isNewSession) {
+        const attributionProperties = client._collectParamsAndReferrer();
+        client.logEvent('attribution captured', attributionProperties);
+      }
+    });
     amplitude.init('a2dbce0e18dfe5f8e74493843ff5c053', null, {includeReferrer: true, includeUtm: true, includeGclid: true}, function() {
         alert(amplitude.options.deviceId);
     });
@@ -109,6 +117,10 @@
 
     amplitude.getInstance('app4').init('1d2fe1e104eb3f07a24e94d359f70fd5', 'joe@gmail.com');
     amplitude.getInstance('app4').logEvent('app 4 page load');
+
+    // Used to show proof of concept, will be removed
+    amplitude.getInstance('app5').logEvent('log event before init');
+    amplitude.getInstance('app5').init('1d2fe1e104eb3f07a24e94d359f70fd5', {includeReferrer: true, includeUtm: true, includeGclid: true});
 </script>
 <body>
 <h3>Amplitude JS Test</h3>

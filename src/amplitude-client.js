@@ -366,6 +366,23 @@ AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndRefe
 };
 
 /**
+ * Collect all utm, referral, and gclid data and combine into a single object
+ * @private
+ */
+
+AmplitudeClient.prototype._collectParamsAndReferrer = function _collectParamsAndReferrer() {
+  const utmProperties = this._getUtmProperties();
+  const referrerProperties = this._getReferrerProperties(this._getReferrer());
+  const gclidProperties = this._getGclidProperties(this._getUrlParams());
+  
+  return {
+    ...utmProperties,
+    ...referrerProperties,
+    ...gclidProperties,
+  };
+};
+
+/**
  * Parse and validate user specified config values and overwrite existing option value
  * DEFAULT_OPTIONS provides list of all config keys that are modifiable, as well as expected types for values
  * @private
@@ -667,13 +684,21 @@ var _saveCookieData = function _saveCookieData(scope) {
 };
 
 /**
- * Parse the utm properties out of cookies and query for adding to user properties.
+ * Parse the utm properties out of cookies and query params
+ * @private
+ */
+AmplitudeClient.prototype._getUtmProperties = function _getUtmProperties(queryParams, cookieParams) {
+  queryParams = queryParams || this._getUrlParams();
+  cookieParams = cookieParams || this.cookieStorage.get('__utmz');
+  return getUtmData(cookieParams, queryParams);
+};
+
+/**
+ * Gets parsed utm properties and adds to user properties
  * @private
  */
 AmplitudeClient.prototype._initUtmData = function _initUtmData(queryParams, cookieParams) {
-  queryParams = queryParams || this._getUrlParams();
-  cookieParams = cookieParams || this.cookieStorage.get('__utmz');
-  var utmProperties = getUtmData(cookieParams, queryParams);
+  var utmProperties = this._getUtmProperties(queryParams, cookieParams);
   _sendParamsReferrerUserProperties(this, utmProperties);
 };
 
@@ -732,12 +757,20 @@ AmplitudeClient.prototype._getUrlParams = function _getUrlParams() {
  * Try to fetch Google Gclid from url params.
  * @private
  */
-AmplitudeClient.prototype._saveGclid = function _saveGclid(urlParams) {
+AmplitudeClient.prototype._getGclidProperties = function _getGclidProperties(urlParams) {
   var gclid = utils.getQueryParam('gclid', urlParams);
   if (utils.isEmptyString(gclid)) {
     return;
   }
-  var gclidProperties = {'gclid': gclid};
+  return {'gclid': gclid};
+};
+
+/**
+ * If Google Gclid exists, add as user properties
+ * @private
+ */
+AmplitudeClient.prototype._saveGclid = function _saveGclid(urlParams) {
+  var gclidProperties = this._getGclidProperties(urlParams);
   _sendParamsReferrerUserProperties(this, gclidProperties);
 };
 
@@ -765,18 +798,26 @@ AmplitudeClient.prototype._getReferringDomain = function _getReferringDomain(ref
 };
 
 /**
- * Fetch the referrer information, parse the domain and send.
+ * Fetch the referrer information and the domain.
+ * @private
+ */
+AmplitudeClient.prototype._getReferrerProperties = function _getReferrerProperties(referrer) {
+  if (utils.isEmptyString(referrer)) {
+    return;
+  }
+  return {
+    'referrer': referrer,
+    'referring_domain': this._getReferringDomain(referrer)
+  };
+};
+
+/**
+ * Check if referrer info exists and send.
  * Since user properties are propagated on the server, only send once per session, don't need to send with every event
  * @private
  */
 AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
-  if (utils.isEmptyString(referrer)) {
-    return;
-  }
-  var referrerInfo = {
-    'referrer': referrer,
-    'referring_domain': this._getReferringDomain(referrer)
-  };
+  var referrerInfo = this._getReferrerProperties(referrer);
   _sendParamsReferrerUserProperties(this, referrerInfo);
 };
 
