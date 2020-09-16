@@ -370,11 +370,15 @@ AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndRefe
  * @private
  */
 
-AmplitudeClient.prototype._collectParamsAndReferrer = function _collectParamsAndReferrer() {
-  const utmProperties = this._getUtmProperties();
-  const referrerProperties = this._getReferrerProperties(this._getReferrer());
-  const gclidProperties = this._getGclidProperties(this._getUrlParams());
-  
+AmplitudeClient.prototype._getParamsAndReferrer = function _getParamsAndReferrer() {
+  const utmProperties = this.options.includeUtm ? this._getUtmProperties() : {};
+  const referrerProperties = this.options.includeReferrer
+    ? this._getReferrerProperties(this._getReferrer())
+    : {};
+  const gclidProperties = this.options.includeGlid
+    ? this._getGclidProperties(this._getUrlParams())
+    : {};
+
   return {
     ...utmProperties,
     ...referrerProperties,
