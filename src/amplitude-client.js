@@ -368,18 +368,23 @@ AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndRefe
 };
 
 /**
- * Collect all utm, referral, and gclid data and combine into a single object
+ * Collect all utm, referral, and gclid data
  * @private
  */
-
 AmplitudeClient.prototype._getParamsAndReferrer = function _getParamsAndReferrer() {
-  const utmProperties = this.options.includeUtm ? this._getUtmProperties() : null;
-  const referrerProperties = this.options.includeReferrer
-    ? this._getReferrerProperties(this._getReferrer())
-    : null;
-  const gclidProperties = this.options.includeGlid
-    ? this._getGclidProperties(this._getUrlParams())
-    : null;
+  let utmProperties = null;
+  let referrerProperties = null;
+  let gclidProperties = null;
+
+  if (this.options.includeUtm) {
+    utmProperties = this._getUtmProperties()
+  }
+  if (this.options.includeReferrer) {
+    referrerProperties = this._getReferrerProperties(this._getReferrer())
+  }
+  if (this.options.includeGclid) {
+    gclidProperties = this._getGclidProperties(this._getUrlParams())
+  }
 
   return {
     utmProperties,
@@ -700,7 +705,7 @@ AmplitudeClient.prototype._getUtmProperties = function _getUtmProperties(queryPa
 };
 
 /**
- * Gets parsed utm properties and adds to user properties
+ * Accepts parsed utm properties and adds to user properties
  * @private
  */
 AmplitudeClient.prototype._initUtmData = function _initUtmData(utmProperties) {
@@ -759,7 +764,7 @@ AmplitudeClient.prototype._getUrlParams = function _getUrlParams() {
 };
 
 /**
- * Try to fetch Google Gclid from url params.
+ * Attempts to fetch Google Gclid from url params.
  * @private
  */
 AmplitudeClient.prototype._getGclidProperties = function _getGclidProperties(urlParams) {
@@ -771,7 +776,7 @@ AmplitudeClient.prototype._getGclidProperties = function _getGclidProperties(url
 };
 
 /**
- * Add Google Gclid as user properties
+ * Adds Google Gclid as user properties
  * @private
  */
 AmplitudeClient.prototype._saveGclid = function _saveGclid(gclidProperties) {
@@ -802,7 +807,7 @@ AmplitudeClient.prototype._getReferringDomain = function _getReferringDomain(ref
 };
 
 /**
- * Fetch the referrer information and the domain.
+ * Gets the referrer information and the domain.
  * @private
  */
 AmplitudeClient.prototype._getReferrerProperties = function _getReferrerProperties(referrer) {
@@ -816,7 +821,7 @@ AmplitudeClient.prototype._getReferrerProperties = function _getReferrerProperti
 };
 
 /**
- * Sends referrer properties
+ * Accepts parsed referrer properties and adds to user properties
  * Since user properties are propagated on the server, only send once per session, don't need to send with every event
  * @private
  */
