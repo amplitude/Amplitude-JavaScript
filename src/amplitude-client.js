@@ -367,12 +367,11 @@ AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndRefe
     gclidProperties = this._saveGclid(this._getUrlParams());
   }
   if (this.options.logAttributionCapturedEvent) {
-    const attributionProperties = Object.assign(
-      {},
-      utmProperties,
-      referrerProperties,
-      gclidProperties
-    );
+    const attributionProperties = {
+      ...utmProperties,
+      ...referrerProperties,
+      ...gclidProperties,
+    };
     if (Object.keys(attributionProperties).length > 0) {
       this.logEvent(Constants.ATTRIBUTION_EVENT, attributionProperties);
     }
