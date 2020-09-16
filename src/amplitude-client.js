@@ -377,13 +377,13 @@ AmplitudeClient.prototype._getParamsAndReferrer = function _getParamsAndReferrer
   let gclidProperties = null;
 
   if (this.options.includeUtm) {
-    utmProperties = this._getUtmProperties()
+    utmProperties = this._getUtmProperties();
   }
   if (this.options.includeReferrer) {
-    referrerProperties = this._getReferrerProperties(this._getReferrer())
+    referrerProperties = this._getReferrerProperties(this._getReferrer());
   }
   if (this.options.includeGclid) {
-    gclidProperties = this._getGclidProperties(this._getUrlParams())
+    gclidProperties = this._getGclidProperties(this._getUrlParams());
   }
 
   return {
