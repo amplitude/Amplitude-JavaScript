@@ -354,14 +354,16 @@ AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(c
  * @private
  */
 AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndReferrer() {
+  const { utmProperties, referrerProperties, gclidProperties } = this._getParamsAndReferrer();
+
   if (this.options.includeUtm) {
-    this._initUtmData();
+    this._initUtmData(utmProperties);
   }
   if (this.options.includeReferrer) {
-    this._saveReferrer(this._getReferrer());
+    this._saveReferrer(referrerProperties);
   }
   if (this.options.includeGclid) {
-    this._saveGclid(this._getUrlParams());
+    this._saveGclid(gclidProperties);
   }
 };
 
@@ -371,18 +373,18 @@ AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndRefe
  */
 
 AmplitudeClient.prototype._getParamsAndReferrer = function _getParamsAndReferrer() {
-  const utmProperties = this.options.includeUtm ? this._getUtmProperties() : {};
+  const utmProperties = this.options.includeUtm ? this._getUtmProperties() : null;
   const referrerProperties = this.options.includeReferrer
     ? this._getReferrerProperties(this._getReferrer())
-    : {};
+    : null;
   const gclidProperties = this.options.includeGlid
     ? this._getGclidProperties(this._getUrlParams())
-    : {};
+    : null;
 
   return {
-    ...utmProperties,
-    ...referrerProperties,
-    ...gclidProperties,
+    utmProperties,
+    referrerProperties,
+    gclidProperties,
   };
 };
 
@@ -701,8 +703,7 @@ AmplitudeClient.prototype._getUtmProperties = function _getUtmProperties(queryPa
  * Gets parsed utm properties and adds to user properties
  * @private
  */
-AmplitudeClient.prototype._initUtmData = function _initUtmData(queryParams, cookieParams) {
-  var utmProperties = this._getUtmProperties(queryParams, cookieParams);
+AmplitudeClient.prototype._initUtmData = function _initUtmData(utmProperties) {
   _sendParamsReferrerUserProperties(this, utmProperties);
 };
 
@@ -770,11 +771,10 @@ AmplitudeClient.prototype._getGclidProperties = function _getGclidProperties(url
 };
 
 /**
- * If Google Gclid exists, add as user properties
+ * Add Google Gclid as user properties
  * @private
  */
-AmplitudeClient.prototype._saveGclid = function _saveGclid(urlParams) {
-  var gclidProperties = this._getGclidProperties(urlParams);
+AmplitudeClient.prototype._saveGclid = function _saveGclid(gclidProperties) {
   _sendParamsReferrerUserProperties(this, gclidProperties);
 };
 
@@ -816,13 +816,12 @@ AmplitudeClient.prototype._getReferrerProperties = function _getReferrerProperti
 };
 
 /**
- * Check if referrer info exists and send.
+ * Sends referrer properties
  * Since user properties are propagated on the server, only send once per session, don't need to send with every event
  * @private
  */
-AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrer) {
-  var referrerInfo = this._getReferrerProperties(referrer);
-  _sendParamsReferrerUserProperties(this, referrerInfo);
+AmplitudeClient.prototype._saveReferrer = function _saveReferrer(referrerProperties) {
+  _sendParamsReferrerUserProperties(this, referrerProperties);
 };
 
 /**
