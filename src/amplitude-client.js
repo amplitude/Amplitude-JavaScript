@@ -368,7 +368,7 @@ AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndRefe
 };
 
 /**
- * Collect all utm, referral, and gclid data
+ * Fetch all utm, referral, and gclid data
  * @private
  */
 AmplitudeClient.prototype._getParamsAndReferrer = function _getParamsAndReferrer() {
