@@ -23,10 +23,10 @@ const get = (name) => {
 };
 
 const set = (name, value, opts) => {
-  let expires = value !== null ? opts.expirationDays : -1 ;
+  let expires = value !== null ? opts.expirationDays : -1;
   if (expires) {
     const date = new Date();
-    date.setTime(date.getTime() + (expires * 24 * 60 * 60 * 1000));
+    date.setTime(date.getTime() + expires * 24 * 60 * 60 * 1000);
     expires = date;
   }
   let str = name + '=' + value;
@@ -46,15 +46,14 @@ const set = (name, value, opts) => {
   document.cookie = str;
 };
 
-
 // test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
-const areCookiesEnabled = () => {
+const areCookiesEnabled = (opts = {}) => {
   const uid = String(new Date());
   try {
     const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
-    set(cookieName, uid, {});
+    set(cookieName, uid, opts);
     const _areCookiesEnabled = get(cookieName + '=') === uid;
-    set(cookieName, null, {});
+    set(cookieName, null, opts);
     return _areCookiesEnabled;
   } catch (e) {}
   return false;
@@ -63,5 +62,5 @@ const areCookiesEnabled = () => {
 export default {
   set,
   get,
-  areCookiesEnabled
+  areCookiesEnabled,
 };
