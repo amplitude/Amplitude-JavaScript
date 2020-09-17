@@ -30,6 +30,14 @@ class MetadataStorage {
     this.sameSite = sameSite;
     this.expirationDays = expirationDays;
 
+    this.cookieDomain = '';
+
+    if (!BUILD_COMPAT_REACT_NATIVE) {
+      const writableTopDomain = topDomain(getLocation().href);
+      this.cookieDomain =
+        domain || (writableTopDomain ? '.' + writableTopDomain : null);
+    }
+
     this.disableCookieStorage =
       disableCookies ||
       !baseCookie.areCookiesEnabled({
@@ -38,14 +46,6 @@ class MetadataStorage {
         sameSite: this.sameSite,
         expirationDays: this.expirationDays,
       });
-
-    this.cookieDomain = '';
-
-    if (!BUILD_COMPAT_REACT_NATIVE) {
-      const writableTopDomain = topDomain(getLocation().href);
-      this.cookieDomain =
-        domain || (writableTopDomain ? '.' + writableTopDomain : null);
-    }
   }
 
   getCookieStorageKey() {
