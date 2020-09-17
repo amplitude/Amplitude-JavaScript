@@ -2626,8 +2626,8 @@ describe('setVersionName', function() {
       reset();
       cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
       var utmParams = '?utm_source=amplitude&utm_medium=email&utm_term=terms';
-      clock.tick(30 * 60 * 1000 + 1);
       var utmProperties = amplitude._getUtmProperties(utmParams);
+      clock.tick(30 * 60 * 1000 + 1);
       amplitude._initUtmData(utmProperties);
 
       var expectedProperties = {
