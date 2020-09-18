@@ -39,5 +39,5 @@ export default {
   UTM_TERM: 'utm_term',
   UTM_CONTENT: 'utm_content',
 
-  ATTRIBUTION_EVENT: 'attribution captured'
+  ATTRIBUTION_EVENT: '$attributionCaptured'
 };
