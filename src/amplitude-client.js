@@ -355,7 +355,7 @@ AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(c
  */
 AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndReferrer() {
   let utmProperties;
-  let referrerProperties
+  let referrerProperties;
   let gclidProperties;
   if (this.options.includeUtm) {
     utmProperties = this._initUtmData();
