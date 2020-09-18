@@ -72,9 +72,9 @@
     "semantic-release": "semantic-release"
   },
   "bugs": {
-    "url": "https://github.com/jooohhn/amplitude-javascript/issues"
+    "url": "https://github.com/amplitude/amplitude-javascript/issues"
   },
-  "homepage": "https://github.com/jooohhn/amplitude-javascript#readme",
+  "homepage": "https://github.com/amplitude/amplitude-javascript#readme",
   "directories": {
     "test": "test"
   }
