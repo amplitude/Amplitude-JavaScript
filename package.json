@@ -26,15 +26,10 @@
     "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
     "@babel/runtime": "^7.3.4",
-    "@commitlint/cli": "^11.0.0",
-    "@commitlint/config-conventional": "^11.0.0",
     "chai": "^4.1.2",
-    "commitizen": "^4.2.1",
-    "cz-conventional-changelog": "3.3.0",
     "date-fns": "^1.30.1",
     "express": "^4.16.2",
     "fs-extra": "^4.0.2",
-    "husky": "^4.3.0",
     "jsdoc": "^3.6.3",
     "jsdoc-to-markdown": "^6.0.1",
     "jshint": "^2.9.6",
@@ -64,7 +59,6 @@
   },
   "scripts": {
     "postinstall": "cd website/ && yarn install",
-    "commit": "git-cz",
     "test": "make test",
     "dev": "node test/browser/server.js",
     "docs:generate-jsdoc": "node website/generate-jsdoc",
@@ -81,48 +75,5 @@
   "homepage": "https://github.com/jooohhn/amplitude-javascript#readme",
   "directories": {
     "test": "test"
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
-  "commitlint": {
-    "extends": ["@commitlint/config-conventional"]
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog",
-      "types": {
-        "feat": {
-          "description": "A new feature",
-          "title": "Feature"
-        },
-        "fix": {
-          "description": "A bug fix",
-          "title": "Bug Fix"
-        },
-        "perf": {
-          "description": "A code change that improves performance",
-          "title": "Performance"
-        },
-        "test": {
-          "description": "Adding missing tests or correcting existing tests",
-          "title": "Test"
-        },
-        "chore": {
-          "description": "Other changes that don't modify src or test files (formatting, CI, configs, etc)",
-          "title": "Chore"
-        },
-        "revert": {
-          "description": "Reverts a previous commit",
-          "title": "Revert"
-        },
-        "docs": {
-          "description": "Documentation only changes",
-          "title": "Documentation"
-        }
-      }
-    }
   }
 }
