@@ -35,8 +35,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      # - name: Build and unit tests @TODO Renable this at PR or flaky test fix
-      #   run: make test
+      - name: Run tests
+        run: make test
 
       - name: Release # Uses release.config.js
         env:
