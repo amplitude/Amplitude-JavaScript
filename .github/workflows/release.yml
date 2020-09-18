@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - build-pipeline # @TODO_REPLACE_THIS with release branch
+      - release
 
 jobs:
   release:

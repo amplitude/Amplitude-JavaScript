@@ -1,5 +1,5 @@
 module.exports = {
-  "branches": ["build-pipeline"], // @TODO replace with release branch
+  "branches": ["release"],
   "plugins": [
     ["@semantic-release/commit-analyzer", {
       "preset": "angular",
