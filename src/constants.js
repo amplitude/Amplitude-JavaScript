@@ -37,5 +37,7 @@ export default {
   UTM_MEDIUM: 'utm_medium',
   UTM_CAMPAIGN: 'utm_campaign',
   UTM_TERM: 'utm_term',
-  UTM_CONTENT: 'utm_content'
+  UTM_CONTENT: 'utm_content',
+
+  ATTRIBUTION_EVENT: '[Amplitude] Attribution Captured'
 };

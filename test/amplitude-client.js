@@ -2952,6 +2952,32 @@ describe('setVersionName', function() {
       });
     });
 
+    it('should log attribution event when referrer is updated if configured', function() {
+      clock.tick(30 * 60 * 1000 + 1);  // force new session
+      amplitude.init(apiKey, undefined, {includeReferrer: true, logAttributionCapturedEvent: true, batchEvents: true, eventUploadThreshold: 2});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+      // first event should be identify with initial_referrer and referrer
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$set': {
+          'referrer': 'https://amplitude.com/contact',
+          'referring_domain': 'amplitude.com'
+        },
+        '$setOnce': {
+          'initial_referrer': 'https://amplitude.com/contact',
+          'initial_referring_domain': 'amplitude.com'
+        }
+      });
+      // second event should be the attribution captured event with referrer information
+      assert.equal(events[1].event_type, constants.ATTRIBUTION_EVENT);
+      assert.deepEqual(events[1].event_properties, {
+        'referrer': 'https://amplitude.com/contact',
+        'referring_domain': 'amplitude.com'
+      });
+    });
+
     it('should not delete unsent events saved to localStorage', function() {
       var existingEvent = '[{"device_id":"test_device_id","user_id":"test_user_id","timestamp":1453769146589,' +
         '"event_id":49,"session_id":1453763315544,"event_type":"clicked","version_name":"Web","platform":"Web"' +
@@ -2991,6 +3017,62 @@ describe('setVersionName', function() {
           'initial_referrer': 'https://amplitude.com/contact',
           'initial_referring_domain': 'amplitude.com'
         }
+      });
+    });
+
+    it('should log attribution event when UTMs are captured if configured', function() {
+      reset();
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude.init(apiKey, undefined, {includeUtm: true, logAttributionCapturedEvent: true, batchEvents: true, eventUploadThreshold: 2});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+      // first event should be identify with UTM state
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$setOnce': {
+          initial_utm_campaign: 'new',
+          initial_utm_content: 'top'
+        },
+        '$set': {
+          utm_campaign: 'new',
+          utm_content: 'top'
+        }
+      });
+      // second event should be the attribution captured event with UTMs populated
+      assert.equal(events[1].event_type, constants.ATTRIBUTION_EVENT);
+      assert.deepEqual(events[1].event_properties, {
+        utm_campaign: 'new',
+        utm_content: 'top'
+      });
+    });
+
+    it('should log attribution event more than once per session if configured and UTMs changes', function() {
+      reset();
+      cookie.set('__utmz', '133232535.1424926227.1.1.utmcct=top&utmccn=new');
+      amplitude.init(apiKey, undefined, {
+        includeUtm: true, logAttributionCapturedEvent: true, saveParamsReferrerOncePerSession: false, batchEvents: true, eventUploadThreshold: 2
+      });
+      // even though same session, utm params are sent again
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+            // first event should be identify with UTM state
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$setOnce': {
+          initial_utm_campaign: 'new',
+          initial_utm_content: 'top'
+        },
+        '$set': {
+          utm_campaign: 'new',
+          utm_content: 'top'
+        }
+      });
+      // second event should be the attribution captured event with UTMs populated
+      assert.equal(events[1].event_type, constants.ATTRIBUTION_EVENT);
+      assert.deepEqual(events[1].event_properties, {
+        utm_campaign: 'new',
+        utm_content: 'top'
       });
     });
   });
@@ -3049,6 +3131,27 @@ describe('setVersionName', function() {
         '$set': {'gclid': '12345'},
         '$setOnce': {'initial_gclid': '12345'}
       });
+    });
+
+    it('should log attribution event when gclid is captured if configured', () => {
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude.init(apiKey, undefined, {includeGclid: true, logAttributionCapturedEvent: true, batchEvents: true, eventUploadThreshold: 2});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+
+      // first event should be identify with gclid
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$set': {'gclid': '12345'},
+        '$setOnce': {'initial_gclid': '12345'}
+      });
+      // second event should be the attribution captured event with gclid populated
+      assert.equal(events[1].event_type, constants.ATTRIBUTION_EVENT);
+      assert.deepEqual(events[1].event_properties, {
+        'gclid': '12345'
+      })
     });
   });
 
