@@ -56,11 +56,11 @@ PR titles should follow [conventional commit standards](https://www.conventional
 - `chore(<optional scope>)`: Other changes that don't modify src or test files
 - `revert(<optional scope>)`: Revert commit
 
-### Release
+### Release [Amplitude Internal]
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release). It is a tool that will scan commits since the last release, determine the next [semantic version number](https://semver.org/), publish, and create changelogs.
 
-#### Release Conditions
+#### Release Conditions [Amplitude Internal]
 
 - `BREAKING CHANGES` in the body will do a major release
   ```
