@@ -1,3 +1,5 @@
+### As of September 21, 2020 CHANGELOG.md is no longer manually updated. Please check the [releases page](https://github.com/amplitude/Amplitude-JavaScript/releases) for up to date changes.
+
 ### 7.1.1 (August 26, 2020)
 * Fix an issue with detection of whether or not cookies are enabled on a device
 
