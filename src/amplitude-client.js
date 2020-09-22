@@ -2,7 +2,7 @@
 import Constants from './constants';
 import cookieStorage from './cookiestorage';
 import MetadataStorage from '../src/metadata-storage';
-import getUtmData from './utm'; // Urchin Tracking Module 
+import getUtmData from './utm'; // Urchin Tracking Module
 import Identify from './identify';
 import localStorage from './localstorage';  // jshint ignore:line
 import md5 from 'blueimp-md5';
@@ -493,7 +493,7 @@ AmplitudeClient.prototype.isNewSession = function isNewSession() {
  */
 AmplitudeClient.prototype.onInit = function (callback) {
   if (this._isInitialized) {
-    callback();
+    callback(this);
   } else {
     this._onInit.push(callback);
   }
@@ -874,12 +874,12 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
 
 /**
  * Add user to a group or groups. You need to specify a groupType and groupName(s).
- * 
+ *
  * For example you can group people by their organization.
  * In that case, groupType is "orgId" and groupName would be the actual ID(s).
  * groupName can be a string or an array of strings to indicate a user in multiple gruups.
  * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
- * 
+ *
  * Note: this will also set groupType: groupName as a user property.
  * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
  * @public
@@ -1362,7 +1362,7 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(eventType, e
  * Log an event with eventType, eventProperties, and groups. Use this to set event-level groups.
  * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
  * (unless you explicitly set it with setGroup).
- * 
+ *
  * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
  * about groups and Count by Distinct on the Amplitude platform.
  * @public
@@ -1404,7 +1404,7 @@ var _isNumber = function _isNumber(n) {
 /**
  * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
  * revenueType and event properties.
- * 
+ *
  * See the [Revenue](https://amplitude.github.io/Amplitude-JavaScript/Revenue/)
  * reference page for more information on the Revenue interface and logging revenue.
  * @public
@@ -1487,7 +1487,7 @@ var _removeEvents = function _removeEvents(scope, eventQueue, maxId, status, res
 
   var filteredEvents = [];
   for (var i = 0; i < scope[eventQueue].length || 0; i++) {
-    const unsentEvent = scope[eventQueue][i]; 
+    const unsentEvent = scope[eventQueue][i];
 
     if (unsentEvent.event.event_id > maxId) {
       filteredEvents.push(unsentEvent);
