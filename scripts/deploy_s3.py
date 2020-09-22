@@ -1,3 +1,5 @@
+# Script used by CI to upload snippets to S3
+
 import argparse
 import os
 import sys
