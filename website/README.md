@@ -4,7 +4,7 @@ The JavaScript SDK API Reference website is built using [Docusaurus 2](https://v
 
 ### Installation
 
-Installation is automatically done when `yarn install` is ran from the base directory.
+Run `yarn docs:install` to install website dependencies.
 
 ### Generating `website/docs/` from `src/`
 
