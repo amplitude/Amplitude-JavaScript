@@ -16,6 +16,12 @@ jobs:
     - name: Check out Git repository
       uses: actions/checkout@v2
 
+    - name: node_modules cache
+      uses: actions/cache@v2
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
