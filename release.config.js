@@ -15,7 +15,7 @@ module.exports = {
     }],
     ["@semantic-release/exec", {
       "prepareCmd": "make release",
-      "publishCmd": "python scripts/deployjs.py --version ${nextRelease.version}",
+      "publishCmd": "python scripts/deploy_s3.py --version ${nextRelease.version}",
       "failCmd": "npm unpublish amplitude-js@${nextRelease.version}"
     }],
     ["@semantic-release/github", {
