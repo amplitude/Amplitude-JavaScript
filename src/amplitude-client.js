@@ -284,7 +284,7 @@ AmplitudeClient.prototype._getInitialDeviceId = function (configDeviceId, stored
 
   if (this.options.deviceIdFromUrlParam) {
     let deviceIdFromUrlParam = this._getDeviceIdFromUrlParam(this._getUrlParams());
-    if(deviceIdFromUrlParam) {
+    if (deviceIdFromUrlParam) {
         return deviceIdFromUrlParam;
     }
   }
