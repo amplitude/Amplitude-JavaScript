@@ -39,7 +39,7 @@ yarn dev # Start development utility. Open localhost:9000 in your browser to acc
 
 ### PR Commit Title Conventions
 
-PR titles should follow [conventional commit standards](https://www.conventionalcommits.org/en/v1.0.0/). A [probot app](https://github.com/zeke/semantic-pull-requests) checks for this when a PR is opened. This helps automate the [release](#release) process.
+PR titles should follow [conventional commit standards](https://www.conventionalcommits.org/en/v1.0.0/). This helps automate the [release](#release) process.
 
 #### Commit Types ([related to release conditions](#release))
 
