@@ -248,6 +248,20 @@ describe('AmplitudeClient', function() {
       amplitude._getUrlParams.restore();
     });
 
+    it ('should create device id if not set in the url', function(){
+        sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345');
+        amplitude.init(apiKey, userId, {deviceIdFromUrlParam: true});
+        assert.notEqual(amplitude.options.deviceId, null);
+        assert.lengthOf(amplitude.options.deviceId, 22);
+
+        const storage = new MetadataStorage({storageKey: cookieName});
+        const cookieData = storage.load();
+        assert.notEqual(cookieData.deviceId, null);
+        assert.lengthOf(cookieData.deviceId, 22);
+
+        amplitude._getUrlParams.restore();
+    });
+
     it ('should prefer the device id in the config over the url params', function() {
       var deviceId = 'dd_cc_bb_aa';
       sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
