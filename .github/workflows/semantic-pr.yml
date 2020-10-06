@@ -1,6 +1,4 @@
-# Semantic PR title
-
-name: Test
+name: Semantic PR Check
 
 on:
   pull_request:
@@ -23,7 +21,7 @@ jobs:
           startsWith(github.event.pull_request.title, 'build:') || startsWith(github.event.pull_request.title, 'build(') ||
           startsWith(github.event.pull_request.title, 'ci:') || startsWith(github.event.pull_request.title, 'ci(') ||
           startsWith(github.event.pull_request.title, 'chore:') || startsWith(github.event.pull_request.title, 'chore(') ||
-          startsWith(github.event.pull_request.title, 'revert:') || startsWith(github.event.pull_request.title, 'revert(') ||
+          startsWith(github.event.pull_request.title, 'revert:') || startsWith(github.event.pull_request.title, 'revert(')
         run: |
           echo 'Title checks passed'
 
@@ -39,7 +37,7 @@ jobs:
           !startsWith(github.event.pull_request.title, 'build:') && !startsWith(github.event.pull_request.title, 'build(') &&
           !startsWith(github.event.pull_request.title, 'ci:') && !startsWith(github.event.pull_request.title, 'ci(') &&
           !startsWith(github.event.pull_request.title, 'chore:') && !startsWith(github.event.pull_request.title, 'chore(') &&
-          !startsWith(github.event.pull_request.title, 'revert:') && !startsWith(github.event.pull_request.title, 'revert(') &&
+          !startsWith(github.event.pull_request.title, 'revert:') && !startsWith(github.event.pull_request.title, 'revert(')
         run: |
           echo 'Pull request title is not valid. Please check github.com/amplitude/Amplitude-JavaScript/blob/master/CONTRIBUTING.md#pr-commit-title-conventions'
           exit 1
