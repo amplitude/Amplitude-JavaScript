@@ -17,7 +17,7 @@
 A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
 
 ## Installation and Quick Start
-* For using the SDK, please visit our :100:[Developer Center](https://developers.amplitude.com/docs/javascript) for instructions on installing and using our the SDK.
+* For using the SDK, please visit our :100:[Developer Center](https://developers.amplitude.com/docs/javascript) for instructions on installation and usage.
 * For developing the SDK, please visit our [CONTRIBUTING.md](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CONTRIBUTING.md) to get started.
 
 ## Demo Pages
