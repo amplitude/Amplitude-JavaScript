@@ -491,7 +491,7 @@ AmplitudeClient.prototype.isNewSession = function isNewSession() {
 };
 
 /**
- * Store callbacks to call after init
+ * Add callbacks to call after init. Useful for users who load Amplitude through a snippet.
  * @public
  */
 AmplitudeClient.prototype.onInit = function (callback) {
