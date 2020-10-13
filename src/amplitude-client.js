@@ -492,7 +492,7 @@ AmplitudeClient.prototype.isNewSession = function isNewSession() {
 
 /**
  * Store callbacks to call after init
- * @private
+ * @public
  */
 AmplitudeClient.prototype.onInit = function (callback) {
   if (this._isInitialized) {
