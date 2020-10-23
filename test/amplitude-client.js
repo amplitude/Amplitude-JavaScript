@@ -3297,7 +3297,7 @@ describe('setVersionName', function() {
   describe('setDomain', function() {
     beforeEach(() => {
       reset();
-      amplitude.init(apiKey, null, { cookieExpiration: 365, secureCookie: true });
+      amplitude.init(apiKey, null, { cookieExpiration: 1, secureCookie: true });
     });
 
     it('should set the cookie domain to null for an invalid domain', () => {
@@ -3309,7 +3309,7 @@ describe('setVersionName', function() {
     it('should not change the expirationDays options', () => {
       amplitude.setDomain('.foobar.com');
       const options = cookie.options();
-      assert.equal(options.expirationDays, 365);
+      assert.equal(options.expirationDays, 1);
     });
 
     it('should not change the secureCookie options', () => {
