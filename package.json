@@ -16,6 +16,7 @@
   "react-native": "amplitude.native.js",
   "dependencies": {
     "@amplitude/ua-parser-js": "0.7.24",
+    "@amplitude/utils": "^1.0.3",
     "blueimp-md5": "^2.10.0",
     "query-string": "5"
   },

@@ -2,10 +2,22 @@
 # yarn lockfile v1
 
 
+"@amplitude/types@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@amplitude/types/-/types-1.0.3.tgz#b8bb83f82d57bbdadae391ecdf5c74a3179ebe30"
+  integrity sha512-XA+H5FDSupb/bN2hMoRYKTM/jUlO5ys7pVu6LI2gBb4Cm2EYqhDp0vulNDl6bqalVf8PfYtTBqLSZzdpibGrVw==
+
 "@amplitude/ua-parser-js@0.7.24":
   version "0.7.24"
   resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.24.tgz#2ce605af7d2c38d4a01313fb2385df55fbbd69aa"
   integrity sha512-VbQuJymJ20WEw0HtI2np7EdC3NJGUWi8+Xdbc7uk8WfMIF308T0howpzkQ3JFMN7ejnrcSM/OyNGveeE3TP3TA==
+
+"@amplitude/utils@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@amplitude/utils/-/utils-1.0.3.tgz#6945fd1e9ec6b21c6dcae6b21c1d97936812ac89"
+  integrity sha512-hwtPchHP99mcmvYXfiUg5C+K8VkrLB16UBtOcRgkHdvE1WBVmVCR86NnVWNOnO7KX3eQTm1usWYHRcV8/SjhXQ==
+  dependencies:
+    "@amplitude/types" "^1.0.3"
 
 "@babel/code-frame@^7.0.0":
   version "7.0.0"
