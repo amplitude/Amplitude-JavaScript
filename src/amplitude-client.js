@@ -1,4 +1,5 @@
 // Core of SDK code
+import { isBrowserEnv, prototypeJsFix } from '@amplitude/utils';
 import Constants from './constants';
 import cookieStorage from './cookiestorage';
 import MetadataStorage from '../src/metadata-storage';
@@ -82,6 +83,11 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
   try {
     _parseConfig(this.options, opt_config);
+    
+    if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON)
+      prototypeJsFix();
+      utils.log.warn('Prototype.js injected Array.prototype.toJSON. Deleting Array.prototype.toJSON to prevent double-stringify');
+    }
 
     if (this.options.cookieName !== DEFAULT_OPTIONS.cookieName) {
       utils.log.warn('The cookieName option is deprecated. We will be ignoring it for newer cookies');
