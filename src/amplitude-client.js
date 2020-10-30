@@ -23,7 +23,7 @@ let Platform;
 let DeviceInfo;
 if (BUILD_COMPAT_REACT_NATIVE) {
   const reactNative = require('react-native');
-  AsyncStorage = require('@react-native-community/async-storage').default;
+  AsyncStorage = require('@react-native-async-storage/async-storage').default;
   Platform = reactNative.Platform;
   DeviceInfo = require('react-native-device-info');
 }

@@ -30,7 +30,7 @@ A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.ampl
 This library now supports react-native. It has two dependencies on react-native modules you will have to install yourself:
 
 * [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) Tested with version 3.1.4
-* [@react-native-community/async-storage](https://www.npmjs.com/package/@react-native-community/async-storage) Tested with version 1.6.2
+* [@react-native-async-storage/async-storage](https://www.npmjs.com/package/@react-native-async-storage/async-storage) Tested with version 1.6.2
 
 ## Node.js
 Please visit [Amplitude-Node](https://github.com/amplitude/Amplitude-Node) for our Node SDK.
