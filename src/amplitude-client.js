@@ -84,7 +84,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
   try {
     _parseConfig(this.options, opt_config);
     
-    if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON)
+    if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON) {
       prototypeJsFix();
       utils.log.warn('Prototype.js injected Array.prototype.toJSON. Deleting Array.prototype.toJSON to prevent double-stringify');
     }
