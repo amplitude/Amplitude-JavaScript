@@ -69,8 +69,7 @@
     "docs:build": "cd website/ && yarn build",
     "docs:serve": "cd website/ && yarn serve",
     "docs:deploy": "cd website/ && yarn deploy",
-    "docs:swizzle": "cd website/ && yarn swizzle",
-    "semantic-release": "semantic-release"
+    "docs:swizzle": "cd website/ && yarn swizzle"
   },
   "bugs": {
     "url": "https://github.com/amplitude/amplitude-javascript/issues"
