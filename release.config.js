@@ -23,7 +23,7 @@ module.exports = {
       "assets": "amplitude*.js"
     }],
     ["@semantic-release/git", {
-      "assets": ["package.json", "src/amplitude-snippet.js", "CHANGELOG.md"]],
+      "assets": ["package.json", "src/amplitude-snippet.js", "CHANGELOG.md"],
       "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
     }],
   ],
