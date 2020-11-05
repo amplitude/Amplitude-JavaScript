@@ -10,9 +10,10 @@ module.exports = {
     ["@semantic-release/release-notes-generator", {
       "preset": "angular",
     }],
-    ["@semantic-release/npm", {
-      "npmPublish": true,
+    ["@semantic-release/changelog", {
+      "changelogFile": "CHANGELOG.md"
     }],
+    "@semantic-release/npm",
     ["@semantic-release/exec", {
       "prepareCmd": "make release",
       "publishCmd": "python scripts/deploy_s3.py --version ${nextRelease.version}",
@@ -22,7 +23,7 @@ module.exports = {
       "assets": "amplitude*.js"
     }],
     ["@semantic-release/git", {
-      "assets": ["package.json", "src/amplitude-snippet.js"],
+      "assets": ["package.json", "src/amplitude-snippet.js", "CHANGELOG.md"]],
       "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
     }],
   ],
