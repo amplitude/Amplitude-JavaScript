@@ -12,10 +12,10 @@
   resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.24.tgz#2ce605af7d2c38d4a01313fb2385df55fbbd69aa"
   integrity sha512-VbQuJymJ20WEw0HtI2np7EdC3NJGUWi8+Xdbc7uk8WfMIF308T0howpzkQ3JFMN7ejnrcSM/OyNGveeE3TP3TA==
 
-"@amplitude/utils@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@amplitude/utils/-/utils-1.0.4.tgz#e451b17b38b0efb67267233c4da7d9e6c487326a"
-  integrity sha512-yxGcBpWGW1BTRsh9ihSkmRDs9Wza1YjPHzTCkmk9RxML3K8+UNylOJ6MO3YOGlY3qMeFT8TtuVhQLu0srWGrUQ==
+"@amplitude/utils@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@amplitude/utils/-/utils-1.0.5.tgz#843d96b7965c69213bb1896980bed2c1569fbbed"
+  integrity sha512-leo4meeTAvp4W+UWk7EcWaJKuuJ3HqbNglRJPVAUYXaoCs2UzCnCVvjj5rUBN+Mhe0pAmkpEHHaS/1iv2prcKA==
   dependencies:
     "@amplitude/types" "^1.0.4"
 
