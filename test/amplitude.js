@@ -268,7 +268,7 @@ describe('Amplitude', function() {
       amplitude.init(apiKey, userId, config);
       assert.equal(amplitude.options.apiEndpoint, 'api.amplitude.com');
       assert.equal(amplitude.options.batchEvents, false);
-      assert.equal(amplitude.options.cookieExpiration, 3650);
+      assert.equal(amplitude.options.cookieExpiration, 365);
       assert.equal(amplitude.options.cookieName, 'amplitude_id');
       assert.equal(amplitude.options.eventUploadPeriodMillis, 30000);
       assert.equal(amplitude.options.eventUploadThreshold, 30);

@@ -166,7 +166,7 @@ describe('AmplitudeClient', function() {
       amplitude.init(apiKey, userId, config);
       assert.equal(amplitude.options.apiEndpoint, 'api.amplitude.com');
       assert.equal(amplitude.options.batchEvents, false);
-      assert.equal(amplitude.options.cookieExpiration, 3650);
+      assert.equal(amplitude.options.cookieExpiration, 365);
       assert.equal(amplitude.options.cookieName, 'amplitude_id');
       assert.equal(amplitude.options.eventUploadPeriodMillis, 30000);
       assert.equal(amplitude.options.eventUploadThreshold, 30);
@@ -3311,7 +3311,7 @@ describe('setVersionName', function() {
   describe('setDomain', function() {
     beforeEach(() => {
       reset();
-      amplitude.init(apiKey, null, { cookieExpiration: 365, secureCookie: true });
+      amplitude.init(apiKey, null, { cookieExpiration: 1, secureCookie: true });
     });
 
     it('should set the cookie domain to null for an invalid domain', () => {
@@ -3323,7 +3323,7 @@ describe('setVersionName', function() {
     it('should not change the expirationDays options', () => {
       amplitude.setDomain('.foobar.com');
       const options = cookie.options();
-      assert.equal(options.expirationDays, 365);
+      assert.equal(options.expirationDays, 1);
     });
 
     it('should not change the secureCookie options', () => {

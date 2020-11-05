@@ -14,7 +14,7 @@ if (BUILD_COMPAT_REACT_NATIVE) {
 export default {
   apiEndpoint: 'api.amplitude.com',
   batchEvents: false,
-  cookieExpiration: 365 * 10,
+  cookieExpiration: 365, // 12 months is for GDPR compliance
   cookieName: 'amplitude_id', // this is a deprecated option
   sameSiteCookie: 'Lax', // cookie privacy policy
   cookieForceUpgrade: false,
@@ -52,7 +52,7 @@ export default {
     os_version: true,
     platform: true,
     region: true,
-    version_name: true
+    version_name: true,
   },
   unsetParamsReferrerOnNewSession: false,
   unsentKey: 'amplitude_unsent',

@@ -1,50 +1,47 @@
 import cookie from '../src/cookie.js';
-import baseCookie from '../src/base-cookie';
-import getLocation from '../src/get-location';
 
-describe('Cookie', function() {
-
-  before(function() {
+describe('Cookie', () => {
+  before(() => {
     cookie.reset();
   });
 
-  afterEach(function() {
+  afterEach(() => {
     cookie.remove('x');
     cookie.reset();
   });
 
-  describe('get', function() {
-    it('should get an existing cookie', function() {
-      cookie.set('x', { a : 'b' });
-      assert.deepEqual(cookie.get('x'), { a : 'b' });
+  describe('get', () => {
+    it('should get an existing cookie', () => {
+      cookie.set('x', { a: 'b' });
+      assert.deepEqual(cookie.get('x'), { a: 'b' });
     });
 
-    it('should not throw an error on a malformed cookie', function () {
-      document.cookie="x=y; path=/";
+    it('should not throw an error on a malformed cookie', () => {
+      document.cookie = 'x=y; path=/';
       assert.isNull(cookie.get('x'));
     });
   });
 
-  describe('remove', function () {
-    it('should remove a cookie', function() {
-      cookie.set('x', { a : 'b' });
-      assert.deepEqual(cookie.get('x'), { a : 'b' });
+  describe('remove', () => {
+    it('should remove a cookie', () => {
+      cookie.set('x', { a: 'b' });
+      assert.deepEqual(cookie.get('x'), { a: 'b' });
       cookie.remove('x');
       assert.isNull(cookie.get('x'));
     });
   });
 
-  describe('options', function() {
-    it('should set default options', function() {
+  describe('options', () => {
+    it('should set default options', () => {
       assert.deepEqual(cookie.options(), {
         expirationDays: undefined,
-        domain: undefined
+        domain: undefined,
       });
     });
 
-    it('should save options', function() {
-      cookie.options({ expirationDays: 365 });
-      assert.equal(cookie.options().expirationDays, 365);
+    it('should save options', () => {
+      cookie.options({ expirationDays: 1 });
+      assert.equal(cookie.options().expirationDays, 1);
     });
   });
 });
