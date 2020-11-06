@@ -27,6 +27,7 @@
     "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
     "@babel/runtime": "^7.3.4",
+    "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/exec": "^5.0.0",
     "@semantic-release/git": "^9.0.0",
     "chai": "^4.1.2",
@@ -69,8 +70,7 @@
     "docs:build": "cd website/ && yarn build",
     "docs:serve": "cd website/ && yarn serve",
     "docs:deploy": "cd website/ && yarn deploy",
-    "docs:swizzle": "cd website/ && yarn swizzle",
-    "semantic-release": "semantic-release"
+    "docs:swizzle": "cd website/ && yarn swizzle"
   },
   "bugs": {
     "url": "https://github.com/amplitude/amplitude-javascript/issues"

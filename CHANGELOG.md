@@ -1,4 +1,50 @@
-### As of September 21, 2020 CHANGELOG.md is no longer manually updated. Please check the [releases page](https://github.com/amplitude/Amplitude-JavaScript/releases) for up to date changes.
+## [7.3.2](https://github.com/amplitude/amplitude-javascript/compare/v7.3.1...v7.3.2) (2020-11-05)
+
+
+### Bug Fixes
+
+* **cookies:** reduce cookie lifetime ([#306](https://github.com/amplitude/amplitude-javascript/issues/306)) ([84e1a57](https://github.com/amplitude/amplitude-javascript/commit/84e1a5745fbd330fe0b9dba6331e9fbaba5c7015))
+* Prototype js fix ([#313](https://github.com/amplitude/amplitude-javascript/issues/313)) ([7e463ab](https://github.com/amplitude/amplitude-javascript/commit/7e463ab3bb5510ce0cf4d0e4edbe0346029488d7))
+
+## [7.3.1](https://github.com/amplitude/amplitude-javascript/compare/v7.3.0...v7.3.1) (2020-10-30)
+
+
+### Bug Fixes
+
+* **react-native:** Change @react-native-community/async-storage to @react-native-async-storage/async-storage ([#314](https://github.com/amplitude/amplitude-javascript/issues/314)) ([382c5a4](https://github.com/amplitude/amplitude-javascript/commit/382c5a4e508e2ad46a30380ed2e58ee83e696bd4))
+
+# [7.3.0](https://github.com/amplitude/amplitude-javascript/compare/v7.2.2...v7.3.0) (2020-10-15)
+
+
+### Features
+
+* make oninit public ([#307](https://github.com/amplitude/amplitude-javascript/issues/307)) ([51d5d43](https://github.com/amplitude/amplitude-javascript/commit/51d5d4345b2a66c827c1e051e2b77a435fba0609))
+
+## [7.2.2](https://github.com/amplitude/amplitude-javascript/compare/v7.2.1...v7.2.2) (2020-09-25)
+
+
+### Bug Fixes
+
+* Unavailable deviceId fallbacks ([#303](https://github.com/amplitude/amplitude-javascript/issues/303)) ([e0d39fd](https://github.com/amplitude/amplitude-javascript/commit/e0d39fdd6ce8e72a3a490ca16b3c1561d0d16513)), closes [#302](https://github.com/amplitude/amplitude-javascript/issues/302)
+
+## [7.2.1](https://github.com/amplitude/amplitude-javascript/compare/v7.2.0...v7.2.1) (2020-09-22)
+
+
+### Bug Fixes
+
+* **initialization:** always return `this` in onInit ([#300](https://github.com/amplitude/amplitude-javascript/issues/300)) ([44d00d7](https://github.com/amplitude/amplitude-javascript/commit/44d00d7a7f18df19e07107615c2ed7a619b0063c))
+* move bad postinstall script ([#301](https://github.com/amplitude/amplitude-javascript/issues/301)) ([ca98af3](https://github.com/amplitude/amplitude-javascript/commit/ca98af3cb7ded59fa35195b7fb1c3edf091d0449))
+
+# [7.2.0](https://github.com/amplitude/amplitude-javascript/compare/v7.1.1...v7.2.0) (2020-09-22)
+
+
+### Bug Fixes
+
+* **cookies:** respect the options passed into cookies when testing to see if they're enabled ([#294](https://github.com/amplitude/amplitude-javascript/issues/294)) ([61b6590](https://github.com/amplitude/amplitude-javascript/commit/61b6590593238a5f251cbf5aa16233fdd3954802))
+
+### Features
+
+* add logAttributionCapturedEvent option ([#295](https://github.com/amplitude/amplitude-javascript/issues/295)) ([309dac3](https://github.com/amplitude/amplitude-javascript/commit/309dac3873e3404d4e52ba9b6958ab3e194b07b1
 
 ### 7.1.1 (August 26, 2020)
 * Fix an issue with detection of whether or not cookies are enabled on a device
