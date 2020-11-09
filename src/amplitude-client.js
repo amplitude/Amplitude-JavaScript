@@ -518,18 +518,18 @@ AmplitudeClient.prototype.onInit = function (callback) {
  * @public
  * @return {string} device ID of the current client.
  */
-Amplitude.prototype.getDeviceId = function getDeviceId() {
+AmplitudeClient.prototype.getDeviceId = function getDeviceId() {
   return identityManager.getInstance(this._instanceName).getDeviceId();
-}
+};
 
 /**
  * Returns the user ID attached to this amplitude client.
  * @public
  * @return {string | null} user ID of the current client.
  */
-Amplitude.prototype.getDeviceId = function getUserId() {
+AmplitudeClient.prototype.getDeviceId = function getUserId() {
   return identityManager.getInstance(this._instanceName).getUserId();
-}
+};
 
 
 /**
@@ -901,7 +901,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
 
   try {
     const safeUserId = (userId !== undefined && userId !== null && ('' + userId)) || null;
-    identityManager.getInstance(this._instanceName).setUserId(safeUserId)
+    identityManager.getInstance(this._instanceName).setUserId(safeUserId);
     _saveCookieData(this);
   } catch (e) {
     utils.log.error(e);
@@ -1044,7 +1044,7 @@ AmplitudeClient.prototype.resetIdentity = function resetIdentity(deviceId, userI
   identityManager.resetInstance(this._instanceName, newIdentity);
   // Save the new info to metadata
   _saveCookieData(this);
-}
+};
 
 /**
  * Sets user properties for the current user.
