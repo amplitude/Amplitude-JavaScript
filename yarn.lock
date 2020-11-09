@@ -2,6 +2,14 @@
 # yarn lockfile v1
 
 
+"@amplitude/identity@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@amplitude/identity/-/identity-1.0.4.tgz#9708e751b7add15369afd4ab6784dc26013aabe6"
+  integrity sha512-JG63rS7/UQOJPExXhddZ1y+JDioQNSg+lobhodjKTrMCbe+c1Ue9kjkZZSYzVZ4BeOCAg8Ai5AmfLm/PHRC9Kg==
+  dependencies:
+    "@amplitude/types" "^1.0.4"
+    "@amplitude/utils" "^1.0.4"
+
 "@amplitude/types@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@amplitude/types/-/types-1.0.4.tgz#21275b030c8267f9ea133a79c5c525e30c706d69"
@@ -12,7 +20,7 @@
   resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.24.tgz#2ce605af7d2c38d4a01313fb2385df55fbbd69aa"
   integrity sha512-VbQuJymJ20WEw0HtI2np7EdC3NJGUWi8+Xdbc7uk8WfMIF308T0howpzkQ3JFMN7ejnrcSM/OyNGveeE3TP3TA==
 
-"@amplitude/utils@^1.0.5":
+"@amplitude/utils@^1.0.4", "@amplitude/utils@^1.0.5":
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/@amplitude/utils/-/utils-1.0.5.tgz#843d96b7965c69213bb1896980bed2c1569fbbed"
   integrity sha512-leo4meeTAvp4W+UWk7EcWaJKuuJ3HqbNglRJPVAUYXaoCs2UzCnCVvjj5rUBN+Mhe0pAmkpEHHaS/1iv2prcKA==

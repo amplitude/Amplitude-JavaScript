@@ -1,8 +1,10 @@
 // Core of SDK code
+import UAParser from '@amplitude/ua-parser-js'; // Identifying device and browser info (maybe move to backend?)
 import { isBrowserEnv, prototypeJsFix } from '@amplitude/utils';
+
 import Constants from './constants';
 import cookieStorage from './cookiestorage';
-import MetadataStorage from '../src/metadata-storage';
+import MetadataStorage from './metadata-storage';
 import getUtmData from './utm'; // Urchin Tracking Module
 import Identify from './identify';
 import localStorage from './localstorage';  // jshint ignore:line
@@ -10,7 +12,6 @@ import md5 from 'blueimp-md5';
 import Request from './xhr';
 import Revenue from './revenue';
 import type from './type';
-import UAParser from '@amplitude/ua-parser-js'; // Identifying device and browser info (maybe move to backend?)
 import utils from './utils';
 import UUID from './uuid';
 import base64Id from './base64Id';
@@ -83,7 +84,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
   try {
     _parseConfig(this.options, opt_config);
-    
+
     if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON) {
       prototypeJsFix();
       utils.log.warn('Prototype.js injected Array.prototype.toJSON. Deleting Array.prototype.toJSON to prevent double-stringify');
