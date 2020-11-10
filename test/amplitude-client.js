@@ -304,8 +304,8 @@ describe('AmplitudeClient', function() {
       cookie.set(oldCookieName, cookieData);
 
       amplitude.init(apiKey, null, { cookieForceUpgrade: true });
-      const cookieData = cookie.getRaw(cookieName);
-      assert.equal('old_device_id', cookieData.slice(0, 'old_device_id'.length));
+      const cookieRawData = cookie.getRaw(cookieName);
+      assert.equal('old_device_id', cookieRawData.slice(0, 'old_device_id'.length));
     });
 
     it('should delete the old old cookie if forceUpgrade is on', function(){
@@ -323,8 +323,8 @@ describe('AmplitudeClient', function() {
       cookie.set(oldCookieName, cookieData);
 
       amplitude.init(apiKey, null, { cookieForceUpgrade: true });
-      const cookieData = cookie.get(oldCookieName);
-      assert.isNull(cookieData);
+      const cookieRawData = cookie.get(oldCookieName);
+      assert.isNull(cookieRawData);
     });
 
     it('should use device id from the old cookie if a new cookie does not exist', function(){
