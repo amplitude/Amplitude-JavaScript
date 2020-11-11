@@ -24,13 +24,16 @@ describe('AmplitudeClient', function() {
   var userId = 'user';
   var amplitude;
   var server;
+  var sandbox
 
   beforeEach(function() {
     amplitude = new AmplitudeClient();
     server = sinon.fakeServer.create();
+    sandbox = sinon.sandbox.create();
   });
 
   afterEach(function() {
+    sandbox.restore();
     server.restore();
   });
 
@@ -445,6 +448,39 @@ describe('AmplitudeClient', function() {
       assert.equal(amplitude2._eventId, 50);
       assert.equal(amplitude2._identifyId, 60);
       assert.equal(amplitude2._sequenceNumber, 70);
+    });
+
+    it('should not persist anything if storage options is none', function() {
+      const clock = sandbox.useFakeTimers();
+      clock.tick(1000);
+
+      const amplitude2 = new AmplitudeClient();
+      amplitude2.init(apiKey, null, {storage: 'none'});
+      clock.tick(10);
+
+      const amplitude3 = new AmplitudeClient();
+      amplitude3.init(apiKey, null, {storage: 'none'});
+
+      assert.notEqual(amplitude2._sessionId, amplitude3._sessionId);
+    });
+
+    it('should load sessionId if storage options is sessionStorage', function() {
+      const clock = sandbox.useFakeTimers();
+      clock.tick(1000);
+      // Disable cookies read.
+      sandbox.stub(baseCookie, 'get').returns(null);
+
+      const amplitude2 = new AmplitudeClient();
+      amplitude2.init(apiKey, null, {storage: 'sessionStorage'});
+      clock.tick(10);
+
+      // Clear local storage to make sure it's not used.
+      localStorage.clear();
+
+      const amplitude3 = new AmplitudeClient();
+      amplitude3.init(apiKey, null, {storage: 'sessionStorage'});
+
+      assert.equal(amplitude2._sessionId, amplitude3._sessionId);
     });
 
     it('should load saved events from localStorage for default instance', function() {
