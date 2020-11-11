@@ -69,7 +69,7 @@ var truncate = function truncate(value) {
     }
   } else if (type(value) === 'object') {
     for (var key in value) {
-      if (value.hasOwnProperty(key)) {
+      if (key in value) {
         value[key] = truncate(value[key]);
       }
     }
@@ -110,7 +110,7 @@ var validateProperties = function validateProperties(properties) {
 
   var copy = {}; // create a copy with all of the valid properties
   for (var property in properties) {
-    if (!properties.hasOwnProperty(property)) {
+    if (!(property in properties)) {
       continue;
     }
 
