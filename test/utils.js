@@ -239,5 +239,19 @@ describe('utils', function() {
       }
       assert.deepEqual(utils.validateProperties(properties), {});
     });
+
+    it('should validate properties on null objects', function() {
+      var properties = Object.create(null);
+      properties['test'] = 'yes';
+      properties['key'] = 'value';
+      properties['15'] = '16';
+
+      var expected = {
+        'test': 'yes',
+        'key': 'value',
+        '15': '16'
+      };
+      assert.deepEqual(utils.validateProperties(properties), expected);
+    });
   });
 });
