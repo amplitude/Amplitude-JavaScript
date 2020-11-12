@@ -1,3 +1,10 @@
+## [7.3.3](https://github.com/amplitude/amplitude-javascript/compare/v7.3.2...v7.3.3) (2020-11-12)
+
+
+### Bug Fixes
+
+* **validation:** Be able to take in and validate null object event/user properties ([1ed41a3](https://github.com/amplitude/amplitude-javascript/commit/1ed41a3d7713c3930db0d1bffb54f9d8693b46b5))
+
 ## [7.3.2](https://github.com/amplitude/amplitude-javascript/compare/v7.3.1...v7.3.2) (2020-11-05)
 
 
