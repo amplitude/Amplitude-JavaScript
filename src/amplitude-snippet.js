@@ -31,8 +31,8 @@
   for (var j = 0; j < revenueFuncs.length; j++) {proxy(Revenue, revenueFuncs[j]);}
   amplitude.Revenue = Revenue;
   var funcs = ['init', 'logEvent', 'logRevenue', 'setUserId', 'setUserProperties',
-               'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId', 'enableTracking',
-               'setGlobalUserProperties', 'identify', 'clearUserProperties',
+               'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId', 'getDeviceId', 'getUserId',
+                'enableTracking', 'setGlobalUserProperties', 'identify', 'clearUserProperties',
                'setGroup', 'logRevenueV2', 'regenerateDeviceId', 'groupIdentify', 'onInit',
                'logEventWithTimestamp', 'logEventWithGroups', 'setSessionId', 'resetSessionId'];
   function setUpProxy(instance) {

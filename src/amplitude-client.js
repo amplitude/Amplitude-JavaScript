@@ -519,6 +519,10 @@ AmplitudeClient.prototype.onInit = function (callback) {
  * @return {string} device ID of the current client.
  */
 AmplitudeClient.prototype.getDeviceId = function getDeviceId() {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['getDeviceId'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+
   return identityManager.getInstance(this._instanceName).getDeviceId();
 };
 
@@ -527,7 +531,11 @@ AmplitudeClient.prototype.getDeviceId = function getDeviceId() {
  * @public
  * @return {string | null} user ID of the current client.
  */
-AmplitudeClient.prototype.getDeviceId = function getUserId() {
+AmplitudeClient.prototype.getUserId = function getUserId() {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['getUserId'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+
   return identityManager.getInstance(this._instanceName).getUserId();
 };
 
@@ -658,11 +666,11 @@ const _upgradeCookieData = (scope) => {
 
 var _loadCookieDataProps = function _loadCookieDataProps(scope, cookieData) {
   if (cookieData.deviceId && cookieData.deviceId !== scope.getDeviceId()) {
-    scope.resetIdentity(cookieData.deviceId, cookieData.userId);
+    _resetIdentity(scope, cookieData.deviceId, scope.getUserId());
   }
 
   if (cookieData.userId && cookieData.deviceId !== scope.getUserId()) {
-    scope.setUserId(cookieData.userId);
+    _setUserId(scope, cookieData.userId);
   }
 
   if (cookieData.optOut !== null && cookieData.optOut !== undefined) {
@@ -686,6 +694,30 @@ var _loadCookieDataProps = function _loadCookieDataProps(scope, cookieData) {
   if (cookieData.sequenceNumber) {
     scope._sequenceNumber = parseInt(cookieData.sequenceNumber, 10);
   }
+};
+
+var _setUserId = function _setUserId(scope, userId) {
+  const safeUserId = (userId !== undefined && userId !== null && ('' + userId)) || null;
+  identityManager.getInstance(scope._instanceName).setUserId(safeUserId);
+};
+
+var _resetIdentity = function _resetIdentity(scope, deviceId, userId) {
+  let safeDeviceId = deviceId;
+
+  if (!utils.validateInput(deviceId, 'deviceId', 'string') || utils.isEmptyString(deviceId)) {
+    // pass in undefined and let the base identity generate the device ID
+    safeDeviceId = undefined;
+  }
+
+  const newIdentity = new Identity();
+  newIdentity.initializeDeviceId(safeDeviceId);
+  if (userId) {
+    newIdentity.setUserId(userId);
+  }
+
+  // Reset (or set) the identity of this instance to this new identity
+  identityManager.resetInstance(scope._instanceName, newIdentity);
+  // Save the new info to metadata
 };
 
 /**
@@ -900,8 +932,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId) {
   }
 
   try {
-    const safeUserId = (userId !== undefined && userId !== null && ('' + userId)) || null;
-    identityManager.getInstance(this._instanceName).setUserId(safeUserId);
+    _setUserId(this, userId);
     _saveCookieData(this);
   } catch (e) {
     utils.log.error(e);
@@ -1015,7 +1046,6 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
   try {
     if (!utils.isEmptyString(deviceId)) {
       this.resetIdentity(deviceId, this.getUserId());
-      _saveCookieData(this);
     }
   } catch (e) {
     utils.log.error(e);
@@ -1027,21 +1057,7 @@ AmplitudeClient.prototype.resetIdentity = function resetIdentity(deviceId, userI
     return this._q.push(['resetIdentity'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
-  let safeDeviceId = deviceId;
-
-  if (!utils.validateInput(deviceId, 'deviceId', 'string') || utils.isEmptyString(deviceId)) {
-    // pass in undefined and let the base identity generate the device ID
-    safeDeviceId = undefined;
-  }
-
-  const newIdentity = new Identity();
-  newIdentity.initializeDeviceId(safeDeviceId);
-  if (userId) {
-    newIdentity.setUserId(userId);
-  }
-
-  // Reset (or set) the identity of this instance to this new identity
-  identityManager.resetInstance(this._instanceName, newIdentity);
+  _resetIdentity(this, deviceId, userId);
   // Save the new info to metadata
   _saveCookieData(this);
 };

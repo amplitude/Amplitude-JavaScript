@@ -133,23 +133,23 @@ describe('AmplitudeClient', function() {
 
       amplitude.init(apiKey);
       assert.equal(amplitude.options.apiKey, apiKey);
-      assert.lengthOf(amplitude.getDeviceId(), 22);
+      assert.lengthOf(amplitude.getDeviceId(), 25);
     });
 
     it('should accept userId', function() {
       amplitude.init(apiKey, userId);
-      assert.equal(amplitude.options.userId, userId);
+      assert.equal(amplitude.getUserId(), userId);
     });
 
     it('should accept numerical userIds', function() {
       const userId = 5;
       amplitude.init(apiKey, 5);
-      assert.equal(amplitude.options.userId, '5');
+      assert.equal(amplitude.getUserId(), '5');
     });
 
     it('should generate a random deviceId', function() {
       amplitude.init(apiKey, userId);
-      assert.lengthOf(amplitude.getDeviceId(), 22)
+      assert.lengthOf(amplitude.getDeviceId(), 25)
     });
 
     it('should validate config values', function() {
@@ -195,7 +195,7 @@ describe('AmplitudeClient', function() {
       const stored = storage.load();
       assert.property(stored, 'deviceId');
       assert.propertyVal(stored, 'userId', userId);
-      assert.lengthOf(stored.deviceId, 22);
+      assert.lengthOf(stored.deviceId, 25);
     });
 
     it('should set language', function() {
@@ -252,12 +252,12 @@ describe('AmplitudeClient', function() {
         sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345');
         amplitude.init(apiKey, userId, {deviceIdFromUrlParam: true});
         assert.notEqual(amplitude.getDeviceId(), null);
-        assert.lengthOf(amplitude.getDeviceId(), 22);
+        assert.lengthOf(amplitude.getDeviceId(), 25);
 
         const storage = new MetadataStorage({storageKey: cookieName});
         const cookieData = storage.load();
         assert.notEqual(cookieData.deviceId, null);
-        assert.lengthOf(cookieData.deviceId, 22);
+        assert.lengthOf(cookieData.deviceId, 25);
 
         amplitude._getUrlParams.restore();
     });
@@ -783,7 +783,7 @@ it ('should load saved events from localStorage new keys and send events', funct
       assert.lengthOf(amplitude._q, 2);
       amplitude.runQueuedFunctions();
 
-      assert.equal(amplitude.options.userId, userId);
+      assert.equal(amplitude.getUserId(), userId);
       assert.equal(amplitude._unsentCount(), 1);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
@@ -934,7 +934,7 @@ describe('setVersionName', function() {
       amplitude.init(apiKey, null, {'deviceId': deviceId});
       amplitude.regenerateDeviceId();
       assert.notEqual(amplitude.getDeviceId(), deviceId);
-      assert.lengthOf(amplitude.getDeviceId(), 22);
+      assert.lengthOf(amplitude.getDeviceId(), 25);
     });
   });
 
