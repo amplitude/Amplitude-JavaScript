@@ -37,6 +37,9 @@ if (BUILD_COMPAT_REACT_NATIVE) {
  * @example var amplitudeClient = new AmplitudeClient();
  */
 var AmplitudeClient = function AmplitudeClient(instanceName) {
+  if (!isBrowserEnv()) {
+    utils.log.warn('amplitude-js will not work in a non-browser environment. If you are planning to add Amplitude to a node environment, please use @amplitude/node');
+  }
   this._instanceName = utils.isEmptyString(instanceName) ? Constants.DEFAULT_INSTANCE : instanceName.toLowerCase();
   this._unsentEvents = [];
   this._unsentIdentifys = [];
