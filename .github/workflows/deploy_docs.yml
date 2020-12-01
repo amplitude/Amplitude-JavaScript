@@ -36,7 +36,10 @@ jobs:
           node-version: 10.x
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile && yarn docs:install --frozen-lockfile
+
+      - name: Generate website assets
+        run: yarn docs:generate-jsdoc
 
       - name: Add key to allow access to repository
         env:
