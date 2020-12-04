@@ -16,7 +16,7 @@ if (BUILD_COMPAT_REACT_NATIVE) {
  * @typedef {Object} Options
  * @property {string} [apiEndpoint=`api.amplitude.com`] - Endpoint to send amplitude event requests to.
  * @property {boolean} [batchEvents=`false`] -  If `true`, then events are batched together and uploaded only when the number of unsent events is greater than or equal to eventUploadThreshold or after eventUploadPeriodMillis milliseconds have passed since the first unsent event was logged.
- * @property {number} [cookieExpiration=`365`)] - The number of days after which the Amplitude cookie will expire. 12 months is for GDPR compliance.
+ * @property {number} [cookieExpiration=`365`] - The number of days after which the Amplitude cookie will expire. 12 months is for GDPR compliance.
  * @property {string} [cookieName=`amplitude_id`] - *DEPRECATED*
  * @property {string} [sameSiteCookie='None'] -  Sets the SameSite flag on the amplitude cookie. Decides cookie privacy policy.
  * @property {boolean} [cookieForceUpgrade=false] - Forces pre-v6.0.0 instances to adopt post-v6.0.0 compat cookie formats.
