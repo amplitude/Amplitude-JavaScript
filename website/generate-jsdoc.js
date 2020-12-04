@@ -8,11 +8,11 @@ const publicClassFiles = [
   "identify.js",
   "revenue.js",
 ];
-const optionsFile = "options.js";
+const publicTypedefFiles = ["options.js"];
 const srcDir = path.join(__dirname, "../", "src");
 const outputDir = path.join(__dirname, "docs");
 
-function generateOptionsMarkdown(inputFile) {
+function generateTypedefMarkdown(inputFile) {
   const inputFilePath = path.join(srcDir, inputFile);
   const data = jsdoc2md.getTemplateDataSync({ files: inputFilePath });
   const name = data.find((e) => e.kind === "typedef").name;
@@ -132,4 +132,7 @@ for (const file of publicClassFiles) {
   generateClassMarkdown(file);
 }
 
-generateOptionsMarkdown(optionsFile);
+for (const file of publicTypedefFiles) {
+  generateTypedefMarkdown(file);
+}
+
