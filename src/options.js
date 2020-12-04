@@ -19,14 +19,14 @@ if (BUILD_COMPAT_REACT_NATIVE) {
  * @property {number} [cookieExpiration=`365`] - The number of days after which the Amplitude cookie will expire. 12 months is for GDPR compliance.
  * @property {string} [cookieName=`amplitude_id`] - *DEPRECATED*
  * @property {string} [sameSiteCookie='None'] -  Sets the SameSite flag on the amplitude cookie. Decides cookie privacy policy.
- * @property {boolean} [cookieForceUpgrade=false] - Forces pre-v6.0.0 instances to adopt post-v6.0.0 compat cookie formats.
+ * @property {boolean} [cookieForceUpgrade=`false`] - Forces pre-v6.0.0 instances to adopt post-v6.0.0 compat cookie formats.
  * @property {boolean} [deferInitialization=`null`] -  If true, disables the core functionality of the sdk, including saving a cookie and all logging, until explicitly enabled. To enable tracking, please call `amplitude.getInstance().enableTracking()` *Note: This will not affect users who already have an amplitude cookie. The decision to track events is determined by whether or not a user has an amplitude analytics cookie. If the `cookieExpiration</code> is manually defined to be a short lifespan, you may need to run `amplitude.getInstance().enableTracking()` upon the cookie expiring or upon logging in.*
  * @property {boolean} [disableCookies=`false`] -  Disable Ampllitude cookies altogether.
  * @property {string} [deviceId=A randomly generated UUID.] -  The custom Device ID to set. *Note: This is not recommended unless you know what you are doing (e.g. you have your own system for tracking user devices).*
- * @property {boolean} [deviceIdFromUrlParam=false] -  If `true`, then the SDK will parse Device ID values from the URL parameter amp_device_id if available. Device IDs defined in the configuration options during init will take priority over Device IDs from URL parameters.
+ * @property {boolean} [deviceIdFromUrlParam=`false`] -  If `true`, then the SDK will parse Device ID values from the URL parameter amp_device_id if available. Device IDs defined in the configuration options during init will take priority over Device IDs from URL parameters.
  * @property {string} [domain=The top domain of the current page's URL. ('https://amplitude.com')] -  Set a custom domain for the Amplitude cookie. To include subdomains, add a preceding period, eg: `.amplitude.com`.
  * @property {number} [eventUploadPeriodMillis=`30000` (30 sec)] -  Amount of time in milliseconds that the SDK waits before uploading events if batchEvents is true.
- * @property {number} [eventUploadThreshold=30] -  Minimum number of events to batch together per request if batchEvents is true.
+ * @property {number} [eventUploadThreshold=`30`] -  Minimum number of events to batch together per request if batchEvents is true.
  * @property {boolean} [forceHttps=`true`] -  If true, the events will always be uploaded to HTTPS endpoint. Otherwise, it will use the embedding site's protocol.
  * @property {boolean} [includeGclid=`false`] -  If true, captures the gclid URL parameter as well as the user's initial_gclid via a setOnce operation.
  * @property {boolean} [includeReferrer=`false`] -  If `true`, captures the referrer and referring_domain for each session, as well as the user's initial_referrer and initial_referring_domain via a setOnce operation.
@@ -43,7 +43,7 @@ if (BUILD_COMPAT_REACT_NATIVE) {
  * @property {number} [sessionTimeout=`30*60*1000` (30 min)] -  The time between logged events before a new session starts in milliseconds.
  * @property {Object} [trackingOptions=`{ city: true, country: true, carrier: true, device_manufacturer: true, device_model: true, dma: true, ip_address: true, language: true, os_name: true, os_version: true, platform: true, region: true, version_name: true}`] - Type of data associated with a user.
  * @property {boolean} [unsetParamsReferrerOnNewSession=`false`] -  If `false`, the existing `referrer` and `utm_parameter` values will be carried through each new session. If set to `true`, the `referrer` and `utm_parameter` user properties, which include `referrer`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, and `utm_content`, will be set to `null` upon instantiating a new session. Note: This only works if includeReferrer or includeUtm includeUtm are set to true.
- * @property {string} [unsentKey=amplitude_unsent] - localStorage key that stores unsent events.
+ * @property {string} [unsentKey=`amplitude_unsent`] - localStorage key that stores unsent events.
  * @property {string} [unsentIdentifyKey=`amplitude_unsent_identify`] - localStorage key that stores unsent identifies.
  * @property {number} [uploadBatchSize=`100`] -  The maximum number of events to send to the server per request.
  */
