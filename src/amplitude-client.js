@@ -74,7 +74,7 @@ AmplitudeClient.prototype.Revenue = Revenue;
  * @param {string} apiKey - The API key for your app.
  * @param {string} opt_userId - (optional) An identifier for this user.
  * @param {object} opt_config - (optional) Configuration options.
- * See [options.js](https://github.com/amplitude/Amplitude-JavaScript/blob/master/src/options.js#L14) for list of options and default values.
+ * See [options.js](https://amplitude.github.io/Amplitude-JavaScript/Options) for a list of options and default values.
  * @param {function} opt_callback - (optional) Provide a callback function to run after initialization is complete.
  * @example amplitudeClient.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
  */
