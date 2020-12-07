@@ -1612,7 +1612,7 @@ describe('setVersionName', function() {
       assert.lengthOf(unsentEvents, 5);
       assert.deepEqual(unsentEvents[4].event.event_properties, {index: 14});
 
-      // remaining 5 events should be sent by the delayed sendEvent call
+      // remaining 5 events should be sent by the delayed flushEvent call
       clock.tick(eventUploadPeriodMillis);
       assert.lengthOf(server.requests, 2);
       server.respondWith('success');

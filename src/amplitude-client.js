@@ -188,7 +188,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
       this._pendingReadStorage = false;
 
-      this._sendEventsIfReady(); // try sending unsent events
+      this.flushEvents(); // try flushing unsent events
 
       for (let i = 0; i < this._onInit.length; i++) {
         this._onInit[i](this);
@@ -556,32 +556,36 @@ AmplitudeClient.prototype._unsentCount = function _unsentCount() {
 };
 
 /**
- * Send events if ready. Returns true if events are sent.
- * @private
+ * Flushes batched events if ready. Is periodically called by SDK,
+ * but can be manually called by client. Behavior is dependent on configuration
+ * If `batchEvents === false`, it is called after `logEvent`.
+ * If `batchEvents === true`, then events are sent only when batch criterias are met.
+ * @public
+ * @returns {boolean} true if events are sent. false if they aren't or are scheduled for a later time
  */
-AmplitudeClient.prototype._sendEventsIfReady = function _sendEventsIfReady() {
+AmplitudeClient.prototype.flushEvents = function flushEvents() {
   if (this._unsentCount() === 0) {
     return false;
   }
 
   // if batching disabled, send any unsent events immediately
   if (!this.options.batchEvents) {
-    this.sendEvents();
+    this._sendEvents();
     return true;
   }
 
   // if batching enabled, check if min threshold met for batch size
   if (this._unsentCount() >= this.options.eventUploadThreshold) {
-    this.sendEvents();
+    this._sendEvents();
     return true;
   }
 
-  // otherwise schedule an upload after 30s
+  // otherwise schedule an upload after `eventUploadPeriodMillis`
   if (!this._updateScheduled) {  // make sure we only schedule 1 upload
     this._updateScheduled = true;
     setTimeout(function() {
         this._updateScheduled = false;
-        this.sendEvents();
+        this._sendEvents();
       }.bind(this), this.options.eventUploadPeriodMillis
     );
   }
@@ -1276,7 +1280,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(eventType, eventPropert
       this.saveEvents();
     }
 
-    this._sendEventsIfReady(callback);
+    this.flushEvents(callback);
 
     return eventId;
   } catch (e) {
@@ -1513,12 +1517,11 @@ var _removeEvents = function _removeEvents(scope, eventQueue, maxId, status, res
 };
 
 /**
- * Send unsent events. Note: this is called automatically after events are logged if option batchEvents is false.
- * If batchEvents is true, then events are only sent when batch criterias are met.
+ * Uploads unsent batched events created by `logEvent`.
  * @private
  */
-AmplitudeClient.prototype.sendEvents = function sendEvents() {
-  if (!this._apiKeySet('sendEvents()')) {
+AmplitudeClient.prototype._sendEvents = function _sendEvents() {
+  if (!this._apiKeySet('_sendEvents()')) {
     this.removeEvents(Infinity, Infinity, 0, 'No request sent', {reason: 'API key not set'});
     return;
   }
@@ -1533,7 +1536,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
     return;
   }
 
-  // We only make one request at a time. sendEvents will be invoked again once
+  // We only make one request at a time. flushEvents will be invoked again once
   // the last request completes.
   if (this._sending) {
     return;
@@ -1571,8 +1574,8 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
           scope.saveEvents();
         }
 
-        // Send more events if any queued during previous send.
-        scope._sendEventsIfReady();
+        // Flush out more events if any queued during previous send.
+        scope.flushEvents();
 
       // handle payload too large
       } else if (status === 413) {
@@ -1582,9 +1585,9 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
           scope.removeEvents(maxEventId, maxIdentifyId, status, response);
         }
 
-        // The server complained about the length of the request. Backoff and try again.
+        // The server complained about the length of the request. Backoff and try sending again.
         scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
-        scope.sendEvents();
+        scope._sendEvents();
 
       }
       // else {
