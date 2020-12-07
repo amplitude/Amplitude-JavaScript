@@ -1358,6 +1358,9 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     return eventId;
   } catch (e) {
     utils.log.error(e);
+    if (type(callback) === 'function') {
+      callback(0, 'No request sent', {reason: 'Request failed (e.g. it was blocked).'});
+    }
   }
 };
 
