@@ -583,10 +583,10 @@ AmplitudeClient.prototype.flushEvents = function flushEvents() {
   // otherwise schedule an upload after `eventUploadPeriodMillis`
   if (!this._updateScheduled) {  // make sure we only schedule 1 upload
     this._updateScheduled = true;
-    setTimeout(function() {
+    setTimeout(() => {
         this._updateScheduled = false;
         this._sendEvents();
-      }.bind(this), this.options.eventUploadPeriodMillis
+      }, this.options.eventUploadPeriodMillis
     );
   }
 
