@@ -34,7 +34,7 @@
                'setOptOut', 'setVersionName', 'setDomain', 'setDeviceId', 'enableTracking',
                'setGlobalUserProperties', 'identify', 'clearUserProperties',
                'setGroup', 'logRevenueV2', 'regenerateDeviceId', 'groupIdentify', 'onInit',
-               'logEventWithTimestamp', 'logEventWithGroups', 'setSessionId', 'resetSessionId'];
+               'logEventWithTimestamp', 'logEventWithGroups', 'setSessionId', 'resetSessionId', 'flushEvents'];
   function setUpProxy(instance) {
     function proxyMain(fn) {
       instance[fn] = function() {
