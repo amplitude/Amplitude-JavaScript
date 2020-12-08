@@ -65,12 +65,9 @@
     "test": "make test",
     "dev": "node test/browser/server.js",
     "docs:install": "cd website/ && yarn install",
-    "docs:generate-jsdoc": "node website/generate-jsdoc",
+    "docs:generate-jsdoc": "cd website && yarn generate-jsdoc",
     "docs:start": "cd website/ && yarn start",
-    "docs:build": "cd website/ && yarn build",
-    "docs:serve": "cd website/ && yarn serve",
-    "docs:deploy": "cd website/ && yarn deploy",
-    "docs:swizzle": "cd website/ && yarn swizzle"
+    "docs:deploy": "cd website/ && yarn deploy"
   },
   "bugs": {
     "url": "https://github.com/amplitude/amplitude-javascript/issues"
