@@ -564,6 +564,10 @@ AmplitudeClient.prototype._unsentCount = function _unsentCount() {
  * @returns {boolean} true if events are sent. false if `apiKey` hasn't been set, `eventUploadPeriodMillis` hasn't elapsed, batched event counts is less than `eventUploadThreshold`
  */
 AmplitudeClient.prototype.flushEvents = function flushEvents() {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['flushEvents'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+  
   if (this._unsentCount() === 0) {
     return false;
   }
