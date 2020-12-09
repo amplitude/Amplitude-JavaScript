@@ -5,13 +5,22 @@
 
 import Base64 from './base64';
 import baseCookie from './base-cookie';
+import Constants from './constants';
 import getLocation from './get-location';
 import localStorage from './localstorage'; // jshint ignore:line
 import topDomain from './top-domain';
 
+const storageOptionExists = {
+  [Constants.STORAGE_COOKIES]: true,
+  [Constants.STORAGE_NONE]: true,
+  [Constants.STORAGE_LOCAL]: true,
+  [Constants.STORAGE_SESSION]: true,
+};
+
 /**
  * MetadataStorage involves SDK data persistance
  * storage priority: cookies -> localStorage -> in memory
+ * This priority can be overriden by setting the storage options.
  * if in localStorage, unable track users between subdomains
  * if in memory, then memory can't be shared between different tabs
  */
@@ -23,6 +32,7 @@ class MetadataStorage {
     secure,
     sameSite,
     expirationDays,
+    storage,
   }) {
     this.storageKey = storageKey;
     this.domain = domain;
@@ -38,14 +48,23 @@ class MetadataStorage {
         domain || (writableTopDomain ? '.' + writableTopDomain : null);
     }
 
-    this.disableCookieStorage =
-      disableCookies ||
-      !baseCookie.areCookiesEnabled({
-        domain: this.cookieDomain,
-        secure: this.secure,
-        sameSite: this.sameSite,
-        expirationDays: this.expirationDays,
-      });
+    if (storageOptionExists[storage]) {
+      this.storage = storage;
+    } else {
+      const disableCookieStorage =
+        disableCookies ||
+        !baseCookie.areCookiesEnabled({
+          domain: this.cookieDomain,
+          secure: this.secure,
+          sameSite: this.sameSite,
+          expirationDays: this.expirationDays,
+        });
+      if (disableCookieStorage) {
+        this.storage = Constants.STORAGE_LOCAL;
+      } else {
+        this.storage = Constants.STORAGE_COOKIES;
+      }
+    }
   }
 
   getCookieStorageKey() {
@@ -73,6 +92,9 @@ class MetadataStorage {
     identifyId,
     sequenceNumber,
   }) {
+    if (this.storage === Constants.STORAGE_NONE) {
+      return;
+    }
     const value = [
       deviceId,
       Base64.encode(userId || ''), // used to convert not unicode to alphanumeric since cookies only use alphanumeric
@@ -84,25 +106,36 @@ class MetadataStorage {
       sequenceNumber ? sequenceNumber.toString(32) : '0',
     ].join('.');
 
-    if (this.disableCookieStorage) {
-      localStorage.setItem(this.storageKey, value);
-    } else {
-      baseCookie.set(this.getCookieStorageKey(), value, {
-        domain: this.cookieDomain,
-        secure: this.secure,
-        sameSite: this.sameSite,
-        expirationDays: this.expirationDays,
-      });
+    switch (this.storage) {
+      case Constants.STORAGE_SESSION:
+        if (window.sessionStorage) {
+          window.sessionStorage.setItem(this.storageKey, value);
+        }
+        break;
+      case Constants.STORAGE_LOCAL:
+        localStorage.setItem(this.storageKey, value);
+        break;
+      case Constants.STORAGE_COOKIES:
+        baseCookie.set(this.getCookieStorageKey(), value, {
+          domain: this.cookieDomain,
+          secure: this.secure,
+          sameSite: this.sameSite,
+          expirationDays: this.expirationDays,
+        });
+        break;
     }
   }
 
   load() {
     let str;
-    if (!this.disableCookieStorage) {
+    if (this.storage === Constants.STORAGE_COOKIES) {
       str = baseCookie.get(this.getCookieStorageKey() + '=');
     }
     if (!str) {
       str = localStorage.getItem(this.storageKey);
+    }
+    if (!str) {
+      str = window.sessionStorage && window.sessionStorage.getItem(this.storageKey);
     }
 
     if (!str) {

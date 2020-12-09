@@ -119,7 +119,8 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain,
       secure: this.options.secureCookie,
-      sameSite: this.options.sameSiteCookie
+      sameSite: this.options.sameSiteCookie,
+      storage: this.options.storage
     });
 
     const hasOldCookie = !!this.cookieStorage.get(this._oldCookiename);

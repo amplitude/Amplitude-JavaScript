@@ -21,6 +21,13 @@ export default {
   COOKIE_TEST_PREFIX: 'amp_cookie_test',
   COOKIE_PREFIX: "amp",
 
+  // Storage options
+  STORAGE_DEFAULT: '',
+  STORAGE_COOKIES: 'cookies',
+  STORAGE_NONE: 'none',
+  STORAGE_LOCAL: 'localStorage',
+  STORAGE_SESSION: 'sessionStorage',
+
   // revenue keys
   REVENUE_EVENT: 'revenue_amount',
   REVENUE_PRODUCT_ID: '$productId',

@@ -1,3 +1,4 @@
+import Constants from './constants';
 import language from './language';
 
 let platform = 'Web';
@@ -56,7 +57,7 @@ export default {
   sameSiteCookie: 'Lax', // cookie privacy policy
   cookieForceUpgrade: false,
   deferInitialization: false,
-  disableCookies: false,
+  disableCookies: false, // this is a deprecated option
   deviceIdFromUrlParam: false,
   domain: '',
   eventUploadPeriodMillis: 30 * 1000, // 30s
@@ -76,6 +77,7 @@ export default {
   saveParamsReferrerOncePerSession: true,
   secureCookie: false,
   sessionTimeout: 30 * 60 * 1000,
+  storage: Constants.STORAGE_DEFAULT,
   trackingOptions: {
     city: true,
     country: true,
