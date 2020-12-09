@@ -569,8 +569,7 @@ AmplitudeClient.prototype.flushEvents = function flushEvents() {
   }
 
   if (!this._apiKeySet('flushEvents()')) {
-    logger.warn('API key not set. Events won\'t be uploaded');
-    return false;
+    utils.log.warn('API key not set. Events won\'t be uploaded');
   }
 
   // if batching disabled, send any unsent events immediately
