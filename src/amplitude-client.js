@@ -1358,9 +1358,6 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     return eventId;
   } catch (e) {
     utils.log.error(e);
-    if (type(callback) === 'function') {
-      callback(0, 'No request sent', {reason: 'Request failed (e.g. it was blocked).'});
-    }
   }
 };
 
@@ -1687,6 +1684,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
       //  here.
       // }
     } catch (e) {
+      scope.removeEvents(Infinity, Infinity, 0, 'No request sent', {reason: 'Request failed (e.g. it was blocked).'});
       // utils.log('failed upload');
     }
   });
