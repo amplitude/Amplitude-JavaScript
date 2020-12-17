@@ -94,7 +94,8 @@
   },
   "lint-staged": {
     "{src,test,scripts}/**/*.js": [
-      "yarn run fix"
+      "prettier --write",
+      "eslint --fix"
     ]
   }
 }
