@@ -66,8 +66,8 @@ README.md: $(SNIPPET_OUT) version
 #
 
 $(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js rollup.native.js rollup.esm.js rollup.umd.js rollup.umd.min.js
-	@$(PRETTIER) --write $(src)
-	@$(ESLINT) --fix $(SRC)
+	@$(PRETTIER) --check $(SRC)
+	@$(ESLINT) $(SRC)
 	@NODE_ENV=production $(ROLLUP) --config rollup.config.js # is the snippet build config
 	@NODE_ENV=production $(ROLLUP) --config rollup.esm.js # does not concat dependencies, only has module and dependencies 
 	@NODE_ENV=production $(ROLLUP) --config rollup.umd.js # generates npm version, also usable in require js app
@@ -81,8 +81,8 @@ $(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js rollup.n
 # Target for minified `amplitude-snippet.js` file.
 #
 $(SNIPPET_OUT): $(SRC) $(SNIPPET)
-	@$(PRETTIER) --write $(src)
-	@$(ESLINT) --fix $(SRC)
+	@$(PRETTIER) --check $(SRC)
+	@$(ESLINT) $(SRC)
 	@$(MINIFY) $(SNIPPET) -m -b max-line-len=80,beautify=false | awk 'NF' > $(SNIPPET_OUT)
 
 $(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET)
