@@ -1,17 +1,13 @@
 import sinon from 'sinon';
 import AmplitudeClient from '../src/amplitude-client.js';
-import getUtmData from '../src/utm.js';
-import Cookie from '../src/cookie';
 import MetadataStorage from '../src/metadata-storage';
 import localStorage from '../src/localstorage.js';
-import CookieStorage from '../src/cookiestorage.js';
 import baseCookie from '../src/base-cookie.js';
 import Base64 from '../src/base64.js';
 import cookie from '../src/cookie.js';
 import utils from '../src/utils.js';
 import queryString from 'query-string';
 import Identify from '../src/identify.js';
-import Revenue from '../src/revenue.js';
 import constants from '../src/constants.js';
 import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 
@@ -121,10 +117,10 @@ describe('AmplitudeClient', function () {
       let onInitCalled = false;
       let onInit2Called = false;
       amplitude.onInit(() => {
-        onInitCalled = true;
+        onInitCalled = true; /* eslint-disable-line no-unused-vars */
       });
       amplitude.onInit(() => {
-        onInit2Called = true;
+        onInit2Called = true; /* eslint-disable-line no-unused-vars */
       });
 
       amplitude.init(apiKey);
@@ -151,7 +147,6 @@ describe('AmplitudeClient', function () {
     });
 
     it('should accept numerical userIds', function () {
-      const userId = 5;
       amplitude.init(apiKey, 5);
       assert.equal(amplitude.options.userId, '5');
     });
@@ -291,8 +286,6 @@ describe('AmplitudeClient', function () {
     });
 
     it('should load device id from the cookie', function () {
-      var now = new Date().getTime();
-
       // deviceId and sequenceNumber not set, init should load value from localStorage
       var cookieData = {
         deviceId: 'current_device_id',
@@ -1652,7 +1645,7 @@ describe('AmplitudeClient', function () {
       server.respond();
 
       assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 6);
       assert.deepEqual(events[0].event_properties, { index: 10 });
       assert.deepEqual(events[5].event_properties, { index: 100 });
@@ -1690,7 +1683,7 @@ describe('AmplitudeClient', function () {
       server.respondWith('success');
       server.respond();
       assert.lengthOf(amplitude._unsentEvents, 0);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 5);
       assert.deepEqual(events[4].event_properties, { index: 14 });
     });
@@ -1798,7 +1791,7 @@ describe('AmplitudeClient', function () {
       server.respond();
 
       assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 5);
       assert.deepEqual(events[0].event_properties, { index: 0 });
       assert.deepEqual(events[4].event_properties, { index: 4 });
@@ -1808,13 +1801,13 @@ describe('AmplitudeClient', function () {
       amplitude.init(apiKey, null, { uploadBatchSize: 9 });
 
       amplitude._sending = true;
-      for (var i = 0; i < 10; i++) {
+      for (let i = 0; i < 10; i++) {
         amplitude.logEvent('Event', { index: i });
       }
       amplitude._sending = false;
       amplitude.logEvent('Event', { index: 100 });
 
-      for (var i = 0; i < 6; i++) {
+      for (let i = 0; i < 6; i++) {
         assert.lengthOf(server.requests, i + 1);
         server.respondWith([413, {}, '']);
         server.respond();
@@ -1985,7 +1978,7 @@ describe('AmplitudeClient', function () {
 
       // after sending first backoff batch, callback still should not have fired
       assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 8);
       server.respondWith('success');
       server.respond();
@@ -1995,7 +1988,7 @@ describe('AmplitudeClient', function () {
 
       // after sending second backoff batch, callback should fire
       assert.lengthOf(server.requests, 3);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 8);
       server.respondWith('success');
       server.respond();
@@ -2741,7 +2734,7 @@ describe('AmplitudeClient', function () {
 
       amplitude.logEvent('UTM Test Event', {});
       assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.deepEqual(events[0].user_properties, {});
     });
 
@@ -3545,7 +3538,6 @@ describe('AmplitudeClient', function () {
 
     it('should let user override sessionId with setSessionId', function () {
       var amplitude2 = new AmplitudeClient();
-      var cookieStorage = new CookieStorage().getStorage();
 
       // set up initial session
       var sessionId = 1000;

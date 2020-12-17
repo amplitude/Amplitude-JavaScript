@@ -1044,7 +1044,7 @@ describe('Amplitude', function () {
       server.respond();
 
       assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 6);
       assert.deepEqual(events[0].event_properties, { index: 10 });
       assert.deepEqual(events[5].event_properties, { index: 100 });
@@ -1082,7 +1082,7 @@ describe('Amplitude', function () {
       server.respondWith('success');
       server.respond();
       assert.lengthOf(amplitude.getInstance()._unsentEvents, 0);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 5);
       assert.deepEqual(events[4].event_properties, { index: 14 });
     });
@@ -1190,7 +1190,7 @@ describe('Amplitude', function () {
       server.respond();
 
       assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 5);
       assert.deepEqual(events[0].event_properties, { index: 0 });
       assert.deepEqual(events[4].event_properties, { index: 4 });
@@ -1200,13 +1200,13 @@ describe('Amplitude', function () {
       amplitude.init(apiKey, null, { uploadBatchSize: 9 });
 
       amplitude.getInstance()._sending = true;
-      for (var i = 0; i < 10; i++) {
+      for (let i = 0; i < 10; i++) {
         amplitude.logEvent('Event', { index: i });
       }
       amplitude.getInstance()._sending = false;
       amplitude.logEvent('Event', { index: 100 });
 
-      for (var i = 0; i < 6; i++) {
+      for (let i = 0; i < 6; i++) {
         assert.lengthOf(server.requests, i + 1);
         server.respondWith([413, {}, '']);
         server.respond();
@@ -1377,7 +1377,7 @@ describe('Amplitude', function () {
 
       // after sending first backoff batch, callback still should not have fired
       assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 8);
       server.respondWith('success');
       server.respond();
@@ -1387,7 +1387,7 @@ describe('Amplitude', function () {
 
       // after sending second backoff batch, callback should fire
       assert.lengthOf(server.requests, 3);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.lengthOf(events, 8);
       server.respondWith('success');
       server.respond();
@@ -1992,7 +1992,7 @@ describe('Amplitude', function () {
 
       amplitude.logEvent('UTM Test Event', {});
       assert.lengthOf(server.requests, 2);
-      var events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
+      events = JSON.parse(queryString.parse(server.requests[1].requestBody).e);
       assert.deepEqual(events[0].user_properties, {});
     });
   });

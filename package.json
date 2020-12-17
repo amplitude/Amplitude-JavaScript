@@ -73,10 +73,10 @@
     "docs:deploy": "cd website/ && yarn deploy",
     "lint": "yarn run lint:prettier && yarn run lint:eslint",
     "lint:prettier": "prettier --check \"{src,test,scripts}/**/*.js\"",
-    "lint:eslint": "eslint 'src/**/*.js'",
+    "lint:eslint": "eslint \"{src,test,scripts}/**/*.js\"",
     "fix": "yarn run fix:eslint && yarn run fix:prettier",
     "fix:prettier": "prettier --write \"{src,test,scripts}/**/*.js\"",
-    "fix:eslint": "eslint --fix 'src/**/*.js'"
+    "fix:eslint": "eslint --fix \"{src,test,scripts}/**/*.js\""
   },
   "bugs": {
     "url": "https://github.com/amplitude/amplitude-javascript/issues"

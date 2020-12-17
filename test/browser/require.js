@@ -107,7 +107,7 @@ var requirejs, require, define;
         !f && e && ((f = e), (k = A));
         f && (l.splice(0, k, f), (a = l.join('/')));
       }
-      return (f = g(m.pkgs, a)) ? f : a;
+      return (f = g(m.pkgs, a)) ? f : a; /* eslint-disable-line no-cond-assign */
     }
     function d(a) {
       F &&
@@ -375,6 +375,7 @@ var requirejs, require, define;
                 }
                 this.map.isDefine &&
                   void 0 === f &&
+                  /* eslint-disable-next-line no-cond-assign */
                   ((b = this.module) ? (f = b.exports) : this.usingExports && (f = this.exports));
                 if (a) {
                   if ((this.events.error && this.map.isDefine) || k.onError !== ia)
@@ -724,8 +725,8 @@ var requirejs, require, define;
               break;
             }
           d = a.join('/');
-          d += b || (/^data\:|\?/.test(d) || c ? '' : '.js');
-          d = ('/' === d.charAt(0) || d.match(/^[\w\+\.\-]+:/) ? '' : m.baseUrl) + d;
+          d += b || (/^data:|\?/.test(d) || c ? '' : '.js');
+          d = ('/' === d.charAt(0) || d.match(/^[\w+.-]+:/) ? '' : m.baseUrl) + d;
         }
         return m.urlArgs ? d + ((-1 === d.indexOf('?') ? '?' : '&') + m.urlArgs) : d;
       },
@@ -836,7 +837,7 @@ var requirejs, require, define;
       ((D = C.head = document.getElementsByTagName('head')[0]), (I = document.getElementsByTagName('base')[0])) &&
       (D = C.head = I.parentNode);
     k.onError = ia;
-    k.createNode = function (b, c, d) {
+    k.createNode = function (b, c) {
       c = b.xhtml
         ? document.createElementNS('http://www.w3.org/1999/xhtml', 'html:script')
         : document.createElement('script');
@@ -864,7 +865,7 @@ var requirejs, require, define;
       }
       if (ka)
         try {
-          importScripts(d), b.completeLoad(c);
+          importScripts(d), b.completeLoad(c); /* eslint-disable-line no-undef */
         } catch (q) {
           b.onError(G('importscripts', 'importScripts failed for ' + c + ' at ' + d, q, [c]));
         }

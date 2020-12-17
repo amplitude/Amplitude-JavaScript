@@ -469,8 +469,6 @@ this.sinon = function () {
         quoteStrings: true,
       };
 
-      var hasOwn = Object.prototype.hasOwnProperty;
-
       var specialObjects = [];
       if (typeof global !== 'undefined') {
         specialObjects.push({ object: global, value: '[object global]' });
@@ -495,7 +493,7 @@ this.sinon = function () {
         if (func.name) {
           return func.name;
         }
-        var matches = func.toString().match(/function\s+([^\(]+)/m);
+        var matches = func.toString().match(/function\s+([^(]+)/m);
         return (matches && matches[1]) || '';
       }
 
@@ -638,7 +636,7 @@ this.sinon = function () {
           attrName = attr.nodeName.toLowerCase().replace('html:', '');
           val = attr.nodeValue;
           if (attrName !== 'contenteditable' || val !== 'inherit') {
-            if (!!val) {
+            if (val) {
               pairs.push(attrName + '="' + val + '"');
             }
           }
@@ -806,7 +804,7 @@ this.sinon = function () {
         } else if (wrappedMethod.restore && wrappedMethod.restore.sinon) {
           error = new TypeError('Attempted to wrap ' + property + ' which is already wrapped');
         } else if (wrappedMethod.calledBefore) {
-          var verb = !!wrappedMethod.returns ? 'stubbed' : 'spied on';
+          var verb = wrappedMethod.returns ? 'stubbed' : 'spied on';
           error = new TypeError('Attempted to wrap ' + property + ' which is already ' + verb);
         }
 
@@ -928,7 +926,7 @@ this.sinon = function () {
         // doesn't debugging will be slightly less informative
         // (i.e. toString will say 'spy' rather than 'myFunc').
         if (!name) {
-          var matches = func.toString().match(/function ([^\s\(]+)/);
+          var matches = func.toString().match(/function ([^\s(]+)/);
           name = matches && matches[1];
         }
 
@@ -1201,7 +1199,7 @@ this.sinon = function () {
    * Copyright (c) 2010-2014 Christian Johansen
    */
 
-  (function (sinon, formatio) {
+  (function (sinon) {
     function makeApi(sinon) {
       function typeOf(value) {
         if (value === null) {
@@ -1240,8 +1238,6 @@ this.sinon = function () {
    * @depend util/core.js
    * @depend typeOf.js
    */
-  /*jslint eqeqeq: false, onevar: false, plusplus: false*/
-  /*global module, require, sinon*/
   /**
    * Match functions
    *
@@ -1518,7 +1514,7 @@ this.sinon = function () {
         return format;
       }
 
-      function getNodeFormatter(value) {
+      function getNodeFormatter() {
         function format(value) {
           return typeof value == 'object' && value.toString === Object.prototype.toString ? util.inspect(value) : value;
         }
@@ -1538,7 +1534,7 @@ this.sinon = function () {
       if (isNode) {
         try {
           formatio = require('formatio');
-        } catch (e) {}
+        } catch (e) {} /* eslint-disable-line no-empty */
       }
 
       if (formatio) {
@@ -3385,7 +3381,7 @@ this.sinon = function () {
    */
 
   if (typeof sinon == 'undefined') {
-    var sinon = {};
+    sinon = {};
   }
 
   (function (global) {
@@ -3535,7 +3531,7 @@ this.sinon = function () {
         } else {
           try {
             delete global[method];
-          } catch (e) {}
+          } catch (e) {} /* eslint-disable-line no-empty */
         }
       }
 
@@ -3582,7 +3578,7 @@ this.sinon = function () {
           return clock;
         },
 
-        setTimeout: function setTimeout(callback, timeout) {
+        setTimeout: function setTimeout() {
           return addTimer.call(this, arguments, false);
         },
 
@@ -3604,7 +3600,7 @@ this.sinon = function () {
           }
         },
 
-        setInterval: function setInterval(callback, timeout) {
+        setInterval: function setInterval() {
           return addTimer.call(this, arguments, true);
         },
 
@@ -3655,8 +3651,7 @@ this.sinon = function () {
 
         firstTimerInRange: function (from, to) {
           var timer,
-            smallest = null,
-            originalTimer;
+            smallest = null;
 
           for (var id in this.timeouts) {
             if (this.timeouts.hasOwnProperty(id)) {
@@ -3665,7 +3660,6 @@ this.sinon = function () {
               }
 
               if (smallest === null || this.timeouts[id].callAt < smallest) {
-                originalTimer = this.timeouts[id];
                 smallest = this.timeouts[id].callAt;
 
                 timer = {
@@ -4603,7 +4597,7 @@ this.sinon = function () {
    */
 
   if (typeof sinon == 'undefined') {
-    var sinon = {};
+    sinon = {};
   }
 
   (function () {
@@ -4696,7 +4690,7 @@ this.sinon = function () {
         getHTTPMethod: function getHTTPMethod(request) {
           if (this.fakeHTTPMethods && /post/i.test(request.method)) {
             var matches = (request.requestBody || '').match(/_method=([^\b;]+)/);
-            return !!matches ? matches[1] : request.method;
+            return matches ? matches[1] : request.method;
           }
 
           return request.method;
@@ -5147,7 +5141,7 @@ this.sinon = function () {
         }
 
         if (callback.length) {
-          return function sinonAsyncSandboxedTest(callback) {
+          return function sinonAsyncSandboxedTest() {
             return sinonSandboxedTest.apply(this, arguments);
           };
         }
@@ -5380,7 +5374,7 @@ this.sinon = function () {
           throw error;
         },
 
-        pass: function pass(assertion) {},
+        pass: function pass() {},
 
         callOrder: function assertCallOrder() {
           verifyIsStub.apply(null, arguments);

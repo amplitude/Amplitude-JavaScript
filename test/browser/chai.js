@@ -71,7 +71,7 @@
     var paths = [path, path + '.js', path + '.json', path + '/index.js', path + '/index.json'];
 
     for (var i = 0; i < paths.length; i++) {
-      var path = paths[i];
+      path = paths[i];
       if (require.modules.hasOwnProperty(path)) return path;
       if (require.aliases.hasOwnProperty(path)) return require.aliases[path];
     }
@@ -316,7 +316,7 @@
      * Primary Exports
      */
 
-    var exports = (module.exports = getType);
+    exports = module.exports = getType;
 
     /*!
      * Detectable javascript natives
@@ -719,8 +719,8 @@
      * MIT Licensed
      */
 
-    var used = [],
-      exports = (module.exports = {});
+    var used = [];
+    exports = module.exports = {};
 
     /*!
      * Chai version
@@ -905,8 +905,8 @@
         if (true !== config.showDiff) showDiff = false;
 
         if (!ok) {
-          var msg = util.getMessage(this, arguments),
-            actual = util.getActual(this, arguments);
+          msg = util.getMessage(this, arguments);
+          var actual = util.getActual(this, arguments);
           throw new AssertionError(
             msg,
             {
@@ -997,7 +997,6 @@
 
     module.exports = function (chai, _) {
       var Assertion = chai.Assertion,
-        toString = Object.prototype.toString,
         flag = _.flag;
 
       /**
@@ -1144,11 +1143,11 @@
           }
         } else if (_.type(val) === 'object') {
           if (!flag(this, 'negate')) {
-            for (var k in val) new Assertion(obj).property(k, val[k]);
+            for (let k in val) new Assertion(obj).property(k, val[k]);
             return;
           }
           var subset = {};
-          for (var k in val) subset[k] = obj[k];
+          for (let k in val) subset[k] = obj[k];
           expected = _.eql(subset, val);
         } else {
           expected = obj && ~obj.indexOf(val);
@@ -3330,7 +3329,7 @@
      * MIT Licensed
      */
 
-    module.exports = function (chai, util) {
+    module.exports = function (chai) {
       chai.expect = function (val, message) {
         return new chai.Assertion(val, message);
       };
@@ -3343,7 +3342,7 @@
      * MIT Licensed
      */
 
-    module.exports = function (chai, util) {
+    module.exports = function (chai) {
       var Assertion = chai.Assertion;
 
       function loadShould() {
@@ -3708,7 +3707,7 @@
 
     var flag = require('./flag'),
       getActual = require('./getActual'),
-      inspect = require('./inspect'),
+      inspect = require('./inspect') /* eslint-disable-line no-unused-vars */,
       objDisplay = require('./objDisplay');
 
     /**
@@ -3769,108 +3768,7 @@
       return match && match[1] ? match[1] : '';
     };
   });
-  require.register('chai/lib/chai/utils/getPathValue.js', function (exports, require, module) {
-    /*!
-     * Chai - getPathValue utility
-     * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
-     * @see https://github.com/logicalparadox/filtr
-     * MIT Licensed
-     */
 
-    /**
-     * ### .getPathValue(path, object)
-     *
-     * This allows the retrieval of values in an
-     * object given a string path.
-     *
-     *     var obj = {
-     *         prop1: {
-     *             arr: ['a', 'b', 'c']
-     *           , str: 'Hello'
-     *         }
-     *       , prop2: {
-     *             arr: [ { nested: 'Universe' } ]
-     *           , str: 'Hello again!'
-     *         }
-     *     }
-     *
-     * The following would be the results.
-     *
-     *     getPathValue('prop1.str', obj); // Hello
-     *     getPathValue('prop1.att[2]', obj); // b
-     *     getPathValue('prop2.arr[0].nested', obj); // Universe
-     *
-     * @param {String} path
-     * @param {Object} object
-     * @returns {Object} value or `undefined`
-     * @name getPathValue
-     * @api public
-     */
-
-    var getPathValue = (module.exports = function (path, obj) {
-      var parsed = parsePath(path);
-      return _getPathValue(parsed, obj);
-    });
-
-    /*!
-     * ## parsePath(path)
-     *
-     * Helper function used to parse string object
-     * paths. Use in conjunction with `_getPathValue`.
-     *
-     *      var parsed = parsePath('myobject.property.subprop');
-     *
-     * ### Paths:
-     *
-     * * Can be as near infinitely deep and nested
-     * * Arrays are also valid using the formal `myobject.document[3].property`.
-     *
-     * @param {String} path
-     * @returns {Object} parsed
-     * @api private
-     */
-
-    function parsePath(path) {
-      var str = path.replace(/\[/g, '.['),
-        parts = str.match(/(\\\.|[^.]+?)+/g);
-      return parts.map(function (value) {
-        var re = /\[(\d+)\]$/,
-          mArr = re.exec(value);
-        if (mArr) return { i: parseFloat(mArr[1]) };
-        else return { p: value };
-      });
-    }
-
-    /*!
-     * ## _getPathValue(parsed, obj)
-     *
-     * Helper companion function for `.parsePath` that returns
-     * the value located at the parsed address.
-     *
-     *      var value = getPathValue(parsed, obj);
-     *
-     * @param {Object} parsed definition from `parsePath`.
-     * @param {Object} object to search against
-     * @returns {Object|Undefined} value
-     * @api private
-     */
-
-    function _getPathValue(parsed, obj) {
-      var tmp = obj,
-        res;
-      for (var i = 0, l = parsed.length; i < l; i++) {
-        var part = parsed[i];
-        if (tmp) {
-          if ('undefined' !== typeof part.p) tmp = tmp[part.p];
-          else if ('undefined' !== typeof part.i) tmp = tmp[part.i];
-          if (i == l - 1) res = tmp;
-        } else {
-          res = undefined;
-        }
-      }
-      return res;
-    }
-  });
   require.register('chai/lib/chai/utils/getProperties.js', function (exports, require, module) {
     /*!
      * Chai - getProperties utility
@@ -3890,7 +3788,7 @@
      * @api public
      */
 
-    module.exports = function getProperties(object) {
+    module.exports = function getProperties(subject) {
       var result = Object.getOwnPropertyNames(subject);
 
       function addProperty(property) {
@@ -3919,7 +3817,7 @@
      * Main exports
      */
 
-    var exports = (module.exports = {});
+    exports = module.exports = {};
 
     /*!
      * test utility
@@ -4044,7 +3942,7 @@
      * @param {Boolean} colors Flag to turn on ANSI escape codes to color the
      *    output. Default is false (no coloring).
      */
-    function inspect(obj, showHidden, depth, colors) {
+    function inspect(obj, showHidden, depth) {
       var ctx = {
         showHidden: showHidden,
         seen: [],
@@ -4108,7 +4006,7 @@
               var container = document.createElementNS(ns, '_');
 
               container.appendChild(value.cloneNode(false));
-              html = container.innerHTML.replace('><', '>' + value.innerHTML + '<');
+              var html = container.innerHTML.replace('><', '>' + value.innerHTML + '<');
               container.innerHTML = '';
               return html;
             }
@@ -4161,8 +4059,8 @@
 
       // Make functions say that they are functions
       if (typeof value === 'function') {
-        var name = getName(value);
-        var nameSuffix = name ? ': ' + name : '';
+        name = getName(value);
+        nameSuffix = name ? ': ' + name : '';
         base = ' [Function' + nameSuffix + ']';
       }
 
@@ -4322,10 +4220,7 @@
     }
 
     function reduceToSingleString(output, base, braces) {
-      var numLinesEst = 0;
       var length = output.reduce(function (prev, cur) {
-        numLinesEst++;
-        if (cur.indexOf('\n') >= 0) numLinesEst++;
         return prev + cur.length + 1;
       }, 0);
 

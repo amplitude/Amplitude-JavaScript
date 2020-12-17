@@ -225,7 +225,6 @@ describe('Identify', function () {
     var value1 = 'testValue';
     var value2 = 0.123;
     var value3 = true;
-    var value4 = {};
 
     var identify = new Identify().setOnce(property, value1).add(property, value2);
     identify.set(property, value3).unset(property);
@@ -244,7 +243,6 @@ describe('Identify', function () {
     var value1 = 'testValue';
     var value2 = 0.123;
     var value3 = true;
-    var value4 = {};
 
     var identify = new Identify().clearAll();
     identify.setOnce(property, value1).add(property, value2).set(property, value3).unset(property);
@@ -262,7 +260,6 @@ describe('Identify', function () {
     var value1 = 'testValue';
     var value2 = 0.123;
     var value3 = true;
-    var value4 = {};
 
     var identify = new Identify().setOnce(property, value1).add(property, value2);
     identify.set(property, value3).unset(property).clearAll();
@@ -277,6 +274,6 @@ describe('Identify', function () {
   });
 
   it('should not log any warnings for calling clearAll multiple times on a single identify', function () {
-    var identify = new Identify().clearAll().clearAll().clearAll();
+    new Identify().clearAll().clearAll().clearAll();
   });
 });
