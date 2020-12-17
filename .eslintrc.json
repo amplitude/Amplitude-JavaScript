@@ -1,0 +1,19 @@
+{
+  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "plugins": ["prettier", "@amplitude/eslint-plugin-amplitude"],
+  "env": { "es6": true, "browser": true, "node": true },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2018
+  },
+  "rules": {
+    "prettier/prettier": "error",
+    "no-prototype-builtins": "off"
+  },
+  "globals": {
+    "BUILD_COMPAT_REACT_NATIVE": "readonly",
+    "BUILD_COMPAT_LOCAL_STORAGE": "readonly",
+    "BUILD_COMPAT_SNIPPET": "readonly",
+    "BUILD_COMPAT_2_0": "readonly"
+  }
+}

@@ -13,13 +13,18 @@ var toString = Object.prototype.toString;
  * @api public
  */
 
-export default function(val) {
+export default function (val) {
   switch (toString.call(val)) {
-    case '[object Date]': return 'date';
-    case '[object RegExp]': return 'regexp';
-    case '[object Arguments]': return 'arguments';
-    case '[object Array]': return 'array';
-    case '[object Error]': return 'error';
+    case '[object Date]':
+      return 'date';
+    case '[object RegExp]':
+      return 'regexp';
+    case '[object Arguments]':
+      return 'arguments';
+    case '[object Array]':
+      return 'array';
+    case '[object Error]':
+      return 'error';
   }
 
   if (val === null) {

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const {version} = require('../package');
-const {format} = require('date-fns');
+const { version } = require('../package');
+const { format } = require('date-fns');
 const crypto = require('crypto');
 
 const cwd = process.cwd();
@@ -9,9 +9,7 @@ const cwd = process.cwd();
 function replaceTextInFile(filepath, match, replacement) {
   var filename = path.join(cwd, filepath);
 
-  const updatedText = fs
-    .readFileSync(filename, 'utf-8')
-    .replace(match, replacement);
+  const updatedText = fs.readFileSync(filename, 'utf-8').replace(match, replacement);
 
   if (updatedText.indexOf(replacement) === -1) {
     throw new Error(`Failed to update text in ${filepath}`);
