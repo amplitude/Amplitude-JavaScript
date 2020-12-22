@@ -17,7 +17,7 @@ import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 
 // maintain for testing backwards compatability
 describe('AmplitudeClient', function() {
-  var apiKey = '000000';
+  var apiKey = '94c438f3750a78ccdee636712bf2c889';
   const cookieName = 'amp_' + apiKey.slice(0,6);
   const oldCookieName = 'amplitude_id_' + apiKey;
   var keySuffix = '_' + apiKey.slice(0,6);
@@ -227,7 +227,7 @@ describe('AmplitudeClient', function() {
 
     it ('should load the device id from url params if configured', function() {
       var deviceId = 'aa_bb_cc_dd';
-      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&fbclid=67890&gclid=12345&amp_device_id=aa_bb_cc_dd');
       amplitude.init(apiKey, userId, {deviceIdFromUrlParam: true});
       assert.equal(amplitude.options.deviceId, deviceId);
 
@@ -240,7 +240,7 @@ describe('AmplitudeClient', function() {
 
     it ('should not load device id from url params if not configured', function() {
       var deviceId = 'aa_bb_cc_dd';
-      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&fbclid=67890&gclid=12345&amp_device_id=aa_bb_cc_dd');
       amplitude.init(apiKey, userId, {deviceIdFromUrlParam: false});
       assert.notEqual(amplitude.options.deviceId, deviceId);
 
@@ -252,7 +252,7 @@ describe('AmplitudeClient', function() {
     });
 
     it ('should create device id if not set in the url', function(){
-        sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345');
+        sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&fbclid=67890&gclid=12345');
         amplitude.init(apiKey, userId, {deviceIdFromUrlParam: true});
         assert.notEqual(amplitude.options.deviceId, null);
         assert.lengthOf(amplitude.options.deviceId, 22);
@@ -267,7 +267,7 @@ describe('AmplitudeClient', function() {
 
     it ('should prefer the device id in the config over the url params', function() {
       var deviceId = 'dd_cc_bb_aa';
-      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&gclid=12345&amp_device_id=aa_bb_cc_dd');
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&fbclid=67890&gclid=12345&amp_device_id=aa_bb_cc_dd');
       amplitude.init(apiKey, userId, {deviceId: deviceId, deviceIdFromUrlParam: true});
       assert.equal(amplitude.options.deviceId, deviceId);
 
@@ -3127,6 +3127,154 @@ describe('setVersionName', function() {
     });
   });
 
+  describe('gatherFbclid', function() {
+    var clock;
+    beforeEach(function() {
+      clock = sinon.useFakeTimers(100);
+      amplitude.init(apiKey);
+      sinon.stub(amplitude, '_getUrlParams').returns('?utm_source=amplitude&utm_medium=email&fbclid=67890&gclid=12345');
+    });
+
+    afterEach(function() {
+      reset();
+      amplitude._getUrlParams.restore();
+      clock.restore();
+    });
+
+    it('should parse fbclid once per session', function() {
+      amplitude.init(apiKey, undefined, {includeFbclid: true});
+
+      // still same session, no fbclid sent
+      assert.lengthOf(server.requests, 0);
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 0);
+
+      // advance the clock to force a new session
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude.init(apiKey, undefined, {includeFbclid: true, batchEvents: true, eventUploadThreshold: 2});
+      amplitude.logEvent('Fbclid test event', {});
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+
+      // first event should be identify with fbclid
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$set': {'fbclid': '67890'},
+        '$setOnce': {'initial_fbclid': '67890'}
+      });
+
+      // second event should be the test event with no fbclid information
+      assert.equal(events[1].event_type, 'Fbclid test event');
+      assert.deepEqual(events[1].user_properties, {});
+    });
+
+    it('should parse fbclid multiple times per session if configured', function() {
+      amplitude.init(apiKey, undefined, {includeFbclid: true, saveParamsReferrerOncePerSession: false});
+
+      // even though session is same, fbclid is sent again
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 1);
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$set': {'fbclid': '67890'},
+        '$setOnce': {'initial_fbclid': '67890'}
+      });
+    });
+
+    it('should log attribution event when fbclid is captured if configured', () => {
+      clock.tick(30 * 60 * 1000 + 1);
+      amplitude.init(apiKey, undefined, {includeFbclid: true, logAttributionCapturedEvent: true, batchEvents: true, eventUploadThreshold: 2});
+
+      assert.lengthOf(server.requests, 1);
+      var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+      assert.lengthOf(events, 2);
+
+      // first event should be identify with fbclid
+      assert.equal(events[0].event_type, '$identify');
+      assert.deepEqual(events[0].user_properties, {
+        '$set': {'fbclid': '67890'},
+        '$setOnce': {'initial_fbclid': '67890'}
+      });
+      // second event should be the attribution captured event with fbclid populated
+      assert.equal(events[1].event_type, constants.ATTRIBUTION_EVENT);
+      assert.deepEqual(events[1].event_properties, {
+        'fbclid': '67890'
+      })
+    });
+  });
+  });
+
+  afterEach(function() {
+    reset();
+    amplitude._getUrlParams.restore();
+    clock.restore();
+  });
+
+  it('should parse fbclid once per session', function() {
+    amplitude.init(apiKey, undefined, {includeFbclid: true});
+
+    // still same session, no fbclid sent
+    assert.lengthOf(server.requests, 0);
+    assert.lengthOf(amplitude._unsentEvents, 0);
+    assert.lengthOf(amplitude._unsentIdentifys, 0);
+
+    // advance the clock to force a new session
+    clock.tick(30 * 60 * 1000 + 1);
+    amplitude.init(apiKey, undefined, {includeFbclid: true, batchEvents: true, eventUploadThreshold: 2});
+    amplitude.logEvent('Fbclid test event', {});
+    assert.lengthOf(server.requests, 1);
+    var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+    assert.lengthOf(events, 2);
+
+    // first event should be identify with fbclid
+    assert.equal(events[0].event_type, '$identify');
+    assert.deepEqual(events[0].user_properties, {
+      '$set': {'fbclid': '67890'},
+      '$setOnce': {'initial_fbclid': '67890'}
+    });
+
+    // second event should be the test event with no fbclid information
+    assert.equal(events[1].event_type, 'Fbclid test event');
+    assert.deepEqual(events[1].user_properties, {});
+  });
+
+  it('should parse fbclid multiple times per session if configured', function() {
+    amplitude.init(apiKey, undefined, {includeFbclid: true, saveParamsReferrerOncePerSession: false});
+
+    // even though session is same, fbclid is sent again
+    assert.lengthOf(server.requests, 1);
+    var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+    assert.lengthOf(events, 1);
+    assert.equal(events[0].event_type, '$identify');
+    assert.deepEqual(events[0].user_properties, {
+      '$set': {'fbclid': '67890'},
+      '$setOnce': {'initial_fbclid': '67890'}
+    });
+  });
+
+  it('should log attribution event when fbclid is captured if configured', () => {
+    clock.tick(30 * 60 * 1000 + 1);
+    amplitude.init(apiKey, undefined, {includeFbclid: true, logAttributionCapturedEvent: true, batchEvents: true, eventUploadThreshold: 2});
+
+    assert.lengthOf(server.requests, 1);
+    var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
+    assert.lengthOf(events, 2);
+
+    // first event should be identify with fbclid
+    assert.equal(events[0].event_type, '$identify');
+    assert.deepEqual(events[0].user_properties, {
+      '$set': {'fbclid': '67890'},
+      '$setOnce': {'initial_fbclid': '67890'}
+    });
+    // second event should be the attribution captured event with fbclid populated
+    assert.equal(events[1].event_type, constants.ATTRIBUTION_EVENT);
+    assert.deepEqual(events[1].event_properties, {
+      'fbclid': '67890'
+    })
+  });
+
   describe('gatherGclid', function() {
     var clock;
     beforeEach(function() {
@@ -3540,4 +3688,3 @@ describe('setVersionName', function() {
       });
     });
   });
-});

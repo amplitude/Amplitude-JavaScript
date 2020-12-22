@@ -9,7 +9,7 @@ import Identify from '../src/identify.js';
 
 // maintain for testing backwards compatability
 describe('Amplitude', function() {
-  var apiKey = '000000';
+  var apiKey = '94c438f3750a78ccdee636712bf2c889';
   const cookieName = 'amp_' + apiKey.slice(0,6);
   var keySuffix = '_' + apiKey.slice(0,6);
   var userId = 'user';
