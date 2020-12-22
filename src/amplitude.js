@@ -9,10 +9,10 @@ import DEFAULT_OPTIONS from './options';
 
 /**
  * Deprecated legacy API of the Amplitude JS SDK - instance manager.
- * 
+ *
  * Wraps around the current [AmplitudeClient](https://amplitude.github.io/Amplitude-JavaScript/) which provides more features
  * Function calls directly on amplitude have been deprecated. Please call methods on the default shared instance: amplitude.getInstance() instead.
- * 
+ *
  * See the [3.0.0 changelog](https://github.com/amplitude/Amplitude-JavaScript/blob/ed405afb5f06d5cf5b72539a5d09179abcf7e1fe/README.md#300-update-and-logging-events-to-multiple-amplitude-apps) for more information about this change.
  * @constructor Amplitude
  * @public
@@ -20,7 +20,7 @@ import DEFAULT_OPTIONS from './options';
  * @example var amplitude = new Amplitude();
  */
 var Amplitude = function Amplitude() {
-  this.options = {...DEFAULT_OPTIONS};
+  this.options = { ...DEFAULT_OPTIONS };
   this._q = [];
   this._instances = {}; // mapping of instance names to instances
 };
@@ -76,13 +76,18 @@ if (BUILD_COMPAT_2_0) {
    * @example amplitude.init('API_KEY', 'USER_ID', {includeReferrer: true, includeUtm: true}, function() { alert('init complete'); });
    */
   Amplitude.prototype.init = function init(apiKey, opt_userId, opt_config, opt_callback) {
-    this.getInstance().init(apiKey, opt_userId, opt_config, function(instance) {
-      // make options such as deviceId available for callback functions
-      this.options = instance.options;
-      if (type(opt_callback) === 'function') {
-        opt_callback(instance);
-      }
-    }.bind(this));
+    this.getInstance().init(
+      apiKey,
+      opt_userId,
+      opt_config,
+      function (instance) {
+        // make options such as deviceId available for callback functions
+        this.options = instance.options;
+        if (type(opt_callback) === 'function') {
+          opt_callback(instance);
+        }
+      }.bind(this),
+    );
   };
 
   /**
@@ -174,7 +179,7 @@ if (BUILD_COMPAT_2_0) {
    * @deprecated Please use amplitude.getInstance().setGroup(groupType, groupName);
    * @example amplitude.setGroup('orgId', 15); // this adds the current user to orgId 15.
    */
-  Amplitude.prototype.setGroup = function(groupType, groupName) {
+  Amplitude.prototype.setGroup = function (groupType, groupName) {
     this.getInstance().setGroup(groupType, groupName);
   };
 
@@ -190,28 +195,28 @@ if (BUILD_COMPAT_2_0) {
   };
 
   /**
-    * Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you
-    * are doing. This can be used in conjunction with `setUserId(null)` to anonymize users after they log out.
-    * With a null userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
-    * This uses src/uuid.js to regenerate the deviceId.
-    * @public
-    * @deprecated Please use amplitude.getInstance().regenerateDeviceId();
-    */
+   * Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you
+   * are doing. This can be used in conjunction with `setUserId(null)` to anonymize users after they log out.
+   * With a null userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
+   * This uses src/uuid.js to regenerate the deviceId.
+   * @public
+   * @deprecated Please use amplitude.getInstance().regenerateDeviceId();
+   */
   Amplitude.prototype.regenerateDeviceId = function regenerateDeviceId() {
     this.getInstance().regenerateDeviceId();
   };
 
   /**
-    * Sets a custom deviceId for current user. Note: this is not recommended unless you know what you are doing
-    * (like if you have your own system for managing deviceIds).
-    * 
-    * Make sure the deviceId you set is sufficiently unique
-    * (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
-    * @public
-    * @param {string} deviceId - custom deviceId for current user.
-    * @deprecated Please use amplitude.getInstance().setDeviceId(deviceId);
-    * @example amplitude.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
-    */
+   * Sets a custom deviceId for current user. Note: this is not recommended unless you know what you are doing
+   * (like if you have your own system for managing deviceIds).
+   *
+   * Make sure the deviceId you set is sufficiently unique
+   * (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
+   * @public
+   * @param {string} deviceId - custom deviceId for current user.
+   * @deprecated Please use amplitude.getInstance().setDeviceId(deviceId);
+   * @example amplitude.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
+   */
   Amplitude.prototype.setDeviceId = function setDeviceId(deviceId) {
     this.getInstance().setDeviceId(deviceId);
   };
@@ -235,7 +240,7 @@ if (BUILD_COMPAT_2_0) {
    * @deprecated Please use amplitude.getInstance().clearUserProperties();
    * @example amplitude.clearUserProperties();
    */
-  Amplitude.prototype.clearUserProperties = function clearUserProperties(){
+  Amplitude.prototype.clearUserProperties = function clearUserProperties() {
     this.getInstance().clearUserProperties();
   };
 
@@ -251,7 +256,7 @@ if (BUILD_COMPAT_2_0) {
    * var identify = new amplitude.Identify().set('colors', ['rose', 'gold']).add('karma', 1).setOnce('sign_up_date', '2016-03-31');
    * amplitude.identify(identify);
    */
-  Amplitude.prototype.identify = function(identify_obj, opt_callback) {
+  Amplitude.prototype.identify = function (identify_obj, opt_callback) {
     this.getInstance().identify(identify_obj, opt_callback);
   };
 
@@ -290,10 +295,10 @@ if (BUILD_COMPAT_2_0) {
 
   /**
    * Log an event with eventType, eventProperties, and groups. Use this to set event-level groups.
-   * 
+   *
    * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
    * (unless you explicitly set it with setGroup).
-   * 
+   *
    * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
    * about groups and Count by Distinct on the Amplitude platform.
    * @public
@@ -306,14 +311,14 @@ if (BUILD_COMPAT_2_0) {
    * @deprecated Please use amplitude.getInstance().logEventWithGroups(eventType, eventProperties, groups, opt_callback);
    * @example amplitude.logEventWithGroups('Clicked Button', null, {'orgId': 24});
    */
-  Amplitude.prototype.logEventWithGroups = function(eventType, eventProperties, groups, opt_callback) {
+  Amplitude.prototype.logEventWithGroups = function (eventType, eventProperties, groups, opt_callback) {
     return this.getInstance().logEventWithGroups(eventType, eventProperties, groups, opt_callback);
   };
 
   /**
    * Log revenue with Revenue interface. The new revenue interface allows for more revenue fields like
    * revenueType and event properties.
-   * 
+   *
    * See the [Revenue](https://amplitude.github.io/Amplitude-JavaScript/Revenue/)
    * reference page for more information on the Revenue interface and logging revenue.
    * @public

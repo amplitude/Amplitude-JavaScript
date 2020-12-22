@@ -21,6 +21,7 @@
     "query-string": "5"
   },
   "devDependencies": {
+    "@amplitude/eslint-plugin-amplitude": "^1.0.1",
     "@babel/core": "^7.3.4",
     "@babel/plugin-external-helpers": "^7.2.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
@@ -32,11 +33,14 @@
     "@semantic-release/git": "^9.0.0",
     "chai": "^4.1.2",
     "date-fns": "^1.30.1",
+    "eslint": "^7.15.0",
+    "eslint-config-prettier": "^7.0.0",
+    "eslint-plugin-prettier": "^3.3.0",
     "express": "^4.16.2",
     "fs-extra": "^4.0.2",
+    "husky": "^4.3.6",
     "jsdoc": "^3.6.3",
     "jsdoc-to-markdown": "^6.0.1",
-    "jshint": "^2.9.6",
     "karma": "^4.0.0",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
@@ -46,8 +50,9 @@
     "karma-sauce-launcher": "^2.0.2",
     "karma-sinon": "^1.0.5",
     "karma-sourcemap-loader": "^0.3.7",
+    "lint-staged": "^10.5.3",
     "mocha": "^4.0.1",
-    "prettier": "^2.1.1",
+    "prettier": "^2.2.1",
     "requirejs": "^2.3.6",
     "rollup": "^1.4.1",
     "rollup-plugin-babel": "^4.3.2",
@@ -67,7 +72,13 @@
     "docs:install": "cd website/ && yarn install",
     "docs:generate-jsdoc": "cd website && yarn generate-jsdoc",
     "docs:start": "cd website/ && yarn start",
-    "docs:deploy": "cd website/ && yarn deploy"
+    "docs:deploy": "cd website/ && yarn deploy",
+    "lint": "yarn run lint:prettier && yarn run lint:eslint",
+    "lint:prettier": "prettier --check \"{src,test,scripts,website}/**/*.js\"",
+    "lint:eslint": "eslint \"{src,test,scripts,website}/**/*.js\"",
+    "fix": "yarn run fix:eslint && yarn run fix:prettier",
+    "fix:prettier": "prettier --write \"{src,test,scripts,website}/**/*.js\"",
+    "fix:eslint": "eslint --fix \"{src,test,scripts,website}/**/*.js\""
   },
   "bugs": {
     "url": "https://github.com/amplitude/amplitude-javascript/issues"
@@ -75,5 +86,16 @@
   "homepage": "https://github.com/amplitude/amplitude-javascript#readme",
   "directories": {
     "test": "test"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "{src,test,scripts,website}/**/*.js": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }
