@@ -815,7 +815,7 @@ AmplitudeClient.prototype._saveFbclid = function _saveFbclid(urlParams) {
   if (utils.isEmptyString(fbclid)) {
     return;
   }
-  var fbclidProperties = {'fbclid': fbclid};
+  var fbclidProperties = { fbclid: fbclid };
   _sendParamsReferrerUserProperties(this, fbclidProperties);
   return fbclidProperties;
 };
