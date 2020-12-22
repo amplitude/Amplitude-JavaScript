@@ -7,7 +7,7 @@ import Base64 from './base64';
 import baseCookie from './base-cookie';
 import Constants from './constants';
 import getLocation from './get-location';
-import localStorage from './localstorage'; // jshint ignore:line
+import localStorage from './localstorage';
 import topDomain from './top-domain';
 
 const storageOptionExists = {
@@ -25,15 +25,7 @@ const storageOptionExists = {
  * if in memory, then memory can't be shared between different tabs
  */
 class MetadataStorage {
-  constructor({
-    storageKey,
-    disableCookies,
-    domain,
-    secure,
-    sameSite,
-    expirationDays,
-    storage,
-  }) {
+  constructor({ storageKey, disableCookies, domain, secure, sameSite, expirationDays, storage }) {
     this.storageKey = storageKey;
     this.domain = domain;
     this.secure = secure;
@@ -44,8 +36,7 @@ class MetadataStorage {
 
     if (!BUILD_COMPAT_REACT_NATIVE) {
       const writableTopDomain = topDomain(getLocation().href);
-      this.cookieDomain =
-        domain || (writableTopDomain ? '.' + writableTopDomain : null);
+      this.cookieDomain = domain || (writableTopDomain ? '.' + writableTopDomain : null);
     }
 
     if (storageOptionExists[storage]) {
@@ -72,8 +63,7 @@ class MetadataStorage {
       return this.storageKey;
     }
 
-    const suffix =
-      this.domain.charAt(0) === '.' ? this.domain.substring(1) : this.domain;
+    const suffix = this.domain.charAt(0) === '.' ? this.domain.substring(1) : this.domain;
 
     return `${this.storageKey}${suffix ? `_${suffix}` : ''}`;
   }
@@ -82,16 +72,7 @@ class MetadataStorage {
    * Data is saved as delimited values rather than JSO to minimize cookie space
    * Should not change order of the items
    */
-  save({
-    deviceId,
-    userId,
-    optOut,
-    sessionId,
-    lastEventTime,
-    eventId,
-    identifyId,
-    sequenceNumber,
-  }) {
+  save({ deviceId, userId, optOut, sessionId, lastEventTime, eventId, identifyId, sequenceNumber }) {
     if (this.storage === Constants.STORAGE_NONE) {
       return;
     }

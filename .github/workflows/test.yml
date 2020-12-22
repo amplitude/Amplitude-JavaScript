@@ -30,6 +30,14 @@ jobs:
       run: |
         yarn install --frozen-lockfile
 
+    - name: prettier check
+      run: |
+        yarn run lint:prettier
+
+    - name: eslint check
+      run: |
+        yarn run lint:eslint
+
     - name: Build and run tests
       run: |
         make test
