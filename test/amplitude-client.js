@@ -17,7 +17,7 @@ import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 
 // maintain for testing backwards compatability
 describe('AmplitudeClient', function() {
-  var apiKey = '94c438f3750a78ccdee636712bf2c889';
+  var apiKey = '000000';
   const cookieName = 'amp_' + apiKey.slice(0,6);
   const oldCookieName = 'amplitude_id_' + apiKey;
   var keySuffix = '_' + apiKey.slice(0,6);
