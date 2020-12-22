@@ -773,6 +773,7 @@ AmplitudeClient.prototype._saveGclid = function _saveGclid(urlParams) {
   _sendParamsReferrerUserProperties(this, gclidProperties);
   return gclidProperties;
 };
+
 /**
  * Try to fetch Facebook Fbclid from url params.
  * @private
