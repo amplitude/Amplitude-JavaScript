@@ -8,6 +8,6 @@ describe('base64Id', () => {
   // If this test fails randomly it'll be frustrating to reproduce.  Ideally
   // there would be some reproducible seed we would print for every test run.
   it('should return an id of safe base64 characters', () => {
-    assert.equal(true, /^[a-zA-Z0-9\-_]*$/.test(base64Id()))
+    assert.equal(true, /^[a-zA-Z0-9\-_]*$/.test(base64Id()));
   });
 });

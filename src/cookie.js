@@ -8,21 +8,19 @@ import getLocation from './get-location';
 import baseCookie from './base-cookie';
 import topDomain from './top-domain';
 
-
 var _options = {
   expirationDays: undefined,
-  domain: undefined
+  domain: undefined,
 };
 
-
-var reset = function() {
+var reset = function () {
   _options = {
     expirationDays: undefined,
-    domain: undefined
+    domain: undefined,
   };
 };
 
-var options = function(opts) {
+var options = function (opts) {
   if (arguments.length === 0) {
     return _options;
   }
@@ -33,7 +31,7 @@ var options = function(opts) {
   _options.secure = opts.secure;
   _options.sameSite = opts.sameSite;
 
-  var domain = (!utils.isEmptyString(opts.domain)) ? opts.domain : '.' + topDomain(getLocation().href);
+  var domain = !utils.isEmptyString(opts.domain) ? opts.domain : '.' + topDomain(getLocation().href);
   var token = Math.random();
   _options.domain = domain;
   set('amplitude_test', token);
@@ -47,7 +45,7 @@ var options = function(opts) {
   return _options;
 };
 
-var _domainSpecific = function(name) {
+var _domainSpecific = function (name) {
   // differentiate between cookies on different domains
   var suffix = '';
   if (_options.domain) {
@@ -56,8 +54,7 @@ var _domainSpecific = function(name) {
   return name + suffix;
 };
 
-
-var get = function(name) {
+var get = function (name) {
   var nameEq = _domainSpecific(name) + '=';
   const value = baseCookie.get(nameEq);
 
@@ -72,8 +69,7 @@ var get = function(name) {
   return null;
 };
 
-
-var set = function(name, value) {
+var set = function (name, value) {
   try {
     baseCookie.set(_domainSpecific(name), Base64.encode(JSON.stringify(value)), _options);
     return true;
@@ -82,7 +78,7 @@ var set = function(name, value) {
   }
 };
 
-var setRaw = function(name, value) {
+var setRaw = function (name, value) {
   try {
     baseCookie.set(_domainSpecific(name), value, _options);
     return true;
@@ -91,13 +87,12 @@ var setRaw = function(name, value) {
   }
 };
 
-var getRaw = function(name) {
+var getRaw = function (name) {
   var nameEq = _domainSpecific(name) + '=';
   return baseCookie.get(nameEq);
 };
 
-
-var remove = function(name) {
+var remove = function (name) {
   try {
     baseCookie.set(_domainSpecific(name), null, _options);
     return true;
@@ -113,5 +108,5 @@ export default {
   set,
   remove,
   setRaw,
-  getRaw
+  getRaw,
 };

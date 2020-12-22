@@ -43,8 +43,7 @@ module.exports = {
           path: 'docs',
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl:
-            'https://github.com/amplitude/Amplitude-JavaScript/website',
+          editUrl: 'https://github.com/amplitude/Amplitude-JavaScript/website',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

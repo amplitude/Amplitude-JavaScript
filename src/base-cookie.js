@@ -55,7 +55,7 @@ const areCookiesEnabled = (opts = {}) => {
     const _areCookiesEnabled = get(cookieName + '=') === uid;
     set(cookieName, null, opts);
     return _areCookiesEnabled;
-  } catch (e) {}
+  } catch (e) {} /* eslint-disable-line no-empty */
   return false;
 };
 

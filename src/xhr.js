@@ -3,17 +3,17 @@ import queryString from 'query-string';
 /*
  * Simple AJAX request object
  */
-var Request = function(url, data) {
+var Request = function (url, data) {
   this.url = url;
   this.data = data || {};
 };
 
-Request.prototype.send = function(callback) {
+Request.prototype.send = function (callback) {
   var isIE = window.XDomainRequest ? true : false;
   if (isIE) {
     var xdr = new window.XDomainRequest();
     xdr.open('POST', this.url, true);
-    xdr.onload = function() {
+    xdr.onload = function () {
       callback(200, xdr.responseText);
     };
     xdr.onerror = function () {
@@ -25,12 +25,12 @@ Request.prototype.send = function(callback) {
       }
     };
     xdr.ontimeout = function () {};
-    xdr.onprogress = function() {};
+    xdr.onprogress = function () {};
     xdr.send(queryString.stringify(this.data));
   } else {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', this.url, true);
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         callback(xhr.status, xhr.responseText);
       }
