@@ -90,6 +90,7 @@ $(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET)
 build: $(TESTS) $(OUT) $(SNIPPET_OUT) $(SEGMENT_SNIPPET_OUT)
 	@$(ROLLUP) --config rollup.test.js
 	@$(ROLLUP) --config rollup.snippet-tests.js
+	@-echo "Done building"
 
 docs:
 	@$(JSDOC) -d ./documentation/ src/*.js
