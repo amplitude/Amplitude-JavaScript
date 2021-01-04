@@ -64,11 +64,14 @@
     "rollup-plugin-uglify": "^6.0.2",
     "semantic-release": "^17.1.1",
     "sinon": "^7.0.0",
-    "uglify-js": "^2.0.0"
+    "uglify-js": "^2.0.0",
+    "watch": "^1.0.2"
   },
   "scripts": {
     "test": "make test",
     "dev": "node test/browser/server.js",
+    "build": "make build",
+    "build:watch": "watch 'yarn build' src/ test/",
     "docs:install": "cd website/ && yarn install",
     "docs:generate-jsdoc": "cd website && yarn generate-jsdoc",
     "docs:start": "cd website/ && yarn start",
