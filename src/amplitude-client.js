@@ -393,6 +393,7 @@ AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndRefe
   let utmProperties;
   let referrerProperties;
   let gclidProperties;
+  let fbclidProperties;
   if (this.options.includeUtm) {
     utmProperties = this._initUtmData();
   }
@@ -402,11 +403,15 @@ AmplitudeClient.prototype._trackParamsAndReferrer = function _trackParamsAndRefe
   if (this.options.includeGclid) {
     gclidProperties = this._saveGclid(this._getUrlParams());
   }
+  if (this.options.includeFbclid) {
+    fbclidProperties = this._saveFbclid(this._getUrlParams());
+  }
   if (this.options.logAttributionCapturedEvent) {
     const attributionProperties = {
       ...utmProperties,
       ...referrerProperties,
       ...gclidProperties,
+      ...fbclidProperties,
     };
     if (Object.keys(attributionProperties).length > 0) {
       this.logEvent(Constants.ATTRIBUTION_EVENT, attributionProperties);
@@ -799,6 +804,20 @@ AmplitudeClient.prototype._saveGclid = function _saveGclid(urlParams) {
   var gclidProperties = { gclid: gclid };
   _sendParamsReferrerUserProperties(this, gclidProperties);
   return gclidProperties;
+};
+
+/**
+ * Try to fetch Facebook Fbclid from url params.
+ * @private
+ */
+AmplitudeClient.prototype._saveFbclid = function _saveFbclid(urlParams) {
+  var fbclid = utils.getQueryParam('fbclid', urlParams);
+  if (utils.isEmptyString(fbclid)) {
+    return;
+  }
+  var fbclidProperties = { fbclid: fbclid };
+  _sendParamsReferrerUserProperties(this, fbclidProperties);
+  return fbclidProperties;
 };
 
 /**
