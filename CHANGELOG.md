@@ -1,3 +1,11 @@
+# [7.4.0](https://github.com/amplitude/amplitude-javascript/compare/v7.3.3...v7.4.0) (2021-01-06)
+
+
+### Features
+
+* **privacy:** Add `storage` option ([#320](https://github.com/amplitude/amplitude-javascript/issues/320)) ([1a56a9b](https://github.com/amplitude/amplitude-javascript/commit/1a56a9b95827d90074f0421baa6901f6a7a1035b)), closes [#317](https://github.com/amplitude/amplitude-javascript/issues/317)
+* Added Fbclid config option ([#338](https://github.com/amplitude/amplitude-javascript/issues/338)) ([f52288a](https://github.com/amplitude/amplitude-javascript/commit/f52288a82a9d07350712a84d83180f77295417ff))
+
 ## [7.3.3](https://github.com/amplitude/amplitude-javascript/compare/v7.3.2...v7.3.3) (2020-11-12)
 
 
