@@ -1394,6 +1394,7 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * @callback Amplitude~eventCallback
  * @param {number} responseCode - Server response code for the event / identify upload request.
  * @param {string} responseBody - Server response body for the event / identify upload request.
+ * @param {object} details - (optional) Additional information associated with sending event.
  */
 
 /**
