@@ -1384,7 +1384,14 @@ var _generateApiPropertiesTrackingConfig = function _generateApiPropertiesTracki
  */
 AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue) {
   if (queue.length > this.options.savedMaxCount) {
-    queue.splice(0, queue.length - this.options.savedMaxCount);
+    const deletedEvents = queue.splice(0, queue.length - this.options.savedMaxCount);
+    deletedEvents.forEach((e) => {
+      if (type(e.callback) === 'function') {
+        e.callback(0, 'No request sent', {
+          reason: 'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
+        });
+      }
+    });
   }
 };
 
