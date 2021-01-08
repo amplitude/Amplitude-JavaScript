@@ -14,7 +14,8 @@ build
 karma.conf.js
 scripts
 .npmignore
-.jshintrc
+.prettierrc.json
+.eslintrc.json
 amplitude.min.js
 amplitude-snippet.min.js
 amplitude.nocompat.min.js

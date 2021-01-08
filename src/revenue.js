@@ -6,7 +6,7 @@ import utils from './utils';
  * Revenue API - instance constructor. Wrapper for logging Revenue data. Revenue objects get passed to amplitude.logRevenueV2 to send to Amplitude servers.
  * Each method updates a revenue property in the Revenue object, and returns the same Revenue object,
  * allowing you to chain multiple method calls together.
- * 
+ *
  * Note: price is a required field to log revenue events.
  * If quantity is not specified then defaults to 1.
  * @constructor Revenue
@@ -62,7 +62,7 @@ Revenue.prototype.setQuantity = function setQuantity(quantity) {
 
 /**
  * Set a value for the price. This field is required for all revenue being logged.
- * 
+ *
  * Note: revenue amount is calculated as price * quantity.
  * @public
  * @param {number} price - Double value for the quantity.
@@ -104,7 +104,7 @@ Revenue.prototype.setRevenueType = function setRevenueType(revenueType) {
  * @example var event_properties = {'city': 'San Francisco'};
  * var revenue = new amplitude.Revenue().setProductId('productIdentifier').setPrice(10.99).setEventProperties(event_properties);
  * amplitude.logRevenueV2(revenue);
-*/
+ */
 Revenue.prototype.setEventProperties = function setEventProperties(eventProperties) {
   if (type(eventProperties) !== 'object') {
     utils.log.error('Unsupported type for eventProperties: ' + type(eventProperties) + ', expecting object');

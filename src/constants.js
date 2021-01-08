@@ -19,7 +19,14 @@ export default {
   USER_ID: 'amplitude_userId',
 
   COOKIE_TEST_PREFIX: 'amp_cookie_test',
-  COOKIE_PREFIX: "amp",
+  COOKIE_PREFIX: 'amp',
+
+  // Storage options
+  STORAGE_DEFAULT: '',
+  STORAGE_COOKIES: 'cookies',
+  STORAGE_NONE: 'none',
+  STORAGE_LOCAL: 'localStorage',
+  STORAGE_SESSION: 'sessionStorage',
 
   // revenue keys
   REVENUE_EVENT: 'revenue_amount',
@@ -28,7 +35,7 @@ export default {
   REVENUE_PRICE: '$price',
   REVENUE_REVENUE_TYPE: '$revenueType',
 
-  AMP_DEVICE_ID_PARAM: 'amp_device_id',  // url param
+  AMP_DEVICE_ID_PARAM: 'amp_device_id', // url param
 
   REFERRER: 'referrer',
 
@@ -39,5 +46,5 @@ export default {
   UTM_TERM: 'utm_term',
   UTM_CONTENT: 'utm_content',
 
-  ATTRIBUTION_EVENT: '[Amplitude] Attribution Captured'
+  ATTRIBUTION_EVENT: '[Amplitude] Attribution Captured',
 };

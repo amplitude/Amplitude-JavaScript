@@ -1,4 +1,4 @@
-// A URL safe variation on the the list of Base64 characters 
+// A URL safe variation on the the list of Base64 characters
 const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 const base64Id = () => {
