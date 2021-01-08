@@ -1384,7 +1384,14 @@ var _generateApiPropertiesTrackingConfig = function _generateApiPropertiesTracki
  */
 AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue) {
   if (queue.length > this.options.savedMaxCount) {
-    queue.splice(0, queue.length - this.options.savedMaxCount);
+    const deletedEvents = queue.splice(0, queue.length - this.options.savedMaxCount);
+    deletedEvents.forEach((event) => {
+      if (type(event.callback) === 'function') {
+        event.callback(0, 'No request sent', {
+          reason: 'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
+        });
+      }
+    });
   }
 };
 
@@ -1394,6 +1401,7 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * @callback Amplitude~eventCallback
  * @param {number} responseCode - Server response code for the event / identify upload request.
  * @param {string} responseBody - Server response body for the event / identify upload request.
+ * @param {object} details - (optional) Additional information associated with sending event.
  */
 
 /**
@@ -1684,7 +1692,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
       //  here.
       // }
     } catch (e) {
-      // utils.log('failed upload');
+      // utils.log.error('failed upload');
     }
   });
 };

@@ -1945,6 +1945,33 @@ describe('AmplitudeClient', function () {
       assert.equal(message, 'success');
     });
 
+    it.only('should run the callback even with a dropped unsent event', function () {
+      amplitude.init(apiKey, null, { savedMaxCount: 1 });
+      var counter = 0;
+      var value = null;
+      var message = null;
+      var reason = null;
+      var callback = function (status, response, details) {
+        counter++;
+        value = status;
+        message = response;
+        reason = details.reason;
+      };
+      amplitude.logEvent('DroppedEvent', {}, callback);
+      amplitude.logEvent('SavedEvent', {}, callback);
+      server.respondWith([0, {}, '']);
+      server.respond();
+
+      // verify callback fired
+      assert.equal(counter, 1);
+      assert.equal(value, 0);
+      assert.equal(message, 'No request sent');
+      assert.equal(
+        reason,
+        'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
+      );
+    });
+
     it('should run callback once and only after 413 resolved', function () {
       var counter = 0;
       var value = -1;
