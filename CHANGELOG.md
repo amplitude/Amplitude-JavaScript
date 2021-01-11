@@ -1,3 +1,10 @@
+## [7.4.1](https://github.com/amplitude/amplitude-javascript/compare/v7.4.0...v7.4.1) (2021-01-11)
+
+
+### Bug Fixes
+
+* Bug with logEvent callbacks not being called when unsent events are dropped  ([#342](https://github.com/amplitude/amplitude-javascript/issues/342)) ([f243a92](https://github.com/amplitude/amplitude-javascript/commit/f243a922bf05e99e1b178d4fa5265644fc974ad2)), closes [#142](https://github.com/amplitude/amplitude-javascript/issues/142)
+
 # [7.4.0](https://github.com/amplitude/amplitude-javascript/compare/v7.3.3...v7.4.0) (2021-01-06)
 
 
