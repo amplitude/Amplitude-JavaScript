@@ -11,7 +11,7 @@ var logLevels = {
 let logLevel = logLevels.WARN;
 
 const setLogLevel = function setLogLevel(logLevelName) {
-  if (logLevels.hasOwnProperty(logLevelName)) {
+  if (logLevelName in logLevels) {
     logLevel = logLevels[logLevelName];
   }
 };
@@ -177,7 +177,7 @@ var validateGroups = function validateGroups(groups) {
 
   var copy = {}; // create a copy with all of the valid properties
   for (var group in groups) {
-    if (!groups.hasOwnProperty(group)) {
+    if (!Object.prototype.hasOwnProperty.call(groups, group)) {
       continue;
     }
 

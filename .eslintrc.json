@@ -7,8 +7,7 @@
     "ecmaVersion": 2018
   },
   "rules": {
-    "prettier/prettier": "error",
-    "no-prototype-builtins": "off"
+    "prettier/prettier": "error"
   },
   "globals": {
     "BUILD_COMPAT_REACT_NATIVE": "readonly",

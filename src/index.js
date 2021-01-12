@@ -11,7 +11,7 @@ newInstance._q = old._q || [];
  */
 for (let instance in old._iq) {
   // migrate each instance's queue
-  if (old._iq.hasOwnProperty(instance)) {
+  if (Object.prototype.hasOwnProperty.call(old._iq, instance)) {
     newInstance.getInstance(instance)._q = old._iq[instance]._q || [];
   }
 }
