@@ -11,7 +11,7 @@ var logLevels = {
 let logLevel = logLevels.WARN;
 
 const setLogLevel = function setLogLevel(logLevelName) {
-  if (logLevelName in logLevels) {
+  if (Object.prototype.hasOwnProperty.call(logLevels, logLevel)) {
     logLevel = logLevels[logLevelName];
   }
 };
@@ -112,7 +112,7 @@ var validateProperties = function validateProperties(properties) {
 
   var copy = {}; // create a copy with all of the valid properties
   for (var property in properties) {
-    if (!(property in properties)) {
+    if (!Object.prototype.hasOwnProperty.call(properties, property)) {
       continue;
     }
 
