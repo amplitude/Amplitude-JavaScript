@@ -8,7 +8,7 @@ Run `yarn docs:install` to install website dependencies.
 
 ### Generating `website/docs/` from `src/`
 
-The website autogenerates markdown files of public classes and its contents using [generate-jsdoc.js](https://github.com/amplitude/Amplitude-JavaScript/blob/master/website/generate-jsdoc.js). 
+The website autogenerates markdown files of public classes and its contents using [generate-jsdoc.js](https://github.com/amplitude/Amplitude-JavaScript/blob/main/website/generate-jsdoc.js).
 
 This is done by calling `yarn docs:generate-jsdoc` from the base directory.
 
