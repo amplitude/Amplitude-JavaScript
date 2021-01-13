@@ -55,7 +55,7 @@ if (BUILD_COMPAT_SNIPPET) {
 
     // run queued up functions on instances
     for (var instance in this._instances) {
-      if (this._instances.hasOwnProperty(instance)) {
+      if (Object.prototype.hasOwnProperty.call(this._instances, instance)) {
         this._instances[instance].runQueuedFunctions();
       }
     }

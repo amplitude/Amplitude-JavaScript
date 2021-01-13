@@ -431,7 +431,7 @@ var _parseConfig = function _parseConfig(options, config) {
 
   // validates config value is defined, is the correct type, and some additional value sanity checks
   var parseValidateAndLoad = function parseValidateAndLoad(key) {
-    if (!options.hasOwnProperty(key)) {
+    if (!Object.prototype.hasOwnProperty.call(options, key)) {
       return; // skip bogus config values
     }
 
@@ -453,7 +453,7 @@ var _parseConfig = function _parseConfig(options, config) {
   };
 
   for (var key in config) {
-    if (config.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(config, key)) {
       parseValidateAndLoad(key);
     }
   }
@@ -769,7 +769,7 @@ var _sendParamsReferrerUserProperties = function _sendParamsReferrerUserProperti
   // setOnce the initial user properties
   var identify = new Identify();
   for (var key in userProperties) {
-    if (userProperties.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(userProperties, key)) {
       identify.setOnce('initial_' + key, userProperties[key]);
       identify.set(key, userProperties[key]);
     }
@@ -1076,7 +1076,7 @@ AmplitudeClient.prototype.setUserProperties = function setUserProperties(userPro
   // convert userProperties into an identify call
   var identify = new Identify();
   for (var property in sanitized) {
-    if (sanitized.hasOwnProperty(property)) {
+    if (Object.prototype.hasOwnProperty.call(sanitized, property)) {
       identify.set(property, sanitized[property]);
     }
   }
@@ -1140,7 +1140,7 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback) {
   }
 
   // if identify input is a proxied object created by the async loading snippet, convert it into an identify object
-  if (type(identify_obj) === 'object' && identify_obj.hasOwnProperty('_q')) {
+  if (Object.prototype.hasOwnProperty.call(identify_obj, '_q')) {
     identify_obj = _convertProxyObjectToRealObject(new Identify(), identify_obj);
   }
 
@@ -1196,7 +1196,7 @@ AmplitudeClient.prototype.groupIdentify = function (group_type, group_name, iden
   }
 
   // if identify input is a proxied object created by the async loading snippet, convert it into an identify object
-  if (type(identify_obj) === 'object' && identify_obj.hasOwnProperty('_q')) {
+  if (Object.prototype.hasOwnProperty.call(identify_obj, '_q')) {
     identify_obj = _convertProxyObjectToRealObject(new Identify(), identify_obj);
   }
 
@@ -1524,7 +1524,7 @@ AmplitudeClient.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
   }
 
   // if revenue input is a proxied object created by the async loading snippet, convert it into an revenue object
-  if (type(revenue_obj) === 'object' && revenue_obj.hasOwnProperty('_q')) {
+  if (Object.prototype.hasOwnProperty.call(revenue_obj, '_q')) {
     revenue_obj = _convertProxyObjectToRealObject(new Revenue(), revenue_obj);
   }
 

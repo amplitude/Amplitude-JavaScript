@@ -82,7 +82,7 @@
   setUpProxy(amplitude);
   amplitude.getInstance = function (instance) {
     instance = (!instance || instance.length === 0 ? '$default_instance' : instance).toLowerCase();
-    if (!amplitude._iq.hasOwnProperty(instance)) {
+    if (!Object.prototype.hasOwnProperty.call(amplitude._iq, instance)) {
       amplitude._iq[instance] = { _q: [] };
       setUpProxy(amplitude._iq[instance]);
     }
