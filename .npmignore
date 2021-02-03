@@ -18,7 +18,6 @@ scripts
 .eslintrc.json
 amplitude.min.js
 amplitude-snippet.min.js
-amplitude.nocompat.min.js
 amplitude-segment-snippet.min.js
 *.log
 src
