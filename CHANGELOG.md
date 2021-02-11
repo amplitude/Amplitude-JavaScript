@@ -1,3 +1,10 @@
+## [7.4.2](https://github.com/amplitude/amplitude-javascript/compare/v7.4.1...v7.4.2) (2021-02-11)
+
+
+### Bug Fixes
+
+* **lint:** Do not directly call object builtins  ([#344](https://github.com/amplitude/amplitude-javascript/issues/344)) ([14fc693](https://github.com/amplitude/amplitude-javascript/commit/14fc693d56ff59a2a82b0eeadc4e7e6d3104026b))
+
 ## [7.4.1](https://github.com/amplitude/amplitude-javascript/compare/v7.4.0...v7.4.1) (2021-01-11)
 
 
