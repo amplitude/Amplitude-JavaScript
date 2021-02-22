@@ -7,7 +7,7 @@ import Base64 from './base64';
 import baseCookie from './base-cookie';
 import Constants from './constants';
 import getLocation from './get-location';
-import localStorage from './localstorage';
+import ampLocalStorage from './localstorage';
 import topDomain from './top-domain';
 
 const storageOptionExists = {
@@ -94,7 +94,7 @@ class MetadataStorage {
         }
         break;
       case Constants.STORAGE_LOCAL:
-        localStorage.setItem(this.storageKey, value);
+        ampLocalStorage.setItem(this.storageKey, value);
         break;
       case Constants.STORAGE_COOKIES:
         baseCookie.set(this.getCookieStorageKey(), value, {
@@ -113,7 +113,7 @@ class MetadataStorage {
       str = baseCookie.get(this.getCookieStorageKey() + '=');
     }
     if (!str) {
-      str = localStorage.getItem(this.storageKey);
+      str = ampLocalStorage.getItem(this.storageKey);
     }
     if (!str) {
       str = window.sessionStorage && window.sessionStorage.getItem(this.storageKey);
