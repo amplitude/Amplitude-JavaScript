@@ -1945,7 +1945,7 @@ describe('AmplitudeClient', function () {
       assert.equal(message, 'success');
     });
 
-    it.only('should run the callback even with a dropped unsent event', function () {
+    it('should run the callback even with a dropped unsent event', function () {
       amplitude.init(apiKey, null, { savedMaxCount: 1 });
       var counter = 0;
       var value = null;
