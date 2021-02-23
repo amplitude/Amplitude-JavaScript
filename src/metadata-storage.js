@@ -9,6 +9,7 @@ import Constants from './constants';
 import getLocation from './get-location';
 import ampLocalStorage from './localstorage';
 import topDomain from './top-domain';
+import utils from './utils';
 
 const storageOptionExists = {
   [Constants.STORAGE_COOKIES]: true,
@@ -116,7 +117,11 @@ class MetadataStorage {
       str = ampLocalStorage.getItem(this.storageKey);
     }
     if (!str) {
-      str = window.sessionStorage && window.sessionStorage.getItem(this.storageKey);
+      try {
+        str = window.sessionStorage && window.sessionStorage.getItem(this.storageKey);
+      } catch (e) {
+        utils.log.info(`window.sessionStorage unavailable. Reason: "${e}"`);
+      }
     }
 
     if (!str) {
