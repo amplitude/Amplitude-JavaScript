@@ -1140,7 +1140,7 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback) {
   }
 
   // if identify input is a proxied object created by the async loading snippet, convert it into an identify object
-  if (Object.prototype.hasOwnProperty.call(identify_obj, '_q')) {
+  if (type(identify_obj) === 'object' && Object.prototype.hasOwnProperty.call(identify_obj, '_q')) {
     identify_obj = _convertProxyObjectToRealObject(new Identify(), identify_obj);
   }
 
@@ -1196,7 +1196,7 @@ AmplitudeClient.prototype.groupIdentify = function (group_type, group_name, iden
   }
 
   // if identify input is a proxied object created by the async loading snippet, convert it into an identify object
-  if (Object.prototype.hasOwnProperty.call(identify_obj, '_q')) {
+  if (type(identify_obj) === 'object' && Object.prototype.hasOwnProperty.call(identify_obj, '_q')) {
     identify_obj = _convertProxyObjectToRealObject(new Identify(), identify_obj);
   }
 
@@ -1524,7 +1524,7 @@ AmplitudeClient.prototype.logRevenueV2 = function logRevenueV2(revenue_obj) {
   }
 
   // if revenue input is a proxied object created by the async loading snippet, convert it into an revenue object
-  if (Object.prototype.hasOwnProperty.call(revenue_obj, '_q')) {
+  if (type(revenue_obj) === 'object' && Object.prototype.hasOwnProperty.call(revenue_obj, '_q')) {
     revenue_obj = _convertProxyObjectToRealObject(new Revenue(), revenue_obj);
   }
 
