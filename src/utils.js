@@ -11,7 +11,7 @@ var logLevels = {
 let logLevel = logLevels.WARN;
 
 const setLogLevel = function setLogLevel(logLevelName) {
-  if (Object.prototype.hasOwnProperty.call(logLevels, logLevel)) {
+  if (Object.prototype.hasOwnProperty.call(logLevels, logLevelName)) {
     logLevel = logLevels[logLevelName];
   }
 };
