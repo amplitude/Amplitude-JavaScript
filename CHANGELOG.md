@@ -1,3 +1,10 @@
+## [7.4.3](https://github.com/amplitude/amplitude-javascript/compare/v7.4.2...v7.4.3) (2021-02-24)
+
+
+### Bug Fixes
+
+* Uncaught session storage security error handling ([#358](https://github.com/amplitude/amplitude-javascript/issues/358)) ([560bb05](https://github.com/amplitude/amplitude-javascript/commit/560bb057742f7af17d3e09d0555e72d7b11e0a19))
+
 ## [7.4.2](https://github.com/amplitude/amplitude-javascript/compare/v7.4.1...v7.4.2) (2021-02-11)
 
 
