@@ -1,13 +1,15 @@
 {
   "extends": ["eslint:recommended", "plugin:prettier/recommended"],
-  "plugins": ["prettier", "@amplitude/eslint-plugin-amplitude"],
+  "plugins": ["prettier", "mocha", "@amplitude/eslint-plugin-amplitude"],
   "env": { "es6": true, "browser": true, "node": true, "mocha": true },
   "parserOptions": {
     "sourceType": "module",
     "ecmaVersion": 2018
   },
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "mocha/no-skipped-tests": "error",
+    "mocha/no-exclusive-tests": "error"
   },
   "globals": {
     "BUILD_COMPAT_REACT_NATIVE": "readonly",
