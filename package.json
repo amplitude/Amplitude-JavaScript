@@ -1,7 +1,7 @@
 {
   "name": "amplitude-js",
   "author": "Amplitude <support@amplitude.com>",
-  "version": "7.4.3",
+  "version": "7.4.4",
   "license": "MIT",
   "description": "Javascript library for Amplitude Analytics",
   "keywords": [

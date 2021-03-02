@@ -1,3 +1,10 @@
+## [7.4.4](https://github.com/amplitude/amplitude-javascript/compare/v7.4.3...v7.4.4) (2021-03-02)
+
+
+### Bug Fixes
+
+* remove only test and small robustness regression ([#357](https://github.com/amplitude/amplitude-javascript/issues/357)) ([9f7b036](https://github.com/amplitude/amplitude-javascript/commit/9f7b036aacd2e8e5ed4b27d2744c23c9e00b899e))
+
 ## [7.4.3](https://github.com/amplitude/amplitude-javascript/compare/v7.4.2...v7.4.3) (2021-02-24)
 
 
