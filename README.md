@@ -27,7 +27,7 @@ A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.ampl
 
 
 ## Deprecated - React Native
-As of > v7.4.4, this SDK no longer has support for react-native. We recently released a new SDK focused on providing a React Native and cross-platform first approach.  [Amplitude React Native SDK](https://github.com/amplitude/Amplitude-ReactNative)
+As of >= v8.0.0, this SDK no longer has support for React Native. We recently released a new SDK focused on providing a React Native first approach to using Amplitude in cross-platform projects.  [Amplitude React Native SDK](https://github.com/amplitude/Amplitude-ReactNative)
 
 A migration guide is currently being written and will be linked here when available.
 
