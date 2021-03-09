@@ -19,16 +19,6 @@ import DEFAULT_OPTIONS from './options';
 import getHost from './get-host';
 import baseCookie from './base-cookie';
 
-let AsyncStorage;
-let Platform;
-let DeviceInfo;
-if (BUILD_COMPAT_REACT_NATIVE) {
-  const reactNative = require('react-native');
-  AsyncStorage = require('@react-native-async-storage/async-storage').default;
-  Platform = reactNative.Platform;
-  DeviceInfo = require('react-native-device-info');
-}
-
 /**
  * AmplitudeClient SDK API - instance constructor.
  * The Amplitude class handles creation of client instances, all you need to do is call amplitude.getInstance()
@@ -203,75 +193,18 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       this._isInitialized = true;
     };
 
-    if (AsyncStorage) {
-      this._migrateUnsentEvents(() => {
-        Promise.all([
-          AsyncStorage.getItem(this._storageSuffix),
-          AsyncStorage.getItem(this.options.unsentKey + this._storageSuffix),
-          AsyncStorage.getItem(this.options.unsentIdentifyKey + this._storageSuffix),
-        ])
-          .then((values) => {
-            if (values[0]) {
-              const cookieData = JSON.parse(values[0]);
-              if (cookieData) {
-                _loadCookieDataProps(this, cookieData);
-              }
-            }
-            if (this.options.saveEvents) {
-              this._unsentEvents = this._parseSavedUnsentEventsString(values[1])
-                .map((event) => ({ event }))
-                .concat(this._unsentEvents);
-              this._unsentIdentifys = this._parseSavedUnsentEventsString(values[2])
-                .map((event) => ({ event }))
-                .concat(this._unsentIdentifys);
-            }
-            if (DeviceInfo) {
-              Promise.all([
-                DeviceInfo.getCarrier(),
-                DeviceInfo.getModel(),
-                DeviceInfo.getManufacturer(),
-                DeviceInfo.getVersion(),
-                DeviceInfo.getUniqueId(),
-              ])
-                .then((values) => {
-                  this.deviceInfo = {
-                    carrier: values[0],
-                    model: values[1],
-                    manufacturer: values[2],
-                    version: values[3],
-                  };
-                  initFromStorage(values[4]);
-                  this.runQueuedFunctions();
-                  if (type(opt_callback) === 'function') {
-                    opt_callback(this);
-                  }
-                })
-                .catch((err) => {
-                  this.options.onError(err);
-                });
-            } else {
-              initFromStorage();
-              this.runQueuedFunctions();
-            }
-          })
-          .catch((err) => {
-            this.options.onError(err);
-          });
-      });
-    } else {
-      if (this.options.saveEvents) {
-        this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey)
-          .map((event) => ({ event }))
-          .concat(this._unsentEvents);
-        this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey)
-          .map((event) => ({ event }))
-          .concat(this._unsentIdentifys);
-      }
-      initFromStorage();
-      this.runQueuedFunctions();
-      if (type(opt_callback) === 'function') {
-        opt_callback(this);
-      }
+    if (this.options.saveEvents) {
+      this._unsentEvents = this._loadSavedUnsentEvents(this.options.unsentKey)
+        .map((event) => ({ event }))
+        .concat(this._unsentEvents);
+      this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey)
+        .map((event) => ({ event }))
+        .concat(this._unsentIdentifys);
+    }
+    initFromStorage();
+    this.runQueuedFunctions();
+    if (type(opt_callback) === 'function') {
+      opt_callback(this);
     }
   } catch (err) {
     utils.log.error(err);
@@ -337,53 +270,6 @@ const _validateUnsentEventQueue = (queue) => {
     queue[i].event.event_properties = utils.validateProperties(eventProperties);
     queue[i].event.groups = utils.validateGroups(groups);
   }
-};
-
-/**
- * @private
- */
-AmplitudeClient.prototype._migrateUnsentEvents = function _migrateUnsentEvents(cb) {
-  Promise.all([AsyncStorage.getItem(this.options.unsentKey), AsyncStorage.getItem(this.options.unsentIdentifyKey)])
-    .then((values) => {
-      if (this.options.saveEvents) {
-        var unsentEventsString = values[0];
-        var unsentIdentifyKey = values[1];
-
-        var itemsToSet = [];
-        var itemsToRemove = [];
-
-        if (unsentEventsString) {
-          itemsToSet.push(
-            AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, JSON.stringify(unsentEventsString)),
-          );
-          itemsToRemove.push(AsyncStorage.removeItem(this.options.unsentKey));
-        }
-
-        if (unsentIdentifyKey) {
-          itemsToSet.push(
-            AsyncStorage.setItem(
-              this.options.unsentIdentifyKey + this._storageSuffix,
-              JSON.stringify(unsentIdentifyKey),
-            ),
-          );
-          itemsToRemove.push(AsyncStorage.removeItem(this.options.unsentIdentifyKey));
-        }
-
-        if (itemsToSet.length > 0) {
-          Promise.all(itemsToSet)
-            .then(() => {
-              Promise.all(itemsToRemove);
-            })
-            .catch((err) => {
-              this.options.onError(err);
-            });
-        }
-      }
-    })
-    .then(cb)
-    .catch((err) => {
-      this.options.onError(err);
-    });
 };
 
 /**
@@ -718,9 +604,6 @@ var _saveCookieData = function _saveCookieData(scope) {
     identifyId: scope._identifyId,
     sequenceNumber: scope._sequenceNumber,
   };
-  if (AsyncStorage) {
-    AsyncStorage.setItem(scope._storageSuffix, JSON.stringify(cookieData));
-  }
 
   if (scope._useOldCookie) {
     scope.cookieStorage.set(scope.options.cookieName + scope._storageSuffix, cookieData);
@@ -869,21 +752,13 @@ AmplitudeClient.prototype.saveEvents = function saveEvents() {
   try {
     const serializedUnsentEvents = JSON.stringify(this._unsentEvents.map(({ event }) => event));
 
-    if (AsyncStorage) {
-      AsyncStorage.setItem(this.options.unsentKey + this._storageSuffix, serializedUnsentEvents);
-    } else {
-      this._setInStorage(localStorage, this.options.unsentKey, serializedUnsentEvents);
-    }
+    this._setInStorage(localStorage, this.options.unsentKey, serializedUnsentEvents);
   } catch (e) {} /* eslint-disable-line no-empty */
 
   try {
     const serializedIdentifys = JSON.stringify(this._unsentIdentifys.map((unsentIdentify) => unsentIdentify.event));
 
-    if (AsyncStorage) {
-      AsyncStorage.setItem(this.options.unsentIdentifyKey + this._storageSuffix, serializedIdentifys);
-    } else {
-      this._setInStorage(localStorage, this.options.unsentIdentifyKey, serializedIdentifys);
-    }
+    this._setInStorage(localStorage, this.options.unsentIdentifyKey, serializedIdentifys);
   } catch (e) {} /* eslint-disable-line no-empty */
 };
 
@@ -1257,9 +1132,8 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
   timestamp,
   callback,
 ) {
-  if (!BUILD_COMPAT_REACT_NATIVE) {
-    _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
-  }
+  _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
+
   if (!eventType) {
     if (type(callback) === 'function') {
       callback(0, 'No request sent', { reason: 'Missing eventType' });
@@ -1288,23 +1162,9 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     this._lastEventTime = eventTime;
     _saveCookieData(this);
 
-    let osName = this._ua.browser.name;
-    let osVersion = this._ua.browser.major;
-    let deviceModel = this._ua.os.name;
-    let deviceManufacturer;
-
-    let versionName;
-    let carrier;
-    if (BUILD_COMPAT_REACT_NATIVE) {
-      osName = Platform.OS;
-      osVersion = Platform.Version;
-      if (this.deviceInfo) {
-        carrier = this.deviceInfo.carrier;
-        deviceManufacturer = this.deviceInfo.manufacturer;
-        deviceModel = this.deviceInfo.model;
-        versionName = this.deviceInfo.version;
-      }
-    }
+    const osName = this._ua.browser.name;
+    const osVersion = this._ua.browser.major;
+    const deviceModel = this._ua.os.name;
 
     userProperties = userProperties || {};
     var trackingOptions = { ...this._apiPropertiesTrackingOptions };
@@ -1319,20 +1179,18 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
       event_id: eventId,
       session_id: this._sessionId || -1,
       event_type: eventType,
-      version_name: _shouldTrackField(this, 'version_name') ? this.options.versionName || versionName || null : null,
+      version_name: this.options.versionName || null,
       platform: _shouldTrackField(this, 'platform') ? this.options.platform : null,
       os_name: _shouldTrackField(this, 'os_name') ? osName || null : null,
       os_version: _shouldTrackField(this, 'os_version') ? osVersion || null : null,
       device_model: _shouldTrackField(this, 'device_model') ? deviceModel || null : null,
-      device_manufacturer: _shouldTrackField(this, 'device_manufacturer') ? deviceManufacturer || null : null,
       language: _shouldTrackField(this, 'language') ? this.options.language : null,
-      carrier: _shouldTrackField(this, 'carrier') ? carrier || null : null,
       api_properties: apiProperties,
       event_properties: utils.truncate(utils.validateProperties(eventProperties)),
       user_properties: utils.truncate(utils.validateProperties(userProperties)),
       uuid: UUID(),
       library: {
-        name: BUILD_COMPAT_REACT_NATIVE ? 'amplitude-react-native' : 'amplitude-js',
+        name: 'amplitude-js',
         version: version,
       },
       sequence_number: sequenceNumber, // for ordering events and identifys

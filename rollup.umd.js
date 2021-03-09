@@ -27,7 +27,6 @@ export default {
       BUILD_COMPAT_SNIPPET: 'true',
       BUILD_COMPAT_LOCAL_STORAGE: 'true',
       BUILD_COMPAT_2_0: 'true',
-      BUILD_COMPAT_REACT_NATIVE: 'false',
     }),
     commonjs(),
   ],
