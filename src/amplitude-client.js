@@ -275,7 +275,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     }
   } catch (err) {
     utils.log.error(err);
-    this.options.onError(err);
+    if (type(opt_config.onError) === 'function') {
+      opt_config.onError(err);
+    }
   }
 };
 
