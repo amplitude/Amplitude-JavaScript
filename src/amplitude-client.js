@@ -444,7 +444,8 @@ var _parseConfig = function _parseConfig(options, config) {
       options[key] = !!inputValue;
     } else if (
       (expectedType === 'string' && !utils.isEmptyString(inputValue)) ||
-      (expectedType === 'number' && inputValue > 0)
+      (expectedType === 'number' && inputValue > 0) ||
+      expectedType === 'function'
     ) {
       options[key] = inputValue;
     } else if (expectedType === 'object') {
