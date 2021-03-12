@@ -1353,7 +1353,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
       this.saveEvents();
     }
 
-    this._sendEventsIfReady(callback);
+    this._sendEventsIfReady();
 
     return eventId;
   } catch (e) {
