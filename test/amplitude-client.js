@@ -824,6 +824,17 @@ describe('AmplitudeClient', function () {
         },
       });
     });
+
+    it('should call the supplied onError function if an error occurs during init()', () => {
+      var onErrorSpy = sinon.spy();
+
+      var amplitude = new AmplitudeClient();
+      sinon.stub(amplitude.cookieStorage, 'options').throws();
+      amplitude.init(apiKey, null, { onError: onErrorSpy });
+      assert.isTrue(onErrorSpy.calledOnce);
+
+      amplitude.cookieStorage.options.restore();
+    });
   });
 
   describe('runQueuedFunctions', function () {
