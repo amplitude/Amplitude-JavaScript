@@ -63,11 +63,10 @@ README.md: $(SNIPPET_OUT) version
 # Target for `amplitude.js` file.
 #
 
-$(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js rollup.native.js rollup.esm.js rollup.umd.js rollup.umd.min.js
+$(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js rollup.esm.js rollup.umd.js rollup.umd.min.js
 	@NODE_ENV=production $(ROLLUP) --config rollup.config.js # is the snippet build config
 	@NODE_ENV=production $(ROLLUP) --config rollup.esm.js # does not concat dependencies, only has module and dependencies
 	@NODE_ENV=production $(ROLLUP) --config rollup.umd.js # generates npm version, also usable in require js app
-	@NODE_ENV=production $(ROLLUP) --config rollup.native.js # generates react native build
 	@NODE_ENV=production $(ROLLUP) --config rollup.umd.min.js
 	@NODE_ENV=production $(ROLLUP) --config rollup.min.js
 

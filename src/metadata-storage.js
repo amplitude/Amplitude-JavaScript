@@ -35,10 +35,8 @@ class MetadataStorage {
 
     this.cookieDomain = '';
 
-    if (!BUILD_COMPAT_REACT_NATIVE) {
-      const writableTopDomain = topDomain(getLocation().href);
-      this.cookieDomain = domain || (writableTopDomain ? '.' + writableTopDomain : null);
-    }
+    const writableTopDomain = topDomain(getLocation().href);
+    this.cookieDomain = domain || (writableTopDomain ? '.' + writableTopDomain : null);
 
     if (storageOptionExists[storage]) {
       this.storage = storage;

@@ -26,11 +26,11 @@ A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.ampl
 * A [demo page](https://github.com/amplitude/GTM-Web-Demo) demonstrating a potential integration with Google Tag Manager.
 
 
-## React Native
-This library now supports react-native. It has two dependencies on react-native modules you will have to install yourself:
+## Deprecated - React Native
+As of >= v8.0.0, this SDK no longer has support for React Native. We recently released a new SDK focused on providing a React Native first approach to using Amplitude in cross-platform projects.  [Amplitude React Native SDK](https://github.com/amplitude/Amplitude-ReactNative)
 
-* [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) Tested with version 3.1.4
-* [@react-native-async-storage/async-storage](https://www.npmjs.com/package/@react-native-async-storage/async-storage) Tested with version 1.6.2
+Previously used amplitude-js and looking to migrate to @amplitude/react-native?
+* Please follow the steps detailed in our [migration guide](https://github.com/amplitude/Amplitude-ReactNative/blob/main/MIGRATION_GUIDE.md)
 
 ## Node.js
 Please visit [Amplitude-Node](https://github.com/amplitude/Amplitude-Node) for our Node SDK.

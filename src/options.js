@@ -1,17 +1,6 @@
 import Constants from './constants';
 import language from './language';
 
-let platform = 'Web';
-
-if (BUILD_COMPAT_REACT_NATIVE) {
-  const { Platform } = require('react-native');
-  if (Platform.OS === 'ios') {
-    platform = 'iOS';
-  } else if (Platform.OS === 'android') {
-    platform = 'Android';
-  }
-}
-
 /**
  * Options used when initializing Amplitude
  * @typedef {Object} Options
@@ -38,7 +27,7 @@ if (BUILD_COMPAT_REACT_NATIVE) {
  * @property {boolean} [logAttributionCapturedEvent=`false`] - If `true`, the SDK will log an Amplitude event anytime new attribution values are captured from the user. **Note: These events count towards your event volume.** Event name being logged: [Amplitude] Attribution Captured. Event Properties that can be logged: `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `referrer`, `referring_domain`, `gclid`, `fbclid`. For UTM properties to be logged, `includeUtm` must be set to `true`. For the `referrer` and `referring_domain` properties to be logged, `includeReferrer` must be set to `true`. For the `gclid` property to be logged, `includeGclid` must be set to `true`. For the `fbclid` property to be logged, `includeFbclid` must be set to `true`.
  * @property {boolean} [optOut=`false`] -  Whether or not to disable tracking for the current user.
  * @property {function} [onError=`() => {}`] - Function to call on error.
- * @property {string} [platform=`Web`|`iOS`|`Android`] -  Platform device is running on. `Web` is a browser (including mobile browsers). `iOS` and `Android` are relevant only for react-native apps.
+ * @property {string} [platform=`Web`] -  Platform device is running on. Defaults to `Web` (browser, including mobile browsers).
  * @property {number} [savedMaxCount=`1000`] -  Maximum number of events to save in localStorage. If more events are logged while offline, then old events are removed.
  * @property {boolean} [saveEvents=`true`] -  If `true`, saves events to localStorage and removes them upon successful upload. *Note: Without saving events, events may be lost if the user navigates to another page before the events are uploaded.*
  * @property {boolean} [saveParamsReferrerOncePerSession=`true`] -  If `true`, then includeGclid, includeFbclid, includeReferrer, and includeUtm will only track their respective properties once per session. New values that come in during the middle of the user's session will be ignored. Set to false to always capture new values.
@@ -74,7 +63,7 @@ export default {
   logAttributionCapturedEvent: false,
   optOut: false,
   onError: () => {},
-  platform,
+  platform: 'Web',
   savedMaxCount: 1000,
   saveEvents: true,
   saveParamsReferrerOncePerSession: true,
