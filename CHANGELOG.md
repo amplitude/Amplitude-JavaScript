@@ -1,3 +1,11 @@
+# [8.0.0](https://github.com/amplitude/amplitude-javascript/compare/v7.4.4...v8.0.0) (2021-03-15)
+
+
+### Bug Fixes
+
+* call onError in init function ([#368](https://github.com/amplitude/amplitude-javascript/issues/368)) ([d2ae868](https://github.com/amplitude/amplitude-javascript/commit/d2ae8686752d4a977213f1c0b9e2fe61ba24863c))
+* remove callback from argument to function that takes no arguments ([#370](https://github.com/amplitude/amplitude-javascript/issues/370)) ([777dead](https://github.com/amplitude/amplitude-javascript/commit/777dead4a5051e8d4d7e990aeb365b8d868e9383))
+
 ## [7.4.4](https://github.com/amplitude/amplitude-javascript/compare/v7.4.3...v7.4.4) (2021-03-02)
 
 
