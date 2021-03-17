@@ -31,7 +31,18 @@
     this._q = [];
     return this;
   };
-  var identifyFuncs = ['add', 'append', 'clearAll', 'prepend', 'set', 'setOnce', 'unset'];
+  var identifyFuncs = [
+    'add',
+    'append',
+    'clearAll',
+    'prepend',
+    'set',
+    'setOnce',
+    'unset',
+    'preInsert',
+    'postInsert',
+    'remove',
+  ];
   for (var i = 0; i < identifyFuncs.length; i++) {
     proxy(Identify, identifyFuncs[i]);
   }
