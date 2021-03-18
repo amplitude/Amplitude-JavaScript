@@ -14,6 +14,9 @@ var AMP_OP_PREPEND = '$prepend';
 var AMP_OP_SET = '$set';
 var AMP_OP_SET_ONCE = '$setOnce';
 var AMP_OP_UNSET = '$unset';
+var AMP_OP_PREINSERT = '$preInsert';
+var AMP_OP_POSTINSERT = '$postInsert';
+var AMP_OP_REMOVE = '$remove';
 
 /**
  * Identify API - instance constructor. Identify objects are a wrapper for user property operations.
@@ -153,6 +156,45 @@ Identify.prototype.setOnce = function (property, value) {
  */
 Identify.prototype.unset = function (property) {
   this._addOperation(AMP_OP_UNSET, property, '-');
+  return this;
+};
+
+/**
+ * Preinsert a value or values to a user property, if it does not exist in the user property already.
+ * Preinsert means inserting the value or values to the beginning of the specified user property.
+ * If the item already exists in the user property, it will be a no-op.
+ * @public
+ * @param {string} property - The user property key.
+ * @param {number|string|list|object} value - A value or values to insert.
+ * @returns {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
+ */
+Identify.prototype.preInsert = function (property, value) {
+  this._addOperation(AMP_OP_PREINSERT, property, value);
+  return this;
+};
+
+/**
+ * Postinsert a value or values to a user property, if it does not exist in the user property already.
+ * Postinsert means inserting the value or values to the beginning of the specified user property.
+ * If the item already exists in the user property, it will be a no-op.
+ * @param {string} property - The user property key.
+ * @param {number|string|list|object} value - A value or values to insert.
+ * @returns {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
+ */
+Identify.prototype.postInsert = function (property, value) {
+  this._addOperation(AMP_OP_POSTINSERT, property, value);
+  return this;
+};
+
+/**
+ * Remove a value or values to a user property, if it does exist in the user property.
+ * If the item does not exist in the user property, it will be a no-op.
+ * @param {string} property - The user property key.
+ * @param {number|string|list|object} value - A value or values to remove.
+ * @returns {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
+ */
+Identify.prototype.remove = function (property, value) {
+  this._addOperation(AMP_OP_REMOVE, property, value);
   return this;
 };
 
