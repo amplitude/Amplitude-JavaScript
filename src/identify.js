@@ -160,8 +160,9 @@ Identify.prototype.unset = function (property) {
 };
 
 /**
- * Add the item to the beginning of the specified user property if it does not exist in the user property already.
- * If the item already exists in the user property, it will be a no-op
+ * Preinsert a value or values to a user property, if it does not exist in the user property already.
+ * Preinsert means inserting the value or values to the beginning of the specified user property.
+ * If the item already exists in the user property, it will be a no-op.
  * @public
  * @param {string} property - The user property key.
  * @param {number|string|list|object} value - A value or values to insert.
@@ -173,7 +174,8 @@ Identify.prototype.preInsert = function (property, value) {
 };
 
 /**
- * Add the item to the beginning of the specified user property if it does not exist in the user property already.
+ * Postinsert a value or values to a user property, if it does not exist in the user property already.
+ * Postinsert means inserting the value or values to the beginning of the specified user property.
  * If the item already exists in the user property, it will be a no-op.
  * @param {string} property - The user property key.
  * @param {number|string|list|object} value - A value or values to insert.
@@ -185,8 +187,8 @@ Identify.prototype.postInsert = function (property, value) {
 };
 
 /**
- * Remove the item from the specified user property if it does exist in the user property.
- * If the item does not exist in the user property, it again be a no-op.
+ * Remove a value or values to a user property, if it does exist in the user property.
+ * If the item does not exist in the user property, it will be a no-op.
  * @param {string} property - The user property key.
  * @param {number|string|list|object} value - A value or values to remove.
  * @returns {Identify} Returns the same Identify object, allowing you to chain multiple method calls together.
