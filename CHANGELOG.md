@@ -1,3 +1,10 @@
+# [8.1.0](https://github.com/amplitude/amplitude-javascript/compare/v8.0.0...v8.1.0) (2021-03-19)
+
+
+### Features
+
+* **identify:** add preInsert, postInsert, remove to Identify and gro… ([#372](https://github.com/amplitude/amplitude-javascript/issues/372)) ([7e9e992](https://github.com/amplitude/amplitude-javascript/commit/7e9e9929f5534c9285aad782aa7ded2b2f839f47))
+
 # [8.0.0](https://github.com/amplitude/amplitude-javascript/compare/v7.4.4...v8.0.0) (2021-03-15)
 
 ### Bug Fixes
