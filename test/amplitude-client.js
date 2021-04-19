@@ -1482,6 +1482,10 @@ describe('AmplitudeClient', function () {
       assert.equal(server.requests[0].url, 'http://api.amplitude.com');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
+      assert.equal(
+        server.requests[0].requestHeaders['Content-Type'],
+        'application/x-www-form-urlencoded;charset=utf-8',
+      );
     });
 
     it('should send https request', function () {
