@@ -1520,7 +1520,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
   };
 
   var scope = this;
-  new Request(url, data).send(function (status, response) {
+  new Request(url, data, this.options.headers).send(function (status, response) {
     scope._sending = false;
     try {
       if (status === 200 && response === 'success') {

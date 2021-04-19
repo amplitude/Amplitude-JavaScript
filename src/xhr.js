@@ -3,10 +3,17 @@ import queryString from 'query-string';
 /*
  * Simple AJAX request object
  */
-var Request = function (url, data) {
+var Request = function (url, data, headers) {
   this.url = url;
   this.data = data || {};
+  this.headers = headers;
 };
+
+function setHeaders(xhr, headers) {
+  for (const header in headers) {
+    xhr.setRequestHeader(header, headers[header]);
+  }
+}
 
 Request.prototype.send = function (callback) {
   var isIE = window.XDomainRequest ? true : false;
@@ -35,7 +42,7 @@ Request.prototype.send = function (callback) {
         callback(xhr.status, xhr.responseText);
       }
     };
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    setHeaders(xhr, this.headers);
     xhr.send(queryString.stringify(this.data));
   }
   //log('sent request to ' + this.url + ' with data ' + decodeURIComponent(queryString(this.data)));

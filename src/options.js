@@ -89,4 +89,7 @@ export default {
   unsentKey: 'amplitude_unsent',
   unsentIdentifyKey: 'amplitude_unsent_identify',
   uploadBatchSize: 100,
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+  },
 };
