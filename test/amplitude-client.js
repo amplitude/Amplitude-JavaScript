@@ -1488,6 +1488,13 @@ describe('AmplitudeClient', function () {
       );
     });
 
+    it('should send request with custom headers', function () {
+      amplitude.options.headers = { 'Content-Type': 'application/json;charset=utf-8' };
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.equal(server.requests[0].requestHeaders['Content-Type'], 'application/json;charset=utf-8');
+    });
+
     it('should send https request', function () {
       amplitude.options.forceHttps = true;
       amplitude.logEvent('Event Type 1');
