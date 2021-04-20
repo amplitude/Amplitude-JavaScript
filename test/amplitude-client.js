@@ -1489,10 +1489,14 @@ describe('AmplitudeClient', function () {
     });
 
     it('should send request with custom headers', function () {
-      amplitude.options.headers = { 'Content-Type': 'application/json;charset=utf-8' };
+      amplitude.options.headers = {
+        'Content-Type': 'application/json;charset=utf-8',
+        Authorization: 'Bearer NOT_A_REAL_BEARER_TOKEN',
+      };
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
       assert.equal(server.requests[0].requestHeaders['Content-Type'], 'application/json;charset=utf-8');
+      assert.equal(server.requests[0].requestHeaders['Authorization'], 'Bearer NOT_A_REAL_BEARER_TOKEN');
     });
 
     it('should send https request', function () {
