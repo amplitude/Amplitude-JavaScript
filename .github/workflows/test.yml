@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          run: yarn install --frozen-lockfile --network-timeout 300000
+          yarn install --frozen-lockfile --network-timeout 300000
 
       - name: Build and run tests
         run: |
