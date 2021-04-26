@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
+    name: Execute full unit test suite
     strategy:
       fail-fast: false
       matrix:

@@ -4,6 +4,7 @@ on: pull_request
 
 jobs:
   lint-check:
+    name: Check for ESLint + Prettier Violations
     strategy:
       fail-fast: false
       matrix:
