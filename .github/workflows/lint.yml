@@ -1,13 +1,13 @@
 name: Lint
 
-on: [push, pull_request]
+on: pull_request
 
 jobs:
   lint-check:
     strategy:
       fail-fast: false
       matrix:
-        node-version: 14.x
+        node-version: [14.x]
         os: macOS-latest
     runs-on: ${{ matrix.os }}
 
