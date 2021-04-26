@@ -1,6 +1,13 @@
 name: Test
 
-on: [push, pull_request]
+# https://github.community/t/how-to-trigger-an-action-on-push-or-pull-request-but-not-both/16662
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
