@@ -317,6 +317,9 @@ var _parseConfig = function _parseConfig(options, config) {
     return;
   }
 
+  // Add exception in headers
+  const freeFormObjectKeys = new Set(['headers']);
+
   // validates config value is defined, is the correct type, and some additional value sanity checks
   var parseValidateAndLoad = function parseValidateAndLoad(key) {
     if (!Object.prototype.hasOwnProperty.call(options, key)) {
@@ -342,7 +345,9 @@ var _parseConfig = function _parseConfig(options, config) {
   };
 
   for (var key in config) {
-    if (Object.prototype.hasOwnProperty.call(config, key)) {
+    if (freeFormObjectKeys.has(key)) {
+      options[key] = config[key];
+    } else if (Object.prototype.hasOwnProperty.call(config, key)) {
       parseValidateAndLoad(key);
     }
   }
