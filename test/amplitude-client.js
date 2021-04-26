@@ -1488,15 +1488,26 @@ describe('AmplitudeClient', function () {
       );
     });
 
-    it('should send request with custom headers', function () {
-      amplitude.options.headers = {
-        'Content-Type': 'application/json;charset=utf-8',
-        Authorization: 'Bearer NOT_A_REAL_BEARER_TOKEN',
-      };
+    it('should send request with merged custom header values', function () {
+      amplitude.init(apiKey, null, {
+        headers: { Authorization: 'Bearer NOT_A_REAL_BEARER_TOKEN' },
+      });
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.equal(
+        server.requests[0].requestHeaders['Content-Type'],
+        'application/x-www-form-urlencoded;charset=utf-8',
+      );
+      assert.equal(server.requests[0].requestHeaders['Authorization'], 'Bearer NOT_A_REAL_BEARER_TOKEN');
+    });
+
+    it('should send request with overwritten custom header values', function () {
+      amplitude.init(apiKey, null, {
+        headers: { 'Content-Type': 'application/json;charset=utf-8' },
+      });
       amplitude.logEvent('Event Type 1');
       assert.lengthOf(server.requests, 1);
       assert.equal(server.requests[0].requestHeaders['Content-Type'], 'application/json;charset=utf-8');
-      assert.equal(server.requests[0].requestHeaders['Authorization'], 'Bearer NOT_A_REAL_BEARER_TOKEN');
     });
 
     it('should send https request', function () {
