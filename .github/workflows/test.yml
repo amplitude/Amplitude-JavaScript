@@ -5,7 +5,12 @@ on: [push, pull_request]
 jobs:
   test:
     name: Execute full unit test suite
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+        os: [macOS-latest, ubuntu-18.04]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Check out Git repository

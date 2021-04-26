@@ -5,12 +5,7 @@ on: pull_request
 jobs:
   lint-check:
     name: Check for ESLint + Prettier Violations
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [14.x]
-        os: [macOS-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out Git repository
