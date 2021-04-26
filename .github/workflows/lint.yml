@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [14.x]
-        os: macOS-latest
+        os: [macOS-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
