@@ -346,7 +346,7 @@ var _parseConfig = function _parseConfig(options, config) {
 
   for (var key in config) {
     if (freeFormObjectKeys.has(key)) {
-      options[key] = config[key];
+      options[key] = { ...options[key], ...config[key] };
     } else if (Object.prototype.hasOwnProperty.call(config, key)) {
       parseValidateAndLoad(key);
     }
