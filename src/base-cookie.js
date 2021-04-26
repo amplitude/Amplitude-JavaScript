@@ -1,5 +1,6 @@
 import Constants from './constants';
 import base64Id from './base64Id';
+import utils from './utils';
 
 const get = (name) => {
   try {
@@ -48,15 +49,22 @@ const set = (name, value, opts) => {
 
 // test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
 const areCookiesEnabled = (opts = {}) => {
-  const uid = String(new Date());
+  utils.log.info(`Testing if cookies available`);
+  const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
+  let _areCookiesEnabled = false;
   try {
-    const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
+    const uid = String(new Date());
     set(cookieName, uid, opts);
-    const _areCookiesEnabled = get(cookieName + '=') === uid;
+    _areCookiesEnabled = get(cookieName + '=') === uid;
+  } catch (e) {
+    console.log('error');
+    utils.log.info(`Cookies are unavailable. Reason: "${e}"`);
+  } finally {
+    console.log('cleanup');
+    utils.log.info(`Cleaning up cookies availability test`);
     set(cookieName, null, opts);
-    return _areCookiesEnabled;
-  } catch (e) {} /* eslint-disable-line no-empty */
-  return false;
+  }
+  return _areCookiesEnabled;
 };
 
 export default {
