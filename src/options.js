@@ -39,6 +39,7 @@ import language from './language';
  * @property {string} [unsentKey=`amplitude_unsent`] - localStorage key that stores unsent events.
  * @property {string} [unsentIdentifyKey=`amplitude_unsent_identify`] - localStorage key that stores unsent identifies.
  * @property {number} [uploadBatchSize=`100`] -  The maximum number of events to send to the server per request.
+ * @property {Object} [headers=`{ 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }`] - Headers attached to an event(s) upload network request. Custom header properties are merged with this object.
  */
 export default {
   apiEndpoint: 'api.amplitude.com',
@@ -89,4 +90,7 @@ export default {
   unsentKey: 'amplitude_unsent',
   unsentIdentifyKey: 'amplitude_unsent_identify',
   uploadBatchSize: 100,
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+  },
 };
