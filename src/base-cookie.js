@@ -57,10 +57,8 @@ const areCookiesEnabled = (opts = {}) => {
     set(cookieName, uid, opts);
     _areCookiesEnabled = get(cookieName + '=') === uid;
   } catch (e) {
-    console.log('error');
     utils.log.info(`Cookies are unavailable. Reason: "${e}"`);
   } finally {
-    console.log('cleanup');
     utils.log.info(`Cleaning up cookies availability test`);
     set(cookieName, null, opts);
   }
