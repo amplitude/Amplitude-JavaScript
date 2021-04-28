@@ -1,3 +1,10 @@
+# [8.2.0](https://github.com/amplitude/amplitude-javascript/compare/v8.1.0...v8.2.0) (2021-04-28)
+
+
+### Features
+
+* Add HTTP header configurations to options ([#379](https://github.com/amplitude/amplitude-javascript/issues/379)) ([4aaa26f](https://github.com/amplitude/amplitude-javascript/commit/4aaa26f45919c5587bcc3fb21510ca8afbc41e4b))
+
 # [8.1.0](https://github.com/amplitude/amplitude-javascript/compare/v8.0.0...v8.1.0) (2021-03-19)
 
 
