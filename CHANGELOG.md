@@ -1,3 +1,10 @@
+## [8.2.1](https://github.com/amplitude/amplitude-javascript/compare/v8.2.0...v8.2.1) (2021-04-30)
+
+
+### Bug Fixes
+
+*  Cleanup test cookies ([#381](https://github.com/amplitude/amplitude-javascript/issues/381)) ([9d8ecc3](https://github.com/amplitude/amplitude-javascript/commit/9d8ecc38dafb1a996f0742eb992703517d2a6abd))
+
 # [8.2.0](https://github.com/amplitude/amplitude-javascript/compare/v8.1.0...v8.2.0) (2021-04-28)
 
 
