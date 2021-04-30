@@ -1,5 +1,8 @@
 import sinon from 'sinon';
 import cookie from '../src/base-cookie';
+import base64Id from '../src/base64Id';
+import Constants from '../src/constants';
+import utils from '../src/utils';
 import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 
 describe('cookie', function () {
@@ -43,18 +46,71 @@ describe('cookie', function () {
     });
 
     it('should return null when attempting to retrieve a cookie that does not exist', () => {
-      assert.equal(cookie.get('key='), null);
+      assert.isNull(cookie.get('key='));
     });
   });
 
   describe('areCookiesEnabled', () => {
-    it('return false when it cannot write to a cookie', () => {
-      mockCookie({ disabled: true });
-      assert.equal(cookie.areCookiesEnabled(), false);
+    describe('when it can write to a cookie', () => {
+      afterEach(() => {
+        restoreCookie();
+      });
+
+      it('should return true', () => {
+        assert.isTrue(cookie.areCookiesEnabled());
+      });
+
+      it('should cleanup cookies', () => {
+        const stub = sinon.stub(Math, 'random').returns(12345678);
+
+        const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
+        cookie.areCookiesEnabled();
+        assert.isNull(cookie.get(`${cookieName}=`), null);
+
+        stub.restore();
+      });
     });
 
-    it('should return true when it can write to a cookie', () => {
-      assert.equal(cookie.areCookiesEnabled(), true);
+    describe('when it cannot write to a cookie', () => {
+      beforeEach(() => {
+        mockCookie({ disabled: true });
+      });
+
+      afterEach(() => {
+        restoreCookie();
+      });
+
+      it('should return false', () => {
+        assert.isFalse(cookie.areCookiesEnabled());
+      });
+
+      it('should cleanup cookies', () => {
+        const stub = sinon.stub(Math, 'random').returns(12345678);
+        const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
+
+        cookie.areCookiesEnabled();
+        assert.isNull(cookie.get(`${cookieName}=`));
+
+        stub.restore();
+      });
+    });
+
+    describe('when error is thrown during check', () => {
+      it('should cleanup cookies', () => {
+        const stub = sinon.stub(Math, 'random').returns(12345678);
+        const stubLogInfo = sinon.stub(utils.log, 'info').throws('Stubbed Exception');
+        const spyLogWarning = sinon.spy(utils.log, 'warn');
+        const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
+
+        const res = cookie.areCookiesEnabled();
+        assert.isFalse(res);
+        assert.isTrue(spyLogWarning.calledWith('Error thrown when checking for cookies. Reason: "Stubbed Exception"'));
+        assert.isNull(cookie.get(`${cookieName}=`));
+
+        stub.restore();
+        stubLogInfo.restore();
+        spyLogWarning.restore();
+      });
     });
   });
 });

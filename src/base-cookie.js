@@ -49,12 +49,12 @@ const set = (name, value, opts) => {
 
 // test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
 const areCookiesEnabled = (opts = {}) => {
-  utils.log.info(`Testing if cookies available`);
   const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
   let _areCookiesEnabled = false;
   try {
     const uid = String(new Date());
     set(cookieName, uid, opts);
+    utils.log.info(`Testing if cookies available`);
     _areCookiesEnabled = get(cookieName + '=') === uid;
   } catch (e) {
     utils.log.warn(`Error thrown when checking for cookies. Reason: "${e}"`);
