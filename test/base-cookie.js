@@ -51,23 +51,26 @@ describe('cookie', function () {
   });
 
   describe('areCookiesEnabled', () => {
-    describe('when it can write to a cookie', () => {
-      afterEach(() => {
-        restoreCookie();
-      });
+    before(() => {
+      sinon.stub(Math, 'random').returns(1);
+    });
+    after(() => {
+      sinon.restore();
+    });
+    afterEach(() => {
+      restoreCookie();
+      sinon.restore();
+    });
 
+    describe('when it can write to a cookie', () => {
       it('should return true', () => {
         assert.isTrue(cookie.areCookiesEnabled());
       });
 
       it('should cleanup cookies', () => {
-        const stub = sinon.stub(Math, 'random').returns(12345678);
-
         const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
         cookie.areCookiesEnabled();
         assert.isNull(cookie.get(`${cookieName}=`), null);
-
-        stub.restore();
       });
     });
 
@@ -76,38 +79,28 @@ describe('cookie', function () {
         mockCookie({ disabled: true });
       });
 
-      afterEach(() => {
-        restoreCookie();
-      });
-
       it('should return false', () => {
         assert.isFalse(cookie.areCookiesEnabled());
       });
 
       it('should cleanup cookies', () => {
-        const stub = sinon.stub(Math, 'random').returns(12345678);
         const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
 
         cookie.areCookiesEnabled();
         assert.isNull(cookie.get(`${cookieName}=`));
-
-        stub.restore();
       });
     });
 
     describe('when error is thrown during check', () => {
       it('should cleanup cookies', () => {
-        const stub = sinon.stub(Math, 'random').returns(12345678);
         const stubLogInfo = sinon.stub(utils.log, 'info').throws('Stubbed Exception');
         const spyLogWarning = sinon.spy(utils.log, 'warn');
         const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
-
         const res = cookie.areCookiesEnabled();
         assert.isFalse(res);
         assert.isTrue(spyLogWarning.calledWith('Error thrown when checking for cookies. Reason: "Stubbed Exception"'));
         assert.isNull(cookie.get(`${cookieName}=`));
 
-        stub.restore();
         stubLogInfo.restore();
         spyLogWarning.restore();
       });
