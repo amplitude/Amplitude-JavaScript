@@ -96,20 +96,35 @@ class MetadataStorage {
         ampLocalStorage.setItem(this.storageKey, value);
         break;
       case Constants.STORAGE_COOKIES:
-        baseCookie.set(this.getCookieStorageKey(), value, {
-          domain: this.cookieDomain,
-          secure: this.secure,
-          sameSite: this.sameSite,
-          expirationDays: this.expirationDays,
-        });
+        this.saveCookie(value);
         break;
     }
+  }
+
+  saveCookie(value) {
+    baseCookie.set(this.getCookieStorageKey(), value, {
+      domain: this.cookieDomain,
+      secure: this.secure,
+      sameSite: this.sameSite,
+      expirationDays: this.expirationDays,
+    });
   }
 
   load() {
     let str;
     if (this.storage === Constants.STORAGE_COOKIES) {
-      str = baseCookie.get(this.getCookieStorageKey() + '=');
+      const cookieKey = this.getCookieStorageKey() + '=';
+      const allCookies = baseCookie.getAll(cookieKey);
+      if (allCookies.length === 0 || allCookies.length === 1) {
+        str = allCookies[0];
+      } else {
+        // dedup cookies by deleting them all and restoring
+        // the one with the most recent event time
+        const latestCookie = baseCookie.sortByEventTime(allCookies)[0];
+        allCookies.forEach(() => baseCookie.set(this.getCookieStorageKey(), null, {}));
+        this.saveCookie(latestCookie);
+        str = baseCookie.get(cookieKey);
+      }
     }
     if (!str) {
       str = ampLocalStorage.getItem(this.storageKey);
