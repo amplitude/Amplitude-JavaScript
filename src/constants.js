@@ -18,6 +18,16 @@ export default {
   OPT_OUT: 'amplitude_optOut',
   USER_ID: 'amplitude_userId',
 
+  // indexes of properties in storage format
+  DEVICE_ID_INDEX: 0,
+  USER_ID_INDEX: 1,
+  OPT_OUT_INDEX: 2,
+  SESSION_ID_INDEX: 3,
+  LAST_EVENT_TIME_INDEX: 4,
+  EVENT_ID_INDEX: 5,
+  IDENTIFY_ID_INDEX: 6,
+  SEQUENCE_NUMBER_INDEX: 7,
+
   COOKIE_TEST_PREFIX: 'amp_cookie_test',
   COOKIE_PREFIX: 'amp',
 

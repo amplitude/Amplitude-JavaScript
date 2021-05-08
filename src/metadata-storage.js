@@ -129,23 +129,23 @@ class MetadataStorage {
     const values = str.split('.');
 
     let userId = null;
-    if (values[1]) {
+    if (values[Constants.USER_ID_INDEX]) {
       try {
-        userId = Base64.decode(values[1]);
+        userId = Base64.decode(values[Constants.USER_ID_INDEX]);
       } catch (e) {
         userId = null;
       }
     }
 
     return {
-      deviceId: values[0],
+      deviceId: values[Constants.DEVICE_ID_INDEX],
       userId,
-      optOut: values[2] === '1',
-      sessionId: parseInt(values[3], 32),
-      lastEventTime: parseInt(values[4], 32),
-      eventId: parseInt(values[5], 32),
-      identifyId: parseInt(values[6], 32),
-      sequenceNumber: parseInt(values[7], 32),
+      optOut: values[Constants.OPT_OUT_INDEX] === '1',
+      sessionId: parseInt(values[Constants.SESSION_ID_INDEX], 32),
+      lastEventTime: parseInt(values[Constants.LAST_EVENT_TIME_INDEX], 32),
+      eventId: parseInt(values[Constants.EVENT_ID_INDEX], 32),
+      identifyId: parseInt(values[Constants.IDENTIFY_ID_INDEX], 32),
+      sequenceNumber: parseInt(values[Constants.SEQUENCE_NUMBER_INDEX], 32),
     };
   }
 }
