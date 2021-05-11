@@ -25,15 +25,14 @@ const get = (name) => {
 
 const getAll = (name) => {
   try {
-    const ca = document.cookie.split(';');
+    const cookieArray = document.cookie.split(';').map((c) => c.trimStart());
     let values = [];
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) === ' ') {
-        c = c.substring(1, c.length);
+    for (let cookie of cookieArray) {
+      while (cookie.charAt(0) === ' ') {
+        cookie = cookie.substring(1);
       }
-      if (c.indexOf(name) === 0) {
-        values.push(c.substring(name.length, c.length));
+      if (cookie.indexOf(name) === 0) {
+        values.push(cookie.substring(name.length));
       }
     }
 
