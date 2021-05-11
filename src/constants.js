@@ -18,7 +18,7 @@ export default {
   OPT_OUT: 'amplitude_optOut',
   USER_ID: 'amplitude_userId',
 
-  // indexes of properties in storage format
+  // indexes of properties in cookie v2 storage format
   DEVICE_ID_INDEX: 0,
   USER_ID_INDEX: 1,
   OPT_OUT_INDEX: 2,
