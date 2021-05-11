@@ -78,10 +78,12 @@ const getLastEventTime = (cookie = '') => {
 };
 
 const sortByEventTime = (cookies) => {
-  return cookies.sort((c1, c2) => {
+  return [...cookies].sort((c1, c2) => {
     const t1 = getLastEventTime(c1);
     const t2 = getLastEventTime(c2);
-    return t1 > t2 ? c1 : c2;
+    // sort c1 first if its last event time is more recent
+    // i.e its event time integer is larger that c2's
+    return t2 - t1;
   });
 };
 
