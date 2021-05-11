@@ -38,7 +38,7 @@ const getAll = (name) => {
 
     return values;
   } catch (e) {
-    return null;
+    return [];
   }
 };
 
