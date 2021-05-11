@@ -67,9 +67,14 @@ const set = (name, value, opts) => {
   document.cookie = str;
 };
 
-const getLastEventTime = (cookie) => {
+const getLastEventTime = (cookie = '') => {
   const strValue = cookie.split('.')[Constants.LAST_EVENT_TIME_INDEX];
-  return parseInt(strValue, 32) || 0;
+  // regex that strValue is only digits and at least one digit long
+  if (strValue && /^\d+$/.test(strValue)) {
+    return parseInt(strValue, 32) || 0;
+  } else {
+    return 0;
+  }
 };
 
 const sortByEventTime = (cookies) => {
