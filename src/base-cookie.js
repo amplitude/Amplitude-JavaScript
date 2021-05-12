@@ -68,9 +68,16 @@ const set = (name, value, opts) => {
 
 const getLastEventTime = (cookie = '') => {
   const strValue = cookie.split('.')[Constants.LAST_EVENT_TIME_INDEX];
+
+  let parsedValue;
   if (strValue) {
-    return parseInt(strValue, 32) || 0;
+    parsedValue = parseInt(strValue, 32);
+  }
+
+  if (parsedValue) {
+    return parsedValue;
   } else {
+    utils.log.warn(`unable to parse malformed cookie: ${cookie}`);
     return 0;
   }
 };
