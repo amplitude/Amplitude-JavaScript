@@ -125,12 +125,6 @@ describe('cookie', function () {
         assert.equal(lastEventTime, 0);
       });
 
-      it('should return 0 if cookie is a malformed cookie', () => {
-        const cookieStr = 'asdfasdfasdfasdf';
-        const lastEventTime = cookie.getLastEventTime(cookieStr);
-        assert.equal(lastEventTime, 0);
-      });
-
       it('should return a number thats base 32 encoded and put into the amplitude cookie format', () => {
         const originalTime = 1620698180822;
         const cookieStr = `....${originalTime.toString(32)}...`;
