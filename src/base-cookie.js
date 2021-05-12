@@ -23,6 +23,25 @@ const get = (name) => {
   }
 };
 
+const getAll = (name) => {
+  try {
+    const cookieArray = document.cookie.split(';').map((c) => c.trimStart());
+    let values = [];
+    for (let cookie of cookieArray) {
+      while (cookie.charAt(0) === ' ') {
+        cookie = cookie.substring(1);
+      }
+      if (cookie.indexOf(name) === 0) {
+        values.push(cookie.substring(name.length));
+      }
+    }
+
+    return values;
+  } catch (e) {
+    return [];
+  }
+};
+
 const set = (name, value, opts) => {
   let expires = value !== null ? opts.expirationDays : -1;
   if (expires) {
@@ -47,6 +66,32 @@ const set = (name, value, opts) => {
   document.cookie = str;
 };
 
+const getLastEventTime = (cookie = '') => {
+  const strValue = cookie.split('.')[Constants.LAST_EVENT_TIME_INDEX];
+
+  let parsedValue;
+  if (strValue) {
+    parsedValue = parseInt(strValue, 32);
+  }
+
+  if (parsedValue) {
+    return parsedValue;
+  } else {
+    utils.log.warn(`unable to parse malformed cookie: ${cookie}`);
+    return 0;
+  }
+};
+
+const sortByEventTime = (cookies) => {
+  return [...cookies].sort((c1, c2) => {
+    const t1 = getLastEventTime(c1);
+    const t2 = getLastEventTime(c2);
+    // sort c1 first if its last event time is more recent
+    // i.e its event time integer is larger that c2's
+    return t2 - t1;
+  });
+};
+
 // test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
 const areCookiesEnabled = (opts = {}) => {
   const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
@@ -68,5 +113,8 @@ const areCookiesEnabled = (opts = {}) => {
 export default {
   set,
   get,
+  getAll,
+  getLastEventTime,
+  sortByEventTime,
   areCookiesEnabled,
 };

@@ -105,5 +105,50 @@ describe('cookie', function () {
         spyLogWarning.restore();
       });
     });
+
+    describe('getLastEventTime tests', () => {
+      it('should return 0 if cookie is undefined', () => {
+        const cookieStr = undefined;
+        const lastEventTime = cookie.getLastEventTime(cookieStr);
+        assert.equal(lastEventTime, 0);
+      });
+
+      it('should return 0 if cookie is an empty string', () => {
+        const cookieStr = '';
+        const lastEventTime = cookie.getLastEventTime(cookieStr);
+        assert.equal(lastEventTime, 0);
+      });
+
+      it('should return 0 if cookie is a malformed cookie', () => {
+        const cookieStr = 'asdfasdfasdfasdf';
+        const lastEventTime = cookie.getLastEventTime(cookieStr);
+        assert.equal(lastEventTime, 0);
+      });
+
+      it('should return a number thats base 32 encoded and put into the amplitude cookie format', () => {
+        const originalTime = 1620698180822;
+        const cookieStr = `....${originalTime.toString(32)}...`;
+        const lastEventTime = cookie.getLastEventTime(cookieStr);
+        assert.equal(lastEventTime, originalTime);
+      });
+    });
+
+    describe('sortByEventTime tests', () => {
+      it('should sort cookies by last event time from greatest to least', () => {
+        const firstTime = 10;
+        const secondTime = 20;
+        const thirdTime = 30;
+        const invalidTime = '';
+
+        const cookieArray = [secondTime, invalidTime, thirdTime, firstTime].map((t) => `....${t.toString(32)}...`);
+        const sortedCookieArray = cookie.sortByEventTime(cookieArray);
+
+        assert.notEqual(cookieArray, sortedCookieArray); // returns a shallow copy, not the same array
+        assert.equal(sortedCookieArray[0], cookieArray[2]); // third time
+        assert.equal(sortedCookieArray[1], cookieArray[0]); // second time
+        assert.equal(sortedCookieArray[2], cookieArray[3]); // first time
+        assert.equal(sortedCookieArray[3], cookieArray[1]); // invalid time
+      });
+    });
   });
 });

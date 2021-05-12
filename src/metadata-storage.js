@@ -96,20 +96,35 @@ class MetadataStorage {
         ampLocalStorage.setItem(this.storageKey, value);
         break;
       case Constants.STORAGE_COOKIES:
-        baseCookie.set(this.getCookieStorageKey(), value, {
-          domain: this.cookieDomain,
-          secure: this.secure,
-          sameSite: this.sameSite,
-          expirationDays: this.expirationDays,
-        });
+        this.saveCookie(value);
         break;
     }
+  }
+
+  saveCookie(value) {
+    baseCookie.set(this.getCookieStorageKey(), value, {
+      domain: this.cookieDomain,
+      secure: this.secure,
+      sameSite: this.sameSite,
+      expirationDays: this.expirationDays,
+    });
   }
 
   load() {
     let str;
     if (this.storage === Constants.STORAGE_COOKIES) {
-      str = baseCookie.get(this.getCookieStorageKey() + '=');
+      const cookieKey = this.getCookieStorageKey() + '=';
+      const allCookies = baseCookie.getAll(cookieKey);
+      if (allCookies.length === 0 || allCookies.length === 1) {
+        str = allCookies[0];
+      } else {
+        // dedup cookies by deleting them all and restoring
+        // the one with the most recent event time
+        const latestCookie = baseCookie.sortByEventTime(allCookies)[0];
+        allCookies.forEach(() => baseCookie.set(this.getCookieStorageKey(), null, {}));
+        this.saveCookie(latestCookie);
+        str = baseCookie.get(cookieKey);
+      }
     }
     if (!str) {
       str = ampLocalStorage.getItem(this.storageKey);
@@ -129,23 +144,23 @@ class MetadataStorage {
     const values = str.split('.');
 
     let userId = null;
-    if (values[1]) {
+    if (values[Constants.USER_ID_INDEX]) {
       try {
-        userId = Base64.decode(values[1]);
+        userId = Base64.decode(values[Constants.USER_ID_INDEX]);
       } catch (e) {
         userId = null;
       }
     }
 
     return {
-      deviceId: values[0],
+      deviceId: values[Constants.DEVICE_ID_INDEX],
       userId,
-      optOut: values[2] === '1',
-      sessionId: parseInt(values[3], 32),
-      lastEventTime: parseInt(values[4], 32),
-      eventId: parseInt(values[5], 32),
-      identifyId: parseInt(values[6], 32),
-      sequenceNumber: parseInt(values[7], 32),
+      optOut: values[Constants.OPT_OUT_INDEX] === '1',
+      sessionId: parseInt(values[Constants.SESSION_ID_INDEX], 32),
+      lastEventTime: parseInt(values[Constants.LAST_EVENT_TIME_INDEX], 32),
+      eventId: parseInt(values[Constants.EVENT_ID_INDEX], 32),
+      identifyId: parseInt(values[Constants.IDENTIFY_ID_INDEX], 32),
+      sequenceNumber: parseInt(values[Constants.SEQUENCE_NUMBER_INDEX], 32),
     };
   }
 }
