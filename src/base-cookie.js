@@ -104,7 +104,7 @@ const areCookiesEnabled = (opts = {}) => {
   } catch (e) {
     utils.log.warn(`Error thrown when checking for cookies. Reason: "${e}"`);
   } finally {
-    utils.log.warn(`Cleaning up cookies availability test`);
+    utils.log.info(`Cleaning up cookies availability test`);
     set(cookieName, null, opts);
   }
   return _areCookiesEnabled;
