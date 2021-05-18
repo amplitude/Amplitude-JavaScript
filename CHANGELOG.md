@@ -1,3 +1,10 @@
+## [8.2.3](https://github.com/amplitude/amplitude-javascript/compare/v8.2.2...v8.2.3) (2021-05-18)
+
+
+### Bug Fixes
+
+* reduce log level of cookie test ([#394](https://github.com/amplitude/amplitude-javascript/issues/394)) ([c4bb241](https://github.com/amplitude/amplitude-javascript/commit/c4bb2413dfb217991ab5192e56ac3ae568bc92b9))
+
 ## [8.2.1](https://github.com/amplitude/amplitude-javascript/compare/v8.2.0...v8.2.1) (2021-04-30)
 
 
