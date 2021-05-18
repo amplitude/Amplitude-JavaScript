@@ -93,7 +93,7 @@ describe('cookie', function () {
 
     describe('when error is thrown during check', () => {
       it('should cleanup cookies', () => {
-        const stubLogInfo = sinon.stub(utils.log, 'info').throws('Stubbed Exception');
+        const stubLogInfo = sinon.stub(utils.log, 'info').onFirstCall().throws('Stubbed Exception');
         const spyLogWarning = sinon.spy(utils.log, 'warn');
         const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
         const res = cookie.areCookiesEnabled();
