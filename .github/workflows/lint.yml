@@ -1,23 +1,11 @@
-name: Test
+name: Lint
 
-# https://github.community/t/how-to-trigger-an-action-on-push-or-pull-request-but-not-both/16662
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: pull_request
 
 jobs:
-  test:
-    name: Execute full unit test suite
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [10.x, 12.x, 14.x]
-        os: [macOS-latest, ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+  lint-check:
+    name: Check for ESLint + Prettier Violations
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out Git repository
@@ -38,6 +26,10 @@ jobs:
         run: |
           yarn install --frozen-lockfile --network-timeout 300000
 
-      - name: Build and run tests
+      - name: Prettier check
         run: |
-          make test
+          yarn run lint:prettier
+
+      - name: Eslint check
+        run: |
+          yarn run lint:eslint
