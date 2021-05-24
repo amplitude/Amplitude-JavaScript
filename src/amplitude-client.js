@@ -522,6 +522,16 @@ AmplitudeClient.prototype._sendEventsIfReady = function _sendEventsIfReady() {
 };
 
 /**
+ * Clears any saved metadata storage
+ * @constructor AmplitudeClient
+ * @public
+ * @return {boolean} True if metadata was cleared, false if none existed
+ */
+AmplitudeClient.prototype.clearStorage = function clearStorage() {
+  return this._metadataStorage.clear();
+};
+
+/**
  * Helper function to fetch values from storage
  * Storage argument allows for localStoraoge and sessionStoraoge
  * @private
