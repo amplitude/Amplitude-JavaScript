@@ -522,7 +522,7 @@ AmplitudeClient.prototype._sendEventsIfReady = function _sendEventsIfReady() {
 };
 
 /**
- * Clears any saved metadata storage
+ * Clears any stored events and metadata. Storage is then re-created on next event sending.
  * @constructor AmplitudeClient
  * @public
  * @return {boolean} True if metadata was cleared, false if none existed
