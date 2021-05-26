@@ -174,7 +174,12 @@ class MetadataStorage {
     let str;
     if (this.storage === Constants.STORAGE_COOKIES) {
       str = baseCookie.get(this.getCookieStorageKey() + '=');
-      baseCookie.clear(this.getCookieStorageKey());
+      baseCookie.set(this.getCookieStorageKey(), null, {
+        domain: this.cookieDomain,
+        secure: this.secure,
+        sameSite: this.sameSite,
+        expirationDays: 0,
+      });
     }
     if (!str) {
       str = ampLocalStorage.getItem(this.storageKey);

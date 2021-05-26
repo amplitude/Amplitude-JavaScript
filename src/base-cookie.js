@@ -92,14 +92,6 @@ const sortByEventTime = (cookies) => {
   });
 };
 
-/**
- * Clears cookie by setting expiration to a past date
- * @param {*} name
- */
-const clear = (name) => {
-  document.cookie = `${name}= ; expires = Thu, 01 Jan 1970 00:00:00 GMT'`;
-};
-
 // test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
 const areCookiesEnabled = (opts = {}) => {
   const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
@@ -121,7 +113,6 @@ const areCookiesEnabled = (opts = {}) => {
 export default {
   set,
   get,
-  clear,
   getAll,
   getLastEventTime,
   sortByEventTime,
