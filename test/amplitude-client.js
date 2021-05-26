@@ -3814,7 +3814,7 @@ describe('AmplitudeClient', function () {
       amplitude.init(apiKey, null, { storage: constants.STORAGE_COOKIES });
       assert.isNotNull(amplitude._metadataStorage.load());
       assert.equal(amplitude._metadataStorage.storage, constants.STORAGE_COOKIES);
-      amplitude.clearStorage();
+      assert.equal(amplitude.clearStorage(), true);
       assert.isNull(amplitude._metadataStorage.load());
     });
 
@@ -3822,7 +3822,7 @@ describe('AmplitudeClient', function () {
       amplitude.init(apiKey, null, { storage: constants.STORAGE_LOCAL });
       assert.isNotNull(amplitude._metadataStorage.load());
       assert.equal(amplitude._metadataStorage.storage, constants.STORAGE_LOCAL);
-      amplitude.clearStorage();
+      assert.equal(amplitude.clearStorage(), true);
       assert.isNull(amplitude._metadataStorage.load());
     });
 
@@ -3830,7 +3830,7 @@ describe('AmplitudeClient', function () {
       amplitude.init(apiKey, null, { storage: constants.STORAGE_SESSION });
       assert.isNotNull(amplitude._metadataStorage.load());
       assert.equal(amplitude._metadataStorage.storage, constants.STORAGE_SESSION);
-      amplitude.clearStorage();
+      assert.equal(amplitude.clearStorage(), true);
       assert.isNull(amplitude._metadataStorage.load());
     });
   });
