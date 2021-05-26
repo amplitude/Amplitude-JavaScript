@@ -1,3 +1,10 @@
+# [8.3.0](https://github.com/amplitude/amplitude-javascript/compare/v8.2.3...v8.3.0) (2021-05-26)
+
+
+### Features
+
+* Clear Storage API ([#396](https://github.com/amplitude/amplitude-javascript/issues/396)) ([e8cb8b7](https://github.com/amplitude/amplitude-javascript/commit/e8cb8b728d1aede4aec82e5d040f27e057c4758a))
+
 ## [8.2.3](https://github.com/amplitude/amplitude-javascript/compare/v8.2.2...v8.2.3) (2021-05-18)
 
 
