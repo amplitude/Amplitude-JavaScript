@@ -163,6 +163,39 @@ class MetadataStorage {
       sequenceNumber: parseInt(values[Constants.SEQUENCE_NUMBER_INDEX], 32),
     };
   }
+
+  /**
+   * Clears any saved metadata storage
+   * @constructor AmplitudeClient
+   * @public
+   * @return {boolean} True if metadata was cleared, false if none existed
+   */
+  clear() {
+    let str;
+    if (this.storage === Constants.STORAGE_COOKIES) {
+      str = baseCookie.get(this.getCookieStorageKey() + '=');
+      baseCookie.set(this.getCookieStorageKey(), null, {
+        domain: this.cookieDomain,
+        secure: this.secure,
+        sameSite: this.sameSite,
+        expirationDays: 0,
+      });
+    }
+    if (!str) {
+      str = ampLocalStorage.getItem(this.storageKey);
+      ampLocalStorage.clear();
+    }
+    if (!str) {
+      try {
+        str = window.sessionStorage && window.sessionStorage.getItem(this.storageKey);
+        window.sessionStorage.clear();
+      } catch (e) {
+        utils.log.info(`window.sessionStorage unavailable. Reason: "${e}"`);
+      }
+    }
+    if (!str) false;
+    return true;
+  }
 }
 
 export default MetadataStorage;

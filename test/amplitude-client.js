@@ -3804,4 +3804,34 @@ describe('AmplitudeClient', function () {
       });
     });
   });
+
+  describe('clearStorage', function () {
+    afterEach(() => {
+      reset();
+    });
+
+    it('should clear cookies', function () {
+      amplitude.init(apiKey, null, { storage: constants.STORAGE_COOKIES });
+      assert.isNotNull(amplitude._metadataStorage.load());
+      assert.equal(amplitude._metadataStorage.storage, constants.STORAGE_COOKIES);
+      assert.equal(amplitude.clearStorage(), true);
+      assert.isNull(amplitude._metadataStorage.load());
+    });
+
+    it('should clear localStorage', function () {
+      amplitude.init(apiKey, null, { storage: constants.STORAGE_LOCAL });
+      assert.isNotNull(amplitude._metadataStorage.load());
+      assert.equal(amplitude._metadataStorage.storage, constants.STORAGE_LOCAL);
+      assert.equal(amplitude.clearStorage(), true);
+      assert.isNull(amplitude._metadataStorage.load());
+    });
+
+    it('should clear sessionStorage', function () {
+      amplitude.init(apiKey, null, { storage: constants.STORAGE_SESSION });
+      assert.isNotNull(amplitude._metadataStorage.load());
+      assert.equal(amplitude._metadataStorage.storage, constants.STORAGE_SESSION);
+      assert.equal(amplitude.clearStorage(), true);
+      assert.isNull(amplitude._metadataStorage.load());
+    });
+  });
 });
