@@ -6,8 +6,7 @@ var getUtmData = function getUtmData(rawCookie, query) {
   var cookie = rawCookie ? '?' + rawCookie.split('.').slice(-1)[0].replace(/\|/g, '&') : '';
 
   var fetchParam = function fetchParam(queryName, query, cookieName, cookie) {
-    return utils.getQueryParam(queryName, query) ||
-           utils.getQueryParam(cookieName, cookie);
+    return utils.getQueryParam(queryName, query) || utils.getQueryParam(cookieName, cookie);
   };
 
   var utmSource = fetchParam(Constants.UTM_SOURCE, query, 'utmcsr', cookie);

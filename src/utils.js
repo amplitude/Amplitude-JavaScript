@@ -49,7 +49,7 @@ var _log = function _log(s) {
 };
 
 var isEmptyString = function isEmptyString(str) {
-  return (!str || str.length === 0);
+  return !str || str.length === 0;
 };
 
 var sessionStorageEnabled = function sessionStorageEnabled() {
@@ -57,7 +57,9 @@ var sessionStorageEnabled = function sessionStorageEnabled() {
     if (window.sessionStorage) {
       return true;
     }
-  } catch (e) {} // sessionStorage disabled
+  } catch (e) {
+    // sessionStorage disabled
+  }
   return false;
 };
 
@@ -132,9 +134,7 @@ var validateProperties = function validateProperties(properties) {
   return copy;
 };
 
-var invalidValueTypes = [
-  'nan', 'function', 'arguments', 'regexp', 'element'
-];
+var invalidValueTypes = ['nan', 'function', 'arguments', 'regexp', 'element'];
 
 var validatePropertyValue = function validatePropertyValue(key, value) {
   var valueType = type(value);
@@ -206,7 +206,9 @@ var validateGroupName = function validateGroupName(key, groupName) {
   }
   if (groupNameType === 'date' || groupNameType === 'number' || groupNameType === 'boolean') {
     groupName = String(groupName);
-    log.warn('WARNING: Non-string groupName, received type ' + groupNameType + ', coercing to string "' + groupName + '"');
+    log.warn(
+      'WARNING: Non-string groupName, received type ' + groupNameType + ', coercing to string "' + groupName + '"',
+    );
     return groupName;
   }
   if (groupNameType === 'array') {
@@ -228,16 +230,19 @@ var validateGroupName = function validateGroupName(key, groupName) {
     }
     return arrayCopy;
   }
-  log.warn('WARNING: Non-string groupName, received type ' + groupNameType +
-        '. Please use strings or array of strings for groupName');
+  log.warn(
+    'WARNING: Non-string groupName, received type ' +
+      groupNameType +
+      '. Please use strings or array of strings for groupName',
+  );
 };
 
 // parses the value of a url param (for example ?gclid=1234&...)
 var getQueryParam = function getQueryParam(name, query) {
-  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+  name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
   var results = regex.exec(query);
-  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
+  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, ' '));
 };
 
 export default {

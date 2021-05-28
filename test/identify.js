@@ -1,14 +1,13 @@
 import Identify from '../src/identify.js';
 
-describe('Identify', function() {
-
+describe('Identify', function () {
   it('should unset properties', function () {
     var property1 = 'testProperty1';
     var property2 = 'testProperty2';
     var identify = new Identify().unset(property1).unset(property2);
 
     var expected = {
-      '$unset': {}
+      $unset: {},
     };
     expected['$unset'][property1] = '-';
     expected['$unset'][property2] = '-';
@@ -37,8 +36,8 @@ describe('Identify', function() {
     identify.set(property1, value3);
 
     var expected = {
-      '$set': {}
-    }
+      $set: {},
+    };
     expected['$set'][property1] = value1;
     expected['$set'][property2] = value2;
     expected['$set'][property3] = value3;
@@ -48,7 +47,7 @@ describe('Identify', function() {
     assert.deepEqual([property1, property2, property3, property4], identify.properties);
   });
 
-  it ('should set properties once', function () {
+  it('should set properties once', function () {
     var property1 = 'var value';
     var value1 = 'testValue';
 
@@ -68,8 +67,8 @@ describe('Identify', function() {
     identify.setOnce(property1, value3);
 
     var expected = {
-      '$setOnce': {}
-    }
+      $setOnce: {},
+    };
     expected['$setOnce'][property1] = value1;
     expected['$setOnce'][property2] = value2;
     expected['$setOnce'][property3] = value3;
@@ -79,14 +78,15 @@ describe('Identify', function() {
     assert.deepEqual([property1, property2, property3, property4], identify.properties);
   });
 
-  it ('should add properties', function () {
+  it('should add properties', function () {
     var property1 = 'int value';
     var bad_value1 = ['test', 'array']; // add should filter out arrays
     var value1 = 5;
 
     var property2 = 'var value';
-    var bad_value2 = { // add should filter out maps
-      'test': 'array'
+    var bad_value2 = {
+      // add should filter out maps
+      test: 'array',
     };
     var value2 = 0.123;
 
@@ -97,7 +97,7 @@ describe('Identify', function() {
     identify.add(property1, 'duplicate');
 
     var expected = {
-      '$add': {}
+      $add: {},
     };
     expected['$add'][property1] = value1;
     expected['$add'][property2] = value2;
@@ -106,7 +106,7 @@ describe('Identify', function() {
     assert.deepEqual([property1, property2], identify.properties);
   });
 
-  it ('should append properties', function () {
+  it('should append properties', function () {
     var property1 = 'var value';
     var value1 = 'testValue';
 
@@ -129,8 +129,8 @@ describe('Identify', function() {
     identify.setOnce(property1, value3);
 
     var expected = {
-      '$append': {}
-    }
+      $append: {},
+    };
     expected['$append'][property1] = value1;
     expected['$append'][property2] = value2;
     expected['$append'][property3] = value3;
@@ -141,7 +141,7 @@ describe('Identify', function() {
     assert.deepEqual([property1, property2, property3, property4, property5], identify.properties);
   });
 
-    it ('should prepend properties', function () {
+  it('should prepend properties', function () {
     var property1 = 'var value';
     var value1 = 'testValue';
 
@@ -164,8 +164,8 @@ describe('Identify', function() {
     identify.setOnce(property1, value3);
 
     var expected = {
-      '$prepend': {}
-    }
+      $prepend: {},
+    };
     expected['$prepend'][property1] = value1;
     expected['$prepend'][property2] = value2;
     expected['$prepend'][property3] = value3;
@@ -176,7 +176,7 @@ describe('Identify', function() {
     assert.deepEqual([property1, property2, property3, property4, property5], identify.properties);
   });
 
-  it ('should allow multiple operations', function () {
+  it('should allow multiple operations', function () {
     var property1 = 'string value';
     var value1 = 'testValue';
 
@@ -202,12 +202,12 @@ describe('Identify', function() {
     identify.set(property4, value3);
 
     var expected = {
-      '$add': {},
-      '$append': {},
-      '$prepend': {},
-      '$set': {},
-      '$setOnce': {},
-      '$unset': {}
+      $add: {},
+      $append: {},
+      $prepend: {},
+      $set: {},
+      $setOnce: {},
+      $unset: {},
     };
     expected['$setOnce'][property1] = value1;
     expected['$add'][property2] = value2;
@@ -220,63 +220,60 @@ describe('Identify', function() {
     assert.deepEqual([property1, property2, property3, property4, property5, property6], identify.properties);
   });
 
-  it ('should disallow duplicate properties', function () {
-    var property = "testProperty";
-    var value1 = "testValue";
+  it('should disallow duplicate properties', function () {
+    var property = 'testProperty';
+    var value1 = 'testValue';
     var value2 = 0.123;
     var value3 = true;
-    var value4 = {};
 
     var identify = new Identify().setOnce(property, value1).add(property, value2);
     identify.set(property, value3).unset(property);
 
     var expected = {
-      '$setOnce': {}
+      $setOnce: {},
     };
-    expected['$setOnce'][property] = value1
+    expected['$setOnce'][property] = value1;
 
     assert.deepEqual(expected, identify.userPropertiesOperations);
     assert.deepEqual([property], identify.properties);
   });
 
-  it ('should disallow other operations on a clearAll identify', function() {
-    var property = "testProperty";
-    var value1 = "testValue";
+  it('should disallow other operations on a clearAll identify', function () {
+    var property = 'testProperty';
+    var value1 = 'testValue';
     var value2 = 0.123;
     var value3 = true;
-    var value4 = {};
 
     var identify = new Identify().clearAll();
     identify.setOnce(property, value1).add(property, value2).set(property, value3).unset(property);
 
     var expected = {
-        '$clearAll': '-'
+      $clearAll: '-',
     };
 
     assert.deepEqual(expected, identify.userPropertiesOperations);
     assert.deepEqual([], identify.properties);
   });
 
-  it ('should disallow clearAll on an identify with other operations', function() {
-    var property = "testProperty";
-    var value1 = "testValue";
+  it('should disallow clearAll on an identify with other operations', function () {
+    var property = 'testProperty';
+    var value1 = 'testValue';
     var value2 = 0.123;
     var value3 = true;
-    var value4 = {};
 
     var identify = new Identify().setOnce(property, value1).add(property, value2);
     identify.set(property, value3).unset(property).clearAll();
 
     var expected = {
-      '$setOnce': {}
+      $setOnce: {},
     };
-    expected['$setOnce'][property] = value1
+    expected['$setOnce'][property] = value1;
 
     assert.deepEqual(expected, identify.userPropertiesOperations);
     assert.deepEqual([property], identify.properties);
   });
 
-  it ('should not log any warnings for calling clearAll multiple times on a single identify', function() {
-    var identify = new Identify().clearAll().clearAll().clearAll();
+  it('should not log any warnings for calling clearAll multiple times on a single identify', function () {
+    new Identify().clearAll().clearAll().clearAll();
   });
 });

@@ -25,7 +25,7 @@ var AMP_OP_UNSET = '$unset';
  * @public
  * @example var identify = new amplitude.Identify();
  */
-var Identify = function() {
+var Identify = function () {
   this.userPropertiesOperations = {};
   this.properties = []; // keep track of keys that have been added
 };
@@ -40,7 +40,7 @@ var Identify = function() {
  * @example var identify = new amplitude.Identify().add('karma', 1).add('friends', 1);
  * amplitude.identify(identify); // send the Identify call
  */
-Identify.prototype.add = function(property, value) {
+Identify.prototype.add = function (property, value) {
   if (type(value) === 'number' || type(value) === 'string') {
     this._addOperation(AMP_OP_ADD, property, value);
   } else {
@@ -64,7 +64,7 @@ Identify.prototype.add = function(property, value) {
  * identify.append('some_list', [1, 2, 3, 4, 'values']);
  * amplitude.identify(identify); // send the Identify call
  */
-Identify.prototype.append = function(property, value) {
+Identify.prototype.append = function (property, value) {
   this._addOperation(AMP_OP_APPEND, property, value);
   return this;
 };
@@ -76,10 +76,12 @@ Identify.prototype.append = function(property, value) {
  * If $clearAll already in an Identify object, don't allow other operations to be added.
  * @private
  */
-Identify.prototype.clearAll = function() {
+Identify.prototype.clearAll = function () {
   if (Object.keys(this.userPropertiesOperations).length > 0) {
     if (!this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
-      utils.log.error('Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll');
+      utils.log.error(
+        'Need to send $clearAll on its own Identify object without any other operations, skipping $clearAll',
+      );
     }
     return this;
   }
@@ -103,7 +105,7 @@ Identify.prototype.clearAll = function() {
  * identify.prepend('some_list', [1, 2, 3, 4, 'values']);
  * amplitude.identify(identify); // send the Identify call
  */
-Identify.prototype.prepend = function(property, value) {
+Identify.prototype.prepend = function (property, value) {
   this._addOperation(AMP_OP_PREPEND, property, value);
   return this;
 };
@@ -119,7 +121,7 @@ Identify.prototype.prepend = function(property, value) {
  * identify.set('name', {'first': 'John', 'last': 'Doe'}); // dict is flattened and becomes name.first: John, name.last: Doe
  * amplitude.identify(identify); // send the Identify call
  */
-Identify.prototype.set = function(property, value) {
+Identify.prototype.set = function (property, value) {
   this._addOperation(AMP_OP_SET, property, value);
   return this;
 };
@@ -136,7 +138,7 @@ Identify.prototype.set = function(property, value) {
  * @example var identify = new amplitude.Identify().setOnce('sign_up_date', '2016-04-01');
  * amplitude.identify(identify); // send the Identify call
  */
-Identify.prototype.setOnce = function(property, value) {
+Identify.prototype.setOnce = function (property, value) {
   this._addOperation(AMP_OP_SET_ONCE, property, value);
   return this;
 };
@@ -149,7 +151,7 @@ Identify.prototype.setOnce = function(property, value) {
  * @example var identify = new amplitude.Identify().unset('user_type').unset('age');
  * amplitude.identify(identify); // send the Identify call
  */
-Identify.prototype.unset = function(property) {
+Identify.prototype.unset = function (property) {
   this._addOperation(AMP_OP_UNSET, property, '-');
   return this;
 };
@@ -159,7 +161,7 @@ Identify.prototype.unset = function(property) {
  * Handle's filtering of duplicate user property keys, and filtering for clearAll.
  * @private
  */
-Identify.prototype._addOperation = function(operation, property, value) {
+Identify.prototype._addOperation = function (operation, property, value) {
   // check that the identify doesn't already contain a clearAll
   if (this.userPropertiesOperations.hasOwnProperty(AMP_OP_CLEAR_ALL)) {
     utils.log.error('This identify already contains a $clearAll operation, skipping operation ' + operation);
@@ -172,7 +174,7 @@ Identify.prototype._addOperation = function(operation, property, value) {
     return;
   }
 
-  if (!this.userPropertiesOperations.hasOwnProperty(operation)){
+  if (!this.userPropertiesOperations.hasOwnProperty(operation)) {
     this.userPropertiesOperations[operation] = {};
   }
   this.userPropertiesOperations[operation][property] = value;

@@ -1,20 +1,17 @@
-/* jshint -W020, unused: false, noempty: false, boss: true */
-
 /*
  * Abstraction layer for cookie storage.
  * Uses cookie if available, otherwise fallback to localstorage.
  */
 
-import Constants from './constants';
 import Cookie from './cookie';
-import localStorage from './localstorage'; // jshint ignore:line
+import localStorage from './localstorage';
 import baseCookie from './base-cookie';
 
-var cookieStorage = function() {
+var cookieStorage = function () {
   this.storage = null;
 };
 
-cookieStorage.prototype.getStorage = function() {
+cookieStorage.prototype.getStorage = function () {
   if (this.storage !== null) {
     return this.storage;
   }
@@ -31,45 +28,44 @@ cookieStorage.prototype.getStorage = function() {
         domain: undefined,
         secure: false,
       },
-      reset: function() {
+      reset: function () {
         this._options = {
           expirationDays: undefined,
           domain: undefined,
           secure: false,
         };
       },
-      options: function(opts) {
+      options: function (opts) {
         if (arguments.length === 0) {
           return this._options;
         }
         opts = opts || {};
         this._options.expirationDays = opts.expirationDays || this._options.expirationDays;
         // localStorage is specific to subdomains
-        this._options.domain = opts.domain || this._options.domain || (window && window.location && window.location.hostname);
-        return this._options.secure = opts.secure || false;
+        this._options.domain =
+          opts.domain || this._options.domain || (window && window.location && window.location.hostname);
+        return (this._options.secure = opts.secure || false);
       },
-      get: function(name) {
+      get: function (name) {
         try {
           return JSON.parse(localStorage.getItem(keyPrefix + name));
-        } catch (e) {
-        }
+        } catch (e) {} /* eslint-disable-line no-empty */
         return null;
       },
-      set: function(name, value) {
+      set: function (name, value) {
         try {
           localStorage.setItem(keyPrefix + name, JSON.stringify(value));
           return true;
-        } catch (e) {
-        }
+        } catch (e) {} /* eslint-disable-line no-empty */
         return false;
       },
-      remove: function(name) {
+      remove: function (name) {
         try {
           localStorage.removeItem(keyPrefix + name);
         } catch (e) {
           return false;
         }
-      }
+      },
     };
   }
 

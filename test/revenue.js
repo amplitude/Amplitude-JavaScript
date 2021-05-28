@@ -1,8 +1,7 @@
 import Revenue from '../src/revenue.js';
 
-describe('Revenue', function() {
-
-  it('should initialize fields', function() {
+describe('Revenue', function () {
+  it('should initialize fields', function () {
     var revenue = new Revenue();
     assert.equal(revenue._productId, null);
     assert.equal(revenue._quantity, 1);
@@ -11,7 +10,7 @@ describe('Revenue', function() {
     assert.equal(revenue._properties, null);
   });
 
-  it('should set productId', function() {
+  it('should set productId', function () {
     var revenue = new Revenue();
     assert.equal(revenue._productId, null);
 
@@ -26,7 +25,7 @@ describe('Revenue', function() {
     assert.equal(revenue._productId, productId);
   });
 
-  it('should set quantity', function() {
+  it('should set quantity', function () {
     var revenue = new Revenue();
     assert.equal(revenue._quantity, 1);
 
@@ -43,7 +42,7 @@ describe('Revenue', function() {
     assert.equal(revenue._quantity, quantity);
   });
 
-  it('should set price', function() {
+  it('should set price', function () {
     var revenue = new Revenue();
     assert.equal(revenue._price, null);
 
@@ -56,7 +55,7 @@ describe('Revenue', function() {
     assert.equal(revenue._price, price);
   });
 
-  it('should set revenue type', function() {
+  it('should set revenue type', function () {
     var revenue = new Revenue();
     assert.equal(revenue._revenueType, null);
 
@@ -71,11 +70,11 @@ describe('Revenue', function() {
     assert.equal(revenue._revenueType, revenueType);
   });
 
-  it('should set event properties', function() {
+  it('should set event properties', function () {
     var revenue = new Revenue();
     assert.equal(revenue._properties, null);
 
-    var properties = {'city':'Boston'};
+    var properties = { city: 'Boston' };
     revenue.setEventProperties(properties);
     assert.deepEqual(revenue._properties, properties);
 
@@ -103,23 +102,23 @@ describe('Revenue', function() {
     assert.isTrue(revenue2._isValidRevenue());
   });
 
-  it ('should convert into an object', function() {
+  it('should convert into an object', function () {
     var productId = 'testProductId';
     var quantity = 15;
     var price = 10.99;
     var revenueType = 'testRevenueType';
-    var properties = {'city': 'San Francisco'};
+    var properties = { city: 'San Francisco' };
 
     var revenue = new Revenue().setProductId(productId).setQuantity(quantity).setPrice(price);
     revenue.setRevenueType(revenueType).setEventProperties(properties);
 
     var obj = revenue._toJSONObject();
     assert.deepEqual(obj, {
-      '$productId': productId,
-      '$quantity': quantity,
-      '$price': price,
-      '$revenueType': revenueType,
-      'city': 'San Francisco'
+      $productId: productId,
+      $quantity: quantity,
+      $price: price,
+      $revenueType: revenueType,
+      city: 'San Francisco',
     });
   });
 });

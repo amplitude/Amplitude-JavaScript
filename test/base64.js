@@ -1,6 +1,6 @@
 import Base64 from '../src/base64.js';
 
-describe('Base64', function() {
+describe('Base64', function () {
   var encodeCases = [
     ['', ''],
     ['f', 'Zg=='],
@@ -9,7 +9,7 @@ describe('Base64', function() {
     ['foob', 'Zm9vYg=='],
     ['fooba', 'Zm9vYmE='],
     ['foobar', 'Zm9vYmFy'],
-    ['\u2661', '4pmh']
+    ['\u2661', '4pmh'],
   ];
 
   var decodeCases = [
@@ -24,16 +24,16 @@ describe('Base64', function() {
     ['Zm9vYmE', 'fooba'],
     ['Zm9vYmE=', 'fooba'],
     ['Zm9vYmFy', 'foobar'],
-    ['4pmh', '\u2661']
+    ['4pmh', '\u2661'],
   ];
 
-  it('should encode properly', function() {
+  it('should encode properly', function () {
     for (var i = 0; i < encodeCases.length; i++) {
       assert.equal(encodeCases[i][1], Base64.encode(encodeCases[i][0]));
     }
   });
 
-  it('should decode properly', function() {
+  it('should decode properly', function () {
     for (var i = 0; i < decodeCases.length; i++) {
       assert.equal(decodeCases[i][1], Base64.decode(decodeCases[i][0]));
     }
