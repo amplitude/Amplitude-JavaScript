@@ -939,6 +939,14 @@ AmplitudeClient.prototype.setOptOut = function setOptOut(enable) {
   }
 };
 
+/**
+ * Set a custom Session ID for the current session.
+ * Note: This is not recommended unless you know what you are doing because the Session ID of a session is utilized for all session metrics in Amplitude.
+ * The Session ID to set for the current session must be in milliseconds since epoch (Unix Timestamp).
+ * @public
+ * @param {int} sessionId to set.
+ * @example amplitudeClient.setSessionId(1622158968000);
+ */
 AmplitudeClient.prototype.setSessionId = function setSessionId(sessionId) {
   if (!utils.validateInput(sessionId, 'sessionId', 'number')) {
     return;
