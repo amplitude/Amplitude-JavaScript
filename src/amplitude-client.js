@@ -957,7 +957,7 @@ AmplitudeClient.prototype.setGroup = function (groupType, groupName) {
  * @param {boolean} enable - if true then no events will be logged or sent.
  * @example: amplitude.setOptOut(true);
  */
-AmplitudeClient.prototype.setOptOut = function setOptOut(enable) {
+AmplitudeClient.prototype.setOptOu = function setOptOut(enable) {
   if (this._shouldDeferCall()) {
     return this._q.push(['setOptOut'].concat(Array.prototype.slice.call(arguments, 0)));
   }
