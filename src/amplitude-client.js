@@ -148,6 +148,12 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this._pendingReadStorage = true;
 
     const initFromStorage = (storedDeviceId) => {
+      if (opt_config && opt_config.deviceId && !utils.validateDeviceId(opt_config.deviceId)) {
+        utils.log.error(
+          `Invalid device ID rejected. Randomly generated UUID will be used instead of "${opt_config.deviceId}"`,
+        );
+        delete opt_config.deviceId;
+      }
       this.options.deviceId = this._getInitialDeviceId(opt_config && opt_config.deviceId, storedDeviceId);
       this.options.userId =
         (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
