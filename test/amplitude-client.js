@@ -285,6 +285,20 @@ describe('AmplitudeClient', function () {
       amplitude._getUrlParams.restore();
     });
 
+    it('should reject invalid device ids that contain periods', function () {
+      const spyErrorWarning = sinon.spy(utils.log, 'error');
+      const badDeviceId = 'bad.device.id';
+      amplitude.init(apiKey, null, { deviceId: badDeviceId });
+      assert.isTrue(
+        spyErrorWarning.calledWith(
+          `Invalid device ID rejected. Randomly generated UUID will be used instead of "${badDeviceId}"`,
+        ),
+      );
+      assert.notEqual(amplitude.options.deviceId, badDeviceId);
+
+      spyErrorWarning.restore();
+    });
+
     it('should load device id from the cookie', function () {
       // deviceId and sequenceNumber not set, init should load value from localStorage
       var cookieData = {
@@ -1047,6 +1061,19 @@ describe('AmplitudeClient', function () {
       amplitude.setDeviceId('deviceId');
       var stored = amplitude._metadataStorage.load();
       assert.propertyVal(stored, 'deviceId', 'deviceId');
+    });
+
+    it('should not take periods in deviceId', function () {
+      const spyErrorWarning = sinon.spy(utils.log, 'error');
+      amplitude.init(apiKey, null, { deviceId: 'fakeDeviceId' });
+      const badDeviceId = 'bad.device.id';
+      amplitude.setDeviceId(badDeviceId);
+      var stored = amplitude._metadataStorage.load();
+      assert.propertyVal(stored, 'deviceId', 'fakeDeviceId');
+      assert.isTrue(
+        spyErrorWarning.calledWith(`Device IDs may not contain '.' characters. Value will be ignored "${badDeviceId}"`),
+      );
+      spyErrorWarning.restore();
     });
   });
 
