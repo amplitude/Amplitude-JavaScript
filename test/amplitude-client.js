@@ -1071,7 +1071,9 @@ describe('AmplitudeClient', function () {
       var stored = amplitude._metadataStorage.load();
       assert.propertyVal(stored, 'deviceId', 'fakeDeviceId');
       assert.isTrue(
-        spyErrorWarning.calledWith(`Device IDs may not contain '.' characters. Value will be ignored "${badDeviceId}"`),
+        spyErrorWarning.calledWith(
+          `Device IDs may not contain '.' characters. Value will be ignored: "${badDeviceId}"`,
+        ),
       );
       spyErrorWarning.restore();
     });
