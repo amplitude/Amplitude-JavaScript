@@ -97,6 +97,19 @@ var validateInput = function validateInput(input, name, expectedType) {
   return true;
 };
 
+const validateDeviceId = function validateDeviceId(deviceId) {
+  if (!validateInput(deviceId, 'deviceId', 'string')) {
+    return false;
+  }
+  for (let i = 0; i < deviceId.length; i++) {
+    if (deviceId[i] === '.') {
+      log.error(`Device IDs may not contain '.' characters. Value will be ignored: "${deviceId}"`);
+      return false;
+    }
+  }
+  return true;
+};
+
 // do some basic sanitization and type checking, also catch property dicts with more than 1000 key/value pairs
 var validateProperties = function validateProperties(properties) {
   var propsType = type(properties);
@@ -257,4 +270,5 @@ export default {
   validateGroups,
   validateInput,
   validateProperties,
+  validateDeviceId,
 };
