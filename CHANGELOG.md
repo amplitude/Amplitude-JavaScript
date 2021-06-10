@@ -1,3 +1,10 @@
+## [8.3.1](https://github.com/amplitude/amplitude-javascript/compare/v8.3.0...v8.3.1) (2021-06-10)
+
+
+### Bug Fixes
+
+* Prevent periods in device id check ([#405](https://github.com/amplitude/amplitude-javascript/issues/405)) ([b872d7e](https://github.com/amplitude/amplitude-javascript/commit/b872d7e4a384b53b61e7232fb7b3ce4a4ddff83e))
+
 # [8.3.0](https://github.com/amplitude/amplitude-javascript/compare/v8.2.3...v8.3.0) (2021-05-26)
 
 
