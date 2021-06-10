@@ -148,6 +148,12 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     this._pendingReadStorage = true;
 
     const initFromStorage = (storedDeviceId) => {
+      if (opt_config && opt_config.deviceId && !utils.validateDeviceId(opt_config.deviceId)) {
+        utils.log.error(
+          `Invalid device ID rejected. Randomly generated UUID will be used instead of "${opt_config.deviceId}"`,
+        );
+        delete opt_config.deviceId;
+      }
       this.options.deviceId = this._getInitialDeviceId(opt_config && opt_config.deviceId, storedDeviceId);
       this.options.userId =
         (type(opt_userId) === 'string' && !utils.isEmptyString(opt_userId) && opt_userId) ||
@@ -927,8 +933,9 @@ AmplitudeClient.prototype.regenerateDeviceId = function regenerateDeviceId() {
 };
 
 /**
- * Sets a custom deviceId for current user. Note: this is not recommended unless you know what you are doing
- * (like if you have your own system for managing deviceIds). Make sure the deviceId you set is sufficiently unique
+ * Sets a custom deviceId for current user. **Values may not have `.` inside them**
+ * Note: this is not recommended unless you know what you are doing (like if you have your own system for managing deviceIds).
+ * Make sure the deviceId you set is sufficiently unique
  * (we recommend something like a UUID - see src/uuid.js for an example of how to generate) to prevent conflicts with other devices in our system.
  * @public
  * @param {string} deviceId - custom deviceId for current user.
@@ -939,7 +946,7 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
     return this._q.push(['setDeviceId'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
-  if (!utils.validateInput(deviceId, 'deviceId', 'string')) {
+  if (!utils.validateDeviceId(deviceId)) {
     return;
   }
 
