@@ -289,6 +289,12 @@ describe('AmplitudeClient', function () {
       const spyErrorWarning = sinon.spy(utils.log, 'error');
       const badDeviceId = 'bad.device.id';
       amplitude.init(apiKey, null, { deviceId: badDeviceId });
+
+      assert.isTrue(
+        spyErrorWarning.calledWith(
+          `Device IDs may not contain '.' characters. Value will be ignored: "${badDeviceId}"`,
+        ),
+      );
       assert.isTrue(
         spyErrorWarning.calledWith(
           `Invalid device ID rejected. Randomly generated UUID will be used instead of "${badDeviceId}"`,
