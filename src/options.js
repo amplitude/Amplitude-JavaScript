@@ -35,6 +35,7 @@ import language from './language';
  * @property {number} [sessionTimeout=`30*60*1000` (30 min)] -  The time between logged events before a new session starts in milliseconds.
  * @property {string[]} [storage=`''`] - Sets storage strategy.  Options are 'cookies', 'localStorage', 'sessionStorage', or `none`. Will override `disableCookies` option
  * @property {Object} [trackingOptions=`{ city: true, country: true, carrier: true, device_manufacturer: true, device_model: true, dma: true, ip_address: true, language: true, os_name: true, os_version: true, platform: true, region: true, version_name: true}`] - Type of data associated with a user.
+ * @property {string} [transport=`http`] - Network transport mechanism used to send events. Options are 'http' and 'beacon'
  * @property {boolean} [unsetParamsReferrerOnNewSession=`false`] -  If `false`, the existing `referrer` and `utm_parameter` values will be carried through each new session. If set to `true`, the `referrer` and `utm_parameter` user properties, which include `referrer`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, and `utm_content`, will be set to `null` upon instantiating a new session. Note: This only works if `includeReferrer` or `includeUtm` is set to `true`.
  * @property {string} [unsentKey=`amplitude_unsent`] - localStorage key that stores unsent events.
  * @property {string} [unsentIdentifyKey=`amplitude_unsent_identify`] - localStorage key that stores unsent identifies.
@@ -86,6 +87,7 @@ export default {
     region: true,
     version_name: true,
   },
+  transport: Constants.TRANSPORT_HTTP,
   unsetParamsReferrerOnNewSession: false,
   unsentKey: 'amplitude_unsent',
   unsentIdentifyKey: 'amplitude_unsent_identify',

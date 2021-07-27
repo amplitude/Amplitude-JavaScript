@@ -57,4 +57,7 @@ export default {
   UTM_CONTENT: 'utm_content',
 
   ATTRIBUTION_EVENT: '[Amplitude] Attribution Captured',
+
+  TRANSPORT_HTTP: 'http',
+  TRANSPORT_BEACON: 'beacon',
 };

@@ -108,6 +108,18 @@ const validateDeviceId = function validateDeviceId(deviceId) {
   return true;
 };
 
+const validateTransport = function validateTransport(transport) {
+  if (!validateInput(transport, 'transport', 'string')) {
+    return false;
+  }
+
+  if (transport !== constants.TRANSPORT_HTTP && transport !== constants.TRANSPORT_BEACON) {
+    log.error(`transport value must be one of ''${constants.TRANSPORT_BEACON} or '${constants.TRANSPORT_HTTP}'`);
+    return false;
+  }
+  return true;
+};
+
 // do some basic sanitization and type checking, also catch property dicts with more than 1000 key/value pairs
 var validateProperties = function validateProperties(properties) {
   var propsType = type(properties);
@@ -269,4 +281,5 @@ export default {
   validateInput,
   validateProperties,
   validateDeviceId,
+  validateTransport,
 };
