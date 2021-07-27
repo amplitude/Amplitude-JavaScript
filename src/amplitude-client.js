@@ -225,6 +225,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
           this.setTransport(prevTransport);
         };
 
+        // Monitoring just page exits because that is the most requested feature for now
+        // "If you're specifically trying to detect page unload events, the pagehide event is the best option."
+        // https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event
         window.addEventListener(
           'pagehide',
           () => {
