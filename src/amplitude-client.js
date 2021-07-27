@@ -212,6 +212,28 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     if (type(opt_callback) === 'function') {
       opt_callback(this);
     }
+
+    const onExitPage = this.options.onExitPage;
+    if (type(onExitPage) === 'function') {
+      if (!this.pageHandlersAdded) {
+        this.pageHandlersAdded = true;
+
+        const handleVisibilityChange = () => {
+          const prevTransport = this.options.transport;
+          this.setTransport(Constants.TRANSPORT_BEACON);
+          onExitPage();
+          this.setTransport(prevTransport);
+        };
+
+        window.addEventListener(
+          'pagehide',
+          () => {
+            handleVisibilityChange();
+          },
+          false,
+        );
+      }
+    }
   } catch (err) {
     utils.log.error(err);
     if (type(opt_config.onError) === 'function') {
