@@ -3869,4 +3869,45 @@ describe('AmplitudeClient', function () {
       assert.isNull(amplitude._metadataStorage.load());
     });
   });
+
+  describe('beacon logic', function () {
+    it('should set default transport correctly', function () {
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.transport, constants.TRANSPORT_HTTP);
+    });
+
+    it('should accept transport option correctly', function () {
+      amplitude.init(apiKey, null, { transport: constants.TRANSPORT_BEACON });
+      assert.equal(amplitude.options.transport, constants.TRANSPORT_BEACON);
+    });
+
+    it('should set transport correctly with setTransport', function () {
+      amplitude.init(apiKey);
+      amplitude.setTransport(constants.TRANSPORT_BEACON);
+      assert.equal(amplitude.options.transport, constants.TRANSPORT_BEACON);
+
+      amplitude.setTransport(constants.TRANSPORT_HTTP);
+      assert.equal(amplitude.options.transport, constants.TRANSPORT_HTTP);
+    });
+
+    it('should use sendBeacon when beacon transport is set', function () {
+      sandbox.stub(navigator, 'sendBeacon').returns(true);
+
+      amplitude.init(apiKey, null, { transport: constants.TRANSPORT_BEACON });
+      amplitude.logEvent('test event');
+
+      assert.equal(navigator.sendBeacon.callCount, 1);
+      assert.equal(amplitude._unsentEvents.length, 0);
+    });
+
+    it('should not remove event from unsentEvents if beacon returns false', function () {
+      sandbox.stub(navigator, 'sendBeacon').returns(false);
+
+      amplitude.init(apiKey, null, { transport: constants.TRANSPORT_BEACON });
+      amplitude.logEvent('test event');
+
+      assert.equal(navigator.sendBeacon.callCount, 1);
+      assert.equal(amplitude._unsentEvents.length, 1);
+    });
+  });
 });
