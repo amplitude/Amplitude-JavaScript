@@ -1044,12 +1044,8 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback, opt_e
     return this._q.push(['identify'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('identify()')) {
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'API key is not set' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'API key is not set' });
-    }
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', { reason: 'API key is not set' });
+
     return;
   }
 
@@ -1073,21 +1069,15 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback, opt_e
         opt_error_callback,
       );
     } else {
-      if (type(opt_callback) === 'function') {
-        opt_callback(0, 'No request sent', { reason: 'No user property operations' });
-      }
-      if (type(opt_error_callback) === 'function') {
-        opt_error_callback(0, 'No request sent', { reason: 'No user property operations' });
-      }
+      _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+        reason: 'No user property operations',
+      });
     }
   } else {
     utils.log.error('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'Invalid identify input type' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'No user property operations' });
-    }
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+      reason: 'Invalid identify input type',
+    });
   }
 };
 
@@ -1102,32 +1092,23 @@ AmplitudeClient.prototype.groupIdentify = function (
     return this._q.push(['groupIdentify'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('groupIdentify()')) {
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'API key is not set' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'API key is not set' });
-    }
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+      reason: 'API key is not set',
+    });
     return;
   }
 
   if (!utils.validateInput(group_type, 'group_type', 'string') || utils.isEmptyString(group_type)) {
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'Invalid group type' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'Invalid group type' });
-    }
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+      reason: 'Invalid group type',
+    });
     return;
   }
 
   if (group_name === null || group_name === undefined) {
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'Invalid group name' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'Invalid group name' });
-    }
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+      reason: 'Invalid group name',
+    });
     return;
   }
 
@@ -1151,21 +1132,15 @@ AmplitudeClient.prototype.groupIdentify = function (
         opt_error_callback,
       );
     } else {
-      if (type(opt_callback) === 'function') {
-        opt_callback(0, 'No request sent', { reason: 'No group property operations' });
-      }
-      if (type(opt_error_callback) === 'function') {
-        opt_error_callback(0, 'No request sent', { reason: 'No group property operations' });
-      }
+      _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+        reason: 'No group property operations',
+      });
     }
   } else {
     utils.log.error('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'Invalid identify input type' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'No group property operations' });
-    }
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+      reason: 'Invalid identify input type',
+    });
   }
 };
 
@@ -1204,21 +1179,15 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
 
   if (!eventType) {
-    if (type(callback) === 'function') {
-      callback(0, 'No request sent', { reason: 'Missing eventType' });
-    }
-    if (type(errorCallback) === 'function') {
-      errorCallback(0, 'No request sent', { reason: 'Missing eventType' });
-    }
+    _logErrorsWithCallbacks(callback, errorCallback, 0, 'No request sent', {
+      reason: 'Missing eventType',
+    });
     return;
   }
   if (this.options.optOut) {
-    if (type(callback) === 'function') {
-      callback(0, 'No request sent', { reason: 'optOut is set to true' });
-    }
-    if (type(errorCallback) === 'function') {
-      errorCallback(0, 'No request sent', { reason: 'optOut is set to true' });
-    }
+    _logErrorsWithCallbacks(callback, errorCallback, 0, 'No request sent', {
+      reason: 'optOut is set to true',
+    });
     return;
   }
 
@@ -1319,16 +1288,9 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
   if (queue.length > this.options.savedMaxCount) {
     const deletedEvents = queue.splice(0, queue.length - this.options.savedMaxCount);
     deletedEvents.forEach((event) => {
-      if (type(event.callback) === 'function') {
-        event.callback(0, 'No request sent', {
-          reason: 'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
-        });
-      }
-      if (type(event.errorCallback) === 'function') {
-        event.errorCallback(0, 'No request sent', {
-          reason: 'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
-        });
-      }
+      _logErrorsWithCallbacks(event.callback, event.errorCallback, 0, 'No request sent', {
+        reason: 'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
+      });
     });
   }
 };
@@ -1385,31 +1347,23 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
     return this._q.push(['logEventWithTimestamp'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('logEvent()')) {
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'API key not set' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'API key not set' });
-    }
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+      reason: 'API key not set',
+    });
 
     return -1;
   }
   if (!utils.validateInput(eventType, 'eventType', 'string')) {
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
-    }
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+      reason: 'Invalid type for eventType',
+    });
+
     return -1;
   }
   if (utils.isEmptyString(eventType)) {
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'Missing eventType' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'Missing eventType' });
-    }
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+      reason: 'Missing eventType',
+    });
     return -1;
   }
   return this._logEvent(
@@ -1455,21 +1409,16 @@ AmplitudeClient.prototype.logEventWithGroups = function (
     return this._q.push(['logEventWithGroups'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('logEventWithGroups()')) {
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'API key not set' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'API key not set' });
-    }
+    _logErrorsWithCallbacks(event.callback, event.errorCallback, 0, 'No request sent', {
+      reason: 'API key not set',
+    });
+
     return -1;
   }
   if (!utils.validateInput(eventType, 'eventType', 'string')) {
-    if (type(opt_callback) === 'function') {
-      opt_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
-    }
-    if (type(opt_error_callback) === 'function') {
-      opt_error_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
-    }
+    _logErrorsWithCallbacks(event.callback, event.errorCallback, 0, 'No request sent', {
+      reason: 'Invalid type for eventType',
+    });
     return -1;
   }
   return this._logEvent(eventType, eventProperties, null, null, groups, null, null, opt_callback, opt_error_callback);
@@ -1481,6 +1430,25 @@ AmplitudeClient.prototype.logEventWithGroups = function (
  */
 var _isNumber = function _isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
+};
+
+/**
+ * Handles errors that are sent to both callbacks
+ * @private
+ */
+var _logErrorsWithCallbacks = function _logErrorsWithCallbacks(
+  opt_callback,
+  opt_error_callback,
+  status,
+  response,
+  details,
+) {
+  if (type(opt_callback) === 'function') {
+    opt_callback(status, response, details);
+  }
+  if (type(opt_error_callback) === 'function') {
+    opt_error_callback(status, response, details);
+  }
 };
 
 /**
