@@ -1216,6 +1216,7 @@ describe('AmplitudeClient', function () {
 
     it('should run the callback after making the identify call', function () {
       var counter = 0;
+      var errCounter = 0;
       var value = -1;
       var message = '';
       var callback = function (status, response) {
@@ -1223,12 +1224,18 @@ describe('AmplitudeClient', function () {
         value = status;
         message = response;
       };
+
+      var errCallback = function () {
+        errCounter++;
+      };
+
       var identify = new amplitude.Identify().set('key', 'value');
-      amplitude.identify(identify, callback);
+      amplitude.identify(identify, callback, errCallback);
 
       // before server responds, callback should not fire
       assert.lengthOf(server.requests, 1);
       assert.equal(counter, 0);
+      assert.equal(errCounter, 0);
       assert.equal(value, -1);
       assert.equal(message, '');
 
@@ -1238,41 +1245,76 @@ describe('AmplitudeClient', function () {
       assert.equal(counter, 1);
       assert.equal(value, 200);
       assert.equal(message, 'success');
+
+      // error callback should not fire
+      assert.equal(errCounter, 0);
     });
 
     it('should run the callback even if client not initialized with apiKey', function () {
       var counter = 0;
       var value = -1;
       var message = '';
+
+      var errCounter = 0;
+      var errValue = -1;
+      var errMessage = '';
       var callback = function (status, response) {
         counter++;
         value = status;
         message = response;
       };
+
+      var errCallback = function (status, response) {
+        errCounter++;
+        errValue = status;
+        errMessage = response;
+      };
+
       var identify = new amplitude.Identify().set('key', 'value');
-      new AmplitudeClient().identify(identify, callback);
+      new AmplitudeClient().identify(identify, callback, errCallback);
 
       // verify callback fired
       assert.equal(counter, 1);
       assert.equal(value, 0);
       assert.equal(message, 'No request sent');
+
+      // verify error callback fired
+      assert.equal(errCounter, 1);
+      assert.equal(errValue, 0);
+      assert.equal(errMessage, 'No request sent');
     });
 
     it('should run the callback even with an invalid identify object', function () {
       var counter = 0;
       var value = -1;
       var message = '';
+
+      var errCounter = 0;
+      var errValue = -1;
+      var errMessage = '';
       var callback = function (status, response) {
         counter++;
         value = status;
         message = response;
       };
-      amplitude.identify(null, callback);
+
+      var errCallback = function (status, response) {
+        errCounter++;
+        errValue = status;
+        errMessage = response;
+      };
+
+      amplitude.identify(null, callback, errCallback);
 
       // verify callback fired
       assert.equal(counter, 1);
       assert.equal(value, 0);
       assert.equal(message, 'No request sent');
+
+      // verify error callback fired
+      assert.equal(errCounter, 1);
+      assert.equal(errValue, 0);
+      assert.equal(errMessage, 'No request sent');
     });
   });
 
@@ -1390,6 +1432,7 @@ describe('AmplitudeClient', function () {
 
     it('should run the callback after making the identify call', function () {
       var counter = 0;
+      var errCounter = 0;
       var value = -1;
       var message = '';
       var callback = function (status, response) {
@@ -1397,12 +1440,16 @@ describe('AmplitudeClient', function () {
         value = status;
         message = response;
       };
+      var errCallback = function () {
+        errCounter++;
+      };
       var identify = new amplitude.Identify().set('key', 'value');
-      amplitude.groupIdentify(group_type, group_name, identify, callback);
+      amplitude.groupIdentify(group_type, group_name, identify, callback, errCallback);
 
       // before server responds, callback should not fire
       assert.lengthOf(server.requests, 1);
       assert.equal(counter, 0);
+      assert.equal(errCounter, 0);
       assert.equal(value, -1);
       assert.equal(message, '');
 
@@ -1412,24 +1459,42 @@ describe('AmplitudeClient', function () {
       assert.equal(counter, 1);
       assert.equal(value, 200);
       assert.equal(message, 'success');
+
+      // error callback should not be fired
+      assert.equal(errCounter, 0);
     });
 
     it('should run the callback even if client not initialized with apiKey', function () {
       var counter = 0;
       var value = -1;
       var message = '';
+
+      var errCounter = 0;
+      var errValue = -1;
+      var errMessage = '';
       var callback = function (status, response) {
         counter++;
         value = status;
         message = response;
       };
+
+      var errCallback = function (status, response) {
+        errCounter++;
+        errValue = status;
+        errMessage = response;
+      };
       var identify = new amplitude.Identify().set('key', 'value');
-      new AmplitudeClient().groupIdentify(group_type, group_name, identify, callback);
+      new AmplitudeClient().groupIdentify(group_type, group_name, identify, callback, errCallback);
 
       // verify callback fired
       assert.equal(counter, 1);
       assert.equal(value, 0);
       assert.equal(message, 'No request sent');
+
+      // verify error callback fired
+      assert.equal(errCounter, 1);
+      assert.equal(errValue, 0);
+      assert.equal(errMessage, 'No request sent');
     });
 
     it('should run the callback even with an invalid identify object', function () {
@@ -1894,15 +1959,28 @@ describe('AmplitudeClient', function () {
       var counter = 0;
       var value = -1;
       var message = '';
+
+      var errCounter = 0;
+      var errValue = -1;
+      var errMessage = '';
       var callback = function (status, response) {
         counter++;
         value = status;
         message = response;
       };
-      amplitude.logEvent(null, null, callback);
+
+      var errCallback = function (status, response) {
+        errCounter++;
+        errValue = status;
+        errMessage = response;
+      };
+      amplitude.logEvent(null, null, callback, errCallback);
       assert.equal(counter, 1);
       assert.equal(value, 0);
       assert.equal(message, 'No request sent');
+      assert.equal(errCounter, 1);
+      assert.equal(errValue, 0);
+      assert.equal(errMessage, 'No request sent');
     });
 
     it('should run callback if optout', function () {
@@ -1910,15 +1988,28 @@ describe('AmplitudeClient', function () {
       var counter = 0;
       var value = -1;
       var message = '';
+
+      var errCounter = 0;
+      var errValue = -1;
+      var errMessage = '';
       var callback = function (status, response) {
         counter++;
         value = status;
         message = response;
       };
-      amplitude.logEvent('test', null, callback);
+
+      var errCallback = function (status, response) {
+        errCounter++;
+        errValue = status;
+        errMessage = response;
+      };
+      amplitude.logEvent('test', null, callback, errCallback);
       assert.equal(counter, 1);
       assert.equal(value, 0);
       assert.equal(message, 'No request sent');
+      assert.equal(errCounter, 1);
+      assert.equal(errValue, 0);
+      assert.equal(errMessage, 'No request sent');
     });
 
     it('should not run callback if invalid callback and no eventType', function () {
@@ -1927,18 +2018,25 @@ describe('AmplitudeClient', function () {
 
     it('should run callback after logging event', function () {
       var counter = 0;
+      var errCounter = 0;
       var value = -1;
       var message = '';
+
+      var errCallback = function () {
+        errCounter++;
+      };
+
       var callback = function (status, response) {
         counter++;
         value = status;
         message = response;
       };
-      amplitude.logEvent('test', null, callback);
+      amplitude.logEvent('test', null, callback, errCallback);
 
       // before server responds, callback should not fire
       assert.lengthOf(server.requests, 1);
       assert.equal(counter, 0);
+      assert.equal(errCounter, 0);
       assert.equal(value, -1);
       assert.equal(message, '');
 
@@ -1948,6 +2046,9 @@ describe('AmplitudeClient', function () {
       assert.equal(counter, 1);
       assert.equal(value, 200);
       assert.equal(message, 'success');
+
+      // erro callback should not fire
+      assert.equal(errCounter, 0);
     });
 
     it('should run callback if batchEvents but under threshold', function () {
@@ -1958,6 +2059,7 @@ describe('AmplitudeClient', function () {
         eventUploadPeriodMillis: eventUploadPeriodMillis,
       });
       var counter = 0;
+      var errCounter = 0;
       var value = -1;
       var message = '';
       var callback = function (status, response) {
@@ -1965,7 +2067,12 @@ describe('AmplitudeClient', function () {
         value = status;
         message = response;
       };
-      amplitude.logEvent('test', null, callback);
+
+      var errCallback = function () {
+        errCounter++;
+      };
+
+      amplitude.logEvent('test', null, callback, errCallback);
       assert.lengthOf(server.requests, 0);
 
       // check that request is made after delay, but callback is not run a second time
@@ -1974,6 +2081,7 @@ describe('AmplitudeClient', function () {
       server.respondWith('success');
       server.respond();
       assert.equal(counter, 1);
+      assert.equal(errCounter, 0);
       assert.equal(value, 200);
       assert.equal(message, 'success');
     });
@@ -1981,12 +2089,17 @@ describe('AmplitudeClient', function () {
     it('should run callback once and only after all events are uploaded', function () {
       amplitude.init(apiKey, null, { uploadBatchSize: 10 });
       var counter = 0;
+      var errCounter = 0;
       var value = -1;
       var message = '';
       var callback = function (status, response) {
         counter++;
         value = status;
         message = response;
+      };
+
+      var errCallback = function () {
+        errCounter++;
       };
 
       // queue up 15 events, since batchsize 10, need to send in 2 batches
@@ -1996,7 +2109,7 @@ describe('AmplitudeClient', function () {
       }
       amplitude._sending = false;
 
-      amplitude.logEvent('Event', { index: 100 }, callback);
+      amplitude.logEvent('Event', { index: 100 }, callback, errCallback);
 
       assert.lengthOf(server.requests, 1);
       server.respondWith('success');
@@ -2004,6 +2117,7 @@ describe('AmplitudeClient', function () {
 
       // after first response received, callback should not have fired
       assert.equal(counter, 0);
+      assert.equal(errCounter, 0);
       assert.equal(value, -1);
       assert.equal(message, '');
 
@@ -2015,22 +2129,37 @@ describe('AmplitudeClient', function () {
       assert.equal(counter, 1);
       assert.equal(value, 200);
       assert.equal(message, 'success');
+
+      // error callback should not have fired
+      assert.equal(errCounter, 0);
     });
 
     it('should run the callback even with a dropped unsent event', function () {
       amplitude.init(apiKey, null, { savedMaxCount: 1 });
       var counter = 0;
-      var value = null;
-      var message = null;
-      var reason = null;
+      var value = -1;
+      var message = '';
+      var reason = '';
+
+      var errCounter = 0;
+      var errValue = -1;
+      var errMessage = '';
+      var errReason = '';
       var callback = function (status, response, details) {
         counter++;
         value = status;
         message = response;
         reason = details.reason;
       };
-      amplitude.logEvent('DroppedEvent', {}, callback);
-      amplitude.logEvent('SavedEvent', {}, callback);
+
+      var errCallback = function (status, response, details) {
+        errCounter++;
+        errValue = status;
+        errMessage = response;
+        errReason = details.reason;
+      };
+      amplitude.logEvent('DroppedEvent', {}, callback, errCallback);
+      amplitude.logEvent('SavedEvent', {}, callback, errCallback);
       server.respondWith([0, {}, '']);
       server.respond();
 
@@ -2042,16 +2171,30 @@ describe('AmplitudeClient', function () {
         reason,
         'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
       );
+
+      // verify error callback fired
+      assert.equal(errCounter, 1);
+      assert.equal(errValue, 0);
+      assert.equal(errMessage, 'No request sent');
+      assert.equal(
+        errReason,
+        'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
+      );
     });
 
     it('should run callback once and only after 413 resolved', function () {
       var counter = 0;
+      var errCounter = 0;
       var value = -1;
       var message = '';
       var callback = function (status, response) {
         counter++;
         value = status;
         message = response;
+      };
+
+      var errCallback = function () {
+        errCounter++;
       };
 
       // queue up 15 events
@@ -2062,7 +2205,7 @@ describe('AmplitudeClient', function () {
       amplitude._sending = false;
 
       // 16th event with 413 will backoff to batches of 8
-      amplitude.logEvent('Event', { index: 100 }, callback);
+      amplitude.logEvent('Event', { index: 100 }, callback, errCallback);
 
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
@@ -2072,6 +2215,7 @@ describe('AmplitudeClient', function () {
       server.respondWith([413, {}, '']);
       server.respond();
       assert.equal(counter, 0);
+      assert.equal(errCounter, 1);
       assert.equal(value, -1);
       assert.equal(message, '');
 
@@ -2082,6 +2226,7 @@ describe('AmplitudeClient', function () {
       server.respondWith('success');
       server.respond();
       assert.equal(counter, 0);
+      assert.equal(errCounter, 1);
       assert.equal(value, -1);
       assert.equal(message, '');
 
@@ -2092,25 +2237,30 @@ describe('AmplitudeClient', function () {
       server.respondWith('success');
       server.respond();
       assert.equal(counter, 1);
+      assert.equal(errCounter, 1);
       assert.equal(value, 200);
       assert.equal(message, 'success');
     });
 
     it('should _not_ run callback when the server returns a 500', function () {
       const callback = sinon.spy();
+      const errCallback = sinon.spy();
 
-      amplitude.logEvent('test', null, callback);
+      amplitude.logEvent('test', null, callback, errCallback);
       server.respondWith([500, {}, 'Not found']);
       server.respond();
       assert.isFalse(callback.calledOnce);
+      assert.isTrue(errCallback.calledOnce);
     });
 
     it('should run the callback when the server finally returns a 200 after a 500', function () {
       const callback = sinon.spy();
+      const errCallback = sinon.spy();
 
-      amplitude.logEvent('test', null, callback);
+      amplitude.logEvent('test', null, callback, errCallback);
       server.respondWith([500, {}, 'Not found']);
       server.respond();
+      assert.isTrue(errCallback.calledOnce);
       // The SDK retries failed events when a new event is sent
       amplitude.logEvent('test2');
       server.respondWith([200, {}, 'success']);
@@ -2121,10 +2271,12 @@ describe('AmplitudeClient', function () {
 
     it('should run the callback when the server finally returns a 413 after a 500', function () {
       const callback = sinon.spy();
+      const errCallback = sinon.spy();
 
-      amplitude.logEvent('test', null, callback);
+      amplitude.logEvent('test', null, callback, errCallback);
       server.respondWith([500, {}, 'Not found']);
       server.respond();
+      assert.isTrue(errCallback.calledOnce);
       // The SDK retries failed events when a new event is sent
       amplitude.logEvent('test2');
       server.respondWith([413, {}, '']);
@@ -2562,6 +2714,7 @@ describe('AmplitudeClient', function () {
 
     it('should handle groups input', function () {
       var counter = 0;
+      var errCounter = 0;
       var value = -1;
       var message = '';
       var callback = function (status, response) {
@@ -2569,6 +2722,10 @@ describe('AmplitudeClient', function () {
         counter++;
         value = status;
         message = response;
+      };
+
+      var errCallback = function () {
+        errCounter++;
       };
 
       var eventProperties = {
@@ -2582,7 +2739,7 @@ describe('AmplitudeClient', function () {
         null: null, // ignore null values
       };
 
-      amplitude.logEventWithGroups('Test', eventProperties, groups, callback);
+      amplitude.logEventWithGroups('Test', eventProperties, groups, callback, errCallback);
       assert.lengthOf(server.requests, 1);
       var events = JSON.parse(queryString.parse(server.requests[0].requestBody).e);
       assert.lengthOf(events, 1);
@@ -2600,11 +2757,13 @@ describe('AmplitudeClient', function () {
 
       // verify callback behavior
       assert.equal(counter, 0);
+      assert.equal(errCounter, 0);
       assert.equal(value, -1);
       assert.equal(message, '');
       server.respondWith('success');
       server.respond();
       assert.equal(counter, 1);
+      assert.equal(errCounter, 0);
       assert.equal(value, 200);
       assert.equal(message, 'success');
     });
