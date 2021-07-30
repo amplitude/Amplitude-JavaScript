@@ -1,3 +1,10 @@
+# [8.4.0](https://github.com/amplitude/amplitude-javascript/compare/v8.3.1...v8.4.0) (2021-07-30)
+
+
+### Features
+
+* Add error callback ([#413](https://github.com/amplitude/amplitude-javascript/issues/413)) ([c50429d](https://github.com/amplitude/amplitude-javascript/commit/c50429dada5e0b5dc3b98be58738a5b669f05903))
+
 ## [8.3.1](https://github.com/amplitude/amplitude-javascript/compare/v8.3.0...v8.3.1) (2021-06-10)
 
 
