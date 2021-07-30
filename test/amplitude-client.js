@@ -4051,22 +4051,30 @@ describe('AmplitudeClient', function () {
 
     it('should use sendBeacon when beacon transport is set', function () {
       sandbox.stub(navigator, 'sendBeacon').returns(true);
+      const callback = sandbox.spy();
+      const errCallback = sandbox.spy();
 
       amplitude.init(apiKey, null, { transport: constants.TRANSPORT_BEACON });
-      amplitude.logEvent('test event');
+      amplitude.logEvent('test event', {}, callback, errCallback);
 
       assert.equal(navigator.sendBeacon.callCount, 1);
       assert.equal(amplitude._unsentEvents.length, 0);
+      assert.isTrue(callback.calledOnce);
+      assert.isFalse(errCallback.calledOnce);
     });
 
     it('should not remove event from unsentEvents if beacon returns false', function () {
       sandbox.stub(navigator, 'sendBeacon').returns(false);
+      const callback = sandbox.spy();
+      const errCallback = sandbox.spy();
 
       amplitude.init(apiKey, null, { transport: constants.TRANSPORT_BEACON });
-      amplitude.logEvent('test event');
+      amplitude.logEvent('test event', {}, callback, errCallback);
 
       assert.equal(navigator.sendBeacon.callCount, 1);
       assert.equal(amplitude._unsentEvents.length, 1);
+      assert.isFalse(callback.calledOnce);
+      assert.isTrue(errCallback.calledOnce);
     });
   });
 });

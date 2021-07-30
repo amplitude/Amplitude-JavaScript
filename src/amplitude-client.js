@@ -1700,6 +1700,8 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
       if (this.options.saveEvents) {
         this.saveEvents();
       }
+    } else {
+      this._logErrorsOnEvents(maxEventId, maxIdentifyId, 0, '');
     }
     return;
   }
