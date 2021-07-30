@@ -1523,6 +1523,27 @@ if (BUILD_COMPAT_2_0) {
 }
 
 /**
+ * Calls error callback on unsent events
+ * @private
+ */
+AmplitudeClient.prototype.logErrorsOnEvents = function logErrorsOnEvents(maxEventId, maxIdentifyId, status, response) {
+  const queues = ['_unsentEvents', '_unsentIdentifys'];
+
+  for (let queue in queues) {
+    const maxId = queue === '_unsentEvents' ? maxEventId : maxIdentifyId;
+    for (var i = 0; i < this[queue].length || 0; i++) {
+      const unsentEvent = this[queue][i];
+
+      if (unsentEvent.event.event_id <= maxId) {
+        if (unsentEvent.errorCallback) {
+          unsentEvent.errorCallback(status, response);
+        }
+      }
+    }
+  }
+};
+
+/**
  * Remove events in storage with event ids up to and including maxEventId.
  * @private
  */
@@ -1619,16 +1640,19 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
         scope._sendEventsIfReady();
 
         // handle payload too large
-      } else if (status === 413) {
-        // utils.log('request too large');
-        // Can't even get this one massive event through. Drop it, even if it is an identify.
-        if (scope.options.uploadBatchSize === 1) {
-          scope.removeEvents(maxEventId, maxIdentifyId, status, response);
-        }
+      } else {
+        scope.logErrorsOnEvents(maxEventId, maxIdentifyId, status, response);
+        if (status === 413) {
+          // utils.log('request too large');
+          // Can't even get this one massive event through. Drop it, even if it is an identify.
+          if (scope.options.uploadBatchSize === 1) {
+            scope.removeEvents(maxEventId, maxIdentifyId, status, response);
+          }
 
-        // The server complained about the length of the request. Backoff and try again.
-        scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
-        scope.sendEvents();
+          // The server complained about the length of the request. Backoff and try again.
+          scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
+          scope.sendEvents();
+        }
       }
       // else {
       //  all the events are still queued, and will be retried when the next
