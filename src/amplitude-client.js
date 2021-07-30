@@ -1164,6 +1164,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
   groupProperties,
   timestamp,
   callback,
+  errorCallback,
 ) {
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
 
@@ -1171,11 +1172,17 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     if (type(callback) === 'function') {
       callback(0, 'No request sent', { reason: 'Missing eventType' });
     }
+    if (type(errorCallback) === 'function') {
+      errorCallback(0, 'No request sent', { reason: 'Missing eventType' });
+    }
     return;
   }
   if (this.options.optOut) {
     if (type(callback) === 'function') {
       callback(0, 'No request sent', { reason: 'optOut is set to true' });
+    }
+    if (type(errorCallback) === 'function') {
+      errorCallback(0, 'No request sent', { reason: 'optOut is set to true' });
     }
     return;
   }
@@ -1233,10 +1240,10 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     };
 
     if (eventType === Constants.IDENTIFY_EVENT || eventType === Constants.GROUP_IDENTIFY_EVENT) {
-      this._unsentIdentifys.push({ event, callback });
+      this._unsentIdentifys.push({ event, callback, errorCallback });
       this._limitEventsQueued(this._unsentIdentifys);
     } else {
-      this._unsentEvents.push({ event, callback });
+      this._unsentEvents.push({ event, callback, errorCallback });
       this._limitEventsQueued(this._unsentEvents);
     }
 
@@ -1282,6 +1289,11 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
           reason: 'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
         });
       }
+      if (type(event.errorCallback) === 'function') {
+        event.errorCallback(0, 'No request sent', {
+          reason: 'Event dropped because options.savedMaxCount exceeded. User may be offline or have a content blocker',
+        });
+      }
     });
   }
 };
@@ -1302,13 +1314,16 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * @param {object} eventProperties - (optional) an object with string keys and values for the event properties.
  * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
  * Note: the server response code and response body from the event upload are passed to the callback function.
+ * @param {Amplitude~eventCallback} opt_error_callback - (optional) a callback function to run after the event logging
+ * fails. The failure can be from the request being malformed or from a network failure
+ * Note: the server response code and response body from the event upload are passed to the callback function.
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
-AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback) {
+AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback, opt_error_callback) {
   if (this._shouldDeferCall()) {
     return this._q.push(['logEvent'].concat(Array.prototype.slice.call(arguments, 0)));
   }
-  return this.logEventWithTimestamp(eventType, eventProperties, null, opt_callback);
+  return this.logEventWithTimestamp(eventType, eventProperties, null, opt_callback, opt_error_callback);
 };
 
 /**
@@ -1319,6 +1334,9 @@ AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventPropertie
  * @param {number} timestamp - (optional) the custom timestamp as milliseconds since epoch.
  * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
  * Note: the server response code and response body from the event upload are passed to the callback function.
+ * @param {Amplitude~eventCallback} opt_error_callback - (optional) a callback function to run after the event logging
+ * fails. The failure can be from the request being malformed or from a network failure
+ * Note: the server response code and response body from the event upload are passed to the callback function.
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
@@ -1326,6 +1344,7 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
   eventProperties,
   timestamp,
   opt_callback,
+  opt_error_callback,
 ) {
   if (this._shouldDeferCall()) {
     return this._q.push(['logEventWithTimestamp'].concat(Array.prototype.slice.call(arguments, 0)));
@@ -1334,11 +1353,18 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'API key not set' });
     }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'API key not set' });
+    }
+
     return -1;
   }
   if (!utils.validateInput(eventType, 'eventType', 'string')) {
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
+    }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
     }
     return -1;
   }
@@ -1346,9 +1372,22 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'Missing eventType' });
     }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'Missing eventType' });
+    }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, null, null, timestamp, opt_callback);
+  return this._logEvent(
+    eventType,
+    eventProperties,
+    null,
+    null,
+    null,
+    null,
+    timestamp,
+    opt_callback,
+    opt_error_callback,
+  );
 };
 
 /**
@@ -1365,9 +1404,18 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
  * groupName can be a string or an array of strings.
  * @param {Amplitude~eventCallback} opt_callback - (optional) a callback function to run after the event is logged.
  * Note: the server response code and response body from the event upload are passed to the callback function.
+ * @param {Amplitude~eventCallback} opt_error_callback - (optional) a callback function to run after the event logging
+ * fails. The failure can be from the request being malformed or from a network failure
+ * Note: the server response code and response body from the event upload are passed to the callback function.
  * @example amplitudeClient.logEventWithGroups('Clicked Button', null, {'orgId': 24});
  */
-AmplitudeClient.prototype.logEventWithGroups = function (eventType, eventProperties, groups, opt_callback) {
+AmplitudeClient.prototype.logEventWithGroups = function (
+  eventType,
+  eventProperties,
+  groups,
+  opt_callback,
+  opt_error_callback,
+) {
   if (this._shouldDeferCall()) {
     return this._q.push(['logEventWithGroups'].concat(Array.prototype.slice.call(arguments, 0)));
   }
@@ -1375,15 +1423,21 @@ AmplitudeClient.prototype.logEventWithGroups = function (eventType, eventPropert
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'API key not set' });
     }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'API key not set' });
+    }
     return -1;
   }
   if (!utils.validateInput(eventType, 'eventType', 'string')) {
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
     }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'Invalid type for eventType' });
+    }
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, groups, null, null, opt_callback);
+  return this._logEvent(eventType, eventProperties, null, null, groups, null, null, opt_callback, opt_error_callback);
 };
 
 /**
