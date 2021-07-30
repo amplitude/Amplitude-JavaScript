@@ -1529,7 +1529,12 @@ if (BUILD_COMPAT_2_0) {
  * Calls error callback on unsent events
  * @private
  */
-AmplitudeClient.prototype.logErrorsOnEvents = function logErrorsOnEvents(maxEventId, maxIdentifyId, status, response) {
+AmplitudeClient.prototype._logErrorsOnEvents = function _logErrorsOnEvents(
+  maxEventId,
+  maxIdentifyId,
+  status,
+  response,
+) {
   const queues = ['_unsentEvents', '_unsentIdentifys'];
 
   for (var j = 0; j < queues.length; j++) {
@@ -1645,7 +1650,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
 
         // handle payload too large
       } else {
-        scope.logErrorsOnEvents(maxEventId, maxIdentifyId, status, response);
+        scope._logErrorsOnEvents(maxEventId, maxIdentifyId, status, response);
         if (status === 413) {
           // utils.log('request too large');
           // Can't even get this one massive event through. Drop it, even if it is an identify.
