@@ -1032,17 +1032,23 @@ var _convertProxyObjectToRealObject = function _convertProxyObjectToRealObject(i
  * @param {Identify} identify_obj - the Identify object containing the user property operations to send.
  * @param {Amplitude~eventCallback} opt_callback - (optional) callback function to run when the identify event has been sent.
  * Note: the server response code and response body from the identify event upload are passed to the callback function.
+ * @param {Amplitude~eventCallback} opt_error_callback - (optional) a callback function to run after the event logging
+ * fails. The failure can be from the request being malformed or from a network failure
+ * Note: the server response code and response body from the event upload are passed to the callback function.
  * @example
  * var identify = new amplitude.Identify().set('colors', ['rose', 'gold']).add('karma', 1).setOnce('sign_up_date', '2016-03-31');
  * amplitude.identify(identify);
  */
-AmplitudeClient.prototype.identify = function (identify_obj, opt_callback) {
+AmplitudeClient.prototype.identify = function (identify_obj, opt_callback, opt_error_callback) {
   if (this._shouldDeferCall()) {
     return this._q.push(['identify'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('identify()')) {
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'API key is not set' });
+    }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'API key is not set' });
     }
     return;
   }
@@ -1064,10 +1070,14 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback) {
         null,
         null,
         opt_callback,
+        opt_error_callback,
       );
     } else {
       if (type(opt_callback) === 'function') {
         opt_callback(0, 'No request sent', { reason: 'No user property operations' });
+      }
+      if (type(opt_error_callback) === 'function') {
+        opt_error_callback(0, 'No request sent', { reason: 'No user property operations' });
       }
     }
   } else {
@@ -1075,16 +1085,28 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback) {
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'Invalid identify input type' });
     }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'No user property operations' });
+    }
   }
 };
 
-AmplitudeClient.prototype.groupIdentify = function (group_type, group_name, identify_obj, opt_callback) {
+AmplitudeClient.prototype.groupIdentify = function (
+  group_type,
+  group_name,
+  identify_obj,
+  opt_callback,
+  opt_error_callback,
+) {
   if (this._shouldDeferCall()) {
     return this._q.push(['groupIdentify'].concat(Array.prototype.slice.call(arguments, 0)));
   }
   if (!this._apiKeySet('groupIdentify()')) {
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'API key is not set' });
+    }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'API key is not set' });
     }
     return;
   }
@@ -1093,12 +1115,18 @@ AmplitudeClient.prototype.groupIdentify = function (group_type, group_name, iden
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'Invalid group type' });
     }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'Invalid group type' });
+    }
     return;
   }
 
   if (group_name === null || group_name === undefined) {
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'Invalid group name' });
+    }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'Invalid group name' });
     }
     return;
   }
@@ -1120,16 +1148,23 @@ AmplitudeClient.prototype.groupIdentify = function (group_type, group_name, iden
         identify_obj.userPropertiesOperations,
         null,
         opt_callback,
+        opt_error_callback,
       );
     } else {
       if (type(opt_callback) === 'function') {
         opt_callback(0, 'No request sent', { reason: 'No group property operations' });
+      }
+      if (type(opt_error_callback) === 'function') {
+        opt_error_callback(0, 'No request sent', { reason: 'No group property operations' });
       }
     }
   } else {
     utils.log.error('Invalid identify input type. Expected Identify object but saw ' + type(identify_obj));
     if (type(opt_callback) === 'function') {
       opt_callback(0, 'No request sent', { reason: 'Invalid identify input type' });
+    }
+    if (type(opt_error_callback) === 'function') {
+      opt_error_callback(0, 'No request sent', { reason: 'No group property operations' });
     }
   }
 };
@@ -1529,7 +1564,8 @@ if (BUILD_COMPAT_2_0) {
 AmplitudeClient.prototype.logErrorsOnEvents = function logErrorsOnEvents(maxEventId, maxIdentifyId, status, response) {
   const queues = ['_unsentEvents', '_unsentIdentifys'];
 
-  for (let queue in queues) {
+  for (var j = 0; j < queues.length; j++) {
+    const queue = queues[j];
     const maxId = queue === '_unsentEvents' ? maxEventId : maxIdentifyId;
     for (var i = 0; i < this[queue].length || 0; i++) {
       const unsentEvent = this[queue][i];
