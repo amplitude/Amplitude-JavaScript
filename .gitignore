@@ -15,3 +15,6 @@ amplitude-segment-snippet.min.js
 package-lock.json
 amplitude.umd.js
 amplitude.umd.min.js
+amplitude.native.js
+amplitude.nocompat.js
+amplitude.nocompat.min.js
