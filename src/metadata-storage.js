@@ -193,8 +193,7 @@ class MetadataStorage {
         utils.log.info(`window.sessionStorage unavailable. Reason: "${e}"`);
       }
     }
-    if (!str) false;
-    return true;
+    return !!str
   }
 }
 
