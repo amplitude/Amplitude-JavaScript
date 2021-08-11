@@ -359,7 +359,9 @@ var _parseConfig = function _parseConfig(options, config) {
 
     var inputValue = config[key];
     var expectedType = type(options[key]);
-    if (!utils.validateInput(inputValue, key + ' option', expectedType)) {
+    if (key === 'transport' && !utils.validateTransport(inputValue)) {
+      return;
+    } else if (!utils.validateInput(inputValue, key + ' option', expectedType)) {
       return;
     }
     if (expectedType === 'boolean') {
@@ -1687,10 +1689,6 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
     upload_time: uploadTime,
     checksum: md5(Constants.API_VERSION + this.options.apiKey + events + uploadTime),
   };
-
-  if (!navigator.sendBeacon) {
-    this.options.transport = Constants.TRANSPORT_HTTP;
-  }
 
   if (this.options.transport === Constants.TRANSPORT_BEACON) {
     const success = navigator.sendBeacon(url, new URLSearchParams(data));
