@@ -1,3 +1,15 @@
+# [8.5.0](https://github.com/amplitude/amplitude-javascript/compare/v8.4.0...v8.5.0) (2021-08-13)
+
+
+### Bug Fixes
+
+* LGTM return fix for falsy str ([#416](https://github.com/amplitude/amplitude-javascript/issues/416)) ([f744fe7](https://github.com/amplitude/amplitude-javascript/commit/f744fe7dbd02974d6e3adedf662c966a7012335d))
+
+
+### Features
+
+* add sendBeacon support ([#412](https://github.com/amplitude/amplitude-javascript/issues/412)) ([0517038](https://github.com/amplitude/amplitude-javascript/commit/0517038951691a447a34a7581e9dddd86b6434bf))
+
 # [8.4.0](https://github.com/amplitude/amplitude-javascript/compare/v8.3.1...v8.4.0) (2021-07-30)
 
 
