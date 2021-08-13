@@ -1006,13 +1006,11 @@ AmplitudeClient.prototype.setTransport = function setTransport(transport) {
     return this._q.push(['setTransport'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
-  const t = transport.toLowerCase();
-
-  if (!utils.validateTransport(t)) {
+  if (!utils.validateTransport(transport)) {
     return;
   }
 
-  this.options.transport = t;
+  this.options.transport = transport;
 };
 
 /**
