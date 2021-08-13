@@ -212,6 +212,31 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     if (type(opt_callback) === 'function') {
       opt_callback(this);
     }
+
+    const onExitPage = this.options.onExitPage;
+    if (type(onExitPage) === 'function') {
+      if (!this.pageHandlersAdded) {
+        this.pageHandlersAdded = true;
+
+        const handleVisibilityChange = () => {
+          const prevTransport = this.options.transport;
+          this.setTransport(Constants.TRANSPORT_BEACON);
+          onExitPage();
+          this.setTransport(prevTransport);
+        };
+
+        // Monitoring just page exits because that is the most requested feature for now
+        // "If you're specifically trying to detect page unload events, the pagehide event is the best option."
+        // https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event
+        window.addEventListener(
+          'pagehide',
+          () => {
+            handleVisibilityChange();
+          },
+          false,
+        );
+      }
+    }
   } catch (err) {
     utils.log.error(err);
     if (type(opt_config.onError) === 'function') {
@@ -334,7 +359,9 @@ var _parseConfig = function _parseConfig(options, config) {
 
     var inputValue = config[key];
     var expectedType = type(options[key]);
-    if (!utils.validateInput(inputValue, key + ' option', expectedType)) {
+    if (key === 'transport' && !utils.validateTransport(inputValue)) {
+      return;
+    } else if (!utils.validateInput(inputValue, key + ' option', expectedType)) {
       return;
     }
     if (expectedType === 'boolean') {
@@ -507,6 +534,13 @@ AmplitudeClient.prototype._sendEventsIfReady = function _sendEventsIfReady() {
 
   // if batching enabled, check if min threshold met for batch size
   if (this._unsentCount() >= this.options.eventUploadThreshold) {
+    this.sendEvents();
+    return true;
+  }
+
+  // if beacon transport is activated, send events immediately
+  // because there is no way to retry them later
+  if (this.options.transport === Constants.TRANSPORT_BEACON) {
     this.sendEvents();
     return true;
   }
@@ -958,6 +992,25 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
   } catch (e) {
     utils.log.error(e);
   }
+};
+
+/**
+ * Sets the network transport type for events. Typically used to set to 'beacon'
+ * on an end-of-lifecycle event handler such as `onpagehide` or `onvisibilitychange`
+ * @public
+ * @param {string} transport - transport mechanism to use for events. Must be one of `http` or `beacon`.
+ * @example amplitudeClient.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
+ */
+AmplitudeClient.prototype.setTransport = function setTransport(transport) {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setTransport'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+
+  if (!utils.validateTransport(transport)) {
+    return;
+  }
+
+  this.options.transport = transport;
 };
 
 /**
@@ -1609,11 +1662,13 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
 
   // We only make one request at a time. sendEvents will be invoked again once
   // the last request completes.
-  if (this._sending) {
-    return;
+  // beacon data is sent synchronously, so don't pause for it
+  if (this.options.transport !== Constants.TRANSPORT_BEACON) {
+    if (this._sending) {
+      return;
+    }
+    this._sending = true;
   }
-
-  this._sending = true;
   var protocol = this.options.forceHttps ? 'https' : 'https:' === window.location.protocol ? 'https' : 'http';
   var url = protocol + '://' + this.options.apiEndpoint;
 
@@ -1633,6 +1688,19 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
     checksum: md5(Constants.API_VERSION + this.options.apiKey + events + uploadTime),
   };
 
+  if (this.options.transport === Constants.TRANSPORT_BEACON) {
+    const success = navigator.sendBeacon(url, new URLSearchParams(data));
+
+    if (success) {
+      this.removeEvents(maxEventId, maxIdentifyId, 200, 'success');
+      if (this.options.saveEvents) {
+        this.saveEvents();
+      }
+    } else {
+      this._logErrorsOnEvents(maxEventId, maxIdentifyId, 0, '');
+    }
+    return;
+  }
   var scope = this;
   new Request(url, data, this.options.headers).send(function (status, response) {
     scope._sending = false;

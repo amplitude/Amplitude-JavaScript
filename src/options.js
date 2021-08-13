@@ -27,6 +27,7 @@ import language from './language';
  * @property {boolean} [logAttributionCapturedEvent=`false`] - If `true`, the SDK will log an Amplitude event anytime new attribution values are captured from the user. **Note: These events count towards your event volume.** Event name being logged: [Amplitude] Attribution Captured. Event Properties that can be logged: `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `referrer`, `referring_domain`, `gclid`, `fbclid`. For UTM properties to be logged, `includeUtm` must be set to `true`. For the `referrer` and `referring_domain` properties to be logged, `includeReferrer` must be set to `true`. For the `gclid` property to be logged, `includeGclid` must be set to `true`. For the `fbclid` property to be logged, `includeFbclid` must be set to `true`.
  * @property {boolean} [optOut=`false`] -  Whether or not to disable tracking for the current user.
  * @property {function} [onError=`() => {}`] - Function to call on error.
+ * @property {function} [onExitPage=`() => {}`] - Function called when the user exits the browser. Useful logging on page exit.
  * @property {string} [platform=`Web`] -  Platform device is running on. Defaults to `Web` (browser, including mobile browsers).
  * @property {number} [savedMaxCount=`1000`] -  Maximum number of events to save in localStorage. If more events are logged while offline, then old events are removed.
  * @property {boolean} [saveEvents=`true`] -  If `true`, saves events to localStorage and removes them upon successful upload. *Note: Without saving events, events may be lost if the user navigates to another page before the events are uploaded.*
@@ -35,6 +36,7 @@ import language from './language';
  * @property {number} [sessionTimeout=`30*60*1000` (30 min)] -  The time between logged events before a new session starts in milliseconds.
  * @property {string[]} [storage=`''`] - Sets storage strategy.  Options are 'cookies', 'localStorage', 'sessionStorage', or `none`. Will override `disableCookies` option
  * @property {Object} [trackingOptions=`{ city: true, country: true, carrier: true, device_manufacturer: true, device_model: true, dma: true, ip_address: true, language: true, os_name: true, os_version: true, platform: true, region: true, version_name: true}`] - Type of data associated with a user.
+ * @property {string} [transport=`http`] - Network transport mechanism used to send events. Options are 'http' and 'beacon'.
  * @property {boolean} [unsetParamsReferrerOnNewSession=`false`] -  If `false`, the existing `referrer` and `utm_parameter` values will be carried through each new session. If set to `true`, the `referrer` and `utm_parameter` user properties, which include `referrer`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, and `utm_content`, will be set to `null` upon instantiating a new session. Note: This only works if `includeReferrer` or `includeUtm` is set to `true`.
  * @property {string} [unsentKey=`amplitude_unsent`] - localStorage key that stores unsent events.
  * @property {string} [unsentIdentifyKey=`amplitude_unsent_identify`] - localStorage key that stores unsent identifies.
@@ -64,6 +66,7 @@ export default {
   logAttributionCapturedEvent: false,
   optOut: false,
   onError: () => {},
+  onExitPage: () => {},
   platform: 'Web',
   savedMaxCount: 1000,
   saveEvents: true,
@@ -86,6 +89,7 @@ export default {
     region: true,
     version_name: true,
   },
+  transport: Constants.TRANSPORT_HTTP,
   unsetParamsReferrerOnNewSession: false,
   unsentKey: 'amplitude_unsent',
   unsentIdentifyKey: 'amplitude_unsent_identify',
