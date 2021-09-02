@@ -1260,7 +1260,8 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
 
     const osName = this._ua.browser.name;
     const osVersion = this._ua.browser.major;
-    const deviceModel = this._ua.os.name;
+    const deviceModel = this._ua.device.model || this._ua.os.name;
+    const deviceVendor = this._ua.device.vendor;
 
     userProperties = userProperties || {};
     var trackingOptions = { ...this._apiPropertiesTrackingOptions };
@@ -1280,6 +1281,8 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
       os_name: _shouldTrackField(this, 'os_name') ? osName || null : null,
       os_version: _shouldTrackField(this, 'os_version') ? osVersion || null : null,
       device_model: _shouldTrackField(this, 'device_model') ? deviceModel || null : null,
+      device_manufacturer: _shouldTrackField(this, 'device_manufacturer') ? deviceVendor || null : null,
+      device_brand: _shouldTrackField(this, 'device_brand') ? deviceVendor || null : null,
       language: _shouldTrackField(this, 'language') ? this.options.language : null,
       api_properties: apiProperties,
       event_properties: utils.truncate(utils.validateProperties(eventProperties)),
