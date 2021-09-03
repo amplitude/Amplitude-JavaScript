@@ -15,11 +15,6 @@
   resolved "https://registry.yarnpkg.com/@amplitude/types/-/types-1.0.4.tgz#21275b030c8267f9ea133a79c5c525e30c706d69"
   integrity sha512-iWdgTXiE0T/QCK88g2ezJEhJpYHDvDs0StVVPu1ygcl6qYzk/8xrNvbeEibiIBT8t/GJ8FtH5ZIPx3c4CMjlig==
 
-"@amplitude/ua-parser-js@0.7.24":
-  version "0.7.24"
-  resolved "https://registry.yarnpkg.com/@amplitude/ua-parser-js/-/ua-parser-js-0.7.24.tgz#2ce605af7d2c38d4a01313fb2385df55fbbd69aa"
-  integrity sha512-VbQuJymJ20WEw0HtI2np7EdC3NJGUWi8+Xdbc7uk8WfMIF308T0howpzkQ3JFMN7ejnrcSM/OyNGveeE3TP3TA==
-
 "@amplitude/utils@^1.0.5":
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/@amplitude/utils/-/utils-1.0.5.tgz#843d96b7965c69213bb1896980bed2c1569fbbed"
@@ -8134,6 +8129,11 @@ typical@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/typical/-/typical-6.0.1.tgz#89bd1a6aa5e5e96fa907fb6b7579223bff558a06"
   integrity sha512-+g3NEp7fJLe9DPa1TArHm9QAA7YciZmWnfAqEaFrBihQ7epOv9i99rjtgb6Iz0wh3WuQDjsCTDfgRoGnmHN81A==
+
+ua-parser-js@^0.7.28:
+  version "0.7.28"
+  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.28.tgz#8ba04e653f35ce210239c64661685bf9121dec31"
+  integrity sha512-6Gurc1n//gjp9eQNXjD9O3M/sMwVtN5S8Lv9bvOYBfKfDNiIIhqiyi01vMBO45u4zkDE420w/e0se7Vs+sIg+g==
 
 uc.micro@^1.0.1, uc.micro@^1.0.5:
   version "1.0.6"
