@@ -10,7 +10,7 @@ import md5 from 'blueimp-md5';
 import Request from './xhr';
 import Revenue from './revenue';
 import type from './type';
-import UAParser from 'ua-parser-js'; // Identifying device and browser info (maybe move to backend?)
+import UAParser from '@amplitude/ua-parser-js'; // Identifying device and browser info (maybe move to backend?)
 import utils from './utils';
 import UUID from './uuid';
 import base64Id from './base64Id';

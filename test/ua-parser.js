@@ -1,4 +1,4 @@
-import UAParser from 'ua-parser-js';
+import UAParser from '@amplitude/ua-parser-js';
 
 describe('ua-parser', function () {
   it('should find an os and device for all agents', function () {
@@ -181,7 +181,7 @@ var browsers = [
   [
     'Android 4.1.2 - Chrome 30.0',
     'Mozilla/5.0 (Linux; Android 4.1.2; SHV-E250S Build/JZO54K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.82 Mobile Safari/537.36',
-    'Chrome Mobile',
+    'Chrome',
     '30',
     'Android',
     '4.1.2',
@@ -205,8 +205,8 @@ var browsers = [
   [
     'Android 4.4 - (Nexus 5) - AppleWebKit/536.23',
     'Mozilla/5.0 (Linux; Android 4.4; Nexus 5 Build/BuildID) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36',
-    'Chrome Mobile',
-    '30',
+    'Android Browser',
+    '4',
     'Android',
     '4.4',
   ],
@@ -239,7 +239,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; CPU OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko ) Version/5.1 Mobile/9B176 Safari/7534.48.3',
     'Mobile Safari',
     '5',
-    'iPad',
+    'iOS',
     '5.1',
   ],
   [
@@ -247,7 +247,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; CPU OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML like Gecko) Mobile/12A405 Version/7.0 Safari/9537.53',
     'Safari',
     '7',
-    'iPad',
+    'iOS',
     '8.0.2',
   ],
   [
@@ -255,7 +255,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10',
     'Mobile Safari',
     '4',
-    'iPad',
+    'iOS',
     '3.2',
   ],
   [
@@ -263,7 +263,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU OS 4_2_1 like Mac OS X; ja-jp) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5',
     'Mobile Safari',
     '5',
-    'iPad',
+    'iOS',
     '4.2.1',
   ],
   [
@@ -271,7 +271,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU OS 4_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8F190 Safari/6533.18.5',
     'Mobile Safari',
     '5',
-    'iPad',
+    'iOS',
     '4.3',
   ],
   [
@@ -279,7 +279,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25',
     'Mobile Safari',
     '6',
-    'iPad',
+    'iOS',
     '6.0',
   ],
   [
@@ -303,7 +303,7 @@ var browsers = [
     'Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.15 (KHTML, like Gecko) Ubuntu/10.10 Chromium/10.0.613.0 Chrome/10.0.613.0 Safari/534.15',
     'Chromium',
     '10',
-    'Linux',
+    'Ubuntu',
     '10.10',
   ],
   [
@@ -311,8 +311,8 @@ var browsers = [
     'Mozilla/5.0 (X11; U; FreeBSD x86_64; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16',
     'Chrome',
     '10',
-    'Linux',
-    'x86_64',
+    'FreeBSD',
+    undefined,
   ],
   [
     'Chrome 11.0.672.2 (Win 7)',
@@ -327,7 +327,7 @@ var browsers = [
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.24 (KHTML, like Gecko) Ubuntu/10.10 Chromium/12.0.703.0 Chrome/12.0.703.0 Safari/534.24',
     'Chromium',
     '12',
-    'Linux',
+    'Ubuntu',
     '10.10',
   ],
   [
@@ -359,7 +359,7 @@ var browsers = [
     'Mozilla/5.0 Slackware/13.37 (X11; U; Linux x86_64; en-US) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.41',
     'Chrome',
     '13',
-    'Linux',
+    'Slackware',
     '13.37',
   ],
   [
@@ -367,7 +367,7 @@ var browsers = [
     'Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 (KHTML, like Gecko) Ubuntu/11.04 Chromium/14.0.825.0 Chrome/14.0.825.0 Safari/535.1',
     'Chromium',
     '14',
-    'Linux',
+    'Ubuntu',
     '11.04',
   ],
   [
@@ -375,7 +375,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.186 Safari/535.1',
     'Chrome',
     '14',
-    'Mac',
+    'Mac OS',
     '10.7.2',
   ],
   [
@@ -383,7 +383,7 @@ var browsers = [
     'Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.2 (KHTML, like Gecko) Ubuntu/11.10 Chromium/15.0.874.120 Chrome/15.0.874.120 Safari/535.2',
     'Chromium',
     '15',
-    'Linux',
+    'Ubuntu',
     '11.10',
   ],
   [
@@ -399,7 +399,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.54 Safari/535.2',
     'Chrome',
     '15',
-    'Mac',
+    'Mac OS',
     '10.6.8',
   ],
   [
@@ -407,7 +407,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.36 Safari/535.7',
     'Chrome',
     '16',
-    'Mac',
+    'Mac OS',
     '10.6.8',
   ],
   [
@@ -439,7 +439,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3',
     'Chrome',
     '19',
-    'Mac',
+    'Mac OS',
     '10.8.0',
   ],
   [
@@ -447,8 +447,8 @@ var browsers = [
     'Mozilla/5.0 (X11; FreeBSD amd64) AppleWebKit/536.5 (KHTML like Gecko) Chrome/19.0.1084.56 Safari/536.5',
     'Chrome',
     '19',
-    'Linux',
-    'amd64',
+    'FreeBSD',
+    undefined,
   ],
   [
     'Chrome 19.0.1084.9 (64 bit)',
@@ -503,15 +503,15 @@ var browsers = [
     'Mozilla/5.0 (X11; FreeBSD amd64) AppleWebKit/537.4 (KHTML like Gecko) Chrome/22.0.1229.79 Safari/537.4',
     'Chrome',
     '22',
-    'Linux',
-    'amd64',
+    'FreeBSD',
+    undefined,
   ],
   [
     'Chrome 22.0.1229.79 (OS X 10_8_2 Intel)',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.4 (KHTML like Gecko) Chrome/22.0.1229.79 Safari/537.4',
     'Chrome',
     '22',
-    'Mac',
+    'Mac OS',
     '10.8.2',
   ],
   [
@@ -519,7 +519,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.31 (KHTML like Gecko) Chrome/26.0.1410.63 Safari/537.31',
     'Chrome',
     '26',
-    'Mac',
+    'Mac OS',
     '10.8.4',
   ],
   [
@@ -527,7 +527,7 @@ var browsers = [
     'Mozilla/5.0 (X11; NetBSD) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36',
     'Chrome',
     '27',
-    'Linux',
+    'NetBSD',
     undefined,
   ],
   [
@@ -535,7 +535,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 1083) AppleWebKit/537.36 (KHTML like Gecko) Chrome/28.0.1469.0 Safari/537.36',
     'Chrome',
     '28',
-    'Mac',
+    'Mac OS',
     '1083',
   ],
   [
@@ -567,7 +567,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1664.3 Safari/537.36',
     'Chrome',
     '32',
-    'Mac',
+    'Mac OS',
     '10.9.0',
   ],
   [
@@ -591,7 +591,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1944.0 Safari/537.36',
     'Chrome',
     '36',
-    'Mac',
+    'Mac OS',
     '10.9.2',
   ],
   [
@@ -623,15 +623,15 @@ var browsers = [
     'Mozilla/5.0 (X11; U; FreeBSD i386; en-US) AppleWebKit/532.0 (KHTML, like Gecko) Chrome/4.0.207.0 Safari/532.0',
     'Chrome',
     '4',
-    'Linux',
-    'i386',
+    'FreeBSD',
+    undefined,
   ],
   [
     'Chrome 4.0.237.0 (Debian)',
     'Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/532.4 (KHTML, like Gecko) Chrome/4.0.237.0 Safari/532.4 Debian',
     'Chrome',
     '4',
-    'Linux',
+    'Debian',
     undefined,
   ],
   [
@@ -655,7 +655,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_8; en-US) AppleWebKit/532.8 (KHTML, like Gecko) Chrome/4.0.302.2 Safari/532.8',
     'Chrome',
     '4',
-    'Mac',
+    'Mac OS',
     '10.5.8',
   ],
   [
@@ -663,7 +663,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36',
     'Chrome',
     '41',
-    'Mac',
+    'Mac OS',
     '10.10.1',
   ],
   [
@@ -695,15 +695,15 @@ var browsers = [
     'Mozilla/5.0 (X11; U; OpenBSD i386; en-US) AppleWebKit/533.3 (KHTML, like Gecko) Chrome/5.0.359.0 Safari/533.3',
     'Chrome',
     '5',
-    'Linux',
-    'i386',
+    'OpenBSD',
+    undefined,
   ],
   [
     'Chrome 6.0.464 (OS X 10_6_4 Intel)',
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.464.0 Safari/534.3',
     'Chrome',
     '6',
-    'Mac',
+    'Mac OS',
     '10.6.4',
   ],
   [
@@ -727,7 +727,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_5; en-US) AppleWebKit/534.13 (KHTML, like Gecko) Chrome/9.0.597.15 Safari/534.13',
     'Chrome',
     '9',
-    'Mac',
+    'Mac OS',
     '10.6.5',
   ],
   [
@@ -743,7 +743,7 @@ var browsers = [
     'Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/540.0 (KHTML, like Gecko) Ubuntu/10.10 Chrome/9.1.0.0 Safari/540.0',
     'Chrome',
     '9',
-    'Linux',
+    'Ubuntu',
     '10.10',
   ],
   [
@@ -791,7 +791,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; Mac OS X Mach-O; en-US; rv:2.0a) Gecko/20040614 Firefox/3.0.0',
     'Firefox',
     '3',
-    'Mac',
+    'Mac OS',
     'Mach',
   ],
   [
@@ -807,7 +807,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2; rv:10.0.1) Gecko/20100101 Firefox/10.0.1',
     'Firefox',
     '10',
-    'Mac',
+    'Mac OS',
     '10.7.2',
   ],
   [
@@ -855,7 +855,7 @@ var browsers = [
     'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:14.0) Gecko/20100101 Firefox/14.0.1',
     'Firefox',
     '14',
-    'Linux',
+    'Ubuntu',
     undefined,
   ],
   [
@@ -887,15 +887,15 @@ var browsers = [
     'Mozilla/5.0 (X11; NetBSD amd64; rv:16.0) Gecko/20121102 Firefox/16.0',
     'Firefox',
     '16',
-    'Linux',
-    'amd64',
+    'NetBSD',
+    undefined,
   ],
   [
     'Firefox 16.0 (OS X 10.8 Intel)',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:16.0) Gecko/20120813 Firefox/16.0',
     'Firefox',
     '16',
-    'Mac',
+    'Mac OS',
     '10.8',
   ],
   [
@@ -911,7 +911,7 @@ var browsers = [
     'Mozilla/5.0 (X11; U; Linux i686; rv:19.0) Gecko/20100101 Slackware/13 Firefox/19.0',
     'Firefox',
     '19',
-    'Linux',
+    'Slackware',
     '13',
   ],
   [
@@ -927,7 +927,7 @@ var browsers = [
     'Mozilla/5.0 (X11; U; Linux x86_64; sv-SE; rv:1.8.1.12) Gecko/20080207 Ubuntu/7.10 (gutsy) Firefox/2.0.0.12',
     'Firefox',
     '2',
-    'Linux',
+    'Ubuntu',
     '7.10',
   ],
   [
@@ -943,7 +943,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:20.0) Gecko/20100101 Firefox/20.0',
     'Firefox',
     '20',
-    'Mac',
+    'Mac OS',
     '10.7',
   ],
   [
@@ -951,7 +951,7 @@ var browsers = [
     'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0',
     'Firefox',
     '20',
-    'Linux',
+    'Ubuntu',
     undefined,
   ],
   [
@@ -967,7 +967,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:21.0) Gecko/20100101 Firefox/21.0',
     'Firefox',
     '21',
-    'Mac',
+    'Mac OS',
     '10.8',
   ],
   [
@@ -999,7 +999,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:25.0) Gecko/20100101 Firefox/25.0',
     'Firefox',
     '25',
-    'Mac',
+    'Mac OS',
     '10.6',
   ],
   [
@@ -1023,8 +1023,8 @@ var browsers = [
     'Mozilla/5.0 (X11; OpenBSD amd64; rv:28.0) Gecko/20100101 Firefox/28.0',
     'Firefox',
     '28',
-    'Linux',
-    'amd64',
+    'OpenBSD',
+    undefined,
   ],
   [
     'Firefox 29.0 (Win 7 64 bit)',
@@ -1055,7 +1055,7 @@ var browsers = [
     'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.11) Gecko/2009060309 Ubuntu/9.10 (karmic) Firefox/3.0.11',
     'Firefox',
     '3',
-    'Linux',
+    'Ubuntu',
     '9.10',
   ],
   [
@@ -1071,7 +1071,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.0.3) Gecko/2008092414 Firefox/3.0.3',
     'Firefox',
     '3',
-    'Mac',
+    'Mac OS',
     '10.5',
   ],
   [
@@ -1087,15 +1087,15 @@ var browsers = [
     'Mozilla/5.0 (X11; U; OpenBSD i386; en-US; rv:1.9.1) Gecko/20090702 Firefox/3.5',
     'Firefox',
     '3',
-    'Linux',
-    'i386',
+    'OpenBSD',
+    undefined,
   ],
   [
     'Firefox 3.5 (OS X 10.5 Intel)',
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1) Gecko/20090624 Firefox/3.5',
     'Firefox',
     '3',
-    'Mac',
+    'Mac OS',
     '10.5',
   ],
   [
@@ -1103,7 +1103,7 @@ var browsers = [
     'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.1.2) Gecko/20090803 Ubuntu/9.04 (jaunty) Shiretoko/3.5.2',
     'Mozilla',
     '5',
-    'Linux',
+    'Ubuntu',
     '9.04',
   ],
   [
@@ -1111,7 +1111,7 @@ var browsers = [
     'Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.3) Gecko/20091020 Linux Mint/8 (Helena) Firefox/3.5.3',
     'Firefox',
     '3',
-    'Linux',
+    'Mint',
     '8',
   ],
   [
@@ -1135,7 +1135,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.2.15) Gecko/20110303 Firefox/3.6.15',
     'Firefox',
     '3',
-    'Mac',
+    'Mac OS',
     '10.5',
   ],
   [
@@ -1143,7 +1143,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.14) Gecko/20110218 AlexaToolbar/alxf-2.0 Firefox/3.6.14',
     'Firefox',
     '3',
-    'Mac',
+    'Mac OS',
     '10.6',
   ],
   [
@@ -1151,8 +1151,8 @@ var browsers = [
     'Mozilla/5.0 (X11; U; FreeBSD i386; de-CH; rv:1.9.2.8) Gecko/20100729 Firefox/3.6.8',
     'Firefox',
     '3',
-    'Linux',
-    'i386',
+    'FreeBSD',
+    undefined,
   ],
   [
     'Firefox 3.6.8 (XP)',
@@ -1167,7 +1167,7 @@ var browsers = [
     'Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.9) Gecko/20100915 Gentoo Firefox/3.6.9',
     'Firefox',
     '3',
-    'Linux',
+    'Gentoo',
     'Firefox',
   ],
   [
@@ -1175,7 +1175,7 @@ var browsers = [
     'Mozilla/5.0 (X11; U; Linux i686; pl-PL; rv:1.9.0.2) Gecko/20121223 Ubuntu/9.25 (jaunty) Firefox/3.8',
     'Firefox',
     '3',
-    'Linux',
+    'Ubuntu',
     '9.25',
   ],
   [
@@ -1199,7 +1199,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:35.0) Gecko/20100101 Firefox/35.0',
     'Firefox',
     '35',
-    'Mac',
+    'Mac OS',
     '10.9',
   ],
   [
@@ -1207,7 +1207,7 @@ var browsers = [
     'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:35.0) Gecko/20100101 Firefox/35.0',
     'Firefox',
     '35',
-    'Linux',
+    'Ubuntu',
     undefined,
   ],
   [
@@ -1263,7 +1263,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:2.0.1) Gecko/20100101 Firefox/4.0.1',
     'Firefox',
     '4',
-    'Mac',
+    'Mac OS',
     '10.6',
   ],
   [
@@ -1319,15 +1319,15 @@ var browsers = [
     'Mozilla/5.0 (X11; FreeBSD amd64; rv:5.0) Gecko/20100101 Firefox/5.0',
     'Firefox',
     '5',
-    'Linux',
-    'amd64',
+    'FreeBSD',
+    undefined,
   ],
   [
     'Firefox 5.0 (OS X 10.6 Intel)',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:5.0) Gecko/20100101 Firefox/5.0',
     'Firefox',
     '5',
-    'Mac',
+    'Mac OS',
     '10.6',
   ],
   [
@@ -1383,7 +1383,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:9.0) Gecko/20100101 Firefox/9.0',
     'Firefox',
     '9',
-    'Mac',
+    'Mac OS',
     '10.6',
   ],
   [
@@ -1413,7 +1413,7 @@ var browsers = [
   [
     'Galaxy S 3 (SPH-L710) - Android 4.3 - Chrome 32.0.1700.99',
     'Mozilla/5.0 (Linux; Android 4.3; SPH-L710 Build/JSS15J) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.99 Mobile Safari/537.36',
-    'Chrome Mobile',
+    'Chrome',
     '32',
     'Android',
     '4.3',
@@ -1495,8 +1495,8 @@ var browsers = [
   [
     'Googlebot-Mobile 2.1 (ID: SAMSUNG-SGH-E250)',
     'SAMSUNG-SGH-E250/1.0 Profile/MIDP-2.0 Configuration/CLDC-1.1 UP.Browser/6.2.3.3.c.1.101 (GUI) MMP/2.0 (compatible; Googlebot-Mobile/2.1; http://www.google.com/bot.html)',
-    undefined,
-    undefined,
+    'UP.Browser',
+    '6',
     undefined,
     undefined,
   ],
@@ -1516,7 +1516,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420 (KHTML, like Gecko) Version/3.0 Mobile/1A543a Safari/419.3',
     'Mobile Safari',
     '3',
-    'Mac',
+    'Mac OS',
     undefined,
   ],
   [
@@ -1524,7 +1524,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 2_0 like Mac OS X; en-us) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5A347 Safari/525.200',
     'Mobile Safari',
     '3',
-    'iPhone',
+    'iOS',
     '2.0',
   ],
   [
@@ -1532,7 +1532,7 @@ var browsers = [
     'Mozilla/5.0 (iPod; U; CPU iPhone OS 2_2_1 like Mac OS X; en-us) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5H11a Safari/525.20',
     'Mobile Safari',
     '3',
-    'iPhone',
+    'iOS',
     '2.2.1',
   ],
   [
@@ -1540,7 +1540,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16',
     'Mobile Safari',
     '4',
-    'iPhone',
+    'iOS',
     '3.0',
   ],
   [
@@ -1548,7 +1548,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10',
     'Mobile Safari',
     '4',
-    'iPad',
+    'iOS',
     '3.2',
   ],
   [
@@ -1556,7 +1556,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU OS 4_2_1 like Mac OS X; ja-jp) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5',
     'Mobile Safari',
     '5',
-    'iPad',
+    'iOS',
     '4.2.1',
   ],
   [
@@ -1564,7 +1564,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_2_1 like Mac OS X; da-dk) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5',
     'Mobile Safari',
     '5',
-    'iPhone',
+    'iOS',
     '4.2.1',
   ],
   [
@@ -1572,15 +1572,15 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3 like Mac OS X; de-de) AppleWebKit/533.17.9 (KHTML, like Gecko) Mobile/8F190',
     'WebKit',
     '533',
-    'iPhone',
+    'iOS',
     '4.3',
   ],
   [
     'iOS 5_1_1 - iPhone - Chrome (crios) 19.0.1084.60',
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 5_1_1 like Mac OS X; da-dk) AppleWebKit/534.46.0 (KHTML, like Gecko) CriOS/19.0.1084.60 Mobile/9B206 Safari/7534.48.3',
-    'Chrome Mobile',
+    'Chrome',
     '19',
-    'iPhone',
+    'iOS',
     '5.1.1',
   ],
   [
@@ -1588,15 +1588,15 @@ var browsers = [
     'Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25',
     'Mobile Safari',
     '6',
-    'iPad',
+    'iOS',
     '6.0',
   ],
   [
     'iPad - iOS 7_0 - Safari 6 (8536.25)',
     'Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) CriOS/30.0.1599.12 Mobile/11A465 Safari/8536.25 (3B92C18B-D9DE-4CB7-A02A-22FD2AF17C8F)',
-    'Chrome Mobile',
+    'Chrome',
     '30',
-    'iPad',
+    'iOS',
     '7.0',
   ],
   [
@@ -1604,7 +1604,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; CPU OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML like Gecko) Mobile/12A405 Version/7.0 Safari/9537.53',
     'Safari',
     '7',
-    'iPad',
+    'iOS',
     '8.0.2',
   ],
   [
@@ -1612,7 +1612,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10',
     'Mobile Safari',
     '4',
-    'iPad',
+    'iOS',
     '3.2',
   ],
   [
@@ -1620,7 +1620,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU OS 4_2_1 like Mac OS X; ja-jp) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5',
     'Mobile Safari',
     '5',
-    'iPad',
+    'iOS',
     '4.2.1',
   ],
   [
@@ -1628,7 +1628,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU OS 4_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8F190 Safari/6533.18.5',
     'Mobile Safari',
     '5',
-    'iPad',
+    'iOS',
     '4.3',
   ],
   [
@@ -1636,7 +1636,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU iPad OS 5_0_1 like Mac OS X; en-us) AppleWebKit/535.1+ (KHTML like Gecko) Version/7.2.0.0 Safari/6533.18.5',
     'Safari',
     '7',
-    'iPad',
+    'iOS',
     '5.0.1',
   ],
   [
@@ -1644,7 +1644,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420 (KHTML, like Gecko) Version/3.0 Mobile/1A543a Safari/419.3',
     'Mobile Safari',
     '3',
-    'Mac',
+    'Mac OS',
     undefined,
   ],
   [
@@ -1652,7 +1652,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 2_0 like Mac OS X; en-us) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5A347 Safari/525.200',
     'Mobile Safari',
     '3',
-    'iPhone',
+    'iOS',
     '2.0',
   ],
   [
@@ -1660,7 +1660,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16',
     'Mobile Safari',
     '4',
-    'iPhone',
+    'iOS',
     '3.0',
   ],
   [
@@ -1668,7 +1668,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/531.22.7',
     'Mobile Safari',
     '4',
-    'iPhone',
+    'iOS',
     '4.0',
   ],
   [
@@ -1676,15 +1676,15 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_2_1 like Mac OS X; da-dk) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5',
     'Mobile Safari',
     '5',
-    'iPhone',
+    'iOS',
     '4.2.1',
   ],
   [
     'iPhone - iOS 5_1_1 - Chrome (crios) 19.0.1084.60',
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 5_1_1 like Mac OS X; da-dk) AppleWebKit/534.46.0 (KHTML, like Gecko) CriOS/19.0.1084.60 Mobile/9B206 Safari/7534.48.3',
-    'Chrome Mobile',
+    'Chrome',
     '19',
-    'iPhone',
+    'iOS',
     '5.1.1',
   ],
   [
@@ -1700,7 +1700,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53',
     'Mobile Safari',
     '7',
-    'iPhone',
+    'iOS',
     '7.1.2',
   ],
   [
@@ -1708,7 +1708,7 @@ var browsers = [
     'Mozilla/5.0 (iPod; U; CPU iPhone OS 2_2_1 like Mac OS X; en-us) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5H11a Safari/525.20',
     'Mobile Safari',
     '3',
-    'iPhone',
+    'iOS',
     '2.2.1',
   ],
   [
@@ -1716,7 +1716,7 @@ var browsers = [
     'Mozilla/5.0 (iPod; U; CPU iPhone OS 3_1_1 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Mobile/7C145',
     'WebKit',
     '528',
-    'iPhone',
+    'iOS',
     '3.1.1',
   ],
   [
@@ -1724,7 +1724,7 @@ var browsers = [
     'Mozilla/5.0 (iPod touch; CPU iPhone OS 7_1 like Mac OS X) AppleWebKit/537.51.2 (KHTML like Gecko) Version/7.0 Mobile/11D167 Safari/123E71C',
     'Mobile Safari',
     '7',
-    'iPhone',
+    'iOS',
     '7.1',
   ],
   [
@@ -1738,8 +1738,8 @@ var browsers = [
   [
     'Nexus 5 - Android 4.4 - AppleWebKit/536.23',
     'Mozilla/5.0 (Linux; Android 4.4; Nexus 5 Build/BuildID) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36',
-    'Chrome Mobile',
-    '30',
+    'Android Browser',
+    '4',
     'Android',
     '4.4',
   ],
@@ -1773,7 +1773,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/125.2 (KHTML, like Gecko) Safari/125.8',
     'Safari',
     '1',
-    'Mac',
+    'Mac OS',
     undefined,
   ],
   [
@@ -1781,7 +1781,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; fr-fr) AppleWebKit/312.5 (KHTML, like Gecko) Safari/312.3',
     'Safari',
     '1',
-    'Mac',
+    'Mac OS',
     undefined,
   ],
   [
@@ -1789,7 +1789,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/418.8 (KHTML, like Gecko) Safari/419.3',
     'Safari',
     '2',
-    'Mac',
+    'Mac OS',
     undefined,
   ],
   [
@@ -1805,7 +1805,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; en-us) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10',
     'Safari',
     '4',
-    'Mac',
+    'Mac OS',
     '10.6.2',
   ],
   [
@@ -1821,7 +1821,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; U; CPU OS 4_2_1 like Mac OS X; ja-jp) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5',
     'Mobile Safari',
     '5',
-    'iPad',
+    'iOS',
     '4.2.1',
   ],
   [
@@ -1837,7 +1837,7 @@ var browsers = [
     'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_2_1 like Mac OS X; da-dk) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5',
     'Mobile Safari',
     '5',
-    'iPhone',
+    'iOS',
     '4.2.1',
   ],
   [
@@ -1845,7 +1845,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_5; de-de) AppleWebKit/534.15 (KHTML, like Gecko) Version/5.0.3 Safari/533.19.4',
     'Safari',
     '5',
-    'Mac',
+    'Mac OS',
     '10.6.5',
   ],
   [
@@ -1861,7 +1861,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_6; en-us) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27',
     'Safari',
     '5',
-    'Mac',
+    'Mac OS',
     '10.6.6',
   ],
   [
@@ -1869,7 +1869,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_7; en-us) AppleWebKit/534.20.8 (KHTML, like Gecko) Version/5.1 Safari/534.20.8',
     'Safari',
     '5',
-    'Mac',
+    'Mac OS',
     '10.7',
   ],
   [
@@ -1877,7 +1877,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3) AppleWebKit/534.55.3 (KHTML, like Gecko) Version/5.1.3 Safari/534.53.10',
     'Safari',
     '5',
-    'Mac',
+    'Mac OS',
     '10.7.3',
   ],
   [
@@ -1885,7 +1885,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2',
     'Safari',
     '5',
-    'Mac',
+    'Mac OS',
     '10.6.8',
   ],
   [
@@ -1893,7 +1893,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/536.26.17 (KHTML like Gecko) Version/6.0.2 Safari/536.26.17',
     'Safari',
     '6',
-    'Mac',
+    'Mac OS',
     '10.7.5',
   ],
   [
@@ -1901,7 +1901,7 @@ var browsers = [
     'Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25',
     'Mobile Safari',
     '6',
-    'iPad',
+    'iOS',
     '6.0',
   ],
   [
@@ -1917,7 +1917,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.78.1 (KHTML like Gecko) Version/7.0.6 Safari/537.78.1',
     'Safari',
     '7',
-    'Mac',
+    'Mac OS',
     '10.9.5',
   ],
   [
@@ -1933,7 +1933,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A',
     'Safari',
     '7',
-    'Mac',
+    'Mac OS',
     '10.9.3',
   ],
   [
@@ -1941,7 +1941,7 @@ var browsers = [
     'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/125.2 (KHTML, like Gecko) Safari/85.8',
     'Safari',
     '1',
-    'Mac',
+    'Mac OS',
     undefined,
   ],
   [
@@ -2024,7 +2024,7 @@ var browsers = [
   ['WDG (X)HTML Validator (1.6.2)', 'WDG_Validator/1.6.2', undefined, undefined, undefined, undefined],
   ['WDG CSS Validator (1.2.2)', 'CSSCheck/1.2.2', undefined, undefined, undefined, undefined],
   ['Web Downloader 6.9', 'Web Downloader/6.9', undefined, undefined, undefined, undefined],
-  ['Wget 1.9 (Redhat)', 'Wget/1.9 cvs-stable (Red Hat modified)', undefined, undefined, undefined, undefined],
+  ['Wget 1.9 (Redhat)', 'Wget/1.9 cvs-stable (Red Hat modified)', undefined, undefined, 'Red Hat', 'modified'],
   ['Wget 1.9.1', 'Wget/1.9.1', undefined, undefined, undefined, undefined],
   [
     'X10 - Android 1.6 - Safari 525.20.1',
