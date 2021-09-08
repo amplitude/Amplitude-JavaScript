@@ -1,3 +1,10 @@
+# [8.6.0](https://github.com/amplitude/amplitude-javascript/compare/v8.5.0...v8.6.0) (2021-09-08)
+
+
+### Features
+
+* Mobile device model support ([#425](https://github.com/amplitude/amplitude-javascript/issues/425)) ([d06f5c6](https://github.com/amplitude/amplitude-javascript/commit/d06f5c61797434aa4bbf65ddd3a6e7b67c511064))
+
 # [8.5.0](https://github.com/amplitude/amplitude-javascript/compare/v8.4.0...v8.5.0) (2021-08-13)
 
 
