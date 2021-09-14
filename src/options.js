@@ -96,5 +96,6 @@ export default {
   uploadBatchSize: 100,
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
   },
 };
