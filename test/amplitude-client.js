@@ -855,6 +855,18 @@ describe('AmplitudeClient', function () {
 
       amplitude.cookieStorage.options.restore();
     });
+
+    it('should set observer plan options', function () {
+      var amplitude = new AmplitudeClient('observer plan');
+      var plan = {
+        branch: 'my-feature-branch',
+        source: 'web',
+        version: '1.0.0',
+      };
+      amplitude.init(apiKey, null, { plan: plan });
+
+      assert.deepEqual(amplitude.options.plan, plan);
+    });
   });
 
   describe('runQueuedFunctions', function () {

@@ -1269,6 +1269,13 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     eventProperties = eventProperties || {};
     groups = groups || {};
     groupProperties = groupProperties || {};
+    const plan = _isObservePlanSet(this)
+      ? {
+          branch: this.options.plan.branch || null,
+          source: this.options.plan.source || null,
+          version: this.options.plan.version || null,
+        }
+      : null;
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId,
@@ -1295,6 +1302,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
       groups: utils.truncate(utils.validateGroups(groups)),
       group_properties: utils.truncate(utils.validateProperties(groupProperties)),
       user_agent: this._userAgent,
+      plan: plan,
     };
 
     if (eventType === Constants.IDENTIFY_EVENT || eventType === Constants.GROUP_IDENTIFY_EVENT) {
@@ -1315,6 +1323,10 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
   } catch (e) {
     utils.log.error(e);
   }
+};
+
+var _isObservePlanSet = function _isObservePlanSet(scope) {
+  return scope.options.plan && (scope.options.plan.source || scope.options.plan.branch || scope.options.plan.version);
 };
 
 var _shouldTrackField = function _shouldTrackField(scope, field) {
