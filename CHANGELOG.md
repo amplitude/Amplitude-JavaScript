@@ -1,3 +1,10 @@
+# [8.7.0](https://github.com/amplitude/amplitude-javascript/compare/v8.6.0...v8.7.0) (2021-09-16)
+
+
+### Features
+
+* add cross origin resource policy header ([#426](https://github.com/amplitude/amplitude-javascript/issues/426)) ([709078f](https://github.com/amplitude/amplitude-javascript/commit/709078f53d0dd2cecb53e4c391caf9b9275e76d5))
+
 # [8.6.0](https://github.com/amplitude/amplitude-javascript/compare/v8.5.0...v8.6.0) (2021-09-08)
 
 
