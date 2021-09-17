@@ -1269,13 +1269,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     eventProperties = eventProperties || {};
     groups = groups || {};
     groupProperties = groupProperties || {};
-    const plan = _isObservePlanSet(this)
-      ? {
-          branch: this.options.plan.branch || undefined,
-          source: this.options.plan.source || undefined,
-          version: this.options.plan.version || undefined,
-        }
-      : undefined;
+
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId,
@@ -1302,8 +1296,15 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
       groups: utils.truncate(utils.validateGroups(groups)),
       group_properties: utils.truncate(utils.validateProperties(groupProperties)),
       user_agent: this._userAgent,
-      plan: plan,
     };
+
+    if (_isObservePlanSet(this)) {
+      event.plan = {
+        branch: this.options.plan.branch || undefined,
+        source: this.options.plan.source || undefined,
+        version: this.options.plan.version || undefined,
+      };
+    }
 
     if (eventType === Constants.IDENTIFY_EVENT || eventType === Constants.GROUP_IDENTIFY_EVENT) {
       this._unsentIdentifys.push({ event, callback, errorCallback });
