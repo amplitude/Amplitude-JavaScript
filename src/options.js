@@ -28,7 +28,10 @@ import language from './language';
  * @property {boolean} [optOut=`false`] -  Whether or not to disable tracking for the current user.
  * @property {function} [onError=`() => {}`] - Function to call on error.
  * @property {function} [onExitPage=`() => {}`] - Function called when the user exits the browser. Useful logging on page exit.
- * @property {Object} [plan = {branch: '', source: '', version: ''}] - Observe plan information.
+ * @property {Object} [plan] Tracking plan properties
+ * @property {string} [plan.branch] The tracking plan branch name e.g. "main"
+ * @property {string} [plan.source] The tracking plan source e.g. "web"
+ * @property {string} [plan.version] The tracking plan version e.g. "1", "15"
  * @property {string} [platform=`Web`] -  Platform device is running on. Defaults to `Web` (browser, including mobile browsers).
  * @property {number} [savedMaxCount=`1000`] -  Maximum number of events to save in localStorage. If more events are logged while offline, then old events are removed.
  * @property {boolean} [saveEvents=`true`] -  If `true`, saves events to localStorage and removes them upon successful upload. *Note: Without saving events, events may be lost if the user navigates to another page before the events are uploaded.*
