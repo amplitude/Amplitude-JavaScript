@@ -1271,11 +1271,11 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     groupProperties = groupProperties || {};
     const plan = _isObservePlanSet(this)
       ? {
-          branch: this.options.plan.branch || null,
-          source: this.options.plan.source || null,
-          version: this.options.plan.version || null,
+          branch: this.options.plan.branch || undefined,
+          source: this.options.plan.source || undefined,
+          version: this.options.plan.version || undefined,
         }
-      : null;
+      : undefined;
     var event = {
       device_id: this.options.deviceId,
       user_id: this.options.userId,
