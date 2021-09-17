@@ -1326,7 +1326,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
   }
 };
 
-var _isObservePlanSet = function _isObservePlanSet(scope) {
+const _isObservePlanSet = function _isObservePlanSet(scope) {
   return scope.options.plan && (scope.options.plan.source || scope.options.plan.branch || scope.options.plan.version);
 };
 
