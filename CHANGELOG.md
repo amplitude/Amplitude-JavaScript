@@ -1,3 +1,10 @@
+# [8.8.0](https://github.com/amplitude/amplitude-javascript/compare/v8.7.0...v8.8.0) (2021-09-22)
+
+
+### Features
+
+* add observe plan options ([#427](https://github.com/amplitude/amplitude-javascript/issues/427)) ([529ad88](https://github.com/amplitude/amplitude-javascript/commit/529ad88748d17ade999a9dee0c0d17b6c7dbae3e))
+
 # [8.7.0](https://github.com/amplitude/amplitude-javascript/compare/v8.6.0...v8.7.0) (2021-09-16)
 
 
