@@ -63,6 +63,6 @@ jobs:
 
       - name: Publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           yarn publish --${{ env.PACKAGE_VERSION }} --tag ${{ env.DIST_TAG }} --no-git-tag-version
