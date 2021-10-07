@@ -67,4 +67,4 @@ jobs:
           cat package.json
           yarn publish --${{ env.PACKAGE_VERSION }} --tag ${{ env.DIST_TAG }} --no-git-tag-version
         env:
-          NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
