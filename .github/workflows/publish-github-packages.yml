@@ -33,7 +33,7 @@ jobs:
       DIST_TAG: ${{ github.event.inputs.distTag }}
     strategy:
       matrix:
-        node-version: [ 14.x ]
+        node-version: [ 12.x ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -62,7 +62,6 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Publish
+        run: yarn publish --${{ env.PACKAGE_VERSION }} --tag ${{ env.DIST_TAG }} --no-git-tag-version
         env:
           NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          yarn publish --${{ env.PACKAGE_VERSION }} --tag ${{ env.DIST_TAG }} --no-git-tag-version
