@@ -64,7 +64,7 @@ jobs:
       - name: Publish
         run: |
           cat package.json
-          yarn config set registry https://npm.pkg.github.com
+          yarn config set registry https://npm.pkg.github.com/@amplitude
           yarn config list
           yarn publish --${{ env.PACKAGE_VERSION }} --tag ${{ env.DIST_TAG }} --no-git-tag-version
         env:
