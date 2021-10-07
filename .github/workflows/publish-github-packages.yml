@@ -63,9 +63,8 @@ jobs:
 
       - name: Publish
         run: |
+          sed -i 's,"name": "amplitude-js","name": "@amplitude/amplitude-js",' package.json
           cat package.json
-          yarn config set registry https://npm.pkg.github.com/@amplitude
-          yarn config list
           yarn publish --${{ env.PACKAGE_VERSION }} --tag ${{ env.DIST_TAG }} --no-git-tag-version
         env:
           NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
