@@ -1,7 +1,7 @@
 {
   "name": "@suttj/amplitude-js",
   "author": "Jack Sutton <jack@momenthouse.com>",
-  "version": "8.9.0",
+  "version": "9.0.0",
   "license": "MIT",
   "description": "Javascript library for Amplitude Analytics",
   "keywords": [

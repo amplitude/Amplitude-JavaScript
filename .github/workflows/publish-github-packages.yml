@@ -1,16 +1,12 @@
 name: Publish to Github Packages
 
 on:
-  workflow_dispatch:
-    inputs:
-      packageVersion:
-        description: "The version to publish (e.g. prerelease, patch, major, new-version 1.2.3)"
-        required: true
-        default: "prerelease"
-      distTag:
-        description: "The dist-tag to publish (e.g. latest, beta)"
-        required: true
-        default: "latest"
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   authorize:
