@@ -1,6 +1,7 @@
 var getLanguage = function () {
   return (
-    (navigator && ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage)) ||
+    (typeof navigator !== 'undefined' &&
+      ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage)) ||
     ''
   );
 };

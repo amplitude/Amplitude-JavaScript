@@ -1,7 +1,7 @@
 // Entry point
 import Amplitude from './amplitude';
 
-const old = window.amplitude || {};
+const old = (typeof window !== 'undefined' && window.amplitude) || {};
 const newInstance = new Amplitude();
 newInstance._q = old._q || [];
 
