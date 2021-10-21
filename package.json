@@ -1,7 +1,7 @@
 {
-  "name": "amplitude-js",
-  "author": "Amplitude <support@amplitude.com>",
-  "version": "8.8.0",
+  "name": "@suttj/amplitude-js",
+  "author": "Jack Sutton <jack@momenthouse.com>",
+  "version": "8.9.0",
   "license": "MIT",
   "description": "Javascript library for Amplitude Analytics",
   "keywords": [
@@ -10,7 +10,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/amplitude/amplitude-javascript.git"
+    "url": "https://github.com/SuttJ/Amplitude-JavaScript.git"
   },
   "main": "amplitude.umd.js",
   "dependencies": {
