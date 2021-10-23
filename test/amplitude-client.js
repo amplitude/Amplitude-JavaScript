@@ -10,6 +10,7 @@ import queryString from 'query-string';
 import Identify from '../src/identify.js';
 import constants from '../src/constants.js';
 import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
+import { AmplitudeServerZone } from '../src/server-zone.js';
 
 // maintain for testing backwards compatability
 describe('AmplitudeClient', function () {
@@ -4087,6 +4088,32 @@ describe('AmplitudeClient', function () {
       assert.equal(amplitude._unsentEvents.length, 1);
       assert.isFalse(callback.calledOnce);
       assert.isTrue(errCallback.calledOnce);
+    });
+  });
+
+  describe('eu dynamic configuration', function () {
+    it('EU serverZone should set apiEndpoint to EU', function () {
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+      amplitude.init(apiKey, null, { serverZone: AmplitudeServerZone.EU, serverZoneBasedApi: true });
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_EU_URL);
+    });
+
+    it('EU serverZone without serverZoneBasedApi set should not affect apiEndpoint', function () {
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+      amplitude.init(apiKey, null, { serverZone: AmplitudeServerZone.EU, serverZoneBasedApi: false });
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+    });
+
+    it('EU serverZone with dynamic configuration should set apiEndpoint to EU', function () {
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+      amplitude.init(apiKey, null, {
+        serverZone: AmplitudeServerZone.EU,
+        serverZoneBasedApi: false,
+        useDynamicConfig: true,
+      });
+      server.respondWith('{"ingestionEndpoint": "api.eu.amplitude.com"}');
+      server.respond();
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_EU_URL);
     });
   });
 });

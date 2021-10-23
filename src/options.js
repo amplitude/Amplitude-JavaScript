@@ -1,5 +1,6 @@
 import Constants from './constants';
 import language from './language';
+import { AmplitudeServerZone } from './server-zone';
 
 /**
  * Options used when initializing Amplitude
@@ -46,9 +47,12 @@ import language from './language';
  * @property {string} [unsentIdentifyKey=`amplitude_unsent_identify`] - localStorage key that stores unsent identifies.
  * @property {number} [uploadBatchSize=`100`] -  The maximum number of events to send to the server per request.
  * @property {Object} [headers=`{ 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }`] - Headers attached to an event(s) upload network request. Custom header properties are merged with this object.
+ * @property {string} [serveZone] - For server zone related configuration, used for server api endpoint and dynamic configuration.
+ * @property {boolean} [useDynamicConfig] - Enable dynamic configuration to find best server url for user.
+ * @property {boolean} [serverZoneBasedApi] - To update api endpoint with serverZone change or not. For data residency, recommend to enable it unless using own proxy server.
  */
 export default {
-  apiEndpoint: 'api.amplitude.com',
+  apiEndpoint: Constants.EVENT_LOG_URL,
   batchEvents: false,
   cookieExpiration: 365, // 12 months is for GDPR compliance
   cookieName: 'amplitude_id', // this is a deprecated option
@@ -107,4 +111,7 @@ export default {
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     'Cross-Origin-Resource-Policy': 'cross-origin',
   },
+  serverZone: AmplitudeServerZone.US,
+  useDynamicConfig: false,
+  serverZoneBasedApi: true,
 };
