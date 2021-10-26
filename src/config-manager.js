@@ -14,7 +14,10 @@ class ConfigManager {
   }
 
   refresh(serverZone, forceHttps, callback) {
-    const protocol = forceHttps ? 'https' : 'https:' === window.location.protocol ? 'https' : 'http';
+    let protocol = 'https';
+    if (!forceHttps && 'https:' !== window.location.protocol) {
+      protocol = 'http';
+    }
     const dynamicConfigUrl = protocol + '://' + getDynamicConfigApi(serverZone);
     const self = this;
     const isIE = window.XDomainRequest ? true : false;

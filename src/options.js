@@ -47,7 +47,7 @@ import { AmplitudeServerZone } from './server-zone';
  * @property {string} [unsentIdentifyKey=`amplitude_unsent_identify`] - localStorage key that stores unsent identifies.
  * @property {number} [uploadBatchSize=`100`] -  The maximum number of events to send to the server per request.
  * @property {Object} [headers=`{ 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }`] - Headers attached to an event(s) upload network request. Custom header properties are merged with this object.
- * @property {string} [serveZone] - For server zone related configuration, used for server api endpoint and dynamic configuration.
+ * @property {string} [serverZone] - For server zone related configuration, used for server api endpoint and dynamic configuration.
  * @property {boolean} [useDynamicConfig] - Enable dynamic configuration to find best server url for user.
  * @property {boolean} [serverZoneBasedApi] - To update api endpoint with serverZone change or not. For data residency, recommend to enable it unless using own proxy server.
  */
