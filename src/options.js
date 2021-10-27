@@ -113,5 +113,5 @@ export default {
   },
   serverZone: AmplitudeServerZone.US,
   useDynamicConfig: false,
-  serverZoneBasedApi: true,
+  serverZoneBasedApi: false,
 };
