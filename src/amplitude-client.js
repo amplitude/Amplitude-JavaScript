@@ -18,6 +18,8 @@ import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
 import getHost from './get-host';
 import baseCookie from './base-cookie';
+import { getEventLogApi } from './server-zone';
+import ConfigManager from './config-manager';
 
 /**
  * AmplitudeClient SDK API - instance constructor.
@@ -78,7 +80,6 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
   try {
     _parseConfig(this.options, opt_config);
-
     if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON) {
       prototypeJsFix();
       utils.log.warn(
@@ -89,6 +90,11 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     if (this.options.cookieName !== DEFAULT_OPTIONS.cookieName) {
       utils.log.warn('The cookieName option is deprecated. We will be ignoring it for newer cookies');
     }
+
+    if (this.options.serverZoneBasedApi) {
+      this.options.apiEndpoint = getEventLogApi(this.options.serverZone);
+    }
+    this._refreshDynamicConfig();
 
     this.options.apiKey = apiKey;
     this._storageSuffix =
@@ -1866,6 +1872,21 @@ AmplitudeClient.prototype.enableTracking = function enableTracking() {
   this._initializationDeferred = false;
   _saveCookieData(this);
   this.runQueuedFunctions();
+};
+
+/**
+ * Find best server url if choose to enable dynamic configuration.
+ */
+AmplitudeClient.prototype._refreshDynamicConfig = function _refreshDynamicConfig() {
+  if (this.options.useDynamicConfig) {
+    ConfigManager.refresh(
+      this.options.serverZone,
+      this.options.forceHttps,
+      function () {
+        this.options.apiEndpoint = ConfigManager.ingestionEndpoint;
+      }.bind(this),
+    );
+  }
 };
 
 export default AmplitudeClient;

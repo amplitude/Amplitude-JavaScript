@@ -5,6 +5,10 @@ export default {
   MAX_PROPERTY_KEYS: 1000,
   IDENTIFY_EVENT: '$identify',
   GROUP_IDENTIFY_EVENT: '$groupidentify',
+  EVENT_LOG_URL: 'api.amplitude.com',
+  EVENT_LOG_EU_URL: 'api.eu.amplitude.com',
+  DYNAMIC_CONFIG_URL: 'regionconfig.amplitude.com',
+  DYNAMIC_CONFIG_EU_URL: 'regionconfig.eu.amplitude.com',
 
   // localStorageKeys
   LAST_EVENT_ID: 'amplitude_lastEventId',
