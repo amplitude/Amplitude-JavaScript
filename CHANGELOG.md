@@ -1,3 +1,10 @@
+# [8.9.0](https://github.com/amplitude/amplitude-javascript/compare/v8.8.0...v8.9.0) (2021-10-28)
+
+
+### Features
+
+* eu dynamic configuration support ([#439](https://github.com/amplitude/amplitude-javascript/issues/439)) ([0618a90](https://github.com/amplitude/amplitude-javascript/commit/0618a901ab0209a44d05eacd82d1a6cbabf6a945))
+
 # [8.8.0](https://github.com/amplitude/amplitude-javascript/compare/v8.7.0...v8.8.0) (2021-09-22)
 
 
