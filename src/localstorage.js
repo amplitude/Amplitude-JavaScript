@@ -26,7 +26,7 @@ if (BUILD_COMPAT_LOCAL_STORAGE) {
 
   if (windowLocalStorageAvailable()) {
     localStorage = window.localStorage;
-  } else if (window.globalStorage) {
+  } else if (typeof window !== 'undefined' && window.globalStorage) {
     // Firefox 2-3 use globalStorage
     // See https://developer.mozilla.org/en/dom/storage#globalStorage
     try {
