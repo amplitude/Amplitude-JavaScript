@@ -1,3 +1,10 @@
+## [8.9.1](https://github.com/amplitude/amplitude-javascript/compare/v8.9.0...v8.9.1) (2021-11-02)
+
+
+### Bug Fixes
+
+* allow amplitude to be imported/required during SSR ([#436](https://github.com/amplitude/amplitude-javascript/issues/436)) ([ff7d8ef](https://github.com/amplitude/amplitude-javascript/commit/ff7d8ef156d0a59dba26d9e637c6b15fb3079479))
+
 # [8.9.0](https://github.com/amplitude/amplitude-javascript/compare/v8.8.0...v8.9.0) (2021-10-28)
 
 
