@@ -36,7 +36,7 @@ Previously used amplitude-js and looking to migrate to @amplitude/react-native?
 Please visit [Amplitude-Node](https://github.com/amplitude/Amplitude-Node) for our Node SDK.
 
 ## Changelog
-Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
+Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/main/CHANGELOG.md) to view the JavaScript SDK Changelog.
 
 ## Upgrading Major Versions and Breaking Changes #
 
