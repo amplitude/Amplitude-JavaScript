@@ -44,6 +44,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._sending = false;
   this._updateScheduled = false;
   this._onInit = [];
+  this._onNewSession = [];
 
   // event meta data
   this._eventId = 0;
@@ -171,6 +172,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
         if (this.options.unsetParamsReferrerOnNewSession) {
           this._unsetUTMParams();
+        }
+        for (let i = 0; i < this._onNewSession.length; i++) {
+          this._onNewSession[i](this);
         }
         this._newSession = true;
         this._sessionId = now;
@@ -478,6 +482,10 @@ AmplitudeClient.prototype.onInit = function (callback) {
     this._onInit.push(callback);
   }
 };
+
+AmplitudeClient.prototype.onNewSessionStart = function (callback) {
+  this._onNewSession.push(callback)
+}
 
 /**
  * Returns the id of the current session.
