@@ -4116,4 +4116,37 @@ describe('AmplitudeClient', function () {
       assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_EU_URL);
     });
   });
+
+  describe('custom library options', function () {
+    beforeEach(function () {
+      reset();
+    });
+    it('should use default library options', function () {
+      amplitude.init(apiKey);
+      amplitude.logEvent('Event Type 1');
+      const { name, version } = JSON.parse(queryString.parse(server.requests[0].requestBody).e)[0].library;
+      assert.equal(name, amplitude.options.library.name);
+      assert.equal(version, amplitude.options.library.version);
+    });
+
+    it('should change library when passed in options', function () {
+      const customLibrary = { name: 'test-library', version: '1.0-test' };
+      amplitude.init(apiKey, null, { library: customLibrary });
+      amplitude.logEvent('Event Type 1');
+      const { name, version } = JSON.parse(queryString.parse(server.requests[0].requestBody).e)[0].library;
+      assert.equal(name, 'test-library');
+      assert.equal(version, '1.0-test');
+    });
+
+    it('should change library when set with method', function () {
+      amplitude.init(apiKey);
+      amplitude.setLibrary('test-library', '1.0-test');
+      amplitude.logEvent('Event Type 2');
+
+      const { name, version } = JSON.parse(queryString.parse(server.requests[0].requestBody).e)[0].library;
+
+      assert.equal(name, 'test-library');
+      assert.equal(version, '1.0-test');
+    });
+  });
 });
