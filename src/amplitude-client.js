@@ -14,7 +14,6 @@ import UAParser from '@amplitude/ua-parser-js'; // Identifying device and browse
 import utils from './utils';
 import UUID from './uuid';
 import base64Id from './base64Id';
-
 import DEFAULT_OPTIONS from './options';
 import getHost from './get-host';
 import baseCookie from './base-cookie';
@@ -1849,7 +1848,7 @@ AmplitudeClient.prototype.__VERSION__ = function getVersion() {
  * @param {string} version - Custom library version
  */
 AmplitudeClient.prototype.setLibrary = function setLibrary(name, version) {
-  return (this.options.library = { name, version });
+  this.options.library = { name: name, version: version };
 };
 
 /**
