@@ -1,6 +1,7 @@
 import Constants from './constants';
 import language from './language';
 import { AmplitudeServerZone } from './server-zone';
+import { version as libraryVersion } from '../package.json';
 
 /**
  * Options used when initializing Amplitude
@@ -70,6 +71,10 @@ export default {
   includeReferrer: false,
   includeUtm: false,
   language: language.getLanguage(),
+  library: {
+    name: 'amplitude-js',
+    version: libraryVersion,
+  },
   logLevel: 'WARN',
   logAttributionCapturedEvent: false,
   optOut: false,
