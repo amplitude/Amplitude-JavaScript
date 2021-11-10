@@ -1841,6 +1841,13 @@ if (BUILD_COMPAT_2_0) {
 AmplitudeClient.prototype.__VERSION__ = function getVersion() {
   return this.options.library.version;
 };
+
+/**
+ * Sets the library name and version. Default is `amplitude-js` and the version defined in package.json. Used if you're building another library on top of amplitude-js and want a custom data source value
+ * @public
+ * @param {string} name - Custom library name
+ * @param {string} version - Custom library version
+ */
 AmplitudeClient.prototype.setVersion = function setVersion(name, version) {
   return (this.options.library = { name, version });
 };
