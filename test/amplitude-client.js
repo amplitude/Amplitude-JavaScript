@@ -4125,7 +4125,7 @@ describe('AmplitudeClient', function () {
       amplitude.init(apiKey);
       amplitude.logEvent('Event Type 1');
       const { name, version } = JSON.parse(queryString.parse(server.requests[0].requestBody).e)[0].library;
-      assert.equal(name, amplitude.options.library.name);
+      assert.equal(name, 'amplitude-js');
       assert.equal(version, amplitude.options.library.version);
     });
 
