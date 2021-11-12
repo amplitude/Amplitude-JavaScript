@@ -1,6 +1,7 @@
 import Constants from './constants';
 import language from './language';
 import { AmplitudeServerZone } from './server-zone';
+import { version as libraryVersion } from '../package.json';
 
 /**
  * Options used when initializing Amplitude
@@ -24,6 +25,7 @@ import { AmplitudeServerZone } from './server-zone';
  * @property {boolean} [includeReferrer=`false`] -  If `true`, captures the referrer and referring_domain for each session, as well as the user's initial_referrer and initial_referring_domain via a setOnce operation.
  * @property {boolean} [includeUtm=`false`] -  If `true`, finds UTM parameters in the query string or the _utmz cookie, parses, and includes them as user properties on all events uploaded. This also captures initial UTM parameters for each session via a setOnce operation.
  * @property {string} [language=The language determined by the browser] -  Custom language to set.
+ * @property {Object} [library=`{ name: 'amplitude-js', version: packageJsonVersion }`] -  Values for the library version
  * @property {string} [logLevel=`WARN`] -  Level of logs to be printed in the developer console. Valid values are 'DISABLE', 'ERROR', 'WARN', 'INFO'. To learn more about the different options, see below.
  * @property {boolean} [logAttributionCapturedEvent=`false`] - If `true`, the SDK will log an Amplitude event anytime new attribution values are captured from the user. **Note: These events count towards your event volume.** Event name being logged: [Amplitude] Attribution Captured. Event Properties that can be logged: `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `referrer`, `referring_domain`, `gclid`, `fbclid`. For UTM properties to be logged, `includeUtm` must be set to `true`. For the `referrer` and `referring_domain` properties to be logged, `includeReferrer` must be set to `true`. For the `gclid` property to be logged, `includeGclid` must be set to `true`. For the `fbclid` property to be logged, `includeFbclid` must be set to `true`.
  * @property {boolean} [optOut=`false`] -  Whether or not to disable tracking for the current user.
@@ -70,6 +72,10 @@ export default {
   includeReferrer: false,
   includeUtm: false,
   language: language.getLanguage(),
+  library: {
+    name: 'amplitude-js',
+    version: libraryVersion,
+  },
   logLevel: 'WARN',
   logAttributionCapturedEvent: false,
   optOut: false,

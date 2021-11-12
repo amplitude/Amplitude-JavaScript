@@ -14,7 +14,6 @@ import UAParser from '@amplitude/ua-parser-js'; // Identifying device and browse
 import utils from './utils';
 import UUID from './uuid';
 import base64Id from './base64Id';
-import { version } from '../package.json';
 import DEFAULT_OPTIONS from './options';
 import getHost from './get-host';
 import baseCookie from './base-cookie';
@@ -1294,10 +1293,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
       event_properties: utils.truncate(utils.validateProperties(eventProperties)),
       user_properties: utils.truncate(utils.validateProperties(userProperties)),
       uuid: UUID(),
-      library: {
-        name: 'amplitude-js',
-        version: version,
-      },
+      library: this.options.library,
       sequence_number: sequenceNumber, // for ordering events and identifys
       groups: utils.truncate(utils.validateGroups(groups)),
       group_properties: utils.truncate(utils.validateProperties(groupProperties)),
@@ -1841,7 +1837,19 @@ if (BUILD_COMPAT_2_0) {
  * @returns {number} version number
  * @example var amplitudeVersion = amplitude.__VERSION__;
  */
-AmplitudeClient.prototype.__VERSION__ = version;
+AmplitudeClient.prototype.__VERSION__ = function getVersion() {
+  return this.options.library.version;
+};
+
+/**
+ * Sets the library name and version. Default is `amplitude-js` and the version defined in package.json. Used if you're building another library on top of amplitude-js and want a custom data source value
+ * @public
+ * @param {string} name - Custom library name
+ * @param {string} version - Custom library version
+ */
+AmplitudeClient.prototype.setLibrary = function setLibrary(name, version) {
+  this.options.library = { name: name, version: version };
+};
 
 /**
  * Determines whether or not to push call to this._q or invoke it
