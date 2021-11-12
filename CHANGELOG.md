@@ -1,3 +1,10 @@
+# [8.10.0](https://github.com/amplitude/amplitude-javascript/compare/v8.9.1...v8.10.0) (2021-11-12)
+
+
+### Features
+
+* custom library options and setter ([#443](https://github.com/amplitude/amplitude-javascript/issues/443)) ([dce0eac](https://github.com/amplitude/amplitude-javascript/commit/dce0eac92861f4c0efa4d3561f95e887e61e3874))
+
 ## [8.9.1](https://github.com/amplitude/amplitude-javascript/compare/v8.9.0...v8.9.1) (2021-11-02)
 
 
