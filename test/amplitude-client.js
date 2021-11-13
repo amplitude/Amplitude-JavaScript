@@ -2840,6 +2840,18 @@ describe('AmplitudeClient', function () {
     });
   });
 
+  describe('logEvent with outOfSession', function () {
+    this.beforeEach(function () {
+      reset();
+    });
+
+    it('should reset the sessionId', function () {
+      amplitude.init(apiKey);
+      amplitude.logEvent('Event Type', null, null, null, true);
+      assert.equal(amplitude._sessionId, -1);
+    });
+  });
+
   describe('setEventUploadThreshold', function () {
     beforeEach(function () {
       reset();
@@ -4385,6 +4397,55 @@ describe('AmplitudeClient', function () {
       server.respondWith('success');
       server.respond();
       assert.equal(amplitude._unsentEvents.length, 0);
+    });
+  });
+
+  describe('setUserId', function () {
+    let clock, startTime;
+    beforeEach(function () {
+      reset();
+      startTime = Date.now();
+      clock = sinon.useFakeTimers(startTime);
+      amplitude.init(apiKey);
+    });
+
+    it('should not renew the session id with invalid startNewSession input', function () {
+      var amplitude = new AmplitudeClient();
+      // set up initial session
+      var sessionId = 1000;
+      clock.tick(sessionId);
+      amplitude.init(apiKey);
+      assert.equal(amplitude.getSessionId(), startTime);
+
+      amplitude.setUserId('test user', 'invalid startNewSession');
+      assert.notEqual(amplitude.getSessionId(), new Date().getTime());
+      assert.notEqual(amplitude.options.userId, 'test user');
+    });
+
+    it('should renew the session id with current timestemp', function () {
+      var amplitude = new AmplitudeClient();
+      // set up initial session
+      var sessionId = 1000;
+      clock.tick(sessionId);
+      amplitude.init(apiKey);
+      assert.equal(amplitude.getSessionId(), startTime);
+
+      amplitude.setUserId('test user', true);
+      assert.equal(amplitude.getSessionId(), new Date().getTime());
+      assert.equal(amplitude.options.userId, 'test user');
+    });
+
+    it('should continue the old session', function () {
+      var amplitude = new AmplitudeClient();
+      // set up initial session
+      var sessionId = 1000;
+      clock.tick(sessionId);
+      amplitude.init(apiKey);
+      assert.equal(amplitude.getSessionId(), startTime);
+
+      amplitude.setUserId('test user');
+      assert.equal(amplitude.getSessionId(), startTime);
+      assert.equal(amplitude.options.userId, 'test user');
     });
   });
 });

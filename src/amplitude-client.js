@@ -1435,6 +1435,7 @@ AmplitudeClient.prototype.logEvent = function logEvent(
  * @param {Amplitude~eventCallback} opt_error_callback - (optional) a callback function to run after the event logging
  * fails. The failure can be from the request being malformed or from a network failure
  * Note: the server response code and response body from the event upload are passed to the callback function.
+ * @param {boolean} outOfSession - (optional) if out of the sessioin or not
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
@@ -1443,7 +1444,7 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
   timestamp,
   opt_callback,
   opt_error_callback,
-  outOfSession,
+  outOfSession = false,
 ) {
   if (this._shouldDeferCall()) {
     return this._q.push(['logEventWithTimestamp'].concat(Array.prototype.slice.call(arguments, 0)));
