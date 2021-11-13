@@ -861,7 +861,11 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
  * @param {boolean} startNewSession - (optional) if start a new session or not
  * @example amplitudeClient.setUserId('joe@gmail.com');
  */
-AmplitudeClient.prototype.setUserId = function setUserId(userId, startNewSession) {
+AmplitudeClient.prototype.setUserId = function setUserId(userId, startNewSession = false) {
+  if (!utils.validateInput(startNewSession, 'startNewSession', 'boolean')) {
+    return;
+  }
+
   if (this._shouldDeferCall()) {
     return this._q.push(['setUserId'].concat(Array.prototype.slice.call(arguments, 0)));
   }
@@ -1248,7 +1252,6 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
   errorCallback,
   outOfSession,
 ) {
-  console.log('outOfSession in _logEvent');
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
 
   if (!eventType) {
@@ -1405,6 +1408,7 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * @param {Amplitude~eventCallback} opt_error_callback - (optional) a callback function to run after the event logging
  * fails. The failure can be from the request being malformed or from a network failure
  * Note: the server response code and response body from the event upload are passed to the callback function.
+ * @param {boolean} outOfSession - (optional) if this event is out of session or not
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
 AmplitudeClient.prototype.logEvent = function logEvent(
@@ -1412,9 +1416,8 @@ AmplitudeClient.prototype.logEvent = function logEvent(
   eventProperties,
   opt_callback,
   opt_error_callback,
-  outOfSession,
+  outOfSession = false,
 ) {
-  console.log('in logEvent', opt_callback, opt_error_callback, outOfSession);
   if (this._shouldDeferCall()) {
     return this._q.push(['logEvent'].concat(Array.prototype.slice.call(arguments, 0)));
   }
@@ -1465,11 +1468,13 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
     });
     return -1;
   }
-  /*if (!utils.validateInput(outOfSession, 'outOfSession', 'boolean')) {
+
+  if (!utils.validateInput(outOfSession, 'outOfSession', 'boolean')) {
     _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
-      reason: 'Invalid type for eventType',
+      reason: 'Invalid outOfSession value',
     });
-*/
+  }
+
   return this._logEvent(
     eventType,
     eventProperties,
@@ -1509,6 +1514,7 @@ AmplitudeClient.prototype.logEventWithGroups = function (
   groups,
   opt_callback,
   opt_error_callback,
+  outOfSession = false,
 ) {
   if (this._shouldDeferCall()) {
     return this._q.push(['logEventWithGroups'].concat(Array.prototype.slice.call(arguments, 0)));
@@ -1526,7 +1532,25 @@ AmplitudeClient.prototype.logEventWithGroups = function (
     });
     return -1;
   }
-  return this._logEvent(eventType, eventProperties, null, null, groups, null, null, opt_callback, opt_error_callback);
+
+  if (!utils.validateInput(outOfSession, 'outOfSession', 'boolean')) {
+    _logErrorsWithCallbacks(event.callback, event.errorCallback, 0, 'No request sent', {
+      reason: 'Invalid outOfSession value',
+    });
+  }
+
+  return this._logEvent(
+    eventType,
+    eventProperties,
+    null,
+    null,
+    groups,
+    null,
+    null,
+    opt_callback,
+    opt_error_callback,
+    outOfSession,
+  );
 };
 
 /**
@@ -1901,7 +1925,7 @@ AmplitudeClient.prototype.setLibraryName = function setLibraryName(libraryName) 
  * Sets the library Version.
  * @public
  * @param {string} userId - the library version.
- * @example amplitudeClient.setLibraryVersion('1.0.0);
+ * @example amplitudeClient.setLibraryVersion('1.0.0');
  */
 AmplitudeClient.prototype.setLibraryVersion = function setLibraryVersion(libraryVersion) {
   this.options.library.version = libraryVersion;
@@ -1953,7 +1977,6 @@ AmplitudeClient.prototype._refreshDynamicConfig = function _refreshDynamicConfig
   }
 };
 
-/****************************/
 /**
  * Returns the deviceId value.
  * @public
@@ -2106,4 +2129,5 @@ AmplitudeClient.prototype.uploadEvents = function uploadEvents() {
     utils.log.error(e);
   }
 };
+
 export default AmplitudeClient;
