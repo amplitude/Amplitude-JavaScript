@@ -17,7 +17,7 @@ import base64Id from './base64Id';
 import DEFAULT_OPTIONS from './options';
 import getHost from './get-host';
 import baseCookie from './base-cookie';
-import { getEventLogApi } from './server-zone';
+import { AmplitudeServerZone, getEventLogApi } from './server-zone';
 import ConfigManager from './config-manager';
 
 /**
@@ -858,15 +858,29 @@ AmplitudeClient.prototype.setDomain = function setDomain(domain) {
  * Sets an identifier for the current user.
  * @public
  * @param {string} userId - identifier to set. Can be null.
+ * @param {boolean} startNewSession - (optional) if start a new session or not
  * @example amplitudeClient.setUserId('joe@gmail.com');
  */
-AmplitudeClient.prototype.setUserId = function setUserId(userId) {
+AmplitudeClient.prototype.setUserId = function setUserId(userId, startNewSession) {
   if (this._shouldDeferCall()) {
     return this._q.push(['setUserId'].concat(Array.prototype.slice.call(arguments, 0)));
   }
 
   try {
     this.options.userId = (userId !== undefined && userId !== null && '' + userId) || null;
+    if (startNewSession) {
+      if (this.options.unsetParamsReferrerOnNewSession) {
+        this._unsetUTMParams();
+      }
+      this._newSession = true;
+      this._sessionId = new Date().getTime();
+
+      // only capture UTM params and referrer if new session
+      if (this.options.saveParamsReferrerOncePerSession) {
+        this._trackParamsAndReferrer();
+      }
+    }
+
     _saveCookieData(this);
   } catch (e) {
     utils.log.error(e);
@@ -1232,7 +1246,9 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
   timestamp,
   callback,
   errorCallback,
+  outOfSession,
 ) {
+  console.log('outOfSession in _logEvent');
   _loadCookieData(this); // reload cookie before each log event to sync event meta-data between windows and tabs
 
   if (!eventType) {
@@ -1257,7 +1273,13 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     }
     var sequenceNumber = this.nextSequenceNumber();
     var eventTime = type(timestamp) === 'number' ? timestamp : new Date().getTime();
-    if (!this._sessionId || !this._lastEventTime || eventTime - this._lastEventTime > this.options.sessionTimeout) {
+    if (outOfSession) {
+      this._sessionId = -1;
+    } else if (
+      !this._sessionId ||
+      !this._lastEventTime ||
+      eventTime - this._lastEventTime > this.options.sessionTimeout
+    ) {
       this._sessionId = eventTime;
     }
     this._lastEventTime = eventTime;
@@ -1385,11 +1407,18 @@ AmplitudeClient.prototype._limitEventsQueued = function _limitEventsQueued(queue
  * Note: the server response code and response body from the event upload are passed to the callback function.
  * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
  */
-AmplitudeClient.prototype.logEvent = function logEvent(eventType, eventProperties, opt_callback, opt_error_callback) {
+AmplitudeClient.prototype.logEvent = function logEvent(
+  eventType,
+  eventProperties,
+  opt_callback,
+  opt_error_callback,
+  outOfSession,
+) {
+  console.log('in logEvent', opt_callback, opt_error_callback, outOfSession);
   if (this._shouldDeferCall()) {
     return this._q.push(['logEvent'].concat(Array.prototype.slice.call(arguments, 0)));
   }
-  return this.logEventWithTimestamp(eventType, eventProperties, null, opt_callback, opt_error_callback);
+  return this.logEventWithTimestamp(eventType, eventProperties, null, opt_callback, opt_error_callback, outOfSession);
 };
 
 /**
@@ -1411,6 +1440,7 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
   timestamp,
   opt_callback,
   opt_error_callback,
+  outOfSession,
 ) {
   if (this._shouldDeferCall()) {
     return this._q.push(['logEventWithTimestamp'].concat(Array.prototype.slice.call(arguments, 0)));
@@ -1435,6 +1465,11 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
     });
     return -1;
   }
+  /*if (!utils.validateInput(outOfSession, 'outOfSession', 'boolean')) {
+    _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
+      reason: 'Invalid type for eventType',
+    });
+*/
   return this._logEvent(
     eventType,
     eventProperties,
@@ -1445,6 +1480,7 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
     timestamp,
     opt_callback,
     opt_error_callback,
+    outOfSession,
   );
 };
 
@@ -1852,6 +1888,26 @@ AmplitudeClient.prototype.setLibrary = function setLibrary(name, version) {
 };
 
 /**
+ * Sets the library name.
+ * @public
+ * @param {string} libraryName - the library name.
+ * @example amplitudeClient.setLibraryName('my_library_name');
+ */
+AmplitudeClient.prototype.setLibraryName = function setLibraryName(libraryName) {
+  this.options.library.name = libraryName;
+};
+
+/**
+ * Sets the library Version.
+ * @public
+ * @param {string} userId - the library version.
+ * @example amplitudeClient.setLibraryVersion('1.0.0);
+ */
+AmplitudeClient.prototype.setLibraryVersion = function setLibraryVersion(libraryVersion) {
+  this.options.library.version = libraryVersion;
+};
+
+/**
  * Determines whether or not to push call to this._q or invoke it
  * @private
  */
@@ -1897,4 +1953,157 @@ AmplitudeClient.prototype._refreshDynamicConfig = function _refreshDynamicConfig
   }
 };
 
+/****************************/
+/**
+ * Returns the deviceId value.
+ * @public
+ * @return {string} Id of current device.
+ */
+AmplitudeClient.prototype.getDeviceId = function getDeviceId() {
+  return this.options.deviceId;
+};
+
+/**
+ * Returns the userId.
+ * @public
+ * @return {string} Id of current user.
+ */
+AmplitudeClient.prototype.getUserId = function getUserId() {
+  return this.options.userId;
+};
+
+/**
+ * Set a custom session expiration time.
+ * @public
+ * @param {number} timeInMillis - session expireation time in milliseconds.
+ */
+AmplitudeClient.prototype.setMinTimeBetweenSessionsMillis = function setMinTimeBetweenSessionsMillis(timeInMillis) {
+  if (!utils.validateInput(timeInMillis, 'timeInMillis', 'number')) {
+    return;
+  }
+
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setMinTimeBetweenSessionsMillis'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+
+  try {
+    this.options.sessionTimeout = timeInMillis;
+  } catch (e) {
+    utils.log.error(e);
+  }
+};
+
+/**
+ * Sets minimum number of events to batch together per request if batchEvents is true.
+ * @public
+ * @param {number} eventUploadThreshold - The number of the event upload threshold. Default value is 30.
+ * @example amplitudeClient.setEventUploadThreshold(10);
+ */
+AmplitudeClient.prototype.setEventUploadThreshold = function setEventUploadThreshold(eventUploadThreshold) {
+  if (!utils.validateInput(eventUploadThreshold, 'eventUploadThreshold', 'number')) {
+    return;
+  }
+
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setEventUploadThreshold'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+
+  try {
+    this.options.eventUploadThreshold = eventUploadThreshold;
+  } catch (e) {
+    utils.log.error(e);
+  }
+};
+
+/**
+ * Dynamically adjust server URL
+ * @public
+ * @param {bool} useDynamicConfig - if enable dynamic config or not.
+ * @example amplitudeClient.setUseDynamicConfig(true);
+ */
+AmplitudeClient.prototype.setUseDynamicConfig = function setUseDynamicConfig(useDynamicConfig) {
+  if (!utils.validateInput(useDynamicConfig, 'useDynamicConfig', 'boolean')) {
+    return;
+  }
+
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setUseDynamicConfig'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+
+  try {
+    this.options.useDynamicConfig = useDynamicConfig;
+    this._refreshDynamicConfig();
+  } catch (e) {
+    utils.log.error(e);
+  }
+};
+
+/**
+ * Sets the server zone , used for server api endpoint and dynamic configuration..
+ * @public
+ * @param {string} serverZone - the server zone value. AmplitudeServerZone.US or AmplitudeServerZone.EU.
+ * @param {bool} serverZoneBasedApi - (optional) update api endpoint with serverZone change or not. For data residency, recommend to enable it unless using own proxy server.
+ * @example amplitudeClient.setServerZone('joe@gmail.com', true);
+ */
+AmplitudeClient.prototype.setServerZone = function setServerZone(serverZone, serverZoneBasedApi = true) {
+  if (
+    (serverZone !== AmplitudeServerZone.EU && serverZone !== AmplitudeServerZone.US) ||
+    !utils.validateInput(serverZoneBasedApi, 'serverZoneBasedApi', 'boolean')
+  ) {
+    return;
+  }
+
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setServerZone'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+
+  try {
+    this.options.serverZone = serverZone;
+    this.options.serverZoneBasedApi = serverZoneBasedApi;
+    if (serverZoneBasedApi) {
+      this.options.apiEndpoint = getEventLogApi(this.options.serverZone);
+    }
+  } catch (e) {
+    utils.log.error(e);
+  }
+};
+
+/**
+ * Sets the server URL for the request.
+ * @public
+ * @param {string} serverUrl - The value of the server URL.
+ * @example amplitudeClient.setServerUrl('api.amplitude.com');
+ */
+AmplitudeClient.prototype.setServerUrl = function setServerUrl(serverUrl) {
+  if (!utils.validateInput(serverUrl, 'serverUrl', 'string')) {
+    return;
+  }
+
+  if (this._shouldDeferCall()) {
+    return this._q.push(['setServerUrl'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+
+  try {
+    this.options.apiEndpoint = serverUrl;
+  } catch (e) {
+    utils.log.error(e);
+  }
+};
+
+/**
+ * Upload all unsent events.
+ * @public
+ * @example amplitudeClient.uploadEvents();
+ */
+AmplitudeClient.prototype.uploadEvents = function uploadEvents() {
+  if (this._shouldDeferCall()) {
+    return this._q.push(['uploadEvents'].concat(Array.prototype.slice.call(arguments, 0)));
+  }
+
+  try {
+    this.sendEvents();
+  } catch (e) {
+    utils.log.error(e);
+  }
+};
 export default AmplitudeClient;
