@@ -13,6 +13,7 @@
     "url": "https://github.com/amplitude/amplitude-javascript.git"
   },
   "main": "amplitude.umd.js",
+  "module": "amplitude.esm.js",
   "dependencies": {
     "@amplitude/ua-parser-js": "0.7.25",
     "@amplitude/utils": "^1.0.5",
