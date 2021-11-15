@@ -2114,21 +2114,4 @@ AmplitudeClient.prototype.setServerUrl = function setServerUrl(serverUrl) {
   }
 };
 
-/**
- * Upload all unsent events.
- * @public
- * @example amplitudeClient.uploadEvents();
- */
-AmplitudeClient.prototype.uploadEvents = function uploadEvents() {
-  if (this._shouldDeferCall()) {
-    return this._q.push(['uploadEvents'].concat(Array.prototype.slice.call(arguments, 0)));
-  }
-
-  try {
-    this.sendEvents();
-  } catch (e) {
-    utils.log.error(e);
-  }
-};
-
 export default AmplitudeClient;

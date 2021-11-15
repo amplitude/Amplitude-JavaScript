@@ -4379,22 +4379,6 @@ describe('AmplitudeClient', function () {
     });
   });
 
-  describe('uploadEvents', function () {
-    beforeEach(function () {
-      reset();
-    });
-
-    it('should flush the events', function () {
-      amplitude.init(apiKey, null, { batchEvents: true, eventUploadThreshold: 30 });
-      amplitude.logEvent('Event Type');
-      assert.equal(amplitude._unsentEvents.length, 1);
-      amplitude.uploadEvents();
-      server.respondWith('success');
-      server.respond();
-      assert.equal(amplitude._unsentEvents.length, 0);
-    });
-  });
-
   describe('setUserId', function () {
     let clock, startTime;
     beforeEach(function () {
