@@ -79,6 +79,7 @@
     'logEventWithGroups',
     'setSessionId',
     'resetSessionId',
+    'setLibrary',
   ];
   function setUpProxy(instance) {
     function proxyMain(fn) {
