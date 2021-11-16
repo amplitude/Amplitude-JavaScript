@@ -1,3 +1,15 @@
+# [8.11.0](https://github.com/amplitude/amplitude-javascript/compare/v8.10.0...v8.11.0) (2021-11-16)
+
+
+### Bug Fixes
+
+* add missing setLibrary API to snippet distribution ([#445](https://github.com/amplitude/amplitude-javascript/issues/445)) ([ff44909](https://github.com/amplitude/amplitude-javascript/commit/ff44909711fa2e59852b1785ee3ef99cf704a48f))
+
+
+### Features
+
+* add esm entry point ([#440](https://github.com/amplitude/amplitude-javascript/issues/440)) ([3e98d50](https://github.com/amplitude/amplitude-javascript/commit/3e98d506f003ba428ab08796d1246ccb387d1f32))
+
 # [8.10.0](https://github.com/amplitude/amplitude-javascript/compare/v8.9.1...v8.10.0) (2021-11-12)
 
 
