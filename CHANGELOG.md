@@ -1,3 +1,10 @@
+## [8.11.1](https://github.com/amplitude/amplitude-javascript/compare/v8.11.0...v8.11.1) (2021-11-16)
+
+
+### Bug Fixes
+
+* Add missing setTransport API to snippet ([#446](https://github.com/amplitude/amplitude-javascript/issues/446)) ([355a05b](https://github.com/amplitude/amplitude-javascript/commit/355a05baad6ac15b68cfe51ff95b28aff04850d0))
+
 # [8.11.0](https://github.com/amplitude/amplitude-javascript/compare/v8.10.0...v8.11.0) (2021-11-16)
 
 
