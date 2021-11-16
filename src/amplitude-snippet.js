@@ -80,6 +80,7 @@
     'setSessionId',
     'resetSessionId',
     'setLibrary',
+    'setTransport',
   ];
   function setUpProxy(instance) {
     function proxyMain(fn) {
