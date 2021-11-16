@@ -10,6 +10,7 @@ amplitude.js
 amplitude.esm.js
 amplitude.min.js
 amplitude-snippet.min.js
+amplitude-snippet-instructions.js
 amplitude-segment-snippet.min.js
 .watchmanconfig
 package-lock.json
