@@ -2046,7 +2046,7 @@ AmplitudeClient.prototype.setUseDynamicConfig = function setUseDynamicConfig(use
 };
 
 /**
- * Sets the server zone , used for server api endpoint and dynamic configuration.
+ * Sets the server zone, used for server api endpoint and dynamic configuration.
  * @public
  * @param {string} serverZone - the server zone value. AmplitudeServerZone.US or AmplitudeServerZone.EU.
  * @param {bool} serverZoneBasedApi - (optional) update api endpoint with serverZone change or not. For data residency, recommend to enable it unless using own proxy server.

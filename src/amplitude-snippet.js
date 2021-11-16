@@ -79,6 +79,14 @@
     'logEventWithGroups',
     'setSessionId',
     'resetSessionId',
+    'getDeviceId',
+    'getUserId',
+    'setMinTimeBetweenSessionsMillis',
+    'setEventUploadThreshold',
+    'setUseDynamicConfig',
+    'setServerZone',
+    'setServerUrl',
+    'sendEvents',
   ];
   function setUpProxy(instance) {
     function proxyMain(fn) {
