@@ -4172,6 +4172,7 @@ describe('AmplitudeClient', function () {
     beforeEach(function () {
       reset();
     });
+
     it('should use default library options', function () {
       amplitude.init(apiKey);
       amplitude.logEvent('Event Type 1');
@@ -4199,15 +4200,10 @@ describe('AmplitudeClient', function () {
       assert.equal(name, 'test-library');
       assert.equal(version, '1.0-test');
     });
-  });
 
-  describe('libraryName', function () {
-    beforeEach(function () {
-      reset();
-    });
     it('should use the customize library name and default library version', function () {
       amplitude.init(apiKey);
-      amplitude.setLibraryName('test-library');
+      amplitude.setLibrary('test-library', undefined);
       amplitude.logEvent('Event Type');
 
       const { name, version } = JSON.parse(queryString.parse(server.requests[0].requestBody).e)[0].library;
@@ -4215,15 +4211,10 @@ describe('AmplitudeClient', function () {
       assert.equal(name, 'test-library');
       assert.equal(version, amplitude.options.library.version);
     });
-  });
 
-  describe('libraryVersion', function () {
-    beforeEach(function () {
-      reset();
-    });
     it('should use the customize library version and default library name', function () {
       amplitude.init(apiKey);
-      amplitude.setLibraryVersion('1.0-test');
+      amplitude.setLibrary(undefined, '1.0-test');
       amplitude.logEvent('Event Type');
 
       const { name, version } = JSON.parse(queryString.parse(server.requests[0].requestBody).e)[0].library;

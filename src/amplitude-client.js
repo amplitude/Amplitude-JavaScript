@@ -1908,28 +1908,11 @@ AmplitudeClient.prototype.__VERSION__ = function getVersion() {
  * @param {string} name - Custom library name
  * @param {string} version - Custom library version
  */
-AmplitudeClient.prototype.setLibrary = function setLibrary(name, version) {
+AmplitudeClient.prototype.setLibrary = function setLibrary(
+  name = this.options.libraryName,
+  version = this.options.libraryVersion,
+) {
   this.options.library = { name: name, version: version };
-};
-
-/**
- * Sets the library name.
- * @public
- * @param {string} libraryName - the library name.
- * @example amplitudeClient.setLibraryName('my_library_name');
- */
-AmplitudeClient.prototype.setLibraryName = function setLibraryName(libraryName) {
-  this.options.library.name = libraryName;
-};
-
-/**
- * Sets the library Version.
- * @public
- * @param {string} userId - the library version.
- * @example amplitudeClient.setLibraryVersion('1.0.0');
- */
-AmplitudeClient.prototype.setLibraryVersion = function setLibraryVersion(libraryVersion) {
-  this.options.library.version = libraryVersion;
 };
 
 /**
@@ -2063,7 +2046,7 @@ AmplitudeClient.prototype.setUseDynamicConfig = function setUseDynamicConfig(use
 };
 
 /**
- * Sets the server zone , used for server api endpoint and dynamic configuration..
+ * Sets the server zone , used for server api endpoint and dynamic configuration.
  * @public
  * @param {string} serverZone - the server zone value. AmplitudeServerZone.US or AmplitudeServerZone.EU.
  * @param {bool} serverZoneBasedApi - (optional) update api endpoint with serverZone change or not. For data residency, recommend to enable it unless using own proxy server.
