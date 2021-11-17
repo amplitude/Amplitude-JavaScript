@@ -2840,6 +2840,37 @@ describe('AmplitudeClient', function () {
     });
   });
 
+  describe('logEvent with outOfSession', function () {
+    this.beforeEach(function () {
+      reset();
+    });
+
+    it('should reset the sessionId', function () {
+      amplitude.init(apiKey);
+      amplitude.logEvent('Event Type', null, null, null, true);
+      assert.equal(amplitude._sessionId, -1);
+    });
+  });
+
+  describe('setEventUploadThreshold', function () {
+    beforeEach(function () {
+      reset();
+    });
+
+    it('should not set eventUploadThreshold with invalid eventUploadThreshold value', function () {
+      amplitude.init(apiKey);
+      let previousEventUploadThreshold = amplitude.options.eventUploadThreshold;
+      amplitude.setEventUploadThreshold('invalid eventUploadThreshold');
+      assert.equal(amplitude.options.eventUploadThreshold, previousEventUploadThreshold);
+    });
+
+    it('should set eventUploadThreshold', function () {
+      amplitude.init(apiKey);
+      amplitude.setEventUploadThreshold(5);
+      assert.equal(amplitude.options.eventUploadThreshold, 5);
+    });
+  });
+
   describe('optOut', function () {
     beforeEach(function () {
       amplitude.init(apiKey);
@@ -2913,6 +2944,26 @@ describe('AmplitudeClient', function () {
       assert.lengthOf(events, 10);
       assert.deepEqual(events[0].user_properties, { $add: { test: 6 } });
       assert.deepEqual(events[9].user_properties, { $add: { test: 100 } });
+    });
+  });
+
+  describe('setOptOut', function () {
+    beforeEach(function () {
+      reset();
+    });
+
+    it('should not set optOut with invalid input', function () {
+      amplitude.init(apiKey);
+      let previousOptOut = amplitude.options.optOut;
+      amplitude.setOptOut('invalid sessionTimeOut');
+      assert.equal(amplitude.options.optOut, previousOptOut);
+    });
+
+    it('should set optOut', function () {
+      amplitude.init(apiKey);
+      let optOut = true;
+      amplitude.setOptOut(optOut);
+      assert.equal(amplitude.options.optOut, true);
     });
   });
 
@@ -4121,6 +4172,7 @@ describe('AmplitudeClient', function () {
     beforeEach(function () {
       reset();
     });
+
     it('should use default library options', function () {
       amplitude.init(apiKey);
       amplitude.logEvent('Event Type 1');
@@ -4147,6 +4199,225 @@ describe('AmplitudeClient', function () {
 
       assert.equal(name, 'test-library');
       assert.equal(version, '1.0-test');
+    });
+
+    it('should use the customize library name and default library version', function () {
+      amplitude.init(apiKey);
+      amplitude.setLibrary('test-library', undefined);
+      amplitude.logEvent('Event Type');
+
+      const { name, version } = JSON.parse(queryString.parse(server.requests[0].requestBody).e)[0].library;
+
+      assert.equal(name, 'test-library');
+      assert.equal(version, amplitude.options.library.version);
+    });
+
+    it('should use the customize library version and default library name', function () {
+      amplitude.init(apiKey);
+      amplitude.setLibrary(undefined, '1.0-test');
+      amplitude.logEvent('Event Type');
+
+      const { name, version } = JSON.parse(queryString.parse(server.requests[0].requestBody).e)[0].library;
+
+      assert.equal(name, amplitude.options.library.name);
+      assert.equal(version, '1.0-test');
+    });
+  });
+
+  describe('setUseDynamicConfig', function () {
+    beforeEach(function () {
+      reset();
+    });
+
+    it('EU serverZone should not set apiEndpoint to EU because of invalid useDynamicConfig value', function () {
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+      amplitude.init(apiKey, null, {
+        serverZone: AmplitudeServerZone.EU,
+      });
+      amplitude.setUseDynamicConfig('invalid useDynamicConfig');
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+    });
+
+    it('should not set apiEndpoint to EU because because of dynamic configuration not enable', function () {
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+      amplitude.init(apiKey, null, {
+        serverZone: AmplitudeServerZone.EU,
+      });
+      amplitude.setUseDynamicConfig(false);
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+    });
+
+    it('EU serverZone with dynamic configuration enable should set apiEndpoint to EU', function () {
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+      amplitude.init(apiKey, null, {
+        serverZone: AmplitudeServerZone.EU,
+      });
+      amplitude.setUseDynamicConfig(true);
+      server.respondWith('{"ingestionEndpoint": "api.eu.amplitude.com"}');
+      server.respond();
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_EU_URL);
+    });
+  });
+
+  describe('setServerUrl', function () {
+    beforeEach(function () {
+      reset();
+    });
+
+    it('should not set serverUrl because of invalid serverUrl input', function () {
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+      amplitude.init(apiKey);
+      amplitude.setServerUrl(100);
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+    });
+
+    it('should set serverUrl with valid serverUrl input', function () {
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+      amplitude.init(apiKey);
+      amplitude.setServerUrl(constants.EVENT_LOG_EU_URL);
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_EU_URL);
+    });
+  });
+
+  describe('setServerZone', function () {
+    beforeEach(function () {
+      reset();
+    });
+
+    it('should not set serverZone with invalid serverZone value', function () {
+      amplitude.init(apiKey);
+      let previousServerZone = amplitude.options.serverZone;
+      amplitude.setServerZone('invalid serverZone');
+      assert.equal(amplitude.options.serverZone, previousServerZone);
+    });
+
+    it('should not set serverZone with invalid serverZoneBasedApi value', function () {
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.serverZone, AmplitudeServerZone.US);
+      amplitude.setServerZone(AmplitudeServerZone.EU, 'invalid serverZoneBasedApi');
+      assert.equal(amplitude.options.serverZone, AmplitudeServerZone.US);
+    });
+
+    it('should set serverZone to EU', function () {
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.serverZone, AmplitudeServerZone.US);
+      amplitude.setServerZone(AmplitudeServerZone.EU);
+      assert.equal(amplitude.options.serverZone, AmplitudeServerZone.EU);
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_EU_URL);
+    });
+
+    it('should set serverZone to EU and keep the default serverUrl with serverZoneBasedApi is false', function () {
+      amplitude.init(apiKey);
+      assert.equal(amplitude.options.serverZone, AmplitudeServerZone.US);
+      amplitude.setServerZone(AmplitudeServerZone.EU, false);
+      assert.equal(amplitude.options.serverZone, AmplitudeServerZone.EU);
+      assert.equal(amplitude.options.apiEndpoint, constants.EVENT_LOG_URL);
+    });
+  });
+
+  describe('getUserId', function () {
+    beforeEach(function () {
+      reset();
+    });
+
+    it('should get userId', function () {
+      amplitude.init(apiKey, userId);
+      let currentUserId = amplitude.getUserId();
+      assert.equal(currentUserId, userId);
+    });
+
+    it('should get userId null', function () {
+      amplitude.init(apiKey);
+      assert.equal(amplitude.getUserId(), null);
+    });
+  });
+
+  describe('getDeviceId', function () {
+    beforeEach(function () {
+      reset();
+    });
+
+    it('should get a random deviceId', function () {
+      amplitude.init(apiKey, userId);
+      assert.lengthOf(amplitude.getDeviceId(), 22);
+    });
+
+    it('should get deviceId', function () {
+      const currentDeviceId = 'aa_bb_cc';
+      amplitude.init(apiKey, null, { deviceId: currentDeviceId });
+      assert.equal(amplitude.getDeviceId(), currentDeviceId);
+    });
+  });
+
+  describe('setMinTimeBetweenSessionsMillis', function () {
+    beforeEach(function () {
+      reset();
+    });
+
+    it('should not set sessionTimeout with invalid input', function () {
+      amplitude.init(apiKey);
+      let previousSessionTimeOut = amplitude.options.sessionTimeout;
+      let newSessionTimeOut = 'invalid sessionTimeOut';
+      amplitude.setMinTimeBetweenSessionsMillis(newSessionTimeOut);
+      assert.equal(amplitude.options.sessionTimeout, previousSessionTimeOut);
+    });
+
+    it('should set sessionTimeout', function () {
+      amplitude.init(apiKey);
+      let newSessionTimeOut = 100;
+      amplitude.setMinTimeBetweenSessionsMillis(newSessionTimeOut);
+      assert.equal(amplitude.options.sessionTimeout, newSessionTimeOut);
+    });
+  });
+
+  describe('setUserId', function () {
+    let clock, startTime;
+    beforeEach(function () {
+      reset();
+      startTime = Date.now();
+      clock = sinon.useFakeTimers(startTime);
+      amplitude.init(apiKey);
+    });
+
+    it('should not renew the session id with invalid startNewSession input', function () {
+      var amplitude = new AmplitudeClient();
+      // set up initial session
+      var sessionId = 1000;
+      clock.tick(sessionId);
+      amplitude.init(apiKey);
+      assert.equal(amplitude.getSessionId(), startTime);
+      assert.equal(amplitude.options.userId, null);
+
+      amplitude.setUserId('test user', 'invalid startNewSession');
+      assert.notEqual(amplitude.getSessionId(), new Date().getTime());
+      assert.notEqual(amplitude.options.userId, 'test user');
+      assert.equal(amplitude.options.userId, null);
+    });
+
+    it('should set user id and renew the session id with current timestemp', function () {
+      var amplitude = new AmplitudeClient();
+      // set up initial session
+      var sessionId = 1000;
+      clock.tick(sessionId);
+      amplitude.init(apiKey);
+      assert.equal(amplitude.getSessionId(), startTime);
+
+      amplitude.setUserId('test user', true);
+      assert.equal(amplitude.getSessionId(), new Date().getTime());
+      assert.equal(amplitude.options.userId, 'test user');
+    });
+
+    it('should continue the old session', function () {
+      var amplitude = new AmplitudeClient();
+      // set up initial session
+      var sessionId = 1000;
+      clock.tick(sessionId);
+      amplitude.init(apiKey);
+      assert.equal(amplitude.getSessionId(), startTime);
+
+      amplitude.setUserId('test user');
+      assert.equal(amplitude.getSessionId(), startTime);
+      assert.equal(amplitude.options.userId, 'test user');
     });
   });
 });
