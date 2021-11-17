@@ -1114,7 +1114,7 @@ var _convertProxyObjectToRealObject = function _convertProxyObjectToRealObject(i
  * var identify = new amplitude.Identify().set('colors', ['rose', 'gold']).add('karma', 1).setOnce('sign_up_date', '2016-03-31');
  * amplitude.identify(identify);
  */
-AmplitudeClient.prototype.identify = function (identify_obj, opt_callback, opt_error_callback) {
+AmplitudeClient.prototype.identify = function (identify_obj, opt_callback, opt_error_callback, outOfSession) {
   if (this._shouldDeferCall()) {
     return this._q.push(['identify'].concat(Array.prototype.slice.call(arguments, 0)));
   }
@@ -1142,6 +1142,7 @@ AmplitudeClient.prototype.identify = function (identify_obj, opt_callback, opt_e
         null,
         opt_callback,
         opt_error_callback,
+        outOfSession,
       );
     } else {
       _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
@@ -1162,6 +1163,7 @@ AmplitudeClient.prototype.groupIdentify = function (
   identify_obj,
   opt_callback,
   opt_error_callback,
+  outOfSession,
 ) {
   if (this._shouldDeferCall()) {
     return this._q.push(['groupIdentify'].concat(Array.prototype.slice.call(arguments, 0)));
@@ -1205,6 +1207,7 @@ AmplitudeClient.prototype.groupIdentify = function (
         null,
         opt_callback,
         opt_error_callback,
+        outOfSession,
       );
     } else {
       _logErrorsWithCallbacks(opt_callback, opt_error_callback, 0, 'No request sent', {
