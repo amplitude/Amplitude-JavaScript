@@ -1908,11 +1908,9 @@ AmplitudeClient.prototype.__VERSION__ = function getVersion() {
  * @param {string} name - Custom library name
  * @param {string} version - Custom library version
  */
-AmplitudeClient.prototype.setLibrary = function setLibrary(
-  name = this.options.libraryName,
-  version = this.options.libraryVersion,
-) {
-  this.options.library = { name: name, version: version };
+AmplitudeClient.prototype.setLibrary = function setLibrary(name, version) {
+  if (name) this.options.library.name = name;
+  if (version) this.options.library.version = version;
 };
 
 /**
