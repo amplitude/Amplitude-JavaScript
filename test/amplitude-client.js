@@ -1526,6 +1526,15 @@ describe('AmplitudeClient', function () {
       assert.equal(value, 0);
       assert.equal(message, 'No request sent');
     });
+
+    it('should out of session', function () {
+      var identify = new Identify().set('prop1', 'value1');
+      amplitude.groupIdentify(group_type, group_name, identify, true);
+
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 1);
+      assert.deepEqual(amplitude._unsentIdentifys[0].event.session_id, -1);
+    });
   });
 
   describe('logEvent with tracking options', function () {
@@ -2666,6 +2675,16 @@ describe('AmplitudeClient', function () {
       amplitude.identify(identify);
 
       assert.deepEqual(amplitude._unsentIdentifys[0].event.user_properties, { $set: { 10: 10 } });
+    });
+
+    it('should out of session', function () {
+      var identify = new Identify().set(10, 10);
+      amplitude.init(apiKey);
+      amplitude.identify(identify, null, null, true);
+
+      assert.lengthOf(amplitude._unsentEvents, 0);
+      assert.lengthOf(amplitude._unsentIdentifys, 1);
+      assert.deepEqual(amplitude._unsentIdentifys[0].event.session_id, -1);
     });
 
     it('should ignore event and user properties with too many items', function () {
