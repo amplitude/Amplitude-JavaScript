@@ -1,3 +1,11 @@
+# [8.12.0](https://github.com/amplitude/amplitude-javascript/compare/v8.11.1...v8.12.0) (2021-11-18)
+
+
+### Features
+
+* add more interface for flutter web support ([#444](https://github.com/amplitude/amplitude-javascript/issues/444)) ([69c18f7](https://github.com/amplitude/amplitude-javascript/commit/69c18f7253f39f63b4204bbf15a604b0f458e98c))
+* update setLibrary api make it ignore the null value of name or version  ([#449](https://github.com/amplitude/amplitude-javascript/issues/449)) ([8e0971e](https://github.com/amplitude/amplitude-javascript/commit/8e0971e00164dfb6206e73e51da9329b2f5f2009))
+
 ## [8.11.1](https://github.com/amplitude/amplitude-javascript/compare/v8.11.0...v8.11.1) (2021-11-16)
 
 
