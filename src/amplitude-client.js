@@ -969,6 +969,11 @@ AmplitudeClient.prototype.setSessionId = function setSessionId(sessionId) {
   }
 };
 
+/**
+ * Generates a the current Unix timestamp as the new Session ID for the instance.
+ * @public
+ * @example amplitudeClient.resetSessionId();
+ */
 AmplitudeClient.prototype.resetSessionId = function resetSessionId() {
   this.setSessionId(new Date().getTime());
 };
