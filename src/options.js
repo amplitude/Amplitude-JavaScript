@@ -81,6 +81,7 @@ export default {
   optOut: false,
   onError: () => {},
   onExitPage: () => {},
+  onNewSessionStart: () => {},
   plan: {
     branch: '',
     source: '',
