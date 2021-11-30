@@ -18,7 +18,8 @@
     "@amplitude/ua-parser-js": "0.7.25",
     "@amplitude/utils": "^1.0.5",
     "blueimp-md5": "^2.10.0",
-    "query-string": "5"
+    "query-string": "5",
+    "@amplitude/amplitude-core": "file:../experiment-js-client/packages/core/"
   },
   "devDependencies": {
     "@amplitude/eslint-plugin-amplitude": "^1.0.1",
