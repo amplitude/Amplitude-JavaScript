@@ -75,6 +75,7 @@
     'regenerateDeviceId',
     'groupIdentify',
     'onInit',
+    'onNewSessionStart',
     'logEventWithTimestamp',
     'logEventWithGroups',
     'setSessionId',
