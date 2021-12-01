@@ -1385,10 +1385,12 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
 
     // In the case of an identify event, update the core user store so the experiment SDK can fetch new variants and
     // utilize user properties in real time.
-    this._core.identityStore
-      .editIdentity()
-      .updateUserProperties(utils.truncate(utils.validateProperties(userProperties)))
-      .commit();
+    if (eventType === Constants.IDENTIFY_EVENT) {
+      this._core.identityStore
+        .editIdentity()
+        .updateUserProperties(utils.truncate(utils.validateProperties(userProperties)))
+        .commit();
+    }
 
     return eventId;
   } catch (e) {
