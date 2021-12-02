@@ -2,8 +2,10 @@
 # yarn lockfile v1
 
 
-"@amplitude/amplitude-core@file:../experiment-js-client/packages/core":
+"@amplitude/amplitude-core@0.0.1":
   version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@amplitude/amplitude-core/-/amplitude-core-0.0.1.tgz#54097fac6444266f7edb5b3dd334f5c44ccc5920"
+  integrity sha512-J5VRhIkCBy9qwCjI8c745xLv+JK6Q+E6qijrpUW5F8Br8fbpAe708Zd5jfFZ32vmzzqRkte12pAscaD3VOKDDQ==
 
 "@amplitude/eslint-plugin-amplitude@^1.0.1":
   version "1.0.1"

@@ -19,7 +19,7 @@
     "@amplitude/utils": "^1.0.5",
     "blueimp-md5": "^2.10.0",
     "query-string": "5",
-    "@amplitude/amplitude-core": "file:../experiment-js-client/packages/core"
+    "@amplitude/amplitude-core": "0.0.1"
   },
   "devDependencies": {
     "@amplitude/eslint-plugin-amplitude": "^1.0.1",
