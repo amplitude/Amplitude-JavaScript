@@ -77,7 +77,7 @@ $(SNIPPET_OUT): $(SRC) $(SNIPPET)
 	@$(MINIFY) $(SNIPPET) -m -b max-line-len=80,beautify=false | awk 'NF' > $(SNIPPET_OUT)
 
 $(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET)
-	@grep -Ev "\ba?s\b" $(SNIPPET) | $(MINIFY) -m -b max-line-len=80,beautify=false - \
+	@sed -n '/createElement/,/insertBefore/!p' $(SNIPPET) | $(MINIFY) -m -b max-line-len=80,beautify=false - \
 		| awk 'NF' > $(SEGMENT_SNIPPET_OUT)
 
 #

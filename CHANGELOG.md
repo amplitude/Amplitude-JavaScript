@@ -1,3 +1,23 @@
+## [8.13.1](https://github.com/amplitude/amplitude-javascript/compare/v8.13.0...v8.13.1) (2021-12-03)
+
+
+### Bug Fixes
+
+* make @babel/runtime production dependencies ([#461](https://github.com/amplitude/amplitude-javascript/issues/461)) ([c03632c](https://github.com/amplitude/amplitude-javascript/commit/c03632c7e66cbd2a8a31455114e9a771a5d988cc))
+
+# [8.13.0](https://github.com/amplitude/amplitude-javascript/compare/v8.12.0...v8.13.0) (2021-11-30)
+
+
+### Bug Fixes
+
+* add public method onNewSessionStart to snippet ([#459](https://github.com/amplitude/amplitude-javascript/issues/459)) ([07446fc](https://github.com/amplitude/amplitude-javascript/commit/07446fc1158c0ef3ff21e9e13c6deb3b9ef6fd36))
+* upgrade to @amplitude/ua-parser-js@0.7.26 ([#456](https://github.com/amplitude/amplitude-javascript/issues/456)) ([8962604](https://github.com/amplitude/amplitude-javascript/commit/8962604657224c940991e36876255c4f12a7abfc))
+
+
+### Features
+
+* add support for on new session start callback ([#455](https://github.com/amplitude/amplitude-javascript/issues/455)) ([acf596a](https://github.com/amplitude/amplitude-javascript/commit/acf596a52ff12bad8c9352533fd15f13becf374a))
+
 # [8.12.0](https://github.com/amplitude/amplitude-javascript/compare/v8.11.1...v8.12.0) (2021-11-18)
 
 

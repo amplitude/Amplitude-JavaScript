@@ -44,7 +44,8 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
   this._updateScheduled = false;
-  this._onInit = [];
+  this._onInitCallbacks = [];
+  this._onNewSessionStartCallbacks = [];
 
   // event meta data
   this._eventId = 0;
@@ -172,7 +173,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
         null;
 
       var now = new Date().getTime();
-      if (!this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout) {
+      const startNewSession =
+        !this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout;
+      if (startNewSession) {
         if (this.options.unsetParamsReferrerOnNewSession) {
           this._unsetUTMParams();
         }
@@ -202,11 +205,15 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
       this._sendEventsIfReady(); // try sending unsent events
 
-      for (let i = 0; i < this._onInit.length; i++) {
-        this._onInit[i](this);
+      for (let i = 0; i < this._onInitCallbacks.length; i++) {
+        this._onInitCallbacks[i](this);
       }
-      this._onInit = [];
+      this._onInitCallbacks = [];
       this._isInitialized = true;
+
+      if (startNewSession) {
+        this._runNewSessionStartCallbacks();
+      }
     };
 
     if (this.options.saveEvents) {
@@ -216,6 +223,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       this._unsentIdentifys = this._loadSavedUnsentEvents(this.options.unsentIdentifyKey)
         .map((event) => ({ event }))
         .concat(this._unsentIdentifys);
+    }
+    if (opt_config && opt_config.onNewSessionStart) {
+      this.onNewSessionStart(this.options.onNewSessionStart);
     }
     initFromStorage();
     this.runQueuedFunctions();
@@ -267,6 +277,12 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     if (type(opt_config.onError) === 'function') {
       opt_config.onError(err);
     }
+  }
+};
+
+AmplitudeClient.prototype._runNewSessionStartCallbacks = function () {
+  for (let i = 0; i < this._onNewSessionStartCallbacks.length; i++) {
+    this._onNewSessionStartCallbacks[i](this);
   }
 };
 
@@ -490,12 +506,20 @@ AmplitudeClient.prototype.isNewSession = function isNewSession() {
  * Add callbacks to call after init. Useful for users who load Amplitude through a snippet.
  * @public
  */
-AmplitudeClient.prototype.onInit = function (callback) {
+AmplitudeClient.prototype.onInit = function onInit(callback) {
   if (this._isInitialized) {
     callback(this);
   } else {
-    this._onInit.push(callback);
+    this._onInitCallbacks.push(callback);
   }
+};
+
+/**
+ * Add callbacks to call after new session start.
+ * @public
+ */
+AmplitudeClient.prototype.onNewSessionStart = function onNewSessionStart(callback) {
+  this._onNewSessionStartCallbacks.push(callback);
 };
 
 /**
@@ -898,6 +922,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId, startNewSession
       }
       this._newSession = true;
       this._sessionId = new Date().getTime();
+      this._runNewSessionStartCallbacks();
 
       // only capture UTM params and referrer if new session
       if (this.options.saveParamsReferrerOncePerSession) {

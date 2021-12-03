@@ -125,7 +125,44 @@ describe('AmplitudeClient', function () {
       });
 
       amplitude.init(apiKey);
-      assert.lengthOf(amplitude._onInit, 0);
+      assert.lengthOf(amplitude._onInitCallbacks, 0);
+    });
+
+    it('should invoke onNewSessionStart callbacks on new session passed through init()', function () {
+      const callback = sinon.spy();
+      const amplitude2 = new AmplitudeClient();
+      amplitude2.init(apiKey, undefined, {
+        onNewSessionStart: callback,
+      });
+      assert.lengthOf(amplitude2._onNewSessionStartCallbacks, 1);
+      assert.ok(callback.calledOnce);
+    });
+
+    it('should invoke onNewSessionStart callbacks on new session pased through onNewSessionStart()', function () {
+      const callback = sinon.spy();
+      const amplitude2 = new AmplitudeClient();
+      amplitude2.onNewSessionStart(callback);
+      amplitude2.init(apiKey);
+      assert.lengthOf(amplitude2._onNewSessionStartCallbacks, 1);
+      assert.ok(callback.calledOnce);
+    });
+
+    it('should pass the amplitude instance to onNewSessionStart callbacks', () => {
+      const callback = sinon.spy();
+      const amplitude2 = new AmplitudeClient();
+      amplitude2.onNewSessionStart(callback);
+      amplitude2.init(apiKey);
+      assert.isTrue(callback.calledWith(amplitude2));
+    });
+
+    it('should include a session id on onNewSessionStart callback', () => {
+      let sessionId = null;
+      const amplitude2 = new AmplitudeClient();
+      amplitude2.onNewSessionStart((a) => {
+        sessionId = a.getSessionId();
+      });
+      amplitude2.init(apiKey);
+      assert.isNumber(sessionId);
     });
 
     it('fails on invalid apiKeys', function () {

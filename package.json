@@ -1,7 +1,7 @@
 {
   "name": "amplitude-js",
   "author": "Amplitude <support@amplitude.com>",
-  "version": "8.12.0",
+  "version": "8.13.1",
   "license": "MIT",
   "description": "Javascript library for Amplitude Analytics",
   "keywords": [
@@ -15,8 +15,9 @@
   "main": "amplitude.umd.js",
   "module": "amplitude.esm.js",
   "dependencies": {
-    "@amplitude/ua-parser-js": "0.7.25",
+    "@amplitude/ua-parser-js": "0.7.26",
     "@amplitude/utils": "^1.0.5",
+    "@babel/runtime": "^7.3.4",
     "blueimp-md5": "^2.10.0",
     "query-string": "5",
     "@amplitude/amplitude-core": "0.0.1"
@@ -28,7 +29,6 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
     "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
-    "@babel/runtime": "^7.3.4",
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/exec": "^5.0.0",
     "@semantic-release/git": "^9.0.0",

@@ -18,11 +18,11 @@ A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.ampl
 
 ## Installation and Quick Start
 * For using the SDK, please visit our :100:[Developer Center](https://developers.amplitude.com/docs/javascript).
-* For developing the SDK, please visit our [CONTRIBUTING.md](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CONTRIBUTING.md).
+* For developing the SDK, please visit our [CONTRIBUTING.md](https://github.com/amplitude/Amplitude-JavaScript/blob/main/CONTRIBUTING.md).
 
 ## Demo Pages
-* A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/master/test/browser/amplitudejs.html) showing a simple integration on a web page.
-* A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/master/test/browser/amplitudejs-requirejs.html) showing an integration using RequireJS.
+* A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/main/test/browser/amplitudejs.html) showing a simple integration on a web page.
+* A [demo page](https://github.com/amplitude/Amplitude-JavaScript/blob/main/test/browser/amplitudejs-requirejs.html) showing an integration using RequireJS.
 * A [demo page](https://github.com/amplitude/GTM-Web-Demo) demonstrating a potential integration with Google Tag Manager.
 
 
@@ -36,7 +36,7 @@ Previously used amplitude-js and looking to migrate to @amplitude/react-native?
 Please visit [Amplitude-Node](https://github.com/amplitude/Amplitude-Node) for our Node SDK.
 
 ## Changelog
-Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/master/CHANGELOG.md) to view the JavaScript SDK Changelog.
+Click [here](https://github.com/amplitude/Amplitude-JavaScript/blob/main/CHANGELOG.md) to view the JavaScript SDK Changelog.
 
 ## Upgrading Major Versions and Breaking Changes #
 
