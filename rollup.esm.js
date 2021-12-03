@@ -10,7 +10,6 @@ export default {
     file: 'amplitude.esm.js',
     format: 'esm',
   },
-  external: [/@babel\/runtime/],
   plugins: [
     json(),
     replace({

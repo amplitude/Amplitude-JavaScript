@@ -14,7 +14,6 @@ export default {
       id: 'amplitude',
     }
   },
-  external: [/@babel\/runtime/],
   plugins: [
     json(),
     resolve({
