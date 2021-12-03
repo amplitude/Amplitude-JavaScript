@@ -13,7 +13,7 @@ export default {
   plugins: [
     json(),
     replace({
-      preventAssignment: false,
+      preventAssignment: true,
       BUILD_COMPAT_SNIPPET: 'false',
       BUILD_COMPAT_LOCAL_STORAGE: 'true',
       BUILD_COMPAT_2_0: 'true',
