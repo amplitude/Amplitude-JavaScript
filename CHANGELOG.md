@@ -1,3 +1,10 @@
+## [8.13.1](https://github.com/amplitude/amplitude-javascript/compare/v8.13.0...v8.13.1) (2021-12-03)
+
+
+### Bug Fixes
+
+* make @babel/runtime production dependencies ([#461](https://github.com/amplitude/amplitude-javascript/issues/461)) ([c03632c](https://github.com/amplitude/amplitude-javascript/commit/c03632c7e66cbd2a8a31455114e9a771a5d988cc))
+
 # [8.13.0](https://github.com/amplitude/amplitude-javascript/compare/v8.12.0...v8.13.0) (2021-11-30)
 
 
