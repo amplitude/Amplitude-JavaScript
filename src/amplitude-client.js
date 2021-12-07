@@ -58,7 +58,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._isInitialized = false;
 
   // used to integrate with experiment SDK (client-side exposure tracking & real-time user properties)
-  this._core = AmplitudeCore.getInstance(this._instanceName);
+  this._core = null;
 
   this._userAgent = (navigator && navigator.userAgent) || null;
 };
@@ -84,6 +84,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
   }
 
   try {
+    // used to integrate with experiment SDK (client-side exposure tracking & real-time user properties)
+    this._core = AmplitudeCore.getInstance(this._instanceName);
+
     _parseConfig(this.options, opt_config);
     if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON) {
       prototypeJsFix();
@@ -934,7 +937,9 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId, startNewSession
 
     // Update core identity store to propagate new user info
     // to experiment SDK and trigger a fetch if the ID has changed.
-    this._core.identityStore.editIdentity().setUserId(this.options.userId).commit();
+    if (this._core) {
+      this._core.identityStore.editIdentity().setUserId(this.options.userId).commit();
+    }
   } catch (e) {
     utils.log.error(e);
   }
@@ -1067,7 +1072,9 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
 
       // Update core identity store to propagate new user info
       // to experiment SDK and trigger a fetch if the ID has changed.
-      this._core.identityStore.editIdentity().setDeviceId(this.options.deviceId).commit();
+      if (this._core) {
+        this._core.identityStore.editIdentity().setDeviceId(this.options.deviceId).commit();
+      }
     }
   } catch (e) {
     utils.log.error(e);
@@ -1410,7 +1417,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
 
     // In the case of an identify event, update the core user store so the experiment SDK can fetch new variants and
     // utilize user properties in real time.
-    if (eventType === Constants.IDENTIFY_EVENT) {
+    if (eventType === Constants.IDENTIFY_EVENT && this._core) {
       this._core.identityStore
         .editIdentity()
         .updateUserProperties(utils.truncate(utils.validateProperties(userProperties)))
