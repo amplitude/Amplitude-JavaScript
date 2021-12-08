@@ -1,7 +1,7 @@
 {
   "name": "amplitude-js",
   "author": "Amplitude <support@amplitude.com>",
-  "version": "8.14.0-alpha.1",
+  "version": "8.14.0-alpha.2",
   "license": "MIT",
   "description": "Javascript library for Amplitude Analytics",
   "keywords": [
@@ -20,7 +20,7 @@
     "@babel/runtime": "^7.3.4",
     "blueimp-md5": "^2.10.0",
     "query-string": "5",
-    "@amplitude/amplitude-core": "0.0.1"
+    "@amplitude/amplitude-core": "0.0.2"
   },
   "devDependencies": {
     "@amplitude/eslint-plugin-amplitude": "^1.0.1",
