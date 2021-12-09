@@ -19,6 +19,7 @@ import getHost from './get-host';
 import baseCookie from './base-cookie';
 import { AmplitudeServerZone, getEventLogApi } from './server-zone';
 import ConfigManager from './config-manager';
+import GlobalScope from './global-scope';
 
 /**
  * AmplitudeClient SDK API - instance constructor.
@@ -28,7 +29,7 @@ import ConfigManager from './config-manager';
  * @example var amplitudeClient = new AmplitudeClient();
  */
 var AmplitudeClient = function AmplitudeClient(instanceName) {
-  if (!isBrowserEnv()) {
+  if (!isBrowserEnv() && !utils.isWebWorkerEnvironment()) {
     utils.log.warn(
       'amplitude-js will not work in a non-browser environment. If you are planning to add Amplitude to a node environment, please use @amplitude/node',
     );
@@ -80,7 +81,11 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
   try {
     _parseConfig(this.options, opt_config);
-    if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON) {
+    if (
+      (isBrowserEnv() || utils.isWebWorkerEnvironment()) &&
+      GlobalScope.Prototype !== undefined &&
+      Array.prototype.toJSON
+    ) {
       prototypeJsFix();
       utils.log.warn(
         'Prototype.js injected Array.prototype.toJSON. Deleting Array.prototype.toJSON to prevent double-stringify',
@@ -243,7 +248,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
         // Monitoring just page exits because that is the most requested feature for now
         // "If you're specifically trying to detect page unload events, the pagehide event is the best option."
         // https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event
-        window.addEventListener(
+        GlobalScope.addEventListener(
           'pagehide',
           () => {
             handleVisibilityChange();
@@ -254,7 +259,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     }
   } catch (err) {
     utils.log.error(err);
-    if (type(opt_config.onError) === 'function') {
+    if (opt_config && type(opt_config.onError) === 'function') {
       opt_config.onError(err);
     }
   }
@@ -272,7 +277,7 @@ AmplitudeClient.prototype.deleteLowerLevelDomainCookies = function () {
   const cookieHost =
     this.options.domain && this.options.domain[0] === '.' ? this.options.domain.slice(1) : this.options.domain;
 
-  if (!cookieHost) {
+  if (!cookieHost || !utils.isWebWorkerEnvironment()) {
     return;
   }
 
@@ -751,14 +756,14 @@ var _sendParamsReferrerUserProperties = function _sendParamsReferrerUserProperti
  * @private
  */
 AmplitudeClient.prototype._getReferrer = function _getReferrer() {
-  return document.referrer;
+  return typeof document !== 'undefined' ? document.referrer : '';
 };
 
 /**
  * @private
  */
 AmplitudeClient.prototype._getUrlParams = function _getUrlParams() {
-  return location.search;
+  return GlobalScope.location.search;
 };
 
 /**
@@ -1779,7 +1784,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
     }
     this._sending = true;
   }
-  var protocol = this.options.forceHttps ? 'https' : 'https:' === window.location.protocol ? 'https' : 'http';
+  var protocol = this.options.forceHttps ? 'https' : 'https:' === GlobalScope.location.protocol ? 'https' : 'http';
   var url = protocol + '://' + this.options.apiEndpoint;
 
   // fetch events to send

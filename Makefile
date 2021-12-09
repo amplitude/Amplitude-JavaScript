@@ -35,6 +35,7 @@ clean:
 
 test: build
 	@$(KARMA) start karma.conf.js
+	@$(KARMA) start karma-web-worker.conf.js
 
 test-sauce: build
 	@$(KARMA) start karma.conf.js --browsers sauce_chrome_windows

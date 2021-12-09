@@ -254,4 +254,10 @@ describe('utils', function () {
       assert.deepEqual(utils.validateProperties(properties), expected);
     });
   });
+
+  describe('isWebWorkerEnvironment', function () {
+    it('should return false', function () {
+      assert.isFalse(utils.isWebWorkerEnvironment());
+    });
+  });
 });
