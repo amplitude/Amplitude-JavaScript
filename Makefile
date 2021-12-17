@@ -56,7 +56,7 @@ version: package.json
 #
 # Target for updating readme.
 
-README.md: $(SNIPPET_OUT) version
+README.md: version $(SNIPPET_OUT)
 	node scripts/readme
 
 #
