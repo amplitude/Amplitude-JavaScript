@@ -10,6 +10,10 @@ module.exports = config => {
         pattern: 'amplitude.js',
         included: false,
       },
+      {
+        pattern: 'node_modules/sinon/pkg/sinon.js',
+        included: false,
+      },
     ],
     browsers: ['ChromeHeadless'],
     autoWatch: false,
@@ -17,7 +21,11 @@ module.exports = config => {
     reporters: ['mocha'],
     client: {
       mochaWebWorker: {
-        pattern: ['test/web-worker.js', 'amplitude.js'],
+        pattern: [
+          'test/web-worker.js',
+          'amplitude.js',
+          'node_modules/sinon/pkg/sinon.js'
+        ],
         worker: 'Worker',
         mocha: {
           ui: 'bdd'
