@@ -1352,6 +1352,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
       eventTime - this._lastEventTime > this.options.sessionTimeout
     ) {
       this._sessionId = eventTime;
+      this._runNewSessionStartCallbacks();
     }
     this._lastEventTime = eventTime;
     _saveCookieData(this);

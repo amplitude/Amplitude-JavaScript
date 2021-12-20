@@ -56,7 +56,7 @@ version: package.json
 #
 # Target for updating readme.
 
-README.md: $(SNIPPET_OUT) version
+README.md: version $(SNIPPET_OUT)
 	node scripts/readme
 
 #
@@ -74,10 +74,10 @@ $(OUT): node_modules $(SRC) package.json rollup.config.js rollup.min.js rollup.e
 # Target for minified `amplitude-snippet.js` file.
 #
 $(SNIPPET_OUT): $(SRC) $(SNIPPET)
-	@$(MINIFY) $(SNIPPET) -m -b max-line-len=80,beautify=false | awk 'NF' > $(SNIPPET_OUT)
+	@$(MINIFY) $(SNIPPET) -m -b max_line_len=80,beautify=false | awk 'NF' > $(SNIPPET_OUT)
 
 $(SEGMENT_SNIPPET_OUT): $(SRC) $(SNIPPET)
-	@sed -n '/createElement/,/insertBefore/!p' $(SNIPPET) | $(MINIFY) -m -b max-line-len=80,beautify=false - \
+	@sed -n '/createElement/,/insertBefore/!p' $(SNIPPET) | $(MINIFY) -m -b max_line_len=80,beautify=false - \
 		| awk 'NF' > $(SEGMENT_SNIPPET_OUT)
 
 #
