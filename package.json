@@ -15,12 +15,11 @@
   "main": "amplitude.umd.js",
   "module": "amplitude.esm.js",
   "dependencies": {
-    "@amplitude/ua-parser-js": "0.7.26",
     "@amplitude/utils": "^1.0.5",
     "@babel/runtime": "^7.3.4",
     "blueimp-md5": "^2.10.0",
     "query-string": "5",
-    "@amplitude/amplitude-core": "0.0.3"
+    "@amplitude/amplitude-core": "1.0.0-alpha.0"
   },
   "devDependencies": {
     "@amplitude/eslint-plugin-amplitude": "^1.0.1",
