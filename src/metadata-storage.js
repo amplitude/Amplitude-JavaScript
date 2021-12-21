@@ -10,6 +10,7 @@ import getLocation from './get-location';
 import ampLocalStorage from './localstorage';
 import topDomain from './top-domain';
 import utils from './utils';
+import GlobalScope from './global-scope';
 
 const storageOptionExists = {
   [Constants.STORAGE_COOKIES]: true,
@@ -88,8 +89,8 @@ class MetadataStorage {
 
     switch (this.storage) {
       case Constants.STORAGE_SESSION:
-        if (window.sessionStorage) {
-          window.sessionStorage.setItem(this.storageKey, value);
+        if (GlobalScope.sessionStorage) {
+          GlobalScope.sessionStorage.setItem(this.storageKey, value);
         }
         break;
       case Constants.STORAGE_LOCAL:
@@ -131,7 +132,7 @@ class MetadataStorage {
     }
     if (!str) {
       try {
-        str = window.sessionStorage && window.sessionStorage.getItem(this.storageKey);
+        str = GlobalScope.sessionStorage && GlobalScope.sessionStorage.getItem(this.storageKey);
       } catch (e) {
         utils.log.info(`window.sessionStorage unavailable. Reason: "${e}"`);
       }
@@ -187,8 +188,8 @@ class MetadataStorage {
     }
     if (!str) {
       try {
-        str = window.sessionStorage && window.sessionStorage.getItem(this.storageKey);
-        window.sessionStorage.clear();
+        str = GlobalScope.sessionStorage && GlobalScope.sessionStorage.getItem(this.storageKey);
+        GlobalScope.sessionStorage.clear();
       } catch (e) {
         utils.log.info(`window.sessionStorage unavailable. Reason: "${e}"`);
       }

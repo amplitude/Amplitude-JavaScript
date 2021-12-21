@@ -95,6 +95,9 @@ const sortByEventTime = (cookies) => {
 // test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
 const areCookiesEnabled = (opts = {}) => {
   const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
+  if (typeof document === 'undefined') {
+    return false;
+  }
   let _areCookiesEnabled = false;
   try {
     const uid = String(new Date());

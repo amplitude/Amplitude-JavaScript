@@ -6,6 +6,7 @@
 import Cookie from './cookie';
 import localStorage from './localstorage';
 import baseCookie from './base-cookie';
+import GlobalScope from './global-scope';
 
 var cookieStorage = function () {
   this.storage = null;
@@ -43,7 +44,7 @@ cookieStorage.prototype.getStorage = function () {
         this._options.expirationDays = opts.expirationDays || this._options.expirationDays;
         // localStorage is specific to subdomains
         this._options.domain =
-          opts.domain || this._options.domain || (window && window.location && window.location.hostname);
+          opts.domain || this._options.domain || (GlobalScope && GlobalScope.location && GlobalScope.location.hostname);
         return (this._options.secure = opts.secure || false);
       },
       get: function (name) {

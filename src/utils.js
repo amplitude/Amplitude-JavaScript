@@ -1,4 +1,5 @@
 import constants from './constants';
+import GlobalScope from './global-scope';
 import type from './type';
 
 var logLevels = {
@@ -54,7 +55,7 @@ var isEmptyString = function isEmptyString(str) {
 
 var sessionStorageEnabled = function sessionStorageEnabled() {
   try {
-    if (window.sessionStorage) {
+    if (GlobalScope.sessionStorage) {
       return true;
     }
   } catch (e) {
@@ -273,12 +274,17 @@ var getQueryParam = function getQueryParam(name, query) {
   return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, ' '));
 };
 
+const isWebWorkerEnvironment = () => {
+  return typeof WorkerGlobalScope !== 'undefined';
+};
+
 export default {
   setLogLevel,
   getLogLevel,
   logLevels,
   log,
   isEmptyString,
+  isWebWorkerEnvironment,
   getQueryParam,
   sessionStorageEnabled,
   truncate,
