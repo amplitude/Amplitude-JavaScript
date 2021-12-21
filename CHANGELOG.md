@@ -1,3 +1,11 @@
+# [8.14.0](https://github.com/amplitude/amplitude-javascript/compare/v8.13.1...v8.14.0) (2021-12-21)
+
+
+### Features
+
+* add runNewSessionStartCallback on new sessionId on log event ([#469](https://github.com/amplitude/amplitude-javascript/issues/469)) ([bb8b26b](https://github.com/amplitude/amplitude-javascript/commit/bb8b26b23267ed6fd5adc393f873e2d1103f4030))
+* support web worker env ([#467](https://github.com/amplitude/amplitude-javascript/issues/467)) ([52abaf0](https://github.com/amplitude/amplitude-javascript/commit/52abaf062492217ddf8d556b85509ce00e006f25))
+
 ## [8.13.1](https://github.com/amplitude/amplitude-javascript/compare/v8.13.0...v8.13.1) (2021-12-03)
 
 
