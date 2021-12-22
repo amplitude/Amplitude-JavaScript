@@ -19,7 +19,6 @@ import getHost from './get-host';
 import baseCookie from './base-cookie';
 import { AmplitudeServerZone, getEventLogApi } from './server-zone';
 import ConfigManager from './config-manager';
-import GlobalScope from './global-scope';
 
 /**
  * AmplitudeClient SDK API - instance constructor.
@@ -83,7 +82,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     _parseConfig(this.options, opt_config);
     if (
       (isBrowserEnv() || utils.isWebWorkerEnvironment()) &&
-      GlobalScope.Prototype !== undefined &&
+      globalThis.Prototype !== undefined &&
       Array.prototype.toJSON
     ) {
       prototypeJsFix();
@@ -248,7 +247,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
         // Monitoring just page exits because that is the most requested feature for now
         // "If you're specifically trying to detect page unload events, the pagehide event is the best option."
         // https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event
-        GlobalScope.addEventListener(
+        globalThis.addEventListener(
           'pagehide',
           () => {
             handleVisibilityChange();
@@ -763,7 +762,7 @@ AmplitudeClient.prototype._getReferrer = function _getReferrer() {
  * @private
  */
 AmplitudeClient.prototype._getUrlParams = function _getUrlParams() {
-  return GlobalScope.location.search;
+  return globalThis.location.search;
 };
 
 /**
@@ -1785,7 +1784,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
     }
     this._sending = true;
   }
-  var protocol = this.options.forceHttps ? 'https' : 'https:' === GlobalScope.location.protocol ? 'https' : 'http';
+  var protocol = this.options.forceHttps ? 'https' : 'https:' === globalThis.location.protocol ? 'https' : 'http';
   var url = protocol + '://' + this.options.apiEndpoint;
 
   // fetch events to send

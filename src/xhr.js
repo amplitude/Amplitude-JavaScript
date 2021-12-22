@@ -1,5 +1,4 @@
 import queryString from 'query-string';
-import GlobalScope from './global-scope';
 
 /*
  * Simple AJAX request object
@@ -17,9 +16,9 @@ function setHeaders(xhr, headers) {
 }
 
 Request.prototype.send = function (callback) {
-  var isIE = GlobalScope.XDomainRequest ? true : false;
+  var isIE = globalThis.XDomainRequest ? true : false;
   if (isIE) {
-    var xdr = new GlobalScope.XDomainRequest();
+    var xdr = new globalThis.XDomainRequest();
     xdr.open('POST', this.url, true);
     xdr.onload = function () {
       callback(200, xdr.responseText);

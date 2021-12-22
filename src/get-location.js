@@ -1,7 +1,5 @@
-import GlobalScope from './global-scope';
-
 const getLocation = () => {
-  return GlobalScope.location;
+  return globalThis.location;
 };
 
 export default getLocation;

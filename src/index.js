@@ -1,8 +1,7 @@
 // Entry point
 import Amplitude from './amplitude';
-import GlobalScope from './global-scope';
 
-const old = (typeof GlobalScope !== 'undefined' && GlobalScope.amplitude) || {};
+const old = (typeof globalThis !== 'undefined' && globalThis.amplitude) || {};
 const newInstance = new Amplitude();
 newInstance._q = old._q || [];
 

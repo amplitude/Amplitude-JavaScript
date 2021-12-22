@@ -17,4 +17,3 @@ import './base64Id.js';
 import './server-zone.js';
 import './config-manager.js';
 import './worker-storage.js';
-import './global-scope.js';
