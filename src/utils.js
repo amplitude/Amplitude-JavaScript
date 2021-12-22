@@ -274,7 +274,7 @@ var getQueryParam = function getQueryParam(name, query) {
 };
 
 const isWebWorkerEnvironment = () => {
-  return typeof WorkerglobalThis !== 'undefined';
+  return typeof WorkerGlobalScope !== 'undefined';
 };
 
 export default {
