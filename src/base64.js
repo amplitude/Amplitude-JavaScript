@@ -1,4 +1,5 @@
 import UTF8 from './utf8';
+import GlobalScope from './global-scope';
 
 /*
  * Base64 encoder/decoder
@@ -9,8 +10,8 @@ var Base64 = {
 
   encode: function (input) {
     try {
-      if (globalThis.btoa && globalThis.atob) {
-        return globalThis.btoa(unescape(encodeURIComponent(input)));
+      if (GlobalScope.btoa && GlobalScope.atob) {
+        return GlobalScope.btoa(unescape(encodeURIComponent(input)));
       }
     } catch (e) {
       //log(e);
@@ -53,8 +54,8 @@ var Base64 = {
 
   decode: function (input) {
     try {
-      if (globalThis.btoa && globalThis.atob) {
-        return decodeURIComponent(escape(globalThis.atob(input)));
+      if (GlobalScope.btoa && GlobalScope.atob) {
+        return decodeURIComponent(escape(GlobalScope.atob(input)));
       }
     } catch (e) {
       //log(e);

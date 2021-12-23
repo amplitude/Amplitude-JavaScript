@@ -21,7 +21,6 @@
     "define": "readonly",
     "amplitude": "readonly",
     "opera": "readonly",
-    "ActiveXObject": "readonly",
-    "globalThis": "readonly"
+    "ActiveXObject": "readonly"
   }
 }

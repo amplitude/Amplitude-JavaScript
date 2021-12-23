@@ -2,13 +2,14 @@
  * Implement localStorage to support Firefox 2-3 and IE 5-7
  */
 
+import GlobalScope from './global-scope';
 import WorkerStorage from './worker-storage';
 import utils from './utils';
 
 var localStorage;
 
 if (!BUILD_COMPAT_LOCAL_STORAGE) {
-  localStorage = globalThis.localStorage;
+  localStorage = GlobalScope.localStorage;
 }
 
 if (BUILD_COMPAT_LOCAL_STORAGE) {
@@ -17,9 +18,9 @@ if (BUILD_COMPAT_LOCAL_STORAGE) {
     var uid = new Date();
     var result;
     try {
-      globalThis.localStorage.setItem(uid, uid);
-      result = globalThis.localStorage.getItem(uid) === String(uid);
-      globalThis.localStorage.removeItem(uid);
+      GlobalScope.localStorage.setItem(uid, uid);
+      result = GlobalScope.localStorage.getItem(uid) === String(uid);
+      GlobalScope.localStorage.removeItem(uid);
       return result;
     } catch (e) {
       // localStorage not available
@@ -28,12 +29,12 @@ if (BUILD_COMPAT_LOCAL_STORAGE) {
   };
 
   if (windowLocalStorageAvailable()) {
-    localStorage = globalThis.localStorage;
-  } else if (typeof globalThis !== 'undefined' && globalThis.globalStorage) {
+    localStorage = GlobalScope.localStorage;
+  } else if (typeof GlobalScope !== 'undefined' && GlobalScope.globalStorage) {
     // Firefox 2-3 use globalStorage
     // See https://developer.mozilla.org/en/dom/storage#globalStorage
     try {
-      localStorage = globalThis.globalStorage[globalThis.location.hostname];
+      localStorage = GlobalScope.globalStorage[GlobalScope.location.hostname];
     } catch (e) {
       // Something bad happened...
     }
