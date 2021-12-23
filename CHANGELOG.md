@@ -1,3 +1,10 @@
+## [8.14.1](https://github.com/amplitude/amplitude-javascript/compare/v8.14.0...v8.14.1) (2021-12-23)
+
+
+### Bug Fixes
+
+* global-scope reference error in nodejs ([#474](https://github.com/amplitude/amplitude-javascript/issues/474)) ([bdce39d](https://github.com/amplitude/amplitude-javascript/commit/bdce39daedf8ff965e43f038cd2c73319c63930d))
+
 # [8.14.0](https://github.com/amplitude/amplitude-javascript/compare/v8.13.1...v8.14.0) (2021-12-21)
 
 
