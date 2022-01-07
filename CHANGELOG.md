@@ -1,3 +1,10 @@
+# [8.15.0](https://github.com/amplitude/amplitude-javascript/compare/v8.14.1...v8.15.0) (2022-01-07)
+
+
+### Features
+
+* make snippet public in NPM ([#478](https://github.com/amplitude/amplitude-javascript/issues/478)) ([8f512f0](https://github.com/amplitude/amplitude-javascript/commit/8f512f0a3811acaffd3ad7662dcf0ca6738e0522))
+
 ## [8.14.1](https://github.com/amplitude/amplitude-javascript/compare/v8.14.0...v8.14.1) (2021-12-23)
 
 
