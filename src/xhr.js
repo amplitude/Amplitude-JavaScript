@@ -1,4 +1,5 @@
 import queryString from 'query-string';
+import GlobalScope from './global-scope';
 
 /*
  * Simple AJAX request object
@@ -16,9 +17,9 @@ function setHeaders(xhr, headers) {
 }
 
 Request.prototype.send = function (callback) {
-  var isIE = window.XDomainRequest ? true : false;
+  var isIE = GlobalScope.XDomainRequest ? true : false;
   if (isIE) {
-    var xdr = new window.XDomainRequest();
+    var xdr = new GlobalScope.XDomainRequest();
     xdr.open('POST', this.url, true);
     xdr.onload = function () {
       callback(200, xdr.responseText);
@@ -34,7 +35,7 @@ Request.prototype.send = function (callback) {
     xdr.ontimeout = function () {};
     xdr.onprogress = function () {};
     xdr.send(queryString.stringify(this.data));
-  } else {
+  } else if (typeof XMLHttpRequest !== 'undefined') {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', this.url, true);
     xhr.onreadystatechange = function () {
@@ -44,6 +45,20 @@ Request.prototype.send = function (callback) {
     };
     setHeaders(xhr, this.headers);
     xhr.send(queryString.stringify(this.data));
+  } else {
+    let responseStatus = undefined;
+    fetch(this.url, {
+      method: 'POST',
+      headers: this.headers,
+      body: queryString.stringify(this.data),
+    })
+      .then((response) => {
+        responseStatus = response.status;
+        return response.text();
+      })
+      .then((responseText) => {
+        callback(responseStatus, responseText);
+      });
   }
   //log('sent request to ' + this.url + ' with data ' + decodeURIComponent(queryString(this.data)));
 };
