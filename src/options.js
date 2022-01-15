@@ -52,6 +52,7 @@ import { version as libraryVersion } from '../package.json';
  * @property {string} [serverZone] - For server zone related configuration, used for server api endpoint and dynamic configuration.
  * @property {boolean} [useDynamicConfig] - Enable dynamic configuration to find best server url for user.
  * @property {boolean} [serverZoneBasedApi] - To update api endpoint with serverZone change or not. For data residency, recommend to enable it unless using own proxy server.
+ * @property {number} [sessionId=`null`] - The custom Session ID for the current session. *Note: This is not recommended unless you know what you are doing because the Session ID of a session is utilized for all session metrics in Amplitude.
  */
 export default {
   apiEndpoint: Constants.EVENT_LOG_URL,
@@ -121,4 +122,5 @@ export default {
   serverZone: AmplitudeServerZone.US,
   useDynamicConfig: false,
   serverZoneBasedApi: false,
+  sessionId: null,
 };

@@ -905,6 +905,27 @@ describe('AmplitudeClient', function () {
 
       assert.deepEqual(amplitude.options.plan, plan);
     });
+
+    it('should set sessionId from config', () => {
+      const amplitude = new AmplitudeClient();
+      amplitude.init(apiKey, null, { sessionId: 123 });
+      assert.equal(amplitude.getSessionId(), 123);
+      assert.isUndefined(amplitude.options.sessionId);
+    });
+
+    it('should set default sessionId', () => {
+      const amplitude = new AmplitudeClient();
+      amplitude.init(apiKey, null);
+      assert.isTrue(amplitude.getSessionId() > 0);
+      assert.isUndefined(amplitude.options.sessionId);
+    });
+
+    it('should not set invalid sessionId', () => {
+      const amplitude = new AmplitudeClient();
+      amplitude.init(apiKey, null, { sessionId: 'asdf' });
+      assert.isTrue(amplitude.getSessionId() > 0);
+      assert.isUndefined(amplitude.options.sessionId);
+    });
   });
 
   describe('runQueuedFunctions', function () {
