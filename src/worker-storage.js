@@ -30,5 +30,6 @@ export default class WorkerStorage {
 
   clear() {
     this.map.clear();
+    this.length = 0;
   }
 }

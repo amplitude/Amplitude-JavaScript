@@ -15,6 +15,7 @@ describe('WorkerStorage', function () {
       workerStorage.setItem('0', 'zero');
       workerStorage.setItem('1', 'one');
       assert.isTrue(workerStorage.key(1) === 'one');
+      assert.isTrue(workerStorage.length === 2);
     });
   });
 
@@ -23,6 +24,7 @@ describe('WorkerStorage', function () {
       const workerStorage = new WorkerStorage();
       workerStorage.setItem('0', 'zero');
       assert.isTrue(workerStorage.getItem('0') === 'zero');
+      assert.isTrue(workerStorage.length === 1);
     });
   });
 
@@ -32,6 +34,7 @@ describe('WorkerStorage', function () {
       workerStorage.setItem('0', 'zero');
       workerStorage.removeItem('0');
       assert.isTrue(workerStorage.getItem('0') === undefined);
+      assert.isTrue(workerStorage.length === 0);
     });
   });
 
@@ -43,6 +46,7 @@ describe('WorkerStorage', function () {
       workerStorage.clear();
       assert.isTrue(workerStorage.getItem('0') === undefined);
       assert.isTrue(workerStorage.getItem('1') === undefined);
+      assert.isTrue(workerStorage.length === 0);
     });
   });
 });
