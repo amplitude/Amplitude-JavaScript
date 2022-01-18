@@ -1,3 +1,10 @@
+## [8.15.1](https://github.com/amplitude/amplitude-javascript/compare/v8.15.0...v8.15.1) (2022-01-18)
+
+
+### Bug Fixes
+
+* Add missing worker storage length for clear method ([#487](https://github.com/amplitude/amplitude-javascript/issues/487)) ([6abb957](https://github.com/amplitude/amplitude-javascript/commit/6abb957b8cad332d4a020ffd8e9feb74a6b3096b))
+
 # [8.15.0](https://github.com/amplitude/amplitude-javascript/compare/v8.14.1...v8.15.0) (2022-01-07)
 
 
