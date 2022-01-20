@@ -1827,45 +1827,55 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
     return;
   }
   var scope = this;
-  new Request(url, data, this.options.headers).send(function (status, response) {
-    scope._sending = false;
-    try {
-      if (status === 200 && response === 'success') {
-        scope.removeEvents(maxEventId, maxIdentifyId, status, response);
+  try {
+    new Request(url, data, this.options.headers).send(function (status, response) {
+      scope._sending = false;
+      try {
+        if (status === 200 && response === 'success') {
+          scope.removeEvents(maxEventId, maxIdentifyId, status, response);
 
-        // Update the event cache after the removal of sent events.
-        if (scope.options.saveEvents) {
-          scope.saveEvents();
-        }
-
-        // Send more events if any queued during previous send.
-        scope._sendEventsIfReady();
-
-        // handle payload too large
-      } else {
-        scope._logErrorsOnEvents(maxEventId, maxIdentifyId, status, response);
-        if (status === 413) {
-          // utils.log('request too large');
-          // Can't even get this one massive event through. Drop it, even if it is an identify.
-          if (scope.options.uploadBatchSize === 1) {
-            scope.removeEvents(maxEventId, maxIdentifyId, status, response);
+          // Update the event cache after the removal of sent events.
+          if (scope.options.saveEvents) {
+            scope.saveEvents();
           }
 
-          // The server complained about the length of the request. Backoff and try again.
-          scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
-          scope.sendEvents();
+          // Send more events if any queued during previous send.
+          scope._sendEventsIfReady();
+
+          // handle payload too large
+        } else {
+          scope._logErrorsOnEvents(maxEventId, maxIdentifyId, status, response);
+          if (status === 413) {
+            // utils.log('request too large');
+            // Can't even get this one massive event through. Drop it, even if it is an identify.
+            if (scope.options.uploadBatchSize === 1) {
+              scope.removeEvents(maxEventId, maxIdentifyId, status, response);
+            }
+
+            // The server complained about the length of the request. Backoff and try again.
+            scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
+            scope.sendEvents();
+          }
         }
+        // else {
+        //  all the events are still queued, and will be retried when the next
+        //  event is sent In the interest of debugging, it would be nice to have
+        //  something like an event emitter for a better debugging experince
+        //  here.
+        // }
+      } catch (e) {
+        // utils.log.error('failed upload');
       }
-      // else {
-      //  all the events are still queued, and will be retried when the next
-      //  event is sent In the interest of debugging, it would be nice to have
-      //  something like an event emitter for a better debugging experince
-      //  here.
-      // }
-    } catch (e) {
-      // utils.log.error('failed upload');
-    }
-  });
+    });
+  } catch (e) {
+    const [status, response] = [0, 'Request failed to send'];
+
+    utils.log.error(response);
+    scope._logErrorsOnEvents(maxEventId, maxIdentifyId, status, response);
+    scope.removeEvents(maxEventId, maxIdentifyId, status, response, {
+      reason: e.message,
+    });
+  }
 };
 
 /**
