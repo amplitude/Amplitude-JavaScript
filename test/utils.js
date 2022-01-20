@@ -260,4 +260,24 @@ describe('utils', function () {
       assert.isFalse(utils.isWebWorkerEnvironment());
     });
   });
+
+  describe('validateSessionId', function () {
+    it('should return true', function () {
+      assert.isTrue(utils.validateSessionId(Date.now()));
+    });
+
+    it('should return false', function () {
+      assert.isFalse(utils.validateSessionId('asdf'));
+      assert.isFalse(utils.validateSessionId(0));
+      assert.isFalse(utils.validateSessionId(NaN));
+      assert.isFalse(utils.validateSessionId(null));
+      assert.isFalse(utils.validateSessionId(undefined));
+      assert.isFalse(utils.validateSessionId({}));
+      assert.isFalse(utils.validateSessionId([]));
+      assert.isFalse(utils.validateSessionId(new Map()));
+      assert.isFalse(utils.validateSessionId(new Set()));
+      assert.isFalse(utils.validateSessionId(true));
+      assert.isFalse(utils.validateSessionId(false));
+    });
+  });
 });

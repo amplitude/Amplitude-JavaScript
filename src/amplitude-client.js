@@ -174,13 +174,19 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
       var now = new Date().getTime();
       const startNewSession =
-        !this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout;
+        !this._sessionId ||
+        !this._lastEventTime ||
+        now - this._lastEventTime > this.options.sessionTimeout ||
+        this.options.sessionId;
       if (startNewSession) {
         if (this.options.unsetParamsReferrerOnNewSession) {
           this._unsetUTMParams();
         }
         this._newSession = true;
-        this._sessionId = now;
+        this._sessionId = this.options.sessionId || now;
+        // reset this.options.sessionId to avoid re-usage
+        // use instance.getSessionId() to get session id
+        this.options.sessionId = undefined;
 
         // only capture UTM params and referrer if new session
         if (this.options.saveParamsReferrerOncePerSession) {
@@ -386,6 +392,9 @@ var _parseConfig = function _parseConfig(options, config) {
     var inputValue = config[key];
     var expectedType = type(options[key]);
     if (key === 'transport' && !utils.validateTransport(inputValue)) {
+      return;
+    } else if (key === 'sessionId' && inputValue !== null) {
+      options[key] = utils.validateSessionId(inputValue) ? inputValue : null;
       return;
     } else if (!utils.validateInput(inputValue, key + ' option', expectedType)) {
       return;

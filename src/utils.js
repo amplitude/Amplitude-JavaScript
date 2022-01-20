@@ -278,6 +278,15 @@ const isWebWorkerEnvironment = () => {
   return typeof WorkerGlobalScope !== 'undefined';
 };
 
+const validateSessionId = (sessionId) => {
+  if (validateInput(sessionId, 'sessionId', 'number') && new Date(sessionId).getTime() > 0) {
+    return true;
+  }
+
+  log.error(`sessionId value must in milliseconds since epoch (Unix Timestamp)`);
+  return false;
+};
+
 export default {
   setLogLevel,
   getLogLevel,
@@ -293,4 +302,5 @@ export default {
   validateProperties,
   validateDeviceId,
   validateTransport,
+  validateSessionId,
 };
