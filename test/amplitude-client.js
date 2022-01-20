@@ -11,6 +11,7 @@ import Identify from '../src/identify.js';
 import constants from '../src/constants.js';
 import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 import { AmplitudeServerZone } from '../src/server-zone.js';
+import Request from '../src/xhr';
 
 // maintain for testing backwards compatability
 describe('AmplitudeClient', function () {
@@ -4495,6 +4496,21 @@ describe('AmplitudeClient', function () {
       amplitude.setUserId('test user');
       assert.equal(amplitude.getSessionId(), startTime);
       assert.equal(amplitude.options.userId, 'test user');
+    });
+
+    it('should handle failed requests to send events', function () {
+      const errorLogSpy = sinon.spy(utils.log, 'error');
+      const requestStub = sinon.stub(Request.prototype, 'send').throws();
+
+      const amplitude = new AmplitudeClient();
+      amplitude.init(apiKey);
+      amplitude.logEvent('testEvent1');
+
+      assert.isTrue(errorLogSpy.calledWith('Request failed to send'));
+      assert.equal(amplitude._unsentEvents.length, 0);
+
+      errorLogSpy.restore();
+      requestStub.restore();
     });
   });
 });
