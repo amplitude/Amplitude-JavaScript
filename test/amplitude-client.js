@@ -1690,6 +1690,42 @@ describe('AmplitudeClient', function () {
       assert.equal(server.requests[0].requestHeaders['Content-Type'], 'application/json;charset=utf-8');
     });
 
+    it('should send request with no cors header when passed an empty string', function () {
+      amplitude.init(apiKey, null, {
+        headers: { 'Cross-Origin-Resource-Policy': '' },
+      });
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.notExists(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy']);
+    });
+
+    it('should send request with no cors header when passed undefined', function () {
+      amplitude.init(apiKey, null, {
+        headers: { 'Cross-Origin-Resource-Policy': undefined },
+      });
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.notExists(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy']);
+    });
+
+    it('should send request with no cors header when passed null', function () {
+      amplitude.init(apiKey, null, {
+        headers: { 'Cross-Origin-Resource-Policy': null },
+      });
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.notExists(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy']);
+    });
+
+    it('should send request with custom cors header', function () {
+      amplitude.init(apiKey, null, {
+        headers: { 'Cross-Origin-Resource-Policy': 'same-site' },
+      });
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.equal(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy'], 'same-site');
+    });
+
     it('should send https request', function () {
       amplitude.options.forceHttps = true;
       amplitude.logEvent('Event Type 1');
@@ -1697,6 +1733,7 @@ describe('AmplitudeClient', function () {
       assert.equal(server.requests[0].url, 'https://api.amplitude.com');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
+      assert.equal(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy'], 'cross-origin');
     });
 
     it('should send https request by configuration', function () {

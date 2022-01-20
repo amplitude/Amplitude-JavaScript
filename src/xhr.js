@@ -10,8 +10,13 @@ var Request = function (url, data, headers) {
   this.headers = headers;
 };
 
+const CORS_HEADER = 'Cross-Origin-Resource-Policy';
+
 function setHeaders(xhr, headers) {
   for (const header in headers) {
+    if (header === CORS_HEADER && !headers[header]) {
+      continue;
+    }
     xhr.setRequestHeader(header, headers[header]);
   }
 }
