@@ -939,7 +939,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId, startNewSession
  * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
  *
  * Note: this will also set groupType: groupName as a user property.
- * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
+ * See the [advanced topics article](https://developers.amplitude.com/docs/javascript#user-groups) for more information.
  * @public
  * @param {string} groupType - the group type (ex: orgId)
  * @param {string|list} groupName - the name of the group (ex: 15), or a list of names of the groups
@@ -1543,7 +1543,7 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
  * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
  * (unless you explicitly set it with setGroup).
  *
- * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
+ * See the [advanced topics article](https://developers.amplitude.com/docs/javascript#user-groups) for more information
  * about groups and Count by Distinct on the Amplitude platform.
  * @public
  * @param {string} eventType - name of event
