@@ -1,3 +1,16 @@
+# [8.16.0](https://github.com/amplitude/amplitude-javascript/compare/v8.15.1...v8.16.0) (2022-01-21)
+
+
+### Bug Fixes
+
+* catch errors with Request.send ([#490](https://github.com/amplitude/amplitude-javascript/issues/490)) ([333f8a4](https://github.com/amplitude/amplitude-javascript/commit/333f8a4b6dca512c7c57e64ef2d6072020e5debd))
+
+
+### Features
+
+* accept custom session id paramter in config ([#485](https://github.com/amplitude/amplitude-javascript/issues/485)) ([b64b8b0](https://github.com/amplitude/amplitude-javascript/commit/b64b8b0d0619c5f749e71dca45773d7c869631bb))
+* allow cors header to be excluded from request headers ([#489](https://github.com/amplitude/amplitude-javascript/issues/489)) ([0119ac7](https://github.com/amplitude/amplitude-javascript/commit/0119ac7b92ba969e70189a6d212e7092e9e27818))
+
 ## [8.15.1](https://github.com/amplitude/amplitude-javascript/compare/v8.15.0...v8.15.1) (2022-01-18)
 
 
