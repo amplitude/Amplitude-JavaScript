@@ -1,6 +1,7 @@
 import Constants from './constants';
 import base64Id from './base64Id';
 import utils from './utils';
+import uuid from './uuid';
 
 const get = (name) => {
   try {
@@ -100,7 +101,7 @@ const areCookiesEnabled = (opts = {}) => {
   }
   let _areCookiesEnabled = false;
   try {
-    const uid = String(new Date());
+    const uid = uuid();
     set(cookieName, uid, opts);
     utils.log.info(`Testing if cookies available`);
     _areCookiesEnabled = get(cookieName + '=') === uid;
