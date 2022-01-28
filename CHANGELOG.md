@@ -1,3 +1,10 @@
+## [8.16.1](https://github.com/amplitude/amplitude-javascript/compare/v8.16.0...v8.16.1) (2022-01-28)
+
+
+### Bug Fixes
+
+* use Date.now() for test cookie value ([#495](https://github.com/amplitude/amplitude-javascript/issues/495)) ([03e270e](https://github.com/amplitude/amplitude-javascript/commit/03e270e3a001130064e368ff4e033b2d00612ff1))
+
 # [8.16.0](https://github.com/amplitude/amplitude-javascript/compare/v8.15.1...v8.16.0) (2022-01-21)
 
 
