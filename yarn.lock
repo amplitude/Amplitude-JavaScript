@@ -2,10 +2,12 @@
 # yarn lockfile v1
 
 
-"@amplitude/amplitude-core@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@amplitude/amplitude-core/-/amplitude-core-1.0.0.tgz#bb5defca1de54f63f6228fad462a5cbcd8e00485"
-  integrity sha512-VobJZObB7zo0PTxpPKRF5ow9b8FEfLHrDGYml8QF1Q1zTN0mN8P5daXUeGrCh56ZVXCM68vU7hb6F+8j3KLtJQ==
+"@amplitude/analytics-connector@1.0.0-alpha.0":
+  version "1.0.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-connector/-/analytics-connector-1.0.0-alpha.0.tgz#2a94313749dd9341a8b85bc1927ca4838910de9c"
+  integrity sha512-TTVOtvfQQ17Po54OYOPH7RKtvHGwI6x2g0+b/lFvlAM0a6Qal94Jm688Woke07qhxPFJfbQeZqPFrukWUsq8nw==
+  dependencies:
+    "@amplitude/ua-parser-js" "0.7.26"
 
 "@amplitude/eslint-plugin-amplitude@^1.0.1":
   version "1.0.1"
