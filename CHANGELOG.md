@@ -1,3 +1,30 @@
+## [8.16.1](https://github.com/amplitude/amplitude-javascript/compare/v8.16.0...v8.16.1) (2022-01-28)
+
+
+### Bug Fixes
+
+* use Date.now() for test cookie value ([#495](https://github.com/amplitude/amplitude-javascript/issues/495)) ([03e270e](https://github.com/amplitude/amplitude-javascript/commit/03e270e3a001130064e368ff4e033b2d00612ff1))
+
+# [8.16.0](https://github.com/amplitude/amplitude-javascript/compare/v8.15.1...v8.16.0) (2022-01-21)
+
+
+### Bug Fixes
+
+* catch errors with Request.send ([#490](https://github.com/amplitude/amplitude-javascript/issues/490)) ([333f8a4](https://github.com/amplitude/amplitude-javascript/commit/333f8a4b6dca512c7c57e64ef2d6072020e5debd))
+
+
+### Features
+
+* accept custom session id paramter in config ([#485](https://github.com/amplitude/amplitude-javascript/issues/485)) ([b64b8b0](https://github.com/amplitude/amplitude-javascript/commit/b64b8b0d0619c5f749e71dca45773d7c869631bb))
+* allow cors header to be excluded from request headers ([#489](https://github.com/amplitude/amplitude-javascript/issues/489)) ([0119ac7](https://github.com/amplitude/amplitude-javascript/commit/0119ac7b92ba969e70189a6d212e7092e9e27818))
+
+## [8.15.1](https://github.com/amplitude/amplitude-javascript/compare/v8.15.0...v8.15.1) (2022-01-18)
+
+
+### Bug Fixes
+
+* Add missing worker storage length for clear method ([#487](https://github.com/amplitude/amplitude-javascript/issues/487)) ([6abb957](https://github.com/amplitude/amplitude-javascript/commit/6abb957b8cad332d4a020ffd8e9feb74a6b3096b))
+
 # [8.15.0](https://github.com/amplitude/amplitude-javascript/compare/v8.14.1...v8.15.0) (2022-01-07)
 
 

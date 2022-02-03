@@ -100,7 +100,7 @@ const areCookiesEnabled = (opts = {}) => {
   }
   let _areCookiesEnabled = false;
   try {
-    const uid = String(new Date());
+    const uid = String(Date.now());
     set(cookieName, uid, opts);
     utils.log.info(`Testing if cookies available`);
     _areCookiesEnabled = get(cookieName + '=') === uid;

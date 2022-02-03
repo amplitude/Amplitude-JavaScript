@@ -11,6 +11,7 @@ import Identify from '../src/identify.js';
 import constants from '../src/constants.js';
 import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 import { AmplitudeServerZone } from '../src/server-zone.js';
+import Request from '../src/xhr';
 
 // maintain for testing backwards compatability
 describe('AmplitudeClient', function () {
@@ -905,6 +906,27 @@ describe('AmplitudeClient', function () {
 
       assert.deepEqual(amplitude.options.plan, plan);
     });
+
+    it('should set sessionId from config', () => {
+      const amplitude = new AmplitudeClient();
+      amplitude.init(apiKey, null, { sessionId: 123 });
+      assert.equal(amplitude.getSessionId(), 123);
+      assert.isUndefined(amplitude.options.sessionId);
+    });
+
+    it('should set default sessionId', () => {
+      const amplitude = new AmplitudeClient();
+      amplitude.init(apiKey, null);
+      assert.isTrue(amplitude.getSessionId() > 0);
+      assert.isUndefined(amplitude.options.sessionId);
+    });
+
+    it('should not set invalid sessionId', () => {
+      const amplitude = new AmplitudeClient();
+      amplitude.init(apiKey, null, { sessionId: 'asdf' });
+      assert.isTrue(amplitude.getSessionId() > 0);
+      assert.isUndefined(amplitude.options.sessionId);
+    });
   });
 
   describe('runQueuedFunctions', function () {
@@ -1669,6 +1691,42 @@ describe('AmplitudeClient', function () {
       assert.equal(server.requests[0].requestHeaders['Content-Type'], 'application/json;charset=utf-8');
     });
 
+    it('should send request with no cors header when passed an empty string', function () {
+      amplitude.init(apiKey, null, {
+        headers: { 'Cross-Origin-Resource-Policy': '' },
+      });
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.notExists(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy']);
+    });
+
+    it('should send request with no cors header when passed undefined', function () {
+      amplitude.init(apiKey, null, {
+        headers: { 'Cross-Origin-Resource-Policy': undefined },
+      });
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.notExists(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy']);
+    });
+
+    it('should send request with no cors header when passed null', function () {
+      amplitude.init(apiKey, null, {
+        headers: { 'Cross-Origin-Resource-Policy': null },
+      });
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.notExists(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy']);
+    });
+
+    it('should send request with custom cors header', function () {
+      amplitude.init(apiKey, null, {
+        headers: { 'Cross-Origin-Resource-Policy': 'same-site' },
+      });
+      amplitude.logEvent('Event Type 1');
+      assert.lengthOf(server.requests, 1);
+      assert.equal(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy'], 'same-site');
+    });
+
     it('should send https request', function () {
       amplitude.options.forceHttps = true;
       amplitude.logEvent('Event Type 1');
@@ -1676,6 +1734,7 @@ describe('AmplitudeClient', function () {
       assert.equal(server.requests[0].url, 'https://api.amplitude.com');
       assert.equal(server.requests[0].method, 'POST');
       assert.equal(server.requests[0].async, true);
+      assert.equal(server.requests[0].requestHeaders['Cross-Origin-Resource-Policy'], 'cross-origin');
     });
 
     it('should send https request by configuration', function () {
@@ -4474,6 +4533,21 @@ describe('AmplitudeClient', function () {
       amplitude.setUserId('test user');
       assert.equal(amplitude.getSessionId(), startTime);
       assert.equal(amplitude.options.userId, 'test user');
+    });
+
+    it('should handle failed requests to send events', function () {
+      const errorLogSpy = sinon.spy(utils.log, 'error');
+      const requestStub = sinon.stub(Request.prototype, 'send').throws();
+
+      const amplitude = new AmplitudeClient();
+      amplitude.init(apiKey);
+      amplitude.logEvent('testEvent1');
+
+      assert.isTrue(errorLogSpy.calledWith('Request failed to send'));
+      assert.equal(amplitude._unsentEvents.length, 0);
+
+      errorLogSpy.restore();
+      requestStub.restore();
     });
   });
 });

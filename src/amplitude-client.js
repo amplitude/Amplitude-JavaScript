@@ -182,13 +182,19 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
       var now = new Date().getTime();
       const startNewSession =
-        !this._sessionId || !this._lastEventTime || now - this._lastEventTime > this.options.sessionTimeout;
+        !this._sessionId ||
+        !this._lastEventTime ||
+        now - this._lastEventTime > this.options.sessionTimeout ||
+        this.options.sessionId;
       if (startNewSession) {
         if (this.options.unsetParamsReferrerOnNewSession) {
           this._unsetUTMParams();
         }
         this._newSession = true;
-        this._sessionId = now;
+        this._sessionId = this.options.sessionId || now;
+        // reset this.options.sessionId to avoid re-usage
+        // use instance.getSessionId() to get session id
+        this.options.sessionId = undefined;
 
         // only capture UTM params and referrer if new session
         if (this.options.saveParamsReferrerOncePerSession) {
@@ -409,6 +415,9 @@ var _parseConfig = function _parseConfig(options, config) {
     var inputValue = config[key];
     var expectedType = type(options[key]);
     if (key === 'transport' && !utils.validateTransport(inputValue)) {
+      return;
+    } else if (key === 'sessionId' && inputValue !== null) {
+      options[key] = utils.validateSessionId(inputValue) ? inputValue : null;
       return;
     } else if (!utils.validateInput(inputValue, key + ' option', expectedType)) {
       return;
@@ -959,7 +968,7 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId, startNewSession
  * You can also call setGroup multiple times with different groupTypes to track multiple types of groups (up to 5 per app).
  *
  * Note: this will also set groupType: groupName as a user property.
- * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
+ * See the [advanced topics article](https://developers.amplitude.com/docs/javascript#user-groups) for more information.
  * @public
  * @param {string} groupType - the group type (ex: orgId)
  * @param {string|list} groupName - the name of the group (ex: 15), or a list of names of the groups
@@ -1578,7 +1587,7 @@ AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
  * Note: the group(s) set only apply for the specific event type being logged and does not persist on the user
  * (unless you explicitly set it with setGroup).
  *
- * See the [advanced topics article](https://developers.amplitude.com/docs/setting-user-groups) for more information.
+ * See the [advanced topics article](https://developers.amplitude.com/docs/javascript#user-groups) for more information
  * about groups and Count by Distinct on the Amplitude platform.
  * @public
  * @param {string} eventType - name of event
@@ -1862,45 +1871,55 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
     return;
   }
   var scope = this;
-  new Request(url, data, this.options.headers).send(function (status, response) {
-    scope._sending = false;
-    try {
-      if (status === 200 && response === 'success') {
-        scope.removeEvents(maxEventId, maxIdentifyId, status, response);
+  try {
+    new Request(url, data, this.options.headers).send(function (status, response) {
+      scope._sending = false;
+      try {
+        if (status === 200 && response === 'success') {
+          scope.removeEvents(maxEventId, maxIdentifyId, status, response);
 
-        // Update the event cache after the removal of sent events.
-        if (scope.options.saveEvents) {
-          scope.saveEvents();
-        }
-
-        // Send more events if any queued during previous send.
-        scope._sendEventsIfReady();
-
-        // handle payload too large
-      } else {
-        scope._logErrorsOnEvents(maxEventId, maxIdentifyId, status, response);
-        if (status === 413) {
-          // utils.log('request too large');
-          // Can't even get this one massive event through. Drop it, even if it is an identify.
-          if (scope.options.uploadBatchSize === 1) {
-            scope.removeEvents(maxEventId, maxIdentifyId, status, response);
+          // Update the event cache after the removal of sent events.
+          if (scope.options.saveEvents) {
+            scope.saveEvents();
           }
 
-          // The server complained about the length of the request. Backoff and try again.
-          scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
-          scope.sendEvents();
+          // Send more events if any queued during previous send.
+          scope._sendEventsIfReady();
+
+          // handle payload too large
+        } else {
+          scope._logErrorsOnEvents(maxEventId, maxIdentifyId, status, response);
+          if (status === 413) {
+            // utils.log('request too large');
+            // Can't even get this one massive event through. Drop it, even if it is an identify.
+            if (scope.options.uploadBatchSize === 1) {
+              scope.removeEvents(maxEventId, maxIdentifyId, status, response);
+            }
+
+            // The server complained about the length of the request. Backoff and try again.
+            scope.options.uploadBatchSize = Math.ceil(numEvents / 2);
+            scope.sendEvents();
+          }
         }
+        // else {
+        //  all the events are still queued, and will be retried when the next
+        //  event is sent In the interest of debugging, it would be nice to have
+        //  something like an event emitter for a better debugging experince
+        //  here.
+        // }
+      } catch (e) {
+        // utils.log.error('failed upload');
       }
-      // else {
-      //  all the events are still queued, and will be retried when the next
-      //  event is sent In the interest of debugging, it would be nice to have
-      //  something like an event emitter for a better debugging experince
-      //  here.
-      // }
-    } catch (e) {
-      // utils.log.error('failed upload');
-    }
-  });
+    });
+  } catch (e) {
+    const [status, response] = [0, 'Request failed to send'];
+
+    utils.log.error(response);
+    scope._logErrorsOnEvents(maxEventId, maxIdentifyId, status, response);
+    scope.removeEvents(maxEventId, maxIdentifyId, status, response, {
+      reason: e.message,
+    });
+  }
 };
 
 /**
