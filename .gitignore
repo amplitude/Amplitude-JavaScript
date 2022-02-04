@@ -19,3 +19,6 @@ amplitude.umd.min.js
 amplitude.native.js
 amplitude.nocompat.js
 amplitude.nocompat.min.js
+
+# For WebStorm IDE
+.idea/

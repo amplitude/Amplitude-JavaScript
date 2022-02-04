@@ -21,6 +21,8 @@ import { AmplitudeServerZone, getEventLogApi } from './server-zone';
 import ConfigManager from './config-manager';
 import GlobalScope from './global-scope';
 
+import { AnalyticsConnector } from '@amplitude/analytics-connector';
+
 /**
  * AmplitudeClient SDK API - instance constructor.
  * The Amplitude class handles creation of client instances, all you need to do is call amplitude.getInstance()
@@ -56,6 +58,9 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._sessionId = null;
   this._isInitialized = false;
 
+  // used to integrate with experiment SDK (client-side exposure tracking & real-time user properties)
+  this._connector = null;
+
   this._userAgent = (navigator && navigator.userAgent) || null;
 };
 
@@ -80,6 +85,9 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
   }
 
   try {
+    // used to integrate with experiment SDK (client-side exposure tracking & real-time user properties)
+    this._connector = AnalyticsConnector.getInstance(this._instanceName);
+
     _parseConfig(this.options, opt_config);
     if (
       (isBrowserEnv() || utils.isWebWorkerEnvironment()) &&
@@ -263,6 +271,21 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
         );
       }
     }
+
+    // Sets an event receiver to receive and forward exposure events from the experiment SDK.
+    this._connector.eventBridge.setEventReceiver((event) => {
+      this._logEvent(event.eventType, event.eventProperties, event.userProperties);
+    });
+
+    // Set the user ID and device ID in the core identity store to enable fetching variants.
+    const editor = this._connector.identityStore.editIdentity();
+    if (this.options.deviceId) {
+      editor.setDeviceId(this.options.deviceId);
+    }
+    if (this.options.userId) {
+      editor.setUserId(this.options.userId);
+    }
+    editor.commit();
   } catch (err) {
     utils.log.error(err);
     if (opt_config && type(opt_config.onError) === 'function') {
@@ -925,6 +948,12 @@ AmplitudeClient.prototype.setUserId = function setUserId(userId, startNewSession
     }
 
     _saveCookieData(this);
+
+    // Update core identity store to propagate new user info
+    // to experiment SDK and trigger a fetch if the ID has changed.
+    if (this._connector) {
+      this._connector.identityStore.editIdentity().setUserId(this.options.userId).commit();
+    }
   } catch (e) {
     utils.log.error(e);
   }
@@ -1054,6 +1083,12 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
     if (!utils.isEmptyString(deviceId)) {
       this.options.deviceId = '' + deviceId;
       _saveCookieData(this);
+
+      // Update core identity store to propagate new user info
+      // to experiment SDK and trigger a fetch if the ID has changed.
+      if (this._connector) {
+        this._connector.identityStore.editIdentity().setDeviceId(this.options.deviceId).commit();
+      }
     }
   } catch (e) {
     utils.log.error(e);
@@ -1394,6 +1429,15 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
     }
 
     this._sendEventsIfReady();
+
+    // In the case of an identify event, update the core user store so the experiment SDK can fetch new variants and
+    // utilize user properties in real time.
+    if (eventType === Constants.IDENTIFY_EVENT && this._connector) {
+      this._connector.identityStore
+        .editIdentity()
+        .updateUserProperties(utils.truncate(utils.validateProperties(userProperties)))
+        .commit();
+    }
 
     return eventId;
   } catch (e) {

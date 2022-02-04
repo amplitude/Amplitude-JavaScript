@@ -1,5 +1,5 @@
 import config from './rollup.config.js';
-import legacy from 'rollup-plugin-legacy';
+import legacy from '@rollup/plugin-legacy';
 
 config.plugins.push(legacy({
   './amplitude-snippet.min.js': 'amplitude',
