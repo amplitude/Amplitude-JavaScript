@@ -1,3 +1,10 @@
+# [8.17.0](https://github.com/amplitude/amplitude-javascript/compare/v8.16.1...v8.17.0) (2022-02-10)
+
+
+### Features
+
+* Support seamless integration with amplitude experiment SDK ([#457](https://github.com/amplitude/amplitude-javascript/issues/457)) ([af8f9d1](https://github.com/amplitude/amplitude-javascript/commit/af8f9d15f276773dd1aaff28645d5dad38dc1f35))
+
 ## [8.16.1](https://github.com/amplitude/amplitude-javascript/compare/v8.16.0...v8.16.1) (2022-01-28)
 
 
