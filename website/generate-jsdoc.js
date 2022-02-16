@@ -34,7 +34,7 @@ function documentOptionsFile(data) {
 
   ${data.description}
 
-Option | Type | Description |	Default
+Option | Type | Default |	Description
 -------|------|-------------|---------
 ${documentOptionsProperties(data)}
 
