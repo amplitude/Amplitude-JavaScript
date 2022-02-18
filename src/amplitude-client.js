@@ -1100,7 +1100,7 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
  * on an end-of-lifecycle event handler such as `onpagehide` or `onvisibilitychange`
  * @public
  * @param {string} transport - transport mechanism to use for events. Must be one of `http` or `beacon`.
- * @example amplitudeClient.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
+ * @example amplitudeClient.setTransport(`beacon`);
  */
 AmplitudeClient.prototype.setTransport = function setTransport(transport) {
   if (this._shouldDeferCall()) {
