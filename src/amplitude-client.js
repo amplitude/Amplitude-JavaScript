@@ -1100,7 +1100,7 @@ AmplitudeClient.prototype.setDeviceId = function setDeviceId(deviceId) {
  * on an end-of-lifecycle event handler such as `onpagehide` or `onvisibilitychange`
  * @public
  * @param {string} transport - transport mechanism to use for events. Must be one of `http` or `beacon`.
- * @example amplitudeClient.setDeviceId('45f0954f-eb79-4463-ac8a-233a6f45a8f0');
+ * @example amplitudeClient.setTransport('beacon');
  */
 AmplitudeClient.prototype.setTransport = function setTransport(transport) {
   if (this._shouldDeferCall()) {
@@ -1528,7 +1528,7 @@ AmplitudeClient.prototype.logEvent = function logEvent(
  * fails. The failure can be from the request being malformed or from a network failure
  * Note: the server response code and response body from the event upload are passed to the callback function.
  * @param {boolean} outOfSession - (optional) if out of the sessioin or not
- * @example amplitudeClient.logEvent('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15});
+ * @example amplitudeClient.logEventWithTimestamp('Clicked Homepage Button', {'finished_flow': false, 'clicks': 15}, Date.now());
  */
 AmplitudeClient.prototype.logEventWithTimestamp = function logEvent(
   eventType,
@@ -2154,7 +2154,7 @@ AmplitudeClient.prototype.setUseDynamicConfig = function setUseDynamicConfig(use
  * @public
  * @param {string} serverZone - the server zone value. AmplitudeServerZone.US or AmplitudeServerZone.EU.
  * @param {bool} serverZoneBasedApi - (optional) update api endpoint with serverZone change or not. For data residency, recommend to enable it unless using own proxy server.
- * @example amplitudeClient.setServerZone('joe@gmail.com', true);
+ * @example amplitudeClient.setServerZone(AmplitudeServerZone.EU, true);
  */
 AmplitudeClient.prototype.setServerZone = function setServerZone(serverZone, serverZoneBasedApi = true) {
   if (
