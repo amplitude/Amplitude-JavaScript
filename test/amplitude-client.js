@@ -901,6 +901,7 @@ describe('AmplitudeClient', function () {
         branch: 'my-feature-branch',
         source: 'web',
         version: '1.0.0',
+        versionId: '9ec23ba0-275f-468f-80d1-66b88bff9529',
       };
       amplitude.init(apiKey, null, { plan: plan });
 
