@@ -1,3 +1,10 @@
+# [8.18.0](https://github.com/amplitude/amplitude-javascript/compare/v8.17.0...v8.18.0) (2022-03-31)
+
+
+### Features
+
+* Add versionId to tracking plan data ([#518](https://github.com/amplitude/amplitude-javascript/issues/518)) ([26dd38b](https://github.com/amplitude/amplitude-javascript/commit/26dd38b96ca4dd5f52670e287dee16a0c9881d32))
+
 # [8.17.0](https://github.com/amplitude/amplitude-javascript/compare/v8.16.1...v8.17.0) (2022-02-10)
 
 
