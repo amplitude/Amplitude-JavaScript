@@ -1413,6 +1413,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
         branch: this.options.plan.branch || undefined,
         source: this.options.plan.source || undefined,
         version: this.options.plan.version || undefined,
+        versionId: this.options.plan.versionId || undefined,
       };
     }
 
@@ -1446,7 +1447,13 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
 };
 
 const _isObservePlanSet = function _isObservePlanSet(scope) {
-  return scope.options.plan && (scope.options.plan.source || scope.options.plan.branch || scope.options.plan.version);
+  return (
+    scope.options.plan &&
+    (scope.options.plan.source ||
+      scope.options.plan.branch ||
+      scope.options.plan.version ||
+      scope.options.plan.versionId)
+  );
 };
 
 var _shouldTrackField = function _shouldTrackField(scope, field) {
