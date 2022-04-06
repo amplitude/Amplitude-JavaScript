@@ -1,3 +1,10 @@
+## [8.18.1](https://github.com/amplitude/amplitude-javascript/compare/v8.18.0...v8.18.1) (2022-04-06)
+
+
+### Bug Fixes
+
+* update analytics-connector to 1.4.1 ([#520](https://github.com/amplitude/amplitude-javascript/issues/520)) ([956d53b](https://github.com/amplitude/amplitude-javascript/commit/956d53b93283ccbe7985d2502dd1b117cc575e08))
+
 # [8.18.0](https://github.com/amplitude/amplitude-javascript/compare/v8.17.0...v8.18.0) (2022-03-31)
 
 
