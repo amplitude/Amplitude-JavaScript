@@ -126,6 +126,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
       secure: this.options.secureCookie,
       sameSite: this.options.sameSiteCookie,
     });
+    this.options.domain = this.cookieStorage.options().domain;
 
     this._metadataStorage = new MetadataStorage({
       storageKey: this._cookieName,
@@ -141,7 +142,6 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     const hasNewCookie = !!this._metadataStorage.load();
     this._useOldCookie = !hasNewCookie && hasOldCookie && !this.options.cookieForceUpgrade;
     const hasCookie = hasNewCookie || hasOldCookie;
-    this.options.domain = this.cookieStorage.options().domain;
 
     if (this.options.deferInitialization && !hasCookie) {
       this._deferInitialization(apiKey, opt_userId, opt_config, opt_callback);
