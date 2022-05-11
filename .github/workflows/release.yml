@@ -13,12 +13,12 @@ jobs:
     name: Authorize
     runs-on: ubuntu-latest
     steps:
-    - name: ${{ github.actor }} permission check to do a release
-      uses: "lannonbr/repo-permission-check-action@2.0.2"
-      with:
-        permission: "write"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: ${{ github.actor }} permission check to do a release
+        uses: "lannonbr/repo-permission-check-action@2.0.2"
+        with:
+          permission: "write"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
     name: Release
