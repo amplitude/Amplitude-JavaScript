@@ -17,8 +17,8 @@ jobs:
       uses: "lannonbr/repo-permission-check-action@2.0.2"
       with:
         permission: "write"
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
     name: Release
