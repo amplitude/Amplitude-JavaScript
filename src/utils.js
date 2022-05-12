@@ -102,7 +102,7 @@ const validateDeviceId = function validateDeviceId(deviceId) {
   if (!validateInput(deviceId, 'deviceId', 'string')) {
     return false;
   }
-  if (deviceId.includes('.')) {
+  if (deviceId.indexOf('.') >= 0) {
     log.error(`Device IDs may not contain '.' characters. Value will be ignored: "${deviceId}"`);
     return false;
   }
