@@ -1,3 +1,14 @@
+## [8.18.2](https://github.com/amplitude/amplitude-javascript/compare/v8.18.1...v8.18.2) (2022-05-12)
+
+
+### Bug Fixes
+
+* assign domain after cookie storage options are given ([#528](https://github.com/amplitude/amplitude-javascript/issues/528)) ([2440e9a](https://github.com/amplitude/amplitude-javascript/commit/2440e9a0309236a27bd639ced87b2d2187d2d48b))
+* fix perms for github token in release workflow ([#532](https://github.com/amplitude/amplitude-javascript/issues/532)) ([195c6ef](https://github.com/amplitude/amplitude-javascript/commit/195c6ef158ec3d81b3a9308988f2aec6e19f7ffb))
+* fix release work flow perms to include write access to contents ([#533](https://github.com/amplitude/amplitude-javascript/issues/533)) ([c8845ca](https://github.com/amplitude/amplitude-javascript/commit/c8845caec66b12d954ebb0ddeb2aa4e2d8dc29b8))
+* replace String.prototype.includes with String.prototype.indexOf ([#530](https://github.com/amplitude/amplitude-javascript/issues/530)) ([b0992f8](https://github.com/amplitude/amplitude-javascript/commit/b0992f818e5986985a62f8c2b178729c805d4060))
+* update analytics connector 1.4.2 ([#531](https://github.com/amplitude/amplitude-javascript/issues/531)) ([fba43bf](https://github.com/amplitude/amplitude-javascript/commit/fba43bfe55cc50a80cdbb83dd3616cc3392007c4))
+
 ## [8.18.1](https://github.com/amplitude/amplitude-javascript/compare/v8.18.0...v8.18.1) (2022-04-06)
 
 
