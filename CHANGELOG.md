@@ -1,3 +1,10 @@
+## [8.18.4](https://github.com/amplitude/amplitude-javascript/compare/v8.18.3...v8.18.4) (2022-05-31)
+
+
+### Bug Fixes
+
+* polyfill object entries for ie11 ([#536](https://github.com/amplitude/amplitude-javascript/issues/536)) ([9e68a45](https://github.com/amplitude/amplitude-javascript/commit/9e68a4585c1d7147eca99d3be296054e8c232081))
+
 ## [8.18.3](https://github.com/amplitude/amplitude-javascript/compare/v8.18.2...v8.18.3) (2022-05-24)
 
 
