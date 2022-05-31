@@ -39,11 +39,7 @@ def main():
     parser.add_argument('--version', '-v', required=True,
                         help='Version to deploy')
     args = parser.parse_args()
-    s3 = Session(
-        aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
-        aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
-        region_name=os.environ.get('AWS_REGION'),
-    ).resource('s3')
+    s3 = Session().resource('s3')
     bucket = s3.Bucket(os.environ.get('S3_BUCKET_NAME'))
 
     files = [
