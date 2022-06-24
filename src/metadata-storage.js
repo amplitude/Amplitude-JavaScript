@@ -35,8 +35,8 @@ class MetadataStorage {
     this.expirationDays = expirationDays;
 
     this.cookieDomain = '';
-
-    const writableTopDomain = topDomain(getLocation().href);
+    const loc = getLocation() ? getLocation().href : undefined;
+    const writableTopDomain = topDomain(loc);
     this.cookieDomain = domain || (writableTopDomain ? '.' + writableTopDomain : null);
 
     if (storageOptionExists[storage]) {

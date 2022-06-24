@@ -39,7 +39,6 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._instanceName = utils.isEmptyString(instanceName) ? Constants.DEFAULT_INSTANCE : instanceName.toLowerCase();
   this._unsentEvents = [];
   this._unsentIdentifys = [];
-  this._ua = new UAParser(navigator.userAgent).getResult();
   this.options = { ...DEFAULT_OPTIONS, trackingOptions: { ...DEFAULT_OPTIONS.trackingOptions } };
   this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
@@ -61,7 +60,8 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   // used to integrate with experiment SDK (client-side exposure tracking & real-time user properties)
   this._connector = null;
 
-  this._userAgent = (navigator && navigator.userAgent) || null;
+  this._userAgent = (typeof navigator !== 'undefined' && navigator && navigator.userAgent) || null;
+  this._ua = new UAParser(this._userAgent).getResult();
 };
 
 AmplitudeClient.prototype.Identify = Identify;
@@ -249,7 +249,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
     }
 
     const onExitPage = this.options.onExitPage;
-    if (type(onExitPage) === 'function') {
+    if (type(onExitPage) === 'function' && GlobalScope.addEventListener) {
       if (!this.pageHandlersAdded) {
         this.pageHandlersAdded = true;
 
@@ -1865,7 +1865,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
     checksum: md5(Constants.API_VERSION + this.options.apiKey + events + uploadTime),
   };
 
-  if (this.options.transport === Constants.TRANSPORT_BEACON) {
+  if (this.options.transport === Constants.TRANSPORT_BEACON && typeof navigator !== 'undefined') {
     const success = navigator.sendBeacon(url, new URLSearchParams(data));
 
     if (success) {

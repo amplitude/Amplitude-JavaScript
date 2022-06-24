@@ -119,7 +119,7 @@ const validateTransport = function validateTransport(transport) {
     return false;
   }
 
-  if (transport !== constants.TRANSPORT_HTTP && !navigator.sendBeacon) {
+  if (transport !== constants.TRANSPORT_HTTP && typeof navigator !== 'undefined' && !navigator.sendBeacon) {
     log.error(`browser does not support sendBeacon, so transport must be HTTP`);
     return false;
   }
