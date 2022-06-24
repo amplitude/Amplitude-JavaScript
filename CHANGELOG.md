@@ -1,3 +1,11 @@
+## [8.18.5](https://github.com/amplitude/amplitude-javascript/compare/v8.18.4...v8.18.5) (2022-06-24)
+
+
+### Bug Fixes
+
+* add guard for navigator for use in envs that do no support navigator ([#542](https://github.com/amplitude/amplitude-javascript/issues/542)) ([c3b31ad](https://github.com/amplitude/amplitude-javascript/commit/c3b31ad34fd3c16ab743346b785fe632c48d2c21))
+* fix s3 upload script to use iam role ([#534](https://github.com/amplitude/amplitude-javascript/issues/534)) ([a453dc3](https://github.com/amplitude/amplitude-javascript/commit/a453dc3c9b830f916414551597014d61f2a509ac))
+
 ## [8.18.4](https://github.com/amplitude/amplitude-javascript/compare/v8.18.3...v8.18.4) (2022-05-31)
 
 
