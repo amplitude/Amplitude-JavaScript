@@ -1407,6 +1407,7 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
       groups: utils.truncate(utils.validateGroups(groups)),
       group_properties: utils.truncate(utils.validateProperties(groupProperties)),
       user_agent: this._userAgent,
+      partner_id: this.options.partnerId || null,
     };
 
     if (_isObservePlanSet(this)) {
