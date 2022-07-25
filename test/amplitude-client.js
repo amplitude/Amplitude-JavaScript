@@ -4551,4 +4551,25 @@ describe('AmplitudeClient', function () {
       requestStub.restore();
     });
   });
+
+  describe('partnerId Support', function () {
+    beforeEach(function () {
+      reset();
+    });
+
+    it('should include partner_id', function () {
+      const partnerId = 'test-partner-id';
+      amplitude.init(apiKey, null, { batchEvents: true, partnerId: partnerId });
+
+      amplitude.logEvent('testEvent1');
+      assert.equal(amplitude._unsentEvents[0].event.partner_id, partnerId);
+    });
+
+    it('should set partner_id default null', function () {
+      amplitude.init(apiKey, null, { batchEvents: true });
+
+      amplitude.logEvent('testEvent1');
+      assert.equal(amplitude._unsentEvents[0].event.partner_id, null);
+    });
+  });
 });
