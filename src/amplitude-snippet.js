@@ -9,11 +9,11 @@
   var as = document.createElement('script');
   as.type = 'text/javascript';
   // Don't edit as.integrity, it is tracked by semantic-release-bot during releases
-  as.integrity = 'sha384-0WHS/o1IoPrT+ZyLLW2Wf8tyCwMSsD5Edo2f6zevisq4BHjGt6NG7jrASRIAk4UE';
+  as.integrity = 'sha384-hdEvx3zkd6VeH6O83N6nPQeUBkmA/KVVI/xP1PTxTSX9EGdyzELov1iyspAgfaI8';
   as.crossOrigin = 'anonymous';
   as.async = true;
   // Don't edit as.src, it is tracked by semantic-release-bot during releases
-  as.src = 'https://cdn.amplitude.com/libs/amplitude-8.18.5-min.gz.js';
+  as.src = 'https://cdn.amplitude.com/libs/amplitude-8.19.0-min.gz.js';
   as.onload = function () {
     if (!window.amplitude.runQueuedFunctions) {
       console.log('[Amplitude] Error: could not load SDK');

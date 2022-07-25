@@ -1,3 +1,10 @@
+# [8.19.0](https://github.com/amplitude/amplitude-javascript/compare/v8.18.5...v8.19.0) (2022-07-25)
+
+
+### Features
+
+* add partner_id support ([#545](https://github.com/amplitude/amplitude-javascript/issues/545)) ([7b343ea](https://github.com/amplitude/amplitude-javascript/commit/7b343ea7341185e448cb2fe13ff82213cc3ba817))
+
 ## [8.18.5](https://github.com/amplitude/amplitude-javascript/compare/v8.18.4...v8.18.5) (2022-06-24)
 
 
