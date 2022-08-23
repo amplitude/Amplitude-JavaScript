@@ -792,7 +792,7 @@ AmplitudeClient.prototype._getReferrer = function _getReferrer() {
   const urlRefer = this._getReferrerFromUrlParam(this._getUrlParams());
 
   if (urlRefer) return urlRefer;
-  else typeof document !== 'undefined' ? document.referrer : '';
+  else return typeof document !== 'undefined' ? document.referrer : '';
 };
 
 /**
