@@ -789,7 +789,10 @@ var _sendParamsReferrerUserProperties = function _sendParamsReferrerUserProperti
  * @private
  */
 AmplitudeClient.prototype._getReferrer = function _getReferrer() {
-  return typeof document !== 'undefined' ? document.referrer : '';
+  const urlRefer = this._getReferrerFromUrlParam(this._getUrlParams());
+
+  if (urlRefer) return urlRefer;
+  else return typeof document !== 'undefined' ? document.referrer : '';
 };
 
 /**
@@ -833,6 +836,14 @@ AmplitudeClient.prototype._saveFbclid = function _saveFbclid(urlParams) {
  */
 AmplitudeClient.prototype._getDeviceIdFromUrlParam = function _getDeviceIdFromUrlParam(urlParams) {
   return utils.getQueryParam(Constants.AMP_DEVICE_ID_PARAM, urlParams);
+};
+
+/**
+ * Try to fetch referrer from url params.
+ * @private
+ */
+AmplitudeClient.prototype._getReferrerFromUrlParam = function _getReferrerFromUrlParam(urlParams) {
+  return utils.getQueryParam(Constants.AMP_REFERRER_PARAM, urlParams);
 };
 
 /**

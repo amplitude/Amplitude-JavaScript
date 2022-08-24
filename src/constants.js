@@ -50,6 +50,7 @@ export default {
   REVENUE_REVENUE_TYPE: '$revenueType',
 
   AMP_DEVICE_ID_PARAM: 'amp_device_id', // url param
+  AMP_REFERRER_PARAM: 'amp_referrer', // url param for overwriting the document.refer
 
   REFERRER: 'referrer',
 
