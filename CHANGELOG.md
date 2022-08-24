@@ -1,3 +1,10 @@
+# [8.20.0](https://github.com/amplitude/amplitude-javascript/compare/v8.19.0...v8.20.0) (2022-08-24)
+
+
+### Features
+
+* enable the ability to overwrite the referrer ([#551](https://github.com/amplitude/amplitude-javascript/issues/551)) ([03c0a89](https://github.com/amplitude/amplitude-javascript/commit/03c0a890d578db1ada383cf1e6195d71275bac44))
+
 # [8.19.0](https://github.com/amplitude/amplitude-javascript/compare/v8.18.5...v8.19.0) (2022-07-25)
 
 
