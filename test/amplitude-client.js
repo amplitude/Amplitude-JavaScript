@@ -908,6 +908,17 @@ describe('AmplitudeClient', function () {
       assert.deepEqual(amplitude.options.plan, plan);
     });
 
+    it('should set ingestion metadata options', function () {
+      const amplitude = new AmplitudeClient('ingestion metadata');
+      const ingestionMetadata = {
+        sourceName: 'ampli',
+        sourceVersion: '1.0.0',
+      };
+      amplitude.init(apiKey, null, { ingestionMetadata: ingestionMetadata });
+
+      assert.deepEqual(amplitude.options.ingestionMetadata, ingestionMetadata);
+    });
+
     it('should set sessionId from config', () => {
       const amplitude = new AmplitudeClient();
       amplitude.init(apiKey, null, { sessionId: 123 });
@@ -4570,6 +4581,38 @@ describe('AmplitudeClient', function () {
 
       amplitude.logEvent('testEvent1');
       assert.equal(amplitude._unsentEvents[0].event.partner_id, null);
+    });
+  });
+
+  describe('ingestionMetadata Support', function () {
+    beforeEach(function () {
+      // reset ingestionMetadata
+      amplitude.options.ingestionMetadata = {
+        sourceName: '',
+        sourceVersion: '',
+      };
+      reset();
+    });
+
+    it('should include ingestion_metadata', function () {
+      const ingestionMetadata = {
+        sourceName: 'ampli',
+        sourceVersion: '1.0.0',
+      };
+      amplitude.init(apiKey, null, { batchEvents: true, ingestionMetadata: ingestionMetadata });
+
+      amplitude.logEvent('testEvent1');
+      assert.deepEqual(amplitude._unsentEvents[0].event.ingestion_metadata, {
+        source_name: 'ampli',
+        source_version: '1.0.0',
+      });
+    });
+
+    it('should set ingestion_metadata default null', function () {
+      amplitude.init(apiKey, null, { batchEvents: true });
+
+      amplitude.logEvent('testEvent1');
+      assert.equal(amplitude._unsentEvents[0].event.ingestion_metadata, null);
     });
   });
 });

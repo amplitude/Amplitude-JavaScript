@@ -1430,6 +1430,13 @@ AmplitudeClient.prototype._logEvent = function _logEvent(
       };
     }
 
+    if (_isIngestionMetadataSet(this)) {
+      event.ingestion_metadata = {
+        source_name: this.options.ingestionMetadata.sourceName || undefined,
+        source_version: this.options.ingestionMetadata.sourceVersion || undefined,
+      };
+    }
+
     if (eventType === Constants.IDENTIFY_EVENT || eventType === Constants.GROUP_IDENTIFY_EVENT) {
       this._unsentIdentifys.push({ event, callback, errorCallback });
       this._limitEventsQueued(this._unsentIdentifys);
@@ -1466,6 +1473,13 @@ const _isObservePlanSet = function _isObservePlanSet(scope) {
       scope.options.plan.branch ||
       scope.options.plan.version ||
       scope.options.plan.versionId)
+  );
+};
+
+const _isIngestionMetadataSet = function _isIngestionMetadataSet(scope) {
+  return (
+    scope.options.ingestionMetadata &&
+    (scope.options.ingestionMetadata.sourceName || scope.options.ingestionMetadata.sourceVersion)
   );
 };
 
