@@ -1,3 +1,10 @@
+## [8.20.1](https://github.com/amplitude/amplitude-javascript/compare/v8.20.0...v8.20.1) (2022-09-01)
+
+
+### Bug Fixes
+
+* upgrade @amplitude/utils version ([#553](https://github.com/amplitude/amplitude-javascript/issues/553)) ([aa63d57](https://github.com/amplitude/amplitude-javascript/commit/aa63d579d5c47428b28249b410ea2550841bacb8))
+
 # [8.20.0](https://github.com/amplitude/amplitude-javascript/compare/v8.19.0...v8.20.0) (2022-08-24)
 
 
