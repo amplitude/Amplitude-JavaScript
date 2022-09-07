@@ -24,6 +24,9 @@ import { version as libraryVersion } from '../package.json';
  * @property {boolean} [includeGclid=`false`] -  If `true`, captures the gclid URL parameter as well as the user's initial_gclid via a setOnce operation.
  * @property {boolean} [includeReferrer=`false`] -  If `true`, captures the referrer and referring_domain for each session, as well as the user's initial_referrer and initial_referring_domain via a setOnce operation.
  * @property {boolean} [includeUtm=`false`] -  If `true`, finds UTM parameters in the query string or the _utmz cookie, parses, and includes them as user properties on all events uploaded. This also captures initial UTM parameters for each session via a setOnce operation.
+ * @property {Object} [ingestionMetadata] Ingestion metadata
+ * @property {string} [ingestionMetadata.sourceName] source name in ingestion metadata, e.g. "ampli"
+ * @property {string} [ingestionMetadata.sourceVersion] source version in ingestion metadata, e.g. "1.0.0"
  * @property {string} [language=The language determined by the browser] -  Custom language to set.
  * @property {Object} [library=`{ name: 'amplitude-js', version: packageJsonVersion }`] -  Values for the library version
  * @property {string} [logLevel=`WARN`] -  Level of logs to be printed in the developer console. Valid values are 'DISABLE', 'ERROR', 'WARN', 'INFO'. To learn more about the different options, see below.
@@ -74,6 +77,10 @@ export default {
   includeGclid: false,
   includeReferrer: false,
   includeUtm: false,
+  ingestionMetadata: {
+    sourceName: '',
+    sourceVersion: '',
+  },
   language: language.getLanguage(),
   library: {
     name: 'amplitude-js',
