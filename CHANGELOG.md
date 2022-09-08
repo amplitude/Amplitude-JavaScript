@@ -1,3 +1,10 @@
+# [8.21.0](https://github.com/amplitude/amplitude-javascript/compare/v8.20.1...v8.21.0) (2022-09-08)
+
+
+### Features
+
+* add ingestion_metadata field ([#552](https://github.com/amplitude/amplitude-javascript/issues/552)) ([14c590c](https://github.com/amplitude/amplitude-javascript/commit/14c590c2eefa312bc6bce11c8baba518848ef3f0))
+
 ## [8.20.1](https://github.com/amplitude/amplitude-javascript/compare/v8.20.0...v8.20.1) (2022-09-01)
 
 
