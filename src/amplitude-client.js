@@ -39,7 +39,14 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this._instanceName = utils.isEmptyString(instanceName) ? Constants.DEFAULT_INSTANCE : instanceName.toLowerCase();
   this._unsentEvents = [];
   this._unsentIdentifys = [];
-  this.options = { ...DEFAULT_OPTIONS, trackingOptions: { ...DEFAULT_OPTIONS.trackingOptions } };
+  this.options = {
+    ...DEFAULT_OPTIONS,
+    headers: { ...DEFAULT_OPTIONS.headers },
+    ingestionMetadata: { ...DEFAULT_OPTIONS.ingestionMetadata },
+    library: { ...DEFAULT_OPTIONS.library },
+    plan: { ...DEFAULT_OPTIONS.plan },
+    trackingOptions: { ...DEFAULT_OPTIONS.trackingOptions },
+  };
   this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
