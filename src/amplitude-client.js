@@ -42,6 +42,7 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
   this.options = {
     ...DEFAULT_OPTIONS,
     headers: { ...DEFAULT_OPTIONS.headers },
+    ingestionMetadata: { ...DEFAULT_OPTIONS.ingestionMetadata },
     library: { ...DEFAULT_OPTIONS.library },
     plan: { ...DEFAULT_OPTIONS.plan },
     trackingOptions: { ...DEFAULT_OPTIONS.trackingOptions },
