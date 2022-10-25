@@ -1,3 +1,10 @@
+## [8.21.2](https://github.com/amplitude/amplitude-javascript/compare/v8.21.1...v8.21.2) (2022-10-25)
+
+
+### Bug Fixes
+
+* nested object in options are shared across multiple instances ([#559](https://github.com/amplitude/amplitude-javascript/issues/559)) ([5129c45](https://github.com/amplitude/amplitude-javascript/commit/5129c45da02431e30fe1058d6cf0820b131894e9))
+
 ## [8.21.1](https://github.com/amplitude/amplitude-javascript/compare/v8.21.0...v8.21.1) (2022-09-22)
 
 
