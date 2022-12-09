@@ -20,7 +20,7 @@
     "@babel/runtime": "^7.3.4",
     "blueimp-md5": "^2.10.0",
     "query-string": "5",
-    "@amplitude/analytics-connector": "^1.4.5"
+    "@amplitude/analytics-connector": "^1.4.6"
   },
   "devDependencies": {
     "@amplitude/eslint-plugin-amplitude": "^1.0.1",
