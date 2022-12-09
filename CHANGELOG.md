@@ -1,3 +1,10 @@
+## [8.21.3](https://github.com/amplitude/amplitude-javascript/compare/v8.21.2...v8.21.3) (2022-12-09)
+
+
+### Bug Fixes
+
+* bump analytics-connector ([#565](https://github.com/amplitude/amplitude-javascript/issues/565)) ([ffb5298](https://github.com/amplitude/amplitude-javascript/commit/ffb5298fca9444fbe338bd65daa36c3ba0c83c88))
+
 ## [8.21.2](https://github.com/amplitude/amplitude-javascript/compare/v8.21.1...v8.21.2) (2022-10-25)
 
 
