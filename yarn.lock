@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@amplitude/analytics-connector@^1.4.5":
-  version "1.4.5"
-  resolved "https://registry.yarnpkg.com/@amplitude/analytics-connector/-/analytics-connector-1.4.5.tgz#07e9375101332bd8b6f15e39e70f31f287e87ad0"
-  integrity sha512-ELAP6ivg+13uSk+TOirGZE/92M+tTbeiQ/i7eXgDO4Hiy00Abf/UxO/rp9WovtxCyeFYTILrujEYxPv5cRQmFw==
+"@amplitude/analytics-connector@^1.4.6":
+  version "1.4.6"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-connector/-/analytics-connector-1.4.6.tgz#60a66eaf0bcdcd17db4f414ff340c69e63116a72"
+  integrity sha512-6jD2pOosRD4y8DT8StUCz7yTd5ZDkdOU9/AWnlWKM5qk90Mz7sdZrdZ9H7sA/L3yOJEpQOYZgQplQdWWUzyWug==
   dependencies:
     "@amplitude/ua-parser-js" "0.7.31"
 
