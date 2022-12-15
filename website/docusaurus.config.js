@@ -8,7 +8,6 @@ module.exports = {
   organizationName: 'Amplitude',
   projectName: 'Amplitude-JavaScript',
   themeConfig: {
-    sidebarCollapsible: false,
     navbar: {
       logo: {
         alt: 'Amplitude Logo',
@@ -39,11 +38,11 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
-          homePageId: 'AmplitudeClient',
           path: 'docs',
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/amplitude/Amplitude-JavaScript/website',
+          sidebarCollapsible: false,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

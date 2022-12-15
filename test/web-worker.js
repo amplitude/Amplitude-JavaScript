@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 importScripts('/base/amplitude.js');
 importScripts('/base/node_modules/sinon/pkg/sinon.js');
-const { sandbox } = sinon;
+const { createSandbox } = sinon;
 /* eslint-enable no-undef */
 
 var isTrue = function (a) {
@@ -13,7 +13,7 @@ var isTrue = function (a) {
 describe('web worker', function () {
   let sbox;
   beforeEach(function () {
-    sbox = sandbox.create();
+    sbox = createSandbox();
   });
 
   afterEach(function () {
