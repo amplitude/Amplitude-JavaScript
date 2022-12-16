@@ -11,18 +11,21 @@ describe('language', function () {
       Object.defineProperty(navigator, 'languages', {
         value: null,
         configurable: true,
+        writable: true,
       });
     }
     if (!('language' in navigator)) {
       Object.defineProperty(navigator, 'language', {
         value: null,
         configurable: true,
+        writable: true,
       });
     }
     if (!('userLanguage' in navigator)) {
       Object.defineProperty(navigator, 'userLanguage', {
         value: null,
         configurable: true,
+        writable: true,
       });
     }
 

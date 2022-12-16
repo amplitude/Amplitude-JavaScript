@@ -27,7 +27,7 @@ describe('AmplitudeClient', function () {
   beforeEach(function () {
     amplitude = new AmplitudeClient();
     server = sinon.fakeServer.create();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
   });
 
   afterEach(function () {
@@ -116,13 +116,13 @@ describe('AmplitudeClient', function () {
     });
 
     it('should clear the onInitQueue', function () {
-      let onInitCalled = false;
-      let onInit2Called = false;
+      let onInitCalled = false; /* eslint-disable-line no-unused-vars */
+      let onInit2Called = false; /* eslint-disable-line no-unused-vars */
       amplitude.onInit(() => {
-        onInitCalled = true; /* eslint-disable-line no-unused-vars */
+        onInitCalled = true;
       });
       amplitude.onInit(() => {
-        onInit2Called = true; /* eslint-disable-line no-unused-vars */
+        onInit2Called = true;
       });
 
       amplitude.init(apiKey);
@@ -4504,6 +4504,10 @@ describe('AmplitudeClient', function () {
       startTime = Date.now();
       clock = sinon.useFakeTimers(startTime);
       amplitude.init(apiKey);
+    });
+
+    afterEach(function () {
+      clock.restore();
     });
 
     it('should not renew the session id with invalid startNewSession input', function () {

@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const prettier = require('prettier');
 const publicClassFiles = ['amplitude-client.js', 'amplitude.js', 'identify.js', 'revenue.js'];
+const homeFile = 'amplitude-client.js';
 const publicTypedefFiles = ['options.js'];
 const srcDir = path.join(__dirname, '../', 'src');
 const outputDir = path.join(__dirname, 'docs');
@@ -25,7 +26,15 @@ function generateClassMarkdown(inputFile) {
     (e) => e.kind === 'constructor' || (e.access === 'public' && (e.kind === 'function' || e.kind === 'member')),
   );
 
-  const markdownOutput = filteredData.map((item) => documentClassFile(item)).join('\n');
+  let markdownOutput = filteredData.map((item) => documentClassFile(item)).join('\n');
+  if (inputFile === homeFile) {
+    markdownOutput =
+      `\
+---
+slug: /
+---
+` + markdownOutput;
+  }
   fs.writeFileSync(path.join(outputDir, `${className}.md`), prettier.format(markdownOutput, { parser: 'mdx' }));
 }
 
