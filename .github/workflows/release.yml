@@ -57,9 +57,9 @@ jobs:
         run: pip install boto3==1.14.63
 
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: 10.x
+          node-version: 16.x
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
