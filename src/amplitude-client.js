@@ -1916,7 +1916,7 @@ AmplitudeClient.prototype.sendEvents = function sendEvents() {
     new Request(url, data, this.options.headers).send(function (status, response) {
       scope._sending = false;
       try {
-        if (status === 200 && response === 'success') {
+        if (status === 200) {
           scope.removeEvents(maxEventId, maxIdentifyId, status, response);
 
           // Update the event cache after the removal of sent events.
