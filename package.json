@@ -1,7 +1,7 @@
 {
   "name": "amplitude-js",
   "author": "Amplitude <support@amplitude.com>",
-  "version": "8.21.3",
+  "version": "8.21.4",
   "license": "MIT",
   "description": "Javascript library for Amplitude Analytics",
   "keywords": [

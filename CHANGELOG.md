@@ -1,3 +1,11 @@
+## [8.21.4](https://github.com/amplitude/amplitude-javascript/compare/v8.21.3...v8.21.4) (2023-01-18)
+
+
+### Bug Fixes
+
+* remove events when 200, no need to check response ([#572](https://github.com/amplitude/amplitude-javascript/issues/572)) ([5b52d16](https://github.com/amplitude/amplitude-javascript/commit/5b52d166a077ff1ba27395d749f42bfc3097625d))
+* upgrade dependencies to resolve dependabot vulnerability alerts ([#567](https://github.com/amplitude/amplitude-javascript/issues/567)) ([9207b46](https://github.com/amplitude/amplitude-javascript/commit/9207b466b4998a6cc48a587a59530eaf5f896d7f))
+
 ## [8.21.3](https://github.com/amplitude/amplitude-javascript/compare/v8.21.2...v8.21.3) (2022-12-09)
 
 
