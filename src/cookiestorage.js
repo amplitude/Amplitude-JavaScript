@@ -12,12 +12,12 @@ var cookieStorage = function () {
   this.storage = null;
 };
 
-cookieStorage.prototype.getStorage = function () {
+cookieStorage.prototype.getStorage = function (disableCookies) {
   if (this.storage !== null) {
     return this.storage;
   }
 
-  if (baseCookie.areCookiesEnabled()) {
+  if (!disableCookies && baseCookie.areCookiesEnabled()) {
     this.storage = Cookie;
   } else {
     // if cookies disabled, fallback to localstorage

@@ -888,11 +888,11 @@ describe('AmplitudeClient', function () {
       var onErrorSpy = sinon.spy();
 
       var amplitude = new AmplitudeClient();
-      sinon.stub(amplitude.cookieStorage, 'options').throws();
+      sinon.stub(amplitude, '_refreshDynamicConfig').throws();
       amplitude.init(apiKey, null, { onError: onErrorSpy });
       assert.isTrue(onErrorSpy.calledOnce);
 
-      amplitude.cookieStorage.options.restore();
+      amplitude['_refreshDynamicConfig'].restore();
     });
 
     it('should set observer plan options', function () {
