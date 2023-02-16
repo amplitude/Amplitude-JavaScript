@@ -13,6 +13,17 @@ import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 import { AmplitudeServerZone } from '../src/server-zone.js';
 import Request from '../src/xhr';
 
+const deleteAllCookies = () =>
+  document.cookie.split(';').forEach(function (c) {
+    document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+  });
+
+const getAllCookies = () =>
+  document.cookie
+    .split(';')
+    .map((c) => c.trimStart())
+    .filter((c) => !utils.isEmptyString(c));
+
 // maintain for testing backwards compatability
 describe('AmplitudeClient', function () {
   var apiKey = '000000';
@@ -2729,16 +2740,44 @@ describe('AmplitudeClient', function () {
     });
 
     it('should not create any cookies if disabledCookies = true', function () {
-      const deleteAllCookies = () =>
-        document.cookie.split(';').forEach(function (c) {
-          document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
-        });
-      const getAllCookies = () =>
-        document.cookie
-          .split(';')
-          .map((c) => c.trimStart())
-          .filter((c) => !utils.isEmptyString(c));
+      deleteAllCookies();
+      clock.tick(20);
 
+      var cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+
+      var deviceId = 'test_device_id';
+      var amplitude2 = new AmplitudeClient();
+
+      amplitude2.init(apiKey, null, {
+        deviceId: deviceId,
+        disableCookies: true,
+      });
+
+      cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+    });
+
+    it('should create cookies if disabledCookies = false', function () {
+      deleteAllCookies();
+      clock.tick(20);
+
+      var cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+
+      var deviceId = 'test_device_id';
+      var amplitude2 = new AmplitudeClient();
+
+      amplitude2.init(apiKey, null, {
+        deviceId: deviceId,
+        disableCookies: false,
+      });
+
+      cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 1);
+    });
+
+    it('should not create any cookies if disabledCookies = true', function () {
       deleteAllCookies();
       clock.tick(20);
 
