@@ -1,3 +1,10 @@
+## [8.21.5](https://github.com/amplitude/amplitude-javascript/compare/v8.21.4...v8.21.5) (2023-02-16)
+
+
+### Bug Fixes
+
+* wait to create cookie storage based on user options in init() ([#579](https://github.com/amplitude/amplitude-javascript/issues/579)) ([a682c5b](https://github.com/amplitude/amplitude-javascript/commit/a682c5bb3511b1a65e063cc665ac4cfd9446a6c8))
+
 ## [8.21.4](https://github.com/amplitude/amplitude-javascript/compare/v8.21.3...v8.21.4) (2023-01-18)
 
 
