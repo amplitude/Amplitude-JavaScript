@@ -13,6 +13,17 @@ import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 import { AmplitudeServerZone } from '../src/server-zone.js';
 import Request from '../src/xhr';
 
+const deleteAllCookies = () =>
+  document.cookie.split(';').forEach(function (c) {
+    document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+  });
+
+const getAllCookies = () =>
+  document.cookie
+    .split(';')
+    .map((c) => c.trimStart())
+    .filter((c) => !utils.isEmptyString(c));
+
 // maintain for testing backwards compatability
 describe('AmplitudeClient', function () {
   var apiKey = '000000';
@@ -888,11 +899,11 @@ describe('AmplitudeClient', function () {
       var onErrorSpy = sinon.spy();
 
       var amplitude = new AmplitudeClient();
-      sinon.stub(amplitude.cookieStorage, 'options').throws();
+      sinon.stub(amplitude, '_refreshDynamicConfig').throws();
       amplitude.init(apiKey, null, { onError: onErrorSpy });
       assert.isTrue(onErrorSpy.calledOnce);
 
-      amplitude.cookieStorage.options.restore();
+      amplitude['_refreshDynamicConfig'].restore();
     });
 
     it('should set observer plan options', function () {
@@ -2726,6 +2737,44 @@ describe('AmplitudeClient', function () {
         identifyId: 1,
         sequenceNumber: 3,
       });
+    });
+
+    it('should not create any cookies if disabledCookies = true', function () {
+      deleteAllCookies();
+      clock.tick(20);
+
+      var cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+
+      var deviceId = 'test_device_id';
+      var amplitude2 = new AmplitudeClient();
+
+      amplitude2.init(apiKey, null, {
+        deviceId: deviceId,
+        disableCookies: true,
+      });
+
+      cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+    });
+
+    it('should create cookies if disabledCookies = false', function () {
+      deleteAllCookies();
+      clock.tick(20);
+
+      var cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+
+      var deviceId = 'test_device_id';
+      var amplitude2 = new AmplitudeClient();
+
+      amplitude2.init(apiKey, null, {
+        deviceId: deviceId,
+        disableCookies: false,
+      });
+
+      cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 1);
     });
 
     it('should validate event properties', function () {

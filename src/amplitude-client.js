@@ -47,7 +47,6 @@ var AmplitudeClient = function AmplitudeClient(instanceName) {
     plan: { ...DEFAULT_OPTIONS.plan },
     trackingOptions: { ...DEFAULT_OPTIONS.trackingOptions },
   };
-  this.cookieStorage = new cookieStorage().getStorage();
   this._q = []; // queue for proxied functions before script load
   this._sending = false;
   this._updateScheduled = false;
@@ -127,6 +126,7 @@ AmplitudeClient.prototype.init = function init(apiKey, opt_userId, opt_config, o
 
     this._cookieName = Constants.COOKIE_PREFIX + '_' + this._storageSuffixV5;
 
+    this.cookieStorage = new cookieStorage().getStorage(this.options.disableCookies);
     this.cookieStorage.options({
       expirationDays: this.options.cookieExpiration,
       domain: this.options.domain,
