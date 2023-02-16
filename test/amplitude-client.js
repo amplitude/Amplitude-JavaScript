@@ -2728,6 +2728,35 @@ describe('AmplitudeClient', function () {
       });
     });
 
+    it('should not create any cookies if disabledCookies = true', function () {
+      const deleteAllCookies = () =>
+        document.cookie.split(';').forEach(function (c) {
+          document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+        });
+      const getAllCookies = () =>
+        document.cookie
+          .split(';')
+          .map((c) => c.trimStart())
+          .filter((c) => !utils.isEmptyString(c));
+
+      deleteAllCookies();
+      clock.tick(20);
+
+      var cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+
+      var deviceId = 'test_device_id';
+      var amplitude2 = new AmplitudeClient();
+
+      amplitude2.init(apiKey, null, {
+        deviceId: deviceId,
+        disableCookies: true,
+      });
+
+      cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+    });
+
     it('should validate event properties', function () {
       var e = new Error('oops');
       clock.tick(1);
