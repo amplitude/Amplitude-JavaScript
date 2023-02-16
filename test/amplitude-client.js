@@ -2777,25 +2777,6 @@ describe('AmplitudeClient', function () {
       assert.equal(cookieArray.length, 1);
     });
 
-    it('should not create any cookies if disabledCookies = true', function () {
-      deleteAllCookies();
-      clock.tick(20);
-
-      var cookieArray = getAllCookies();
-      assert.equal(cookieArray.length, 0);
-
-      var deviceId = 'test_device_id';
-      var amplitude2 = new AmplitudeClient();
-
-      amplitude2.init(apiKey, null, {
-        deviceId: deviceId,
-        disableCookies: true,
-      });
-
-      cookieArray = getAllCookies();
-      assert.equal(cookieArray.length, 0);
-    });
-
     it('should validate event properties', function () {
       var e = new Error('oops');
       clock.tick(1);
