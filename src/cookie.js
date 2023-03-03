@@ -4,7 +4,6 @@
 
 import Base64 from './base64';
 import utils from './utils';
-import getLocation from './get-location';
 import baseCookie from './base-cookie';
 import topDomain from './top-domain';
 
@@ -31,7 +30,7 @@ var options = function (opts) {
   _options.secure = opts.secure;
   _options.sameSite = opts.sameSite;
 
-  var domain = !utils.isEmptyString(opts.domain) ? opts.domain : '.' + topDomain(getLocation().href);
+  var domain = !utils.isEmptyString(opts.domain) ? opts.domain : '.' + topDomain(utils.getLocation().href);
   var token = Math.random();
   _options.domain = domain;
   set('amplitude_test', token);

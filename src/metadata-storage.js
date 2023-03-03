@@ -6,7 +6,6 @@
 import Base64 from './base64';
 import baseCookie from './base-cookie';
 import Constants from './constants';
-import getLocation from './get-location';
 import ampLocalStorage from './localstorage';
 import topDomain from './top-domain';
 import utils from './utils';
@@ -35,8 +34,8 @@ class MetadataStorage {
     this.expirationDays = expirationDays;
 
     this.cookieDomain = '';
-    const loc = getLocation() ? getLocation().href : undefined;
-    const writableTopDomain = topDomain(loc);
+    const loc = utils.getLocation() ? utils.getLocation().href : undefined;
+    const writableTopDomain = !disableCookies ? topDomain(loc) : '';
     this.cookieDomain = domain || (writableTopDomain ? '.' + writableTopDomain : null);
 
     if (storageOptionExists[storage]) {

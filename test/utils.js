@@ -1,6 +1,7 @@
 import sinon from 'sinon';
 import utils from '../src/utils.js';
 import constants from '../src/constants.js';
+import GlobalScope from '../src/global-scope';
 
 describe('utils', function () {
   describe('isEmptyString', function () {
@@ -278,6 +279,23 @@ describe('utils', function () {
       assert.isFalse(utils.validateSessionId(new Set()));
       assert.isFalse(utils.validateSessionId(true));
       assert.isFalse(utils.validateSessionId(false));
+    });
+  });
+
+  describe('getHost', function () {
+    it('should return hostname for url', function () {
+      const url = 'https://amplitude.is.good.com/test';
+      assert.equal(utils.getHost(url), 'amplitude.is.good.com');
+    });
+
+    it('should return current hostname if no url is provided', function () {
+      assert.equal(utils.getHost(), GlobalScope.location.hostname);
+    });
+  });
+
+  describe('getLocation', function () {
+    it('should return global location', function () {
+      assert.equal(utils.getLocation(), GlobalScope.location);
     });
   });
 });

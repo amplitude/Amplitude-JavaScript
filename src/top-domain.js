@@ -1,11 +1,10 @@
 import baseCookie from './base-cookie';
 import base64Id from './base64Id';
-import getHost from './get-host';
 import utils from './utils';
 
 // Utility that finds top level domain to write to
 const topDomain = (url) => {
-  const host = getHost(url);
+  const host = utils.getHost(url);
   const parts = host.split('.');
   const levels = [];
   const cname = '_tldtest_' + base64Id();

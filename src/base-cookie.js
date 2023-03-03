@@ -1,5 +1,4 @@
 import Constants from './constants';
-import base64Id from './base64Id';
 import utils from './utils';
 
 const get = (name) => {
@@ -94,7 +93,7 @@ const sortByEventTime = (cookies) => {
 
 // test that cookies are enabled - navigator.cookiesEnabled yields false positives in IE, need to test directly
 const areCookiesEnabled = (opts = {}) => {
-  const cookieName = Constants.COOKIE_TEST_PREFIX + base64Id();
+  const cookieName = Constants.COOKIE_TEST_PREFIX;
   if (typeof document === 'undefined') {
     return false;
   }
