@@ -2739,7 +2739,7 @@ describe('AmplitudeClient', function () {
       });
     });
 
-    it('should not create any cookies if disabledCookies = true', function () {
+    it('should not use any cookies with simple host if disabledCookies = true', function () {
       deleteAllCookies();
       clock.tick(20);
 
@@ -2747,15 +2747,46 @@ describe('AmplitudeClient', function () {
       assert.equal(cookieArray.length, 0);
 
       var deviceId = 'test_device_id';
-      var amplitude2 = new AmplitudeClient();
+      var amplitude = new AmplitudeClient();
 
-      amplitude2.init(apiKey, null, {
+      amplitude.init(apiKey, null, {
         deviceId: deviceId,
         disableCookies: true,
       });
 
       cookieArray = getAllCookies();
       assert.equal(cookieArray.length, 0);
+    });
+
+    it('should not use any cookies with multiple domains in host if disabledCookies = true', function () {
+      const stubbedGetLocation = sinon.stub(utils, 'getLocation').returns({ href: 'https://abc.def.xyz/test' });
+      const spiedSet = sinon.spy(baseCookie, 'set');
+      const spiedGet = sinon.spy(baseCookie, 'get');
+      deleteAllCookies();
+      clock.tick(20);
+
+      var cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+
+      var deviceId = 'test_device_id';
+      var amplitude = new AmplitudeClient();
+
+      amplitude.init(apiKey, null, {
+        deviceId: deviceId,
+        disableCookies: true,
+      });
+
+      cookieArray = getAllCookies();
+      assert.equal(cookieArray.length, 0);
+
+      // spied cookie operations should not be fired
+      assert.equal(spiedSet.called, false);
+      assert.equal(spiedGet.called, false);
+
+      // restore stub, spy
+      stubbedGetLocation.restore();
+      spiedSet.restore();
+      spiedGet.restore();
     });
 
     it('should create cookies if disabledCookies = false', function () {
@@ -2766,9 +2797,9 @@ describe('AmplitudeClient', function () {
       assert.equal(cookieArray.length, 0);
 
       var deviceId = 'test_device_id';
-      var amplitude2 = new AmplitudeClient();
+      var amplitude = new AmplitudeClient();
 
-      amplitude2.init(apiKey, null, {
+      amplitude.init(apiKey, null, {
         deviceId: deviceId,
         disableCookies: false,
       });

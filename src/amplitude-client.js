@@ -15,7 +15,6 @@ import utils from './utils';
 import UUID from './uuid';
 import base64Id from './base64Id';
 import DEFAULT_OPTIONS from './options';
-import getHost from './get-host';
 import baseCookie from './base-cookie';
 import { AmplitudeServerZone, getEventLogApi } from './server-zone';
 import ConfigManager from './config-manager';
@@ -309,7 +308,7 @@ AmplitudeClient.prototype._runNewSessionStartCallbacks = function () {
 };
 
 AmplitudeClient.prototype.deleteLowerLevelDomainCookies = function () {
-  const host = getHost();
+  const host = utils.getHost();
 
   const cookieHost =
     this.options.domain && this.options.domain[0] === '.' ? this.options.domain.slice(1) : this.options.domain;
