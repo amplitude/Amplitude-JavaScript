@@ -1,3 +1,10 @@
+## [8.21.6](https://github.com/amplitude/amplitude-javascript/compare/v8.21.5...v8.21.6) (2023-03-07)
+
+
+### Bug Fixes
+
+* skip top domain when cookie is disabled ([#580](https://github.com/amplitude/amplitude-javascript/issues/580)) ([a9ff324](https://github.com/amplitude/amplitude-javascript/commit/a9ff3247829bba9fccb60dcf83337809e83f1c04))
+
 ## [8.21.5](https://github.com/amplitude/amplitude-javascript/compare/v8.21.4...v8.21.5) (2023-02-16)
 
 
