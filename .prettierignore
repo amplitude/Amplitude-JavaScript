@@ -1,2 +1,5 @@
 *.md
 /*.js
+/website/.docusaurus/
+/website/build/
+/build/
