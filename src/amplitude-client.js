@@ -761,6 +761,7 @@ AmplitudeClient.prototype._initUtmData = function _initUtmData(queryParams, cook
 AmplitudeClient.prototype._unsetUTMParams = function _unsetUTMParams() {
   var identify = new Identify();
   identify.unset(Constants.REFERRER);
+  identify.unset(Constants.REFERRING_DOMAIN);
   identify.unset(Constants.UTM_SOURCE);
   identify.unset(Constants.UTM_MEDIUM);
   identify.unset(Constants.UTM_CAMPAIGN);
