@@ -3394,6 +3394,7 @@ describe('AmplitudeClient', function () {
         {
           $unset: {
             referrer: '-',
+            referring_domain: '-',
             utm_source: '-',
             utm_medium: '-',
             utm_campaign: '-',
@@ -3483,6 +3484,7 @@ describe('AmplitudeClient', function () {
         {
           $unset: {
             referrer: '-',
+            referring_domain: '-',
             utm_source: '-',
             utm_medium: '-',
             utm_campaign: '-',

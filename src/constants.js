@@ -53,6 +53,7 @@ export default {
   AMP_REFERRER_PARAM: 'amp_referrer', // url param for overwriting the document.refer
 
   REFERRER: 'referrer',
+  REFERRING_DOMAIN: 'referring_domain',
 
   // UTM Params
   UTM_SOURCE: 'utm_source',
