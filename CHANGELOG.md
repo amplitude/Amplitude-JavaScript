@@ -1,3 +1,10 @@
+## [8.21.7](https://github.com/amplitude/amplitude-javascript/compare/v8.21.6...v8.21.7) (2023-03-23)
+
+
+### Bug Fixes
+
+* reset referring_domain ([eaa7446](https://github.com/amplitude/amplitude-javascript/commit/eaa74461bd5e88e02c5c78f563ad3f0b9ade417c))
+
 ## [8.21.6](https://github.com/amplitude/amplitude-javascript/compare/v8.21.5...v8.21.6) (2023-03-07)
 
 
