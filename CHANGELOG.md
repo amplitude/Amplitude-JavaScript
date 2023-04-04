@@ -1,3 +1,10 @@
+## [8.21.8](https://github.com/amplitude/amplitude-javascript/compare/v8.21.7...v8.21.8) (2023-04-04)
+
+
+### Bug Fixes
+
+* upgrade to @amplitude/ua-parser-js@0.7.33 ([#588](https://github.com/amplitude/amplitude-javascript/issues/588)) ([d2dec38](https://github.com/amplitude/amplitude-javascript/commit/d2dec387d0af1dcaf6f0c97f71e35ca2a91fd5e4))
+
 ## [8.21.7](https://github.com/amplitude/amplitude-javascript/compare/v8.21.6...v8.21.7) (2023-03-23)
 
 
