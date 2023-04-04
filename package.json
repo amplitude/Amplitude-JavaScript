@@ -15,7 +15,7 @@
   "main": "amplitude.umd.js",
   "module": "amplitude.esm.js",
   "dependencies": {
-    "@amplitude/ua-parser-js": "0.7.31",
+    "@amplitude/ua-parser-js": "0.7.33",
     "@amplitude/utils": "^1.10.2",
     "@babel/runtime": "^7.21.0",
     "blueimp-md5": "^2.19.0",
