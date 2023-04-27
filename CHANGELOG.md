@@ -1,3 +1,10 @@
+## [8.21.9](https://github.com/amplitude/amplitude-javascript/compare/v8.21.8...v8.21.9) (2023-04-27)
+
+
+### Bug Fixes
+
+* do not overwrite flushIntervalMillis=0 with default value (10 seconds) ([#589](https://github.com/amplitude/amplitude-javascript/issues/589)) ([9c96890](https://github.com/amplitude/amplitude-javascript/commit/9c96890ecccadfba9ca81822ba9e5723645b9948))
+
 ## [8.21.8](https://github.com/amplitude/amplitude-javascript/compare/v8.21.7...v8.21.8) (2023-04-04)
 
 
