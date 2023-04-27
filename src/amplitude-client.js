@@ -413,6 +413,8 @@ var _parseConfig = function _parseConfig(options, config) {
   // Add exception in headers
   const freeFormObjectKeys = new Set(['headers']);
 
+  const zeroAllowedKeys = new Set(['eventUploadPeriodMillis']);
+
   // validates config value is defined, is the correct type, and some additional value sanity checks
   var parseValidateAndLoad = function parseValidateAndLoad(key) {
     if (!Object.prototype.hasOwnProperty.call(options, key)) {
@@ -433,7 +435,7 @@ var _parseConfig = function _parseConfig(options, config) {
       options[key] = !!inputValue;
     } else if (
       (expectedType === 'string' && !utils.isEmptyString(inputValue)) ||
-      (expectedType === 'number' && inputValue > 0) ||
+      (expectedType === 'number' && (inputValue > 0 || (inputValue === 0 && zeroAllowedKeys.has(key)))) ||
       expectedType === 'function'
     ) {
       options[key] = inputValue;

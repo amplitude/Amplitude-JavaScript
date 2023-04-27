@@ -227,6 +227,15 @@ describe('AmplitudeClient', function () {
       assert.equal(amplitude.options.bogusKey, undefined);
     });
 
+    it('should not overwrite eventUploadPeriodMillis=0 with default value', function () {
+      var config = {
+        eventUploadPeriodMillis: 0,
+      };
+
+      amplitude.init(apiKey, userId, config);
+      assert.equal(amplitude.options.eventUploadPeriodMillis, 0);
+    });
+
     it('should set the default log level', function () {
       const config = {};
 
