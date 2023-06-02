@@ -11,7 +11,11 @@ describe('base64Id', () => {
     assert.equal(true, /^[a-zA-Z0-9\-_]*$/.test(base64Id()));
   });
 
-  it('should generate a different base64Id', () => {
-    assert.notEqual(base64Id(), base64Id());
+  it('should generate a unique base64Id', () => {
+    const ids = new Set();
+    for (let i = 0; i < 10000; i++) {
+      const id = base64Id();
+      assert.isFalse(ids.has(id));
+    }
   });
 });
