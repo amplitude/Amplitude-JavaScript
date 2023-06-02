@@ -12,6 +12,7 @@ describe('UUID', function () {
     for (let i = 0; i < 10000; i++) {
       const id = UUID();
       assert.isFalse(ids.has(id));
+      ids.add(id);
     }
   });
 });
