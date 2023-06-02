@@ -12,8 +12,6 @@ describe('base64Id', () => {
   });
 
   it('should generate a different base64Id', () => {
-    var id1 = base64Id();
-    var id2 = base64Id();
-    expect(id1).not.toEqual(id2);
+    assert.notEqual(base64Id(), base64Id());
   });
 });

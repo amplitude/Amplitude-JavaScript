@@ -8,8 +8,6 @@ describe('UUID', function () {
   });
 
   it('should generate a different UUID-4', () => {
-    var uuid1 = UUID();
-    var uuid2 = UUID();
-    expect(uuid1).not.toEqual(uuid2);
+    assert.notEqual(UUID(), UUID());
   });
 });
