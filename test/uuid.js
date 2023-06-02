@@ -6,4 +6,10 @@ describe('UUID', function () {
     assert.equal(36, uuid.length);
     assert.equal('4', uuid.substring(14, 15));
   });
+
+  it('should generate a different UUID-4', () => {
+    var uuid1 = UUID();
+    var uuid2 = UUID();
+    expect(uuid1).not.toEqual(uuid2);
+  });
 });

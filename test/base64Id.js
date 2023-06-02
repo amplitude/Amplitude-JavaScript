@@ -10,4 +10,10 @@ describe('base64Id', () => {
   it('should return an id of safe base64 characters', () => {
     assert.equal(true, /^[a-zA-Z0-9\-_]*$/.test(base64Id()));
   });
+
+  it('should generate a different base64Id', () => {
+    var id1 = base64Id();
+    var id2 = base64Id();
+    expect(id1).not.toEqual(id2);
+  });
 });
