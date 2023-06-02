@@ -13,10 +13,10 @@ describe('base64Id', () => {
 
   it('should generate a unique base64Id', () => {
     const ids = new Set();
-    for (let i = 0; i < 10000; i++) {
-      const id = base64Id();
-      assert.isFalse(ids.has(id));
-      ids.add(id);
+    const count = 10000;
+    for (let i = 0; i < count; i++) {
+      ids.add(base64Id(););
     }
+    assert.isEqual(ids.size, count);
   });
 });
