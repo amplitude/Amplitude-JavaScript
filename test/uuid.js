@@ -11,8 +11,7 @@ describe('UUID', function () {
     const ids = new Set();
     const count = 10000;
     for (let i = 0; i < count; i++) {
-      const id = UUID();
-      ids.add(id);
+      ids.add(UUID());
     }
     assert.equal(ids.size, count);
   });
