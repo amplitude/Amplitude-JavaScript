@@ -15,8 +15,8 @@ describe('base64Id', () => {
     const ids = new Set();
     const count = 10000;
     for (let i = 0; i < count; i++) {
-      ids.add(base64Id(););
+      ids.add(base64Id());
     }
-    assert.isEqual(ids.size, count);
+    assert.equal(ids.size, count);
   });
 });

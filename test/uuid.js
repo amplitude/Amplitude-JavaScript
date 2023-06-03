@@ -9,10 +9,11 @@ describe('UUID', function () {
 
   it('should generate a unique UUID-4', () => {
     const ids = new Set();
-    for (let i = 0; i < 10000; i++) {
+    const count = 10000;
+    for (let i = 0; i < count; i++) {
       const id = UUID();
-      assert.isFalse(ids.has(id));
       ids.add(id);
     }
+    assert.equal(ids.size, count);
   });
 });
