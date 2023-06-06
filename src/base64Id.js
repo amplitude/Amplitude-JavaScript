@@ -2,10 +2,14 @@
 const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 const base64Id = () => {
+  const randomValues = crypto.getRandomValues(new Uint8Array(22));
+
   let str = '';
+
   for (let i = 0; i < 22; ++i) {
-    str += base64Chars.charAt(Math.floor(Math.random() * 64));
+    str += base64Chars.charAt(randomValues[i] % 64);
   }
+
   return str;
 };
 
