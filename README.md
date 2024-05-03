@@ -21,7 +21,7 @@ To learn more about the new SDK, here are some useful links:
 
 * NPM: https://www.npmjs.com/package/@amplitude/analytics-browser
 * GitHub: https://github.com/amplitude/Amplitude-TypeScript
-* Documentation: https://developers.amplitude.com/docs/typescript-browser-beta
+* Documentation: https://www.docs.developers.amplitude.com/data/sdks/browser-2
 
 # Official Amplitude JS/Web SDK
 A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
