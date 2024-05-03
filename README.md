@@ -23,7 +23,7 @@ To learn more about the new SDK, here are some useful links:
 * GitHub: https://github.com/amplitude/Amplitude-TypeScript
 * Documentation: https://www.docs.developers.amplitude.com/data/sdks/browser-2
 
-# Official Amplitude JS/Web SDK
+# Amplitude JS/Web SDK
 A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
 
 ## Amplitude and Ampli SDK
