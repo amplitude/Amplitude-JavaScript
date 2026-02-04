@@ -15,12 +15,12 @@
   "main": "amplitude.umd.js",
   "module": "amplitude.esm.js",
   "dependencies": {
+    "@amplitude/analytics-connector": "^1.4.6",
     "@amplitude/ua-parser-js": "0.7.33",
     "@amplitude/utils": "^1.10.2",
-    "@babel/runtime": "^7.21.0",
+    "@babel/runtime": "^7.28.6",
     "blueimp-md5": "^2.19.0",
-    "query-string": "8.1.0",
-    "@amplitude/analytics-connector": "^1.4.6"
+    "query-string": "8.1.0"
   },
   "devDependencies": {
     "@amplitude/eslint-plugin-amplitude": "^1.1.1",
@@ -29,6 +29,13 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
     "@babel/plugin-transform-runtime": "^7.21.0",
     "@babel/preset-env": "^7.20.2",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^23.0.7",
+    "@rollup/plugin-json": "^5.0.2",
+    "@rollup/plugin-legacy": "^3.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-replace": "^5.0.2",
+    "@rollup/plugin-terser": "^0.4.0",
     "@semantic-release/changelog": "^6.0.2",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
@@ -59,13 +66,6 @@
     "prettier": "^2.8.4",
     "requirejs": "^2.3.6",
     "rollup": "^2.79.1",
-    "@rollup/plugin-babel": "^6.0.3",
-    "@rollup/plugin-commonjs": "^23.0.7",
-    "@rollup/plugin-json": "^5.0.2",
-    "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-replace": "^5.0.2",
-    "@rollup/plugin-legacy": "^3.0.1",
-    "@rollup/plugin-terser": "^0.4.0",
     "semantic-release": "^19.0.5",
     "sinon": "^15.0.2"
   },
