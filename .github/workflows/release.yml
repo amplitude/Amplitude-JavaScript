@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [authorize]
     permissions:
-      id-token: write # Required for OIDC
+      id-token: write # Required for OIDC (AWS + npm Trusted Publishing)
       contents: write
     env:
       GIT_AUTHOR_NAME: amplitude-sdk-bot
@@ -61,7 +61,7 @@ jobs:
           fetch-depth: 0
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::358203115967:role/github-actions-role
           aws-region: us-west-2
@@ -81,7 +81,7 @@ jobs:
         run: pip install boto3==1.14.63
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -91,6 +91,7 @@ jobs:
       - name: Run tests
         run: make test
 
+      # npm auth via OIDC (Trusted Publishing); no NPM_TOKEN needed when package has Trusted Publisher on npmjs.com
       - name: Release --dry-run # Uses release.config.js
         if: ${{ github.event.inputs.releaseType == 'dry-run' }}
         env:
