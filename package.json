@@ -86,6 +86,9 @@
     "fix:prettier": "prettier --write \"{src,test,scripts,website}/**/*.js\"",
     "fix:eslint": "eslint --fix \"{src,test,scripts,website}/**/*.js\""
   },
+  "resolutions": {
+    "@semantic-release/npm": "^13.0.0"
+  },
   "bugs": {
     "url": "https://github.com/amplitude/amplitude-javascript/issues"
   },
