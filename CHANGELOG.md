@@ -1,3 +1,11 @@
+## [8.21.10](https://github.com/amplitude/amplitude-javascript/compare/v8.21.9...v8.21.10) (2026-02-11)
+
+
+### Bug Fixes
+
+* upgrade babel version ([#617](https://github.com/amplitude/amplitude-javascript/issues/617)) ([427aac2](https://github.com/amplitude/amplitude-javascript/commit/427aac2166f0f496209af84b91676846344d9d4e))
+* uuid collisions ([#594](https://github.com/amplitude/amplitude-javascript/issues/594)) ([a1a2978](https://github.com/amplitude/amplitude-javascript/commit/a1a2978145169d6dda1a3cd25ac2de4f7be6ecb6))
+
 ## [8.21.9](https://github.com/amplitude/amplitude-javascript/compare/v8.21.8...v8.21.9) (2023-04-27)
 
 
