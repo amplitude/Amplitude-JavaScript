@@ -7,8 +7,6 @@ const sinon = require('sinon');
 
 describe('Guides Footer Tracking', function () {
   let amplitude;
-  let mockDocument;
-  let mockWindow;
 
   beforeEach(function () {
     // Create mock Amplitude instance
@@ -16,15 +14,6 @@ describe('Guides Footer Tracking', function () {
       track: sinon.spy(),
       _unsentEvents: [],
     };
-
-    // Setup mock DOM
-    if (typeof document !== 'undefined') {
-      mockDocument = document;
-    }
-
-    if (typeof window !== 'undefined') {
-      mockWindow = window;
-    }
   });
 
   afterEach(function () {

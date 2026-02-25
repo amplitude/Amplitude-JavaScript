@@ -102,7 +102,6 @@ function isAmplitudeFooter(element) {
 
   // Check if element or parent has specific styling/classes that indicate it's the footer
   // The footer typically has specific styling for bottom positioning
-  const elementStyle = element.style || {};
   const computedStyle = window.getComputedStyle ? window.getComputedStyle(element) : {};
 
   return (
@@ -211,7 +210,7 @@ function enableGuidesFooterTrackingWithObserver(amplitudeInstance, options = {})
     instrumentedElements.add(element);
 
     // Add click tracking
-    element.addEventListener('click', function (event) {
+    element.addEventListener('click', function () {
       try {
         const properties = config.getProperties(element);
         amplitudeInstance.track(config.eventName, properties);
