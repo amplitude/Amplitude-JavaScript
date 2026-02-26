@@ -97,11 +97,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-        run: npx semantic-release --dry-run
+        run: npm exec semantic-release -- --dry-run
 
       - name: Release # Uses release.config.js
         if: ${{ github.event.inputs.releaseType == 'release' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-        run: npx semantic-release
+        run: npm exec semantic-release
