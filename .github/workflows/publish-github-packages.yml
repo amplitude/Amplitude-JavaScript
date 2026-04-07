@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ${{ github.actor }} permission check to do a release
-        uses: "lannonbr/repo-permission-check-action@2.0.2"
+        uses: "lannonbr/repo-permission-check-action@2bb8c89ba8bf115c4bfab344d6a6f442b24c9a1f" # 2.0.2
         with:
           permission: "write"
         env:
