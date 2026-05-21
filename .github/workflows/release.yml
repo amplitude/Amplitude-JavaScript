@@ -18,15 +18,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check branch protection
+        env:
+          RELEASE_TYPE: ${{ github.event.inputs.releaseType }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ "${{ github.event.inputs.releaseType }}" == "dry-run" ]; then
+          if [ "$RELEASE_TYPE" == "dry-run" ]; then
             echo "✅ Branch check skipped: dry-run mode allows any branch"
-            echo "Current branch: ${{ github.ref_name }}"
+            echo "Current branch: $REF_NAME"
             exit 0
           fi
-          if [ "${{ github.ref_name }}" != "v8.x" ]; then
+          if [ "$REF_NAME" != "v8.x" ]; then
             echo "❌ This workflow can only be triggered from the v8.x branch."
-            echo "Current branch: ${{ github.ref_name }}"
+            echo "Current branch: $REF_NAME"
             exit 1
           fi
           echo "✅ Branch check passed: running from v8.x"
