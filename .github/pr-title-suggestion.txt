@@ -1,0 +1,1 @@
+feat(guides): track powered by amplitude footer clicks
