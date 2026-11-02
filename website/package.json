@@ -29,5 +29,9 @@
       "last 2 firefox version",
       "last 2 safari version"
     ]
+  },
+  "resolutions": {
+    "trim": "^0.0.3",
+    "webpack": "5.104.1"
   }
 }

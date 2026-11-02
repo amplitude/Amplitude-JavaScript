@@ -87,7 +87,8 @@
     "fix:eslint": "eslint --fix \"{src,test,scripts,website}/**/*.js\""
   },
   "resolutions": {
-    "@semantic-release/npm": "^13.0.0"
+    "@semantic-release/npm": "^13.0.0",
+    "yaml": "^2.9.1"
   },
   "bugs": {
     "url": "https://github.com/amplitude/amplitude-javascript/issues"
