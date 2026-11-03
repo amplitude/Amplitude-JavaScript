@@ -15,13 +15,13 @@
 
 # Announcement 📣
 
-Amplitude is introducing a new [TypeScript SDK for Browser](https://www.npmjs.com/package/@amplitude/analytics-browser). This new SDK provides improved developer experience, helps users instrument data more seamlessly and provide more control over data being instrumented using custom plugins.
+`amplitude-js` is a legacy SDK in maintenance mode. **For new web installs, use [`@amplitude/unified`](https://www.npmjs.com/package/@amplitude/unified)**: Amplitude's recommended Browser SDK, with analytics, Session Replay, Experiment, and Guides and Surveys in one package.
 
-To learn more about the new SDK, here are some useful links:
+* Unified SDK docs: https://amplitude.com/docs/sdks/analytics/browser/browser-unified-sdk
+* NPM: https://www.npmjs.com/package/@amplitude/unified
+* GitHub: https://github.com/amplitude/Amplitude-TypeScript/tree/main/packages/unified
 
-* NPM: https://www.npmjs.com/package/@amplitude/analytics-browser
-* GitHub: https://github.com/amplitude/Amplitude-TypeScript
-* Documentation: https://www.docs.developers.amplitude.com/data/sdks/browser-2
+**Only need analytics?** Use [`@amplitude/analytics-browser`](https://www.npmjs.com/package/@amplitude/analytics-browser) ([Browser SDK 2 docs](https://amplitude.com/docs/sdks/analytics/browser/browser-sdk-2)). The [migration guide from amplitude-js](https://amplitude.com/docs/sdks/analytics/browser/migrate-from-javascript-sdk-to-browser-sdk-2-0) covers the analytics API changes for both packages (Unified exposes the same `track`, `identify`, etc.; initialize it with `initAll` instead of `init`).
 
 # Amplitude JS/Web SDK
 A JavaScript SDK for tracking events and revenue to [Amplitude](https://www.amplitude.com).
