@@ -80,8 +80,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install boto3 for deploy_s3.python
-        run: pip install boto3==1.14.63
+      - name: Install and verify CDN deployment dependencies
+        run: |
+          python -m pip install boto3==1.44.2
+          # Catch Python dependency incompatibilities before publishing to npm.
+          python scripts/deploy_s3.py --help
 
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
