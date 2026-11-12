@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amplitude Guides Footer Click Tracking Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        .info-box {
+            background: #f4f4f4;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+        .code-box {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .code-box code {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Amplitude Guides Footer Click Tracking</h1>
+    
+    <div class="info-box">
+        <h3>About This Example</h3>
+        <p>
+            This page demonstrates how to track clicks on the "Powered by Amplitude" footer
+            that appears in Amplitude Guides & Surveys. The tracking works by using DOM event
+            delegation to capture clicks on the footer element.
+        </p>
+        <p>
+            <strong>Event Name:</strong> <code>Guides Footer Clicked</code><br>
+            <strong>Destination:</strong> <code>https://app.amplitude.com/guides-surveys</code>
+        </p>
+    </div>
+
+    <h2>Installation</h2>
+    <div class="code-box">
+        <code>
+// 1. Include the Amplitude SDK<br>
+&lt;script src="https://cdn.amplitude.com/libs/amplitude-8.21.10-min.gz.js"&gt;&lt;/script&gt;<br>
+<br>
+// 2. Include the footer tracking helper<br>
+&lt;script src="guides-footer-tracking.js"&gt;&lt;/script&gt;<br>
+<br>
+// 3. Initialize Amplitude and enable footer tracking<br>
+amplitude.init('YOUR_API_KEY');<br>
+window.AmplitudeGuidesFooterTracking.enableGuidesFooterTracking(amplitude);
+        </code>
+    </div>
+
+    <h2>Interactive Demo</h2>
+    <button onclick="simulateGuideWithFooter()">Simulate Guide with Footer</button>
+    <button onclick="simulateFooterClick()">Simulate Footer Click</button>
+    <button onclick="checkEvents()">Check Tracked Events</button>
+
+    <div id="status" class="info-box"></div>
+    <div id="guide-container"></div>
+
+    <!-- Include Amplitude SDK -->
+    <script src="https://cdn.amplitude.com/libs/amplitude-8.21.10-min.gz.js"></script>
+    
+    <!-- Include the footer tracking helper -->
+    <script src="../guides-footer-tracking.js"></script>
+
+    <script>
+        // Initialize Amplitude with a test API key
+        // In production, use your actual API key
+        amplitude.init('test-api-key', null, {
+            apiEndpoint: 'api.amplitude.com',
+            saveEvents: true,
+            includeUtm: true,
+            includeReferrer: true,
+        });
+
+        // Enable footer tracking
+        window.AmplitudeGuidesFooterTracking.enableGuidesFooterTracking(amplitude, {
+            eventName: 'Guides Footer Clicked',
+            getProperties: function(footerElement) {
+                return {
+                    destination_url: 'https://app.amplitude.com/guides-surveys',
+                    component: 'powered_by_footer',
+                    footer_text: footerElement.textContent.trim(),
+                    page_url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                };
+            }
+        });
+
+        // Update status
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = type;
+        }
+
+        updateStatus('Amplitude initialized and footer tracking enabled', 'success');
+
+        // Simulate a guide with a footer
+        function simulateGuideWithFooter() {
+            const container = document.getElementById('guide-container');
+            container.innerHTML = `
+                <div style="
+                    border: 2px solid #ddd;
+                    border-radius: 8px;
+                    padding: 20px;
+                    margin: 20px 0;
+                    background: white;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                ">
+                    <h3>Sample Guide</h3>
+                    <p>This is a sample guide with a "Powered by Amplitude" footer.</p>
+                    <div style="
+                        display: flex;
+                        justify-content: center;
+                        background: none;
+                        padding: 20px 0 0 0;
+                        border-top: 1px solid #eee;
+                        margin-top: 20px;
+                    ">
+                        <a href="javascript:void(0)" 
+                           onclick="window.open('https://app.amplitude.com/guides-surveys', '_blank'); return false;"
+                           style="
+                               display: flex;
+                               align-items: center;
+                               gap: 8px;
+                               color: #666;
+                               text-decoration: none;
+                               font-size: 12px;
+                               cursor: pointer;
+                           "
+                           onmouseover="this.style.color='#333'"
+                           onmouseout="this.style.color='#666'"
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0z"/>
+                            </svg>
+                            Powered by Amplitude
+                        </a>
+                    </div>
+                </div>
+            `;
+            updateStatus('Simulated guide with footer created. Click the footer to test tracking.', 'info');
+        }
+
+        // Simulate a footer click
+        function simulateFooterClick() {
+            const footer = document.querySelector('a[onclick*="guides-surveys"]');
+            if (footer) {
+                footer.click();
+                updateStatus('Footer clicked! Event should be tracked. Check console and events list.', 'success');
+            } else {
+                updateStatus('No footer found. Click "Simulate Guide with Footer" first.', 'error');
+            }
+        }
+
+        // Check tracked events
+        function checkEvents() {
+            // This would normally query your Amplitude project
+            // For demo purposes, we'll show what was tracked in this session
+            const message = `
+                Check your Amplitude project for the "Guides Footer Clicked" event.
+                
+                Event Properties include:
+                - destination_url
+                - component
+                - footer_text
+                - page_url
+                - timestamp
+                - guide_id (if available)
+                - guide_type (if available)
+                - organization_id (if available)
+            `;
+            updateStatus(message, 'info');
+            console.log('Amplitude events:', amplitude._unsentEvents || []);
+        }
+
+        // Auto-create a sample guide on load
+        window.addEventListener('load', function() {
+            setTimeout(simulateGuideWithFooter, 500);
+        });
+    </script>
+</body>
+</html>
