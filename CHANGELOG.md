@@ -1,3 +1,10 @@
+## [8.21.12](https://github.com/amplitude/amplitude-javascript/compare/v8.21.11...v8.21.12) (2026-11-12)
+
+
+### Bug Fixes
+
+* **ci:** restore CDN deployment on Python 3.12 ([#637](https://github.com/amplitude/amplitude-javascript/issues/637)) ([98b1b11](https://github.com/amplitude/amplitude-javascript/commit/98b1b1123c76158c2786c94a8a156aea092e68f3))
+
 ## [8.21.11](https://github.com/amplitude/amplitude-javascript/compare/v8.21.10...v8.21.11) (2026-11-12)
 
 
