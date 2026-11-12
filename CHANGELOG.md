@@ -1,3 +1,12 @@
+## [8.21.11](https://github.com/amplitude/amplitude-javascript/compare/v8.21.10...v8.21.11) (2026-11-12)
+
+
+### Bug Fixes
+
+* **deps:** patch legacy browser tooling security (SDK-644) ([#632](https://github.com/amplitude/amplitude-javascript/issues/632)) ([d10319a](https://github.com/amplitude/amplitude-javascript/commit/d10319a3e4b44058f4e72ea194210709441b3ee8))
+* **deps:** pin query-string 9.5.1 to restore release builds ([#636](https://github.com/amplitude/amplitude-javascript/issues/636)) ([6965996](https://github.com/amplitude/amplitude-javascript/commit/6965996a82f9e12c6093bd68325937473b87db53))
+* move template variables into ENV ([#628](https://github.com/amplitude/amplitude-javascript/issues/628)) ([c624865](https://github.com/amplitude/amplitude-javascript/commit/c6248655ead70b3ac28846841147aa9e71ef2610))
+
 ## [8.21.10](https://github.com/amplitude/amplitude-javascript/compare/v8.21.9...v8.21.10) (2026-02-11)
 
 
