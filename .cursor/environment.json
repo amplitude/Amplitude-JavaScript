@@ -1,0 +1,7 @@
+{
+  "installCommand": "yarn install",
+  "updateCommand": "yarn install",
+  "node": {
+    "version": "18"
+  }
+}
