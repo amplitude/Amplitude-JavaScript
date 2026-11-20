@@ -4,6 +4,21 @@ import constants from '../src/constants.js';
 import GlobalScope from '../src/global-scope';
 
 describe('utils', function () {
+  describe('getQueryParam', function () {
+    it('should treat parameter names literally and decode the first value', function () {
+      assert.strictEqual(
+        utils.getQueryParam('a.b[]', '?axb[]=skip&a.b[]=one+two%26three&a.b[]=skip#end'),
+        'one two&three',
+      );
+    });
+
+    it('should distinguish an empty value from a missing value', function () {
+      assert.strictEqual(utils.getQueryParam('gclid', '?gclid='), '');
+      assert.isUndefined(utils.getQueryParam('gclid', '?other=1'));
+      assert.isUndefined(utils.getQueryParam('gclid', undefined));
+    });
+  });
+
   describe('isEmptyString', function () {
     it('should detect empty strings', function () {
       assert.isTrue(utils.isEmptyString(null));
