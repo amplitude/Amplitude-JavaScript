@@ -61,9 +61,14 @@ Request.prototype.send = function (callback) {
         responseStatus = response.status;
         return response.text();
       })
-      .then((responseText) => {
-        callback(responseStatus, responseText);
-      });
+      .then(
+        (responseText) => {
+          callback(responseStatus, responseText);
+        },
+        () => {
+          callback(0, '');
+        },
+      );
   }
   //log('sent request to ' + this.url + ' with data ' + decodeURIComponent(queryString(this.data)));
 };

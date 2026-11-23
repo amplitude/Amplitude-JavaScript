@@ -12,6 +12,7 @@ import constants from '../src/constants.js';
 import { mockCookie, restoreCookie, getCookie } from './mock-cookie';
 import { AmplitudeServerZone } from '../src/server-zone.js';
 import Request from '../src/xhr';
+import GlobalScope from '../src/global-scope';
 
 const deleteAllCookies = () =>
   document.cookie.split(';').forEach(function (c) {
@@ -1670,6 +1671,52 @@ describe('AmplitudeClient', function () {
           city: false,
           ip_address: false,
         },
+      });
+    });
+  });
+
+  describe('fetch transport failures', function () {
+    beforeEach(function () {
+      reset();
+      amplitude.init(apiKey);
+      sandbox.stub(GlobalScope, 'XMLHttpRequest').value(undefined);
+    });
+
+    afterEach(function () {
+      reset();
+    });
+
+    ['fetch', 'response.text'].forEach(function (failure) {
+      it('should retain events and allow retry after ' + failure + ' rejects', async function () {
+        const error = new Error('Network failure');
+        const fetchStub = sandbox.stub(GlobalScope, 'fetch');
+        if (failure === 'fetch') {
+          fetchStub.onFirstCall().rejects(error);
+        } else {
+          fetchStub.onFirstCall().resolves({ status: 200, text: () => Promise.reject(error) });
+        }
+        fetchStub.onSecondCall().resolves({ status: 200, text: () => Promise.resolve('success') });
+
+        amplitude.logEvent('Retried event');
+        const event = amplitude._unsentEvents[0];
+        assert.isTrue(amplitude._sending);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        assert.isFalse(amplitude._sending);
+        assert.lengthOf(amplitude._unsentEvents, 1);
+        assert.strictEqual(amplitude._unsentEvents[0], event);
+        assert.isTrue(fetchStub.calledOnce);
+
+        amplitude.sendEvents();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        assert.isTrue(fetchStub.calledTwice);
+        assert.equal(
+          queryString.parse(fetchStub.secondCall.args[1].body).e,
+          queryString.parse(fetchStub.firstCall.args[1].body).e,
+        );
+        assert.isFalse(amplitude._sending);
+        assert.lengthOf(amplitude._unsentEvents, 0);
       });
     });
   });
