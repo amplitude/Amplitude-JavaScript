@@ -268,10 +268,19 @@ var validateGroupName = function validateGroupName(key, groupName) {
 
 // parses the value of a url param (for example ?gclid=1234&...)
 var getQueryParam = function getQueryParam(name, query) {
-  name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
-  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-  var results = regex.exec(query);
-  return results === null ? undefined : decodeURIComponent(results[1].replace(/\+/g, ' '));
+  query = String(query);
+  var param = name + '=';
+  var afterQuestionMark = query.indexOf('?' + param);
+  var afterAmpersand = query.indexOf('&' + param);
+  var start =
+    afterQuestionMark === -1 || (afterAmpersand !== -1 && afterAmpersand < afterQuestionMark)
+      ? afterAmpersand
+      : afterQuestionMark;
+
+  if (start !== -1) {
+    var value = query.slice(start + param.length + 1).split(/[&#]/, 1)[0];
+    return decodeURIComponent(value.replace(/\+/g, ' '));
+  }
 };
 
 const isWebWorkerEnvironment = () => {
